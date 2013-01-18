@@ -1,8 +1,10 @@
 server:             '0.0.0.0'
+port:               '3000'
+environment:        'development'
 show_errors:        1
 template:           'template_toolkit'
 error_template:     'error'
 default_mime_type:  'text/plain'
 logger:             'file'
 logger_format:      '%t [%L] %m'
-
+auto_reload:        '1'
