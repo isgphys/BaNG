@@ -1,0 +1,10 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>BaNG Error</title>
+    </head>
+    <body>
+        <h2>Error: <% title %></h2>
+    </body>
+</html>
+
