@@ -1,4 +1,4 @@
-package BaNG::Common;
+package BaNG::Config;
 
 use Dancer ':syntax';
 

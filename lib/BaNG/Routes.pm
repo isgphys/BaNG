@@ -1,7 +1,7 @@
 package BaNG::Routes;
 use Dancer ':syntax';
 use BaNG::Hosts;
-use BaNG::Common;
+use BaNG::Config;
 
 get '/' => sub {
      template 'index' => {
