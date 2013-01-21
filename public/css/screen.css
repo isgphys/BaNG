@@ -1,0 +1,226 @@
+body {
+    padding: 0px;
+    margin: 0px;
+    font-family: verdana, arial, helvetica, sans-serif;
+}
+
+.center {
+    text-align : center;
+    padding-right : 0px;
+}
+
+#header {
+    background-image:url('/images/header.png');
+    background-color:#254370;
+    height: 65px;
+    width: 100%;
+}
+
+#ethz_logo {
+    position: absolute; 
+    top: 10px;
+    left: 15px;
+}
+
+#site_title {
+    font-family: arial, helvetica, sans-serif;
+    position: absolute; 
+    top: 20px;
+    left: 220px;
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+    color: #fff;
+}
+
+#content {
+    margin: 12px;
+}
+
+#content h1 {}
+
+#error {
+    background-color: #ffa6a6;
+    border: 1px #f00 solid;
+    color: #f00;
+    font-weight: bold;
+    padding: 12px;
+    margin-top: 6px;
+}
+
+#infonav {
+    margin: 0px;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    background-color: #7997C9;
+    height: 22px;
+}
+
+#navigation {
+    margin: 0px;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    background-color: #C1CDE0;
+    height: 26px;
+    padding: 0 10 0 15px;
+}
+
+#navigation a.active {
+    background-color: #fff;
+    color: #000; 
+    padding: 5px 10px 7px;
+}
+
+#navigation a {
+    color: #000; 
+    text-decoration: none;
+    margin: 0px;
+    margin-right: 12px;
+    line-height: 26px;
+    font-size: 12px;
+}
+
+#content p.abstract {
+    font-size: 18px;
+    font-style: italic;
+}
+
+#content a {
+    color: #6081bb;
+}
+
+#content h1 {
+    font-size: 22px;
+}
+
+#content h2 {
+    font-size: 20px;
+}
+
+#content h3 {
+    font-size: 18px;
+}
+
+#content ul li {
+    margin: 6px 0;
+}
+
+#content table th {
+    background-color: #eee;
+}
+
+#content table tr.even {
+    background-color: #eee;
+}
+
+#oslist img {
+    border: none;
+}
+
+#oslist div {
+    display: inline-block;
+}
+
+#oslist div a {
+    font-weight: bold;
+}
+
+#oslist {
+    width: 800px;
+    text-align: center;
+    margin-top: 60px;
+}
+
+#content div.centered {
+    margin: 0px auto;
+}
+
+#content img {
+    border: none;
+}
+
+div.os_minilogo {
+    display: inline-block;
+}
+
+#packages {
+    width: 700px;
+}
+
+#packages_filter {
+    margin-bottom: 22px;
+    width: 100%;
+}
+
+#packages td {
+    height: 24px;
+    vertical-align: top;
+}
+
+#packages td.sw_logo {
+    height: 24px;
+    width: 20px;
+    vertical-align: top;
+}
+
+#packages div.package_details {
+    width: 400px;	
+}
+
+#packages dl {
+    font-size: 12px;
+    width: 600px;
+}
+
+#packages dl dt {
+    font-weight: bold;
+    clear: left;
+    float: left;
+    width: 150px;
+    text-align: left;
+}
+
+#packages dl dt:after {
+    content: ":";
+}
+
+#packages dl dt {
+    font-weight: bold;
+    clear: left;
+    float: left;
+    width: 150px;
+    text-align: left;
+}
+
+#packages dl dd {
+    margin: 0 0 0 160px;
+    padding: 0 0 0.5em 0;
+}
+
+#computers_search {
+	margin: 36px 0;
+}
+
+#computers_search input {
+    width: 100px;
+    font-size: 20px;
+}
+#computers_search_text {
+    width: 400px !important;
+    font-size: 20px;
+}
+
+#loader {
+    position: absolute;
+    top: 400px;
+    width: 100%;
+    text-align: center;
+    display: none;
+}
+
+#packages .expander {
+    cursor: pointer
+}
