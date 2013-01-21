@@ -1,0 +1,16 @@
+<table id="hosts" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Hostname</th>
+        </tr>
+    </thead>
+    <tbody>
+      <% FOREACH host IN hosts %>
+        <tr>
+            <td>
+              <% host %>
+            </td>
+        </tr>
+      <% END %>
+    </tbody>
+</table>
