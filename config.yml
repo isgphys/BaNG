@@ -5,6 +5,7 @@ show_errors:        1
 template:           'template_toolkit'
 error_template:     'error'
 default_mime_type:  'text/plain'
+layout:             'main'
 logger:             'file'
 logger_format:      '%t [%L] %m'
 auto_reload:        '1'
