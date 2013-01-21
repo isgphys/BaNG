@@ -1,11 +1,17 @@
+appname:            'BaNG'
+layout:             'main'
 server:             '0.0.0.0'
 port:               '3000'
 environment:        'development'
-show_errors:        1
 template:           'template_toolkit'
+engines:
+  template_toolkit:
+    encoding:  'utf8'
+    start_tag: '<%'
+    end_tag:   '%>'
+show_errors:        1
 error_template:     'error'
 default_mime_type:  'text/plain'
-layout:             'main'
 logger:             'file'
 logger_format:      '%t [%L] %m'
 auto_reload:        '1'
