@@ -16,11 +16,10 @@
         <div id="infonav">
         </div>
         <div id="navigation">
-    <!--        <a href="/" <% IF section == 'info' %>class="active"<% END %>>Info</a>
-            <a href="/computers/current" <% IF section == 'computer' %>class="active"<% END %>>My Computer</a>
-            <a href="/computers/search" <% IF section == 'computers' %>class="active"<% END %>>Search Computer</a>
-            <a href="/packages" <% IF section == 'packages' %>class="active"<% END %>>Show available Software</a>
-            -->
+            <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
+            <a href="/config/clientlist" <% IF section == 'computer' %>class="active"<% END %>>Configlist</a>
+            <a href="/config/clientlist" <% IF section == 'computer' %>class="active"<% END %>>Configlist</a>
+            <a href="/config/general" <% IF section == 'computers' %>class="active"<% END %>>General Settings</a>
         </div>
         <% IF error %>
         <div id="error">
