@@ -1,7 +1,8 @@
+<h2>All enabled Host configs</h2>
 <table id="hosts" class="tablesorter">
     <thead>
         <tr>
-            <th>Hostname</th>
+            <th>Config-Files</th>
         </tr>
     </thead>
     <tbody>

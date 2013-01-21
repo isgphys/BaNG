@@ -25,7 +25,7 @@
         </div>
         <div id="navigation">
             <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
-            <a href="/hosts/list" <% IF section == 'hostlist' %>class="active"<% END %>>all Hosts</a>
+            <a href="/hosts/enabled" <% IF section == 'hostlist' %>class="active"<% END %>>all enabled Hosts</a>
             <a href="/config/configlist" <% IF section == 'configlist' %>class="active"<% END %>>Configlist</a>
             <a href="/config/general" <% IF section == 'generallist' %>class="active"<% END %>>General Settings</a>
         </div>

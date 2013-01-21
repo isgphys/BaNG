@@ -9,7 +9,7 @@ get '/' => sub {
      };
 };
 
-get '/hosts/list' => sub {
+get '/hosts/enabled' => sub {
 
      my @hosts = find_enabled_hosts("*_*.yaml", "$config_path/enabled" );
 
