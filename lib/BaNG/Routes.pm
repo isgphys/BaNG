@@ -2,6 +2,7 @@ package BaNG::Routes;
 use Dancer ':syntax';
 
 get '/' => sub {
-    template 'start', {
-    };
+     template 'index' => {
+                 section => 'dashboard'
+     };
 };
