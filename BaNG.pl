@@ -1,6 +1,619 @@
 #!/usr/bin/perl
-use Dancer;
-use BaNG::Routes;
+#
+# copyright 2012 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
+# the terms of the GNU General Public License version 2 or any later
+# version.
+#
+# This is compiled with threading support
+#
+# 2012.10.15, Patrick Schmid <schmid@phys.ethz.ch>
+#
 
-Dancer->dance;
+use strict;
+use warnings;
+use Getopt::Long;
+use YAML::Tiny qw(LoadFile Dump);
+use Data::Dumper;
+use threads qw(yield);
+use threads::shared;
+use Thread::Queue;
+use List::MoreUtils qw(uniq);
+use POSIX qw(strftime);
+use IPC::Open3;
+use Net::Ping;
+use File::Find::Rule;
+use File::Basename;
+use Switch;
 
+my $version         = "1.0";    # BANG Multisync Version
+my $help            = 0;
+my $debug           = 1;
+my $debuglevel      = 2;        #1 normal output, 2 ultimate output, 3 + rsync verbose!
+
+my $prefix          = dirname($0);
+my $config_path     = "$prefix/etc";
+my $config_global   = "$config_path/bang_globals.yaml";
+
+my ($cfg_group, $bulk_type, $target_host, $nis_group) = ('') x 4;
+
+my @configfiles;
+my %settings;
+
+my @queue;
+my $queue_typ       = 0;
+my $queue_content   = '';
+my $conn_test       = 0;
+my $conn_status     = 0;
+my $conn_msg        = ('') x 2;
+my $nthreads        = 1;
+
+my $host_source = "localhost";
+
+#################################
+# Get the global variables
+#
+sanityfilecheck($config_global);
+
+my $global_settings     = LoadFile($config_global);
+
+my $log_path            = "$prefix/$global_settings->{LogFolder}";
+my $global_log_date     =  strftime "$global_settings->{GlobalLogDate}", localtime;
+my $global_log_file     = "$log_path/$global_log_date.log";
+
+my $path_available      = "$config_path/$global_settings->{AvailableFolder}";
+my $path_enabled        = "$config_path/$global_settings->{EnabledFolder}";
+my $path_special        = "$config_path/$global_settings->{SpecialFolder}";
+
+my $rsync               = "$global_settings->{RSYNC}";
+my $btrfs               = "$global_settings->{BTRFS}";
+
+my $config_default      = "$config_path/$global_settings->{DefaultConfig}";
+my $config_default_nis  = "$config_path/$global_settings->{DefaultNisConfig}";
+
+sanityfilecheck($config_default);
+sanityfilecheck($config_default_nis);
+
+#################################
+# Sanity checks for programs
+#
+sanityprogcheck("$global_settings->{RSYNC}");
+sanityprogcheck("$global_settings->{BTRFS}");
+
+#################################
+# Get/Check command options
+#
+GetOptions (
+    "h"     => \$help,
+    "d"     => \$debug,
+    "g=s"   => \$cfg_group,
+    "b=s"   => \$bulk_type,
+    "s=s"   => \$target_host,
+    "n=s"   => \$nis_group,
+    "th=i"  => \$nthreads,
+)
+    or usage("Invalid commmand line options.");
+
+    if (( $target_host and $bulk_type ) || ( $target_host and $nis_group ) || ( $bulk_type and $nis_group )){
+        usage("Don't mix the mode options (-s/-b/-n)!");
+    }
+
+    if ( $target_host ){
+        usage("The option -g is not defined!")
+            unless $cfg_group;
+    }
+
+    if ( $bulk_type ){
+        usage("The option -g is not defined!")
+            unless (($bulk_type eq "ALL") or $cfg_group);
+    }
+
+#################################
+# Select Backup Procedure
+#
+if ( ! $nis_group ) {
+    print "Normal-Mode\n" if $debug;
+    if ( $target_host ){
+        $queue_typ = 1;
+        get_queue_folders($target_host, $cfg_group);
+        print "Single Host-Mode: $target_host $cfg_group Threads: $settings{$target_host}->{BKP_THREADS_LIMIT}\n" if $debug;
+        ($conn_status, $conn_msg ) = chkClientConn($target_host, $settings{$target_host}->{BKP_GWHOST});
+        print "$conn_status, $conn_msg\n" if $debug;
+        if ($conn_status == 1){
+            $conn_test = 1; # online test successful
+        }else
+        {
+            exit 1;
+        }
+    }
+    if ( $bulk_type ){
+        print "Bulk Host-Mode: $bulk_type $cfg_group\n" if $debug;
+        $queue_typ = 2;
+        get_queue_hosts_enabled($cfg_group);
+        $conn_test = 0;
+    }
+}
+else{
+    print "NIS-Mode\n" if $debug;
+    $queue_typ = 3;
+    get_queue_nishosts("nishost", $nis_group);
+    $conn_test = 0;
+}
+
+print "\nBackup sequence: @queue\n\n" if $debug;
+
+#*****************************************************************
+# Threading setup
+#
+my $Q = Thread::Queue->new;
+my @threads = map threads->create( \&thread, $Q ), 1 .. $nthreads;
+$Q->enqueue($_) for sort @queue;
+$Q->enqueue( (undef) x $nthreads );
+$_->join for @threads;
+
+sub thread {
+    my $Q   = shift;
+    my $tid = threads->tid;
+    while (my $queue_content = $Q->dequeue) {
+
+        #****** do work ******
+        logit($host_source, $queue_content, "initialize backup sequence");
+
+        if ($debug && ($debuglevel == 2)) {
+            switch ($queue_typ) {
+                case(1) {
+                    print "queue_switch: $queue_typ $target_host $queue_content\n";
+                    print "do_queue_work: $target_host $queue_content\n";
+                }
+                case(2) {
+                    print "queue_switch: $queue_typ $queue_content\n";
+                    print "do_queue_work: $queue_content\n";
+                    print "\nQueue BULK HOST Settings of: $queue_content\n";
+                    print Dump($settings{$queue_content});
+                    print "*** YAML ***\n\n"
+                }
+                case(3) {
+                    print "queue_switch: $queue_typ $host_source $queue_content\n";
+                    print "do_queue_work: $host_source $queue_content\n";
+                    print "\nQueue CALL NIS Settings of: $queue_content\n";
+                    print Dump($settings{$queue_content});
+                    print "*** YAML ***\n\n"
+                }
+                else    {
+                    print "queue_switch: $queue_typ - wrong queue_typ\n";
+                }
+            }
+        }
+
+        do_work($queue_typ, $queue_content, $conn_test);
+
+        logit($host_source, $queue_content , "backup sequence done");
+
+        #****** end work ******
+    }
+}
+
+#********************************************************************
+# Subroutine
+#*******************************************************************-
+
+###########################
+# do the work!
+#
+sub do_work {
+    ($queue_typ, $queue_content, $conn_test) = @_;
+    my ($work_host, $work_src) = ('') x 2;
+
+    switch ($queue_typ) {
+        # Single Host backup (Queue < Folders)
+        case(1) {
+            print "Mach Case: 1\n" if $debug;
+            $work_host = $target_host;
+            $work_src  = ":$queue_content";
+        }
+        # Bulk & NIS (Queue < Hosts)
+        case[2,3]{
+            print "Mach Case: $queue_typ\n" if $debug;
+            $work_host = $queue_content;
+            $work_src  = $settings{$queue_content}->{BKP_SOURCE_PARTITION};
+        }
+    }
+
+    if ($conn_test == 0){
+        ($conn_status, $conn_msg ) = chkClientConn($work_host, $settings{$work_host}->{BKP_GWHOST});
+    }
+
+    if ($conn_status == 1){
+
+        print "do_work: $conn_msg\n" if $debug;
+        print "do_work: $work_host $work_src\n" if $debug;
+
+        my $rsync_options = eval_rsync_options($work_host);
+        my $work_dest     = "$settings{$work_host}->{BKP_TARGET_PATH}/$settings{$work_host}->{BKP_PREFIX}/$work_host/current";
+
+        logit($work_host, $work_src, "rsync start");
+        my $rsync_command = "$rsync $rsync_options $work_host$work_src $work_dest";
+
+        print "Do_WORK_Rsync_Command: $rsync_command\n\n" if $debug;
+
+#    local(*HIS_IN, *HIS_OUT, *HIS_ERR);
+#    sleep(rand($nthreads));
+        #my $childpid = open3(
+        #   *HIS_IN,
+        #   *HIS_OUT,
+        #   *HIS_ERR,
+        #   "$rsync -aHR -e rsh --delete $sourcepath/$subfolder $destpath"
+        #);
+
+        #print  HIS_IN ."\n";
+        # Give end of file to kid.
+#    my @outlines = <HIS_OUT>;
+#    my @errlines = <HIS_ERR>;
+#    close HIS_IN;
+#    close HIS_OUT;
+#    close HIS_ERR;
+
+#    print "STDOUT: @outlines\n" if($debug && @outlines);
+#    print "STDERR: @errlines\n" if($debug && @errlines);
+
+        #waitpid($childpid, 0);
+
+#       print "That child exited with wait status of $?\n" if($debug && $?);
+
+#    if (@errlines){
+#        my $errcode = 0;
+#        foreach my $errline (@errlines) {
+#            chomp $errline;
+#            ($errcode) = $errline = /.* \(code (\d+)/ ;
+#            print "ERRORCODE: $errcode\n" if $debug;
+#        }
+#        logit($host_source,$subfolder,"Error $errcode - Check .rhosts and /etc/hosts.allow on $host_source");
+#    }
+#    else{
+        logit($work_host, $work_src, "rsync successful!");
+    }else
+    {
+        logit($work_host, $work_src, "backup failed");
+        print "do_work: $conn_msg\n" if $debug;
+        print "do_work: $work_host FAILED\n" if $debug;
+    }
+}
+
+sub logit {
+    my ($hostname, $folder, $msg) = @_;
+
+    my $timestamp = strftime "%b %d %H:%M:%S", localtime;
+
+    open  LOG,">>$global_log_file" or die "$global_log_file: $!";
+    print LOG "$timestamp $hostname $folder - $msg\n";
+    close LOG;
+}
+
+sub sanityfilecheck {
+    my ($file) = @_;
+
+    if ( ! -f "$file" ){
+        print "$file NOT available!\n";
+        logit($host_source,"INTERNAL", "$file NOT available");
+        exit 0;
+    }
+    else {
+        return 1 ;
+    }
+}
+
+sub sanityprogcheck {
+    my ($prog) = @_;
+
+    if ( ! -x "$prog"){
+        print "$prog not found!\n";
+        logit($host_source,"INTERNAL", "$prog not found");
+        exit 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+sub chkClientConn {
+    my ($host, $gwhost) = @_;
+
+    my $state = 0;
+    my $msg   = "Host offline";
+    my $p     = Net::Ping->new("tcp",2);
+
+    if ($p->ping($host)){
+        $state = 1;
+        $msg   = "Host online";
+    }
+    elsif($gwhost){
+        $state = 1;
+        $msg   = "Host not pingable because behind a Gateway-Host";
+    }
+    logit($host_source,"INTERNAL", "$host $msg");
+    $p->close();
+
+    return $state, $msg;
+}
+
+sub chkLastBkp {
+    my ($dir) = @_;
+
+    my $bkpExist = 0;   # 0=no backup available, 1=previous backup available
+    my ($lastBkp, $msg);
+
+    if (( ! -d $dir ) || ( ! -e "$dir/lastdst")){
+        $bkpExist = 0;
+        $msg      = "no previous backup found!";
+    }
+    else{
+        $bkpExist = 1;
+        $lastBkp  = `cat $dir/lastdst`;
+        $msg      = $lastBkp;
+        chomp($msg);
+    }
+    return $bkpExist, $msg;
+}
+
+sub get_report_header {
+    my $starttime  = `date`;
+    my $startstamp = `date +%s`;
+    print STDERR <<"EOF";
+
+* * * Backup report * * *
+      Version: $version
+----------------------------------------------------
+Start Time: $starttime
+----------------------------------------------------
+EOF
+#Backing up:  ${SRCHOST}${SRCPART}
+#        to:  `hostname`:$BKDIR/$BKFOLDER
+#Exclude-File: $EXCLUDEFROM
+#last backup: $LASTMSG
+#----------------------------------------------------
+}
+
+sub find_enabled_hosts {
+    my ($query, $searchpath) = @_;
+
+    my @files;
+    my $ffr_obj = File::Find::Rule->file()
+                                  ->name( $query  )
+                                  ->relative
+                                  ->maxdepth( 1 )
+                                  ->start ( $searchpath );
+
+    while (my $file = $ffr_obj->match()){
+        push @files, $file;
+    }
+    return @files;
+}
+
+sub read_configfile {
+    my ($host, $group) = @_;
+    my $configfile_host;
+
+    if ($group eq "NIS"){
+       $configfile_host  = $config_default_nis;
+    }
+    else{
+       $configfile_host  = "$path_enabled/$host\_$group.yaml";
+    }
+
+    if ( sanityfilecheck($configfile_host) ) {
+
+	$settings{$host}  = LoadFile($config_default);
+
+    if ($debug) {
+        print "\nDefault Settings:\n";
+        print Dump($settings{$host});
+        print "*** YAML ***\n\n"
+    }
+
+    my $settings_host  = LoadFile($configfile_host);
+
+    if ($debug) {
+        print "\nHost specific Settings: $configfile_host\n";
+        print Dump($settings_host);
+        print "*** YAML ***\n\n"
+    }
+
+    foreach my $key ( keys %{ $settings_host } ){
+        print "Host Config Keys: $key\n" if $debug && ($debuglevel ==2);
+        next if !$settings_host->{$key};
+        $settings{$host}->{$key} = $settings_host->{$key};
+    }
+
+    if ($debug) {
+        print "\nWORK Settings:\n";
+        print Dump($settings{$host});
+        print "*** YAML ***\n\n"
+    }
+    }
+    return $settings{$host};
+}
+
+
+sub get_queue_folders {
+    my ($host, $group) = @_;
+
+    print "get_queue_folders: $host, $group\n" if $debug;
+    read_configfile($host, $group);
+
+    my (@src_part) = split ( / /, $settings{$host}->{BKP_SOURCE_PARTITION});
+    print "Amount of partitions: " . scalar @src_part ." $#src_part\n" if $debug;
+
+    if ( $#src_part == 0 ){
+        my $remoteshell  = $settings{$host}->{BKP_RSYNC_RSHELL};
+        my $queuedepth   = $settings{$host}->{BKP_QUEUE_DEPTH};
+
+        $src_part[0] =~ s/://;
+
+        my @remotedirlist = `$remoteshell $host find $src_part[0] -mindepth 1 -maxdepth $queuedepth`;
+
+        print "eval subfolders command: @remotedirlist\n" if $debug;
+
+        foreach my $remotedir (@remotedirlist) {
+            chomp $remotedir;
+            push @queue, $remotedir;
+        }
+    }else
+    {
+        foreach my $part (@src_part) {
+            $part =~ s/://;
+            push @queue, $part;
+
+        }
+    }
+
+    return @queue;
+}
+
+sub get_queue_hosts_enabled {
+    my ($kat) = @_;
+
+    @configfiles = find_enabled_hosts("*_$kat.yaml", $path_enabled);
+
+    print "Find enabled config: @configfiles\n" if $debug;
+
+    foreach my $configfile (@configfiles) {
+        my ($bulkhost) = $configfile =~ /^([\w\d-]+)_[\w\d-]+\.yaml/;
+        read_configfile($bulkhost, $kat);
+        print "Extracted bulk Hostname: $bulkhost\n" if $debug;
+        push @queue, $bulkhost;
+    }
+    return @queue;
+}
+
+sub get_queue_nishosts {
+    my ($host, $group) = @_;
+
+    my @nishosts = `ypcat auto.$group`;
+
+    read_configfile($host, "NIS");
+
+    my $bkp_target_path = "$settings{$host}->{BKP_TARGET_PATH}/$settings{$host}->{BKP_PREFIX}";
+
+    print "NIS-Data: @nishosts\n" if $debug;
+
+    foreach my $nishost (@nishosts) {
+        my ($host,$srcpart) =  $nishost =~ /^([^:]*):(.*)$/;
+        # check if backup requested
+        if ( -e "$bkp_target_path/$host" ){
+	    read_configfile($host, "NIS");
+            print "NISHost: $host Partitions: $srcpart\n" if $debug;
+            logit($host_source, $host, "add host to queue");
+            $settings{$host}->{BKP_SOURCE_PARTITION} = $srcpart;
+            push @queue, $host;
+        }
+        else{
+            print "NISHost: $host $srcpart --- NO BACKUP\n" if $debug;
+            logit($host_source, $host, "ignoring, no destination directory") if $debug;
+        }
+    }
+    return @queue;
+}
+
+sub eval_rsync_options (){
+    my ($host) = @_;
+    print "Rsync_options_host: $host\n";
+    my $rsync_options = '';
+
+    if ( $settings{$host}->{BKP_RSYNC_ARCHIV} ){
+        $rsync_options .= "-ax ";
+    }
+    if ( $settings{$host}->{BKP_RSYNC_RELATIV} ){
+        $rsync_options .= "-R ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_HLINKS}){
+        $rsync_options .= "-H ";
+    }
+    if ($settings{$host}->{BKP_EXCLUDE_FILE}){
+        $rsync_options .= "--exclude-from=$config_path/$settings{$host}->{BKP_EXCLUDE_FILE} ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_RSHELL}){
+        if ($settings{$host}->{BKP_GWHOST}){
+            $rsync_options .= "-e $settings{$host}->{BKP_RSYNC_RSHELL} $settings{$host}->{BKP_GWHOST} ";
+        }else
+        {
+            $rsync_options .= "-e $settings{$host}->{BKP_RSYNC_RSHELL} ";
+        }
+    }
+    if ($settings{$host}->{BKP_RSYNC_RSHELL_PATH}){
+        $rsync_options .= "--rsync-path=$settings{$host}->{BKP_RSYNC_RSHELL_PATH} ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_DELETE}){
+        $rsync_options .= "--delete ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_DELETE_FORCE}){
+        $rsync_options .= "--force ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_NUM_IDS}){
+        $rsync_options .= "--numeric-ids ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_INPLACE}){
+        $rsync_options .= "--inplace ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_ACL}){
+        $rsync_options .= "--acls ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_XATTRS}){
+        $rsync_options .= "--xattrs ";
+    }
+    if ($settings{$host}->{BKP_RSYNC_OSX}){
+       $rsync_options .= "--no-D "
+    }
+    if ($debug && ($debuglevel == 3)){
+       $rsync_options .= "-v "
+    }
+    print "Rsync Options: $rsync_options\n" if $debug;
+    $rsync_options =~ s/\s+$//;
+    return $rsync_options;
+}
+
+##############
+# Usage
+#
+sub usage {
+    my ($message) = @_;
+
+    if (defined $message && length $message) {
+        $message .= "\n\n"
+            unless $message =~ /\n$/;
+    }
+
+    my $command = $0;
+    $command    =~ s#^.*/##;
+
+    print STDERR (
+        $message,
+       "usage: $command [-h|-v]
+        usage: $command [-d] -s <hostname> [-g <group>] -[-th <nr>]
+        usage: $command [-d] -b Server|Workstation [-g <group>] [-th <nr>]
+        usage: $command [-d] -b All [-th <nr>]
+        usage: $command [-d] [-n <nisgroup>] [-th <nr>]
+
+        Options:
+
+          -b <typ>           bulk backup
+              All            backup every host where enabled
+              Server         backup only the enabled servers
+              Workstation    backup only the enabled workstations
+
+          -s <hostname>      single host backup
+          -g <group>         select group for backup, e.g. *_homes.yaml, *_groupdata.yaml, your choice!
+              system         backup *_system.yaml (preserved for System-Backups)
+
+          -n <nisgroup>      backup-list from NIS (e.g. astro > auto.astro)
+                             Hint: for activation of nis-clients, you must create
+                                   a folder with the name of the host
+                             example: mkdir /export/backup/data/workstations/<hostname>
+
+          -th                Number of threads, default: 1
+
+          -d                 show debugging messages
+
+          -h                 show this
+      \n"
+    );
+    exit 0;
+}
