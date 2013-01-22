@@ -2,14 +2,22 @@
 <table id="hosts" class="tablesorter">
     <thead>
         <tr>
+            <th>Hostname</th>
+            <th>Group</th>
             <th>Config-Files</th>
         </tr>
     </thead>
     <tbody>
-      <% FOREACH host IN hosts %>
+      <% FOREACH hostname IN hosts.keys.sort %>
         <tr>
             <td>
-              <% host %>
+              <% hostname %>
+            </td>
+            <td>
+              <% hosts.$hostname.group %>
+            </td>
+            <td>
+              <% hosts.$hostname.configfile %>
             </td>
         </tr>
       <% END %>

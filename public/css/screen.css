@@ -146,36 +146,36 @@ div.os_minilogo {
     display: inline-block;
 }
 
-#packages {
+#hosts {
     width: 700px;
 }
 
-#packages_filter {
+#hosts_filter {
     margin-bottom: 22px;
     width: 100%;
 }
 
-#packages td {
+#hosts td {
     height: 24px;
     vertical-align: top;
 }
 
-#packages td.sw_logo {
+#hosts td.sw_logo {
     height: 24px;
     width: 20px;
     vertical-align: top;
 }
 
-#packages div.package_details {
-    width: 400px;	
+#hosts div.package_details {
+    width: 400px;
 }
 
-#packages dl {
+#hosts dl {
     font-size: 12px;
     width: 600px;
 }
 
-#packages dl dt {
+#hosts dl dt {
     font-weight: bold;
     clear: left;
     float: left;
@@ -183,11 +183,11 @@ div.os_minilogo {
     text-align: left;
 }
 
-#packages dl dt:after {
+#hosts dl dt:after {
     content: ":";
 }
 
-#packages dl dt {
+#hosts dl dt {
     font-weight: bold;
     clear: left;
     float: left;
@@ -195,7 +195,7 @@ div.os_minilogo {
     text-align: left;
 }
 
-#packages dl dd {
+#hosts dl dd {
     margin: 0 0 0 160px;
     padding: 0 0 0.5em 0;
 }

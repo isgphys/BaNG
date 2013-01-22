@@ -1,8 +1,6 @@
 package BaNG::Routes;
 use Dancer ':syntax';
-use BaNG::Hosts;
 use BaNG::Config;
-use BaNG::Reporting;
 
 get '/' => sub {
      template 'index' => {
@@ -12,10 +10,10 @@ get '/' => sub {
 
 get '/hosts/enabled' => sub {
     get_global_config();
-    my @hosts = find_enabled_hosts("*_*.yaml", "$globalconfig{path_enabled}" );
+    find_enabled_hosts();
 
     template 'hostslist' => {
         section => 'hostlist',
-        hosts => \@hosts
+        hosts => \%hosts
     };
 };
