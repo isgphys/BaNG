@@ -12,6 +12,12 @@
         <script type="text/javascript">
             $(document).ready(function(){
                 $('#hosts').tablesorter();
+
+                $("#hosts div.hosts_details").hide();
+                $("#hosts tr").click(function(){
+                    $(this).find("div.hosts_details").toggle();
+                    $(this).find(".arrow").toggleClass("up");
+                });
             });
         </script>
     </head>

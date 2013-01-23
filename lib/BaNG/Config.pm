@@ -10,16 +10,15 @@ use Exporter 'import';
 our @EXPORT = qw(
     %globalconfig
     %hosts
-    %settings
     get_global_config
-    find_enabled_configs
+    find_hosts
+    find_available_hosts
     find_enabled_hosts
     read_configfile
     split_configname
 );
 
 our %globalconfig;  # App-Settings
-our %settings;      # Host-Settings
 our %hosts;
 
 sub get_global_config {
@@ -59,7 +58,7 @@ sub sanityfilecheck {
     }
 }
 
-sub find_enabled_configs {
+sub find_host_configs {
     my ($query, $searchpath) = @_;
 
     my @files;
@@ -83,48 +82,87 @@ sub split_configname {
     return ($hostname,$groupname) ;
 }
 
+sub find_hosts {
+    my @configsavailable = find_host_configs("*_*.yaml", "$globalconfig{path_available}" );
+    my @configsenabled   = find_host_configs("*_*.yaml", "$globalconfig{path_enabled}" );
+
+    foreach my $configfile (@configsavailable) {
+        my ($hostname,$group) = split_configname($configfile);
+
+        $hosts{"$hostname-$group"}= {
+            'hostname'   => $hostname,
+            'group'      => $group,
+            'status'     => "disabled",
+            'configfile' => $configfile,
+            'css_class'  => '',
+            'hostconfig' => read_configfile($hostname,$group),
+        };
+    }
+
+
+    foreach my $configfile (@configsenabled) {
+        my ($hostname,$group) = split_configname($configfile);
+
+        $hosts{"$hostname-$group"}{'status'} = "enabled";
+        $hosts{"$hostname-$group"}{'css_class'} .= "active ";
+    }
+
+    return 1;
+}
+
 sub find_enabled_hosts {
-    my @configfiles = find_enabled_configs("*_*.yaml", "$globalconfig{path_enabled}" );
+    my @configfiles = find_host_configs("*_*.yaml", "$globalconfig{path_enabled}" );
 
     foreach my $configfile (@configfiles) {
         my ($hostname,$group) = split_configname($configfile);
-        debug "$hostname $group";
-        #$hosts{$hostname}->{group} = $group;
-        $hosts{$hostname}= {
+
+        $hosts{"$hostname-$group"}= {
             group      => $group,
             configfile => $configfile,
         };
-        debug "sub $hosts{inferius}{group}";
     }
     return 1;
 }
 
+sub find_available_hosts {
+    my @configfiles = find_host_configs("*_*.yaml", "$globalconfig{path_available}" );
+
+    foreach my $configfile (@configfiles) {
+        my ($hostname,$group) = split_configname($configfile);
+
+        $hosts{"$hostname-$group"}= {
+            group      => $group,
+            configfile => $configfile,
+        };
+    }
+    return 1;
+}
 
 sub read_configfile {
     my ($host, $group) = @_;
     my $configfile_host;
+    my $settings;
 
     if ($group eq "NIS"){
         $configfile_host  = $globalconfig{config_default_nis};
     }
     else{
-        $configfile_host  = "$globalconfig{path_enabled}/$host\_$group.yaml";
+        $configfile_host  = "$globalconfig{path_available}/$host\_$group.yaml";
     }
 
     if ( sanityfilecheck($configfile_host) ) {
 
-        $settings{$host}  = LoadFile($globalconfig{config_default});
+        $settings = LoadFile($globalconfig{config_default});
 
         my $settings_host  = LoadFile($configfile_host);
 
         foreach my $key ( keys %{ $settings_host } ){
             next if !$settings_host->{$key};
-            $settings{$host}->{$key} = $settings_host->{$key};
+            $settings->{$key} = $settings_host->{$key};
         }
 
     }
-    return $settings{$host};
+    return $settings;
 }
-
 
 1;

@@ -10,10 +10,10 @@ get '/' => sub {
 
 get '/hosts/enabled' => sub {
     get_global_config();
-    find_enabled_hosts();
+    find_hosts();
 
     template 'hostslist' => {
-        section => 'hostlist',
-        hosts => \%hosts
+        section  => 'hostlist',
+        hosts    => \%hosts ,
     };
 };
