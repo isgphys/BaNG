@@ -6,6 +6,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="/css/screen.css">
         <link rel="stylesheet" type="text/css" href="/css/tablesorter.css">
+        <link rel="icon" type="image/ico" href="/favicon">
         <script src="/javascripts/jquery.js" type="text/javascript"></script>
         <script src="/javascripts/jquery.tablesorter.js" type="text/javascript"></script>
         <script type="text/javascript">
@@ -25,8 +26,7 @@
         </div>
         <div id="navigation">
             <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
-            <a href="/hosts/enabled" <% IF section == 'hostlist' %>class="active"<% END %>>all enabled Hosts</a>
-            <a href="/config/configlist" <% IF section == 'configlist' %>class="active"<% END %>>Configlist</a>
+            <a href="/hosts/enabled" <% IF section == 'hostlist' %>class="active"<% END %>>Host configs</a>
             <a href="/config/general" <% IF section == 'generallist' %>class="active"<% END %>>General Settings</a>
         </div>
         <% IF error %>
