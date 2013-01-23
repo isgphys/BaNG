@@ -11,24 +11,28 @@
     <tbody>
       <% FOREACH hostname IN hosts.keys.sort %>
         <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-          <td>
-            <% hosts.$hostname.hostname %>
-          </td>
-          <td>
-            <% hosts.$hostname.group %>
-          </td>
-          <td class="expander">
-            <% hosts.$hostname.configfile %>
-              <div class="hosts_details">
-                <dl>
-                  <dt>Description</dt>
-                  <dd><% hosts.$hostname.hostconfig.BKP_KEEP %></dd>
-                </dl>
-              </div>
-          </td>
-          <td>
-            <% hosts.$hostname.status %>
-          </td>
+            <td>
+              <% hosts.$hostname.hostname %>
+            </td>
+            <td>
+              <% hosts.$hostname.group %>
+            </td>
+            <td class="expander">
+              <% hosts.$hostname.configfile %>
+                <div class="hosts_details">
+                    <table>
+                      <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
+                        <tr>
+                            <td><% hostconf %></td>
+                            <td><% hosts.$hostname.hostconfig.$hostconf %></td>
+                        </tr>
+                      <% END %>
+                    </table>
+                </div>
+            </td>
+            <td>
+              <% hosts.$hostname.status %>
+            </td>
         </tr>
       <% END %>
     </tbody>

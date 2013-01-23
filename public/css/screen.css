@@ -171,34 +171,16 @@ div.os_minilogo {
     width: 100px;
 }
 
-#hosts dl {
-    font-size: 12px;
-    width: 600px;
+.hosts_details table {
+    width: 340px;
 }
 
-#hosts dl dt {
-    font-weight: bold;
-    clear: left;
-    float: left;
-    width: 150px;
-    text-align: left;
+.hosts_details tr:nth-child(odd) {
+    background-color: lightblue;
 }
 
-#hosts dl dt:after {
-    content: ":";
-}
-
-#hosts dl dt {
-    font-weight: bold;
-    clear: left;
-    float: left;
-    width: 150px;
-    text-align: left;
-}
-
-#hosts dl dd {
-    margin: 0 0 0 160px;
-    padding: 0 0 0.5em 0;
+.hosts_details tr:nth-child(even) {
+    background-color: lightgray;
 }
 
 #hosts tr.active {
