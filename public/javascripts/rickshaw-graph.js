@@ -1,5 +1,5 @@
 var PlotData;
-d3.json("/plot.json", function(json) {
+d3.json(jsonURL, function(json) {
     PlotData = json;
     if (PlotData.error) return alert(PlotData.error);
     drawVisualization();

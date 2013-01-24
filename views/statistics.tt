@@ -46,6 +46,9 @@
                 </form>
                 <div id="chart_slider"></div>
             </div>
+            <script>
+                var jsonURL = '/plot.json';
+            </script>
             <script src="/javascripts/rickshaw-graph.js"></script>
         </div>
     </body>
