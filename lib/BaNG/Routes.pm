@@ -12,8 +12,15 @@ get '/config/global' => sub {
     get_global_config();
 
     template 'global-config' => {
-        section      => 'global-config',
-        globalconfig => \%globalconfig,
+        section       => 'global-config',
+        globalconfig  => \%globalconfig,
+        servername    => $servername,
+        portnr        => config->{port},
+        envi          => config->{environment},
+        prefix_path   => $prefix,
+        config_path   => $config_path,
+        config_global => $config_global,
+
     };
 };
 

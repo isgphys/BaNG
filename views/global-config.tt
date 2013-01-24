@@ -1,4 +1,49 @@
 <h2>Global Settings</h2>
+<h3>Static Vars</h3>
+<table>
+  <tr>
+    <td>
+      Servername:
+    </td>
+    <td>
+      <% servername %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Environment:
+    </td>
+    <td>
+     <% envi %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Port:
+    </td>
+    <td>
+      <% portnr %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      App-Dir:
+    </td>
+    <td>
+      <% prefix_path %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Config-Dir:
+    </td>
+    <td>
+      <% config_path %>
+    </td>
+  </tr>
+</table>
+
+<h3>Global Configfile:<% config_global %></h3>
 <table id="config" class="tablesorter">
     <thead>
         <tr>

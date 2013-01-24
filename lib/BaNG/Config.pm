@@ -7,11 +7,16 @@ use File::Find::Rule;
 use YAML::Tiny qw(LoadFile Dump);
 
 use Cwd qw(getcwd abs_path);
+use Sys::Hostname;
 
 use Exporter 'import';
 our @EXPORT = qw(
     %globalconfig
     %hosts
+    $prefix
+    $config_path
+    $config_global
+    $servername
     get_global_config
     find_hosts
     find_available_hosts
@@ -22,13 +27,13 @@ our @EXPORT = qw(
 
 our %globalconfig;  # App-Settings
 our %hosts;
+our $servername       = hostname;
+our $prefix           = getcwd();
+our $config_path      = "$prefix/etc";
+our $config_global    = "$config_path/bang_globals.yaml";
+
 
 sub get_global_config {
-
-    #my $prefix           = "/export/data3/PROJECTS/BaNG";
-    my $prefix           = getcwd();
-    my $config_path      = "$prefix/etc";
-    my $config_global    = "$config_path/bang_globals.yaml";
 
     sanityfilecheck($config_global);
 

@@ -181,6 +181,11 @@ div.os_minilogo {
 
 #config th {
     text-align: left;
+    padding-left: 5px;
+}
+
+#config td {
+    padding-left: 5px;
 }
 
 #config tr {
