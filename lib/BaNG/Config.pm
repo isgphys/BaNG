@@ -6,6 +6,8 @@ use POSIX qw(strftime);
 use File::Find::Rule;
 use YAML::Tiny qw(LoadFile Dump);
 
+use Cwd qw(getcwd abs_path);
+
 use Exporter 'import';
 our @EXPORT = qw(
     %globalconfig
@@ -23,7 +25,8 @@ our %hosts;
 
 sub get_global_config {
 
-    my $prefix           = dirname($0);
+    #my $prefix           = "/export/data3/PROJECTS/BaNG";
+    my $prefix           = getcwd();
     my $config_path      = "$prefix/etc";
     my $config_global    = "$config_path/bang_globals.yaml";
 
@@ -39,8 +42,8 @@ sub get_global_config {
     $globalconfig{path_enabled}        = "$config_path/$global_settings->{EnabledFolder}";
     $globalconfig{path_special}        = "$config_path/$global_settings->{SpecialFolder}";
 
-    $globalconfig{rsync}               = "$global_settings->{RSYNC}";
-    $globalconfig{btrfs}               = "$global_settings->{BTRFS}";
+    $globalconfig{path_rsync}          = "$global_settings->{RSYNC}";
+    $globalconfig{path_btrfs}          = "$global_settings->{BTRFS}";
 
     $globalconfig{config_default}      = "$config_path/$global_settings->{DefaultConfig}";
     $globalconfig{config_default_nis}  = "$config_path/$global_settings->{DefaultNisConfig}";

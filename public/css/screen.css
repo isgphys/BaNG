@@ -17,14 +17,20 @@ body {
 }
 
 #ethz_logo {
-    position: absolute; 
+    position: absolute;
     top: 10px;
     left: 15px;
 }
 
+#ethz_logo_background {
+    height: 100%;
+    width: 250px;
+    background-image:url('/images/header_gradient.png');
+}
+
 #site_title {
     font-family: arial, helvetica, sans-serif;
-    position: absolute; 
+    position: absolute;
     top: 20px;
     left: 220px;
     font-size: 18pt;
@@ -32,6 +38,7 @@ body {
     margin: 0px;
     padding: 0px;
     color: white;
+    text-shadow: 0 0 2px black;
 }
 
 #content {

@@ -27,6 +27,7 @@
             <div id="ethz_logo">
                 <img width="177" height="45" alt="ETH Zurich" src="http://www.phys.ethz.ch/phys/design/ETHlogo_177.png">
             </div>
+            <div id="ethz_logo_background"></div>
             <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
         </div>
         <div id="infonav">
@@ -35,6 +36,7 @@
             <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
             <a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host configs</a>
             <a href="/config/global" <% IF section == 'global-config' %>class="active"<% END %>>Global Settings</a>
+            <a href="/statistics" <% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
         </div>
         <% IF error %>
         <div id="error">

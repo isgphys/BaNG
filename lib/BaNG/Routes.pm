@@ -26,3 +26,9 @@ get '/config/all' => sub {
         hosts    => \%hosts ,
     };
 };
+
+get '/statistics' => sub {
+    template 'statistics' => {
+        section  => 'statistics',
+    };
+};
