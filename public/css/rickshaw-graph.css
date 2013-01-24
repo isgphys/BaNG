@@ -1,0 +1,35 @@
+#chart_container {
+    display     : inline-block;
+    width       : 900px;
+}
+#chart {
+    float       : left;
+}
+#chart_y_axis {
+    float       : left;
+    width       : 40px;
+}
+#chart_legend, #chart_toggler {
+    float       : left;
+    margin-top  : 10px;
+    margin-left : 20px;
+}
+#chart_slider {
+    margin-top  : 420px;
+    margin-left :  30px;
+    margin-right: 160px;
+}
+.rickshaw_graph .detail .x_label {
+    display     : none;
+}
+.rickshaw_graph .detail .item {
+    line-height : 1.4;
+    padding     : 0.5em;
+}
+.detail_swatch {
+    float       : left;
+    display     : inline-block;
+    width       : 10px;
+    height      : 10px;
+    margin      : 3px 4px 0 0;
+}

@@ -34,8 +34,11 @@ get '/config/all' => sub {
     };
 };
 
-get '/statistics' => sub {
-    template 'statistics' => {
-        section  => 'statistics',
+get '/statistics/:host/:share' => sub {
+    template 'statistics', {
+        section   => 'statistics',
+        plothost  => param('host'),
+        plotshare => param('share'),
+    },{ layout    => 0
     };
 };
