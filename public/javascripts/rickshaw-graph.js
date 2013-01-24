@@ -8,8 +8,8 @@ d3.json("/plot.json", function(json) {
 function drawVisualization() {
     var graph = new Rickshaw.Graph({
         element       : document.querySelector("#chart"),
-        width         : 600,
-        height        : 400,
+        width         : 860,
+        height        : 600,
         min           : -0.05,
         renderer      : 'line',   // area, stack, bar, line, scatterplot
         interpolation : 'linear', // linear, step-after, cardinal (default), basis

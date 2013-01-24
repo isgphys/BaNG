@@ -1,6 +1,6 @@
 #chart_container {
     display     : inline-block;
-    width       : 900px;
+    width       : 1100px;
 }
 #chart {
     float       : left;
@@ -15,7 +15,7 @@
     margin-left : 20px;
 }
 #chart_slider {
-    margin-top  : 420px;
+    margin-top  : 620px;
     margin-left :  30px;
     margin-right: 160px;
 }
