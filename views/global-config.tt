@@ -1,0 +1,22 @@
+<h2>Global Settings</h2>
+<table id="config" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+      <% FOREACH globalconf IN globalconfig.keys.sort %>
+        <tr>
+           <td>
+              <% globalconf %>
+            </td>
+            <td>
+              <% globalconfig.$globalconf %>
+            </td>
+            </td>
+        </tr>
+      <% END %>
+    </tbody>
+</table>

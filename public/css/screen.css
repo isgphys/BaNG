@@ -116,24 +116,6 @@ body {
     background-color: #eee;
 }
 
-#oslist img {
-    border: none;
-}
-
-#oslist div {
-    display: inline-block;
-}
-
-#oslist div a {
-    font-weight: bold;
-}
-
-#oslist {
-    width: 800px;
-    text-align: center;
-    margin-top: 60px;
-}
-
 #content div.centered {
     margin: 0px auto;
 }
@@ -146,58 +128,64 @@ div.os_minilogo {
     display: inline-block;
 }
 
-#hosts {
+#configslist {
     width: 700px;
 }
 
-#hosts_filter {
-    margin-bottom: 22px;
-    width: 100%;
+#configslist th {
+    text-align: left;
 }
 
-#hosts td {
+#configslist td {
     height: 24px;
     vertical-align: top;
     padding-top: 5px;
 }
 
-#hosts td.sw_logo {
+#configslist td.sw_logo {
     height: 24px;
     width: 20px;
     vertical-align: top;
 }
 
-#hosts div.hosts_details {
+#configslist div.hosts_details {
     width: 100px;
 }
 
-.hosts_details table {
-    width: 340px;
-}
-
-.hosts_details tr:nth-child(odd) {
-    background-color: lightblue;
-}
-
-.hosts_details tr:nth-child(even) {
-    background-color: lightgray;
-}
-
-#hosts tr.active {
+#configslist tr.active {
     background-color: lightgreen;
 }
 
-#computers_search {
-	margin: 36px 0;
+.config_details table {
+    width: 380px;
 }
 
-#computers_search input {
-    width: 100px;
-    font-size: 20px;
+.config_details tr:nth-child(odd) {
+    background-color: lightblue;
 }
-#computers_search_text {
-    width: 400px !important;
-    font-size: 20px;
+
+.config_details tr:nth-child(even) {
+    background-color: lightgray;
+}
+
+#config {
+    width: 700px;
+}
+
+#config th {
+    text-align: left;
+}
+
+#config tr {
+    height: 24px;
+}
+
+#config tr:nth-child(odd) {
+    background-color: lightblue;
+}
+
+#config tr:nth-child(even) {
+    background-color: lightgray;
 }
 
 #loader {

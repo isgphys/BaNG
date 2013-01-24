@@ -1,5 +1,5 @@
 <h2>Host configs</h2>
-<table id="hosts" class="tablesorter">
+<table id="configslist" class="tablesorter">
     <thead>
         <tr>
             <th>Hostname</th>
@@ -19,7 +19,7 @@
             </td>
             <td class="expander">
               <% hosts.$hostname.configfile %>
-                <div class="hosts_details">
+                <div class="config_details">
                     <table>
                       <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
                         <tr>

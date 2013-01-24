@@ -8,12 +8,21 @@ get '/' => sub {
      };
 };
 
-get '/hosts/enabled' => sub {
+get '/config/global' => sub {
+    get_global_config();
+
+    template 'global-config' => {
+        section      => 'global-config',
+        globalconfig => \%globalconfig,
+    };
+};
+
+get '/config/all' => sub {
     get_global_config();
     find_hosts();
 
-    template 'hostslist' => {
-        section  => 'hostlist',
+    template 'configs-overview' => {
+        section  => 'configs-overview',
         hosts    => \%hosts ,
     };
 };
