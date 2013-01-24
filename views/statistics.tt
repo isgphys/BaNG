@@ -36,7 +36,6 @@
         <% END %>
         <div id="content">
             <h2>Statistics for <%plothost%>:<%plotshare%></h2>
-
             <div id="chart_container">
                 <div id="chart_y_axis"></div>
                 <div id="chart"></div>
@@ -51,6 +50,3 @@
         </div>
     </body>
 </html>
-
-
-
