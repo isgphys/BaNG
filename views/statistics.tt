@@ -35,7 +35,7 @@
         </div>
         <% END %>
         <div id="content">
-            <h2>Statistics for <%plothost%>:<%plotshare%></h2>
+            <h2>Statistics for <%host%>:<%share%></h2>
             <div id="chart_container">
                 <div id="chart_y_axis"></div>
                 <div id="chart"></div>
@@ -47,7 +47,7 @@
                 <div id="chart_slider"></div>
             </div>
             <script>
-                var jsonURL = '/plot.json';
+                var jsonURL = '<%json_url%>';
             </script>
             <script src="/javascripts/rickshaw-graph.js"></script>
         </div>

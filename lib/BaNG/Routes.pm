@@ -42,17 +42,19 @@ get '/statistics' => sub {
 };
 
 get '/statistics/:host/:share/json' => sub {
-    my %json = statistics_json(param('host'),param('share'));
-
-    set serializer => 'JSON';
-    return \%json;
+    my $share = statistics_decode_path(param('share'));
+    return statistics_json(param('host'),$share);
 };
 
 get '/statistics/:host/:share' => sub {
+    my $host  = param('host');
+    my $share = param('share');
+
     template 'statistics', {
         section   => 'statistics',
-        plothost  => param('host'),
-        plotshare => param('share'),
+        host      => $host,
+        share     => statistics_decode_path(param('share')),
+        json_url  => "/statistics/$host/$share/json",
     },{ layout    => 0
     };
 };
