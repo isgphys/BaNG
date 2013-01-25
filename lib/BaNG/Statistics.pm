@@ -103,6 +103,8 @@ sub extract_rickshaw_data {
                 my $humanreadable;
                 if( $field eq 'Runtime' ) {
                     $humanreadable = "\"" . time2human($bkp->{$field}) . "\"";
+                } elsif( $field =~ /Size/ ) {
+                    $humanreadable = "\"" . num2human($bkp->{$field}, 1024.) . "\"";
                 } else {
                     $humanreadable = "\"" . num2human($bkp->{$field})  . "\"";
                 }
@@ -149,9 +151,11 @@ sub rickshaw_json {
 
 sub num2human {
     # convert large numbers to K, M, G, T notation
-    my ($num) = @_;
+    my ($num, $base) = @_;
+    $base = $base || 1000.;
+
     foreach my $unit ('', qw(K M G T P)) {
-        if ($num < 1000) {
+        if ($num < $base) {
             if ($num < 10 && $num > 0) {
                 return sprintf("\%.1f \%s", $num, $unit);  # print small values with 1 decimal
             }
@@ -159,7 +163,7 @@ sub num2human {
                 return sprintf("\%.0f \%s", $num, $unit);  # print larger values without decimals
             }
         }
-        $num = $num / 1000.;
+        $num = $num / $base;
     }
 }
 
