@@ -19,13 +19,16 @@
     margin-left :  30px;
     margin-right: 160px;
 }
-.rickshaw_graph .detail .x_label {
-    display     : none;
+/* color vertical line showing current position */
+.rickshaw_graph .detail {
+    background-color    : red;
 }
+/* wider space in hover details */
 .rickshaw_graph .detail .item {
     line-height : 1.4;
     padding     : 0.5em;
 }
+/* date series color swatch in hover details */
 .detail_swatch {
     float       : left;
     display     : inline-block;

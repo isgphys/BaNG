@@ -5,8 +5,8 @@
         <meta charset="utf-8">
         <link rel="icon" type="image/ico" href="/favicon">
         <link rel="stylesheet" href="/css/screen.css">
-        <link rel="stylesheet" href="/css/rickshaw-graph.css">
         <link rel="stylesheet" href="/css/rickshaw.css">
+        <link rel="stylesheet" href="/css/rickshaw-graph.css">
         <link rel="stylesheet" href="/css/jquery-ui.css">
         <script src="/javascripts/d3.js"></script>
         <script src="/javascripts/rickshaw.js"></script>

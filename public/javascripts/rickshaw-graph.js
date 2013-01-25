@@ -5,6 +5,21 @@ d3.json(jsonURL, function(json) {
     drawVisualization();
 });
 
+function formatDate(timestamp) {
+    var date = new Date(timestamp*1000);
+
+    var weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var weekday  = weekdays[ date.getDay() ];
+    var month    = months[ date.getMonth() ];
+    var day      = date.getDate();
+    var hours    = String('00'+date.getHours()).slice(-2);
+    var minutes  = String('00'+date.getMinutes()).slice(-2);
+
+    var formattedDate = weekday + ' ' + day + ' ' + month + ' ' + hours + ':' + minutes;
+    return formattedDate;
+}
+
 function drawVisualization() {
     var graph = new Rickshaw.Graph({
         element       : document.querySelector("#chart"),
@@ -37,16 +52,11 @@ function drawVisualization() {
     });
     var hoverDetail = new Rickshaw.Graph.HoverDetail( {
         graph      : graph,
+        xFormatter: function(x) { return formatDate(x) },
         formatter: function(series, x, y) {
-            // reformat timestamp
-            var d = new Date(x*1000);
-            var X = d.getMonth() + 1 + '/' + d.getDate() + ' ' + String('00'+d.getHours()).slice(-2) + ':' + String('00'+d.getMinutes()).slice(-2);
             // fetch datapoint from human-readable series
-            var Y = PlotData.filter( function(d){ return d.name === series.name })[0].humanReadable.filter( function(d){ return d.x === x })[0].y;
-
-            var content = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-            content    += series.name + '</br>';
-            content    += Y + ' @ ' + X ;
+            var value = PlotData.filter( function(d){ return d.name === series.name })[0].humanReadable.filter( function(d){ return d.x === x })[0].y;
+            var content = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>' + value + ' ' + series.name;
             return content;
         }
     });
