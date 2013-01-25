@@ -1,6 +1,7 @@
 package BaNG::Routes;
 use Dancer ':syntax';
 use BaNG::Config;
+use BaNG::Statistics;
 
 get '/' => sub {
      template 'index' => {
@@ -32,6 +33,19 @@ get '/config/all' => sub {
         section  => 'configs-overview',
         hosts    => \%hosts ,
     };
+};
+
+get '/statistics' => sub {
+    template 'statistics-overview', {
+        section   => 'statistics',
+    };
+};
+
+get '/statistics/:host/:share/json' => sub {
+    my %json = statistics_json(param('host'),param('share'));
+
+    set serializer => 'JSON';
+    return \%json;
 };
 
 get '/statistics/:host/:share' => sub {

@@ -1,2 +1,3 @@
 /logs
 *.swp
+etc/bangstat_db.yaml
