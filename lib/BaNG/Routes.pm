@@ -45,9 +45,12 @@ get '/statistics/:host/:share/json' => sub {
 };
 
 get '/statistics' => sub {
+    my %hosts_shares = statistics_hosts_shares();
+
     template 'statistics-overview', {
         section   => 'statistics',
         json_url  => "/statistics/json",
+        hosts_shares => \%hosts_shares,
     },{ layout    => 'statistics'
     };
 };

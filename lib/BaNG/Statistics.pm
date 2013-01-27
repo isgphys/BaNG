@@ -3,6 +3,7 @@ use Dancer ':syntax';
 use BaNG::Reporting;
 use Date::Parse;
 use List::Util qw(min max);
+use List::MoreUtils qw(uniq);
 use POSIX qw(floor);
 
 use Exporter 'import';
@@ -10,6 +11,7 @@ our @EXPORT = qw(
     statistics_json
     statistics_cumulated_json
     statistics_decode_path
+    statistics_hosts_shares
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles Runtime );
@@ -42,6 +44,38 @@ sub statistics_cumulated_json {
     my %BackupsByDay = bangstat_db_query_statistics_cumulated($lastXdays);
 
     return rickshaw_json(\%BackupsByDay);
+}
+
+sub statistics_hosts_shares {
+
+    bangstat_db_connect();
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT
+        DISTINCT BkpFromHost, BkpFromPath
+        FROM statistic
+        WHERE Start > date_sub(now(), interval 10000 day)
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND ( BkpFromPath LIKE '\%export\%' OR BkpFromPath LIKE '%imap%' )
+        ORDER BY BkpFromHost;
+    ");
+    $sth->execute();
+
+    my %hosts_shares;
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        my $hostname    = $dbrow->{'BkpFromHost'};
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/\s//g; # remove whitespace
+        my ($empty, @shares) = split(/:/, $BkpFromPath);
+
+        push( @{$hosts_shares{$hostname}}, @shares );
+    }
+
+    # filter duplicate shares
+    foreach my $host (sort keys %hosts_shares) {
+        @{$hosts_shares{$host}} = uniq @{$hosts_shares{$host}};
+    }
+
+    return %hosts_shares;
 }
 
 sub bangstat_db_query_statistics {
