@@ -40,16 +40,9 @@ sub statistics_cumulated_json {
 
     bangstat_db_connect();
     my %BackupsByDay = bangstat_db_query_statistics_cumulated($lastXdays);
+    my %RickshawData = extract_rickshaw_data(\%BackupsByDay);
 
-    my $json;
-    foreach my $day (sort keys %BackupsByDay) {
-        $json .= "$day ($BackupsByDay{$day}{time_start}) ==> ";
-        $json .= time2human($BackupsByDay{$day}{Runtime}) . " - ";
-        $json .= num2human($BackupsByDay{$day}{TotFileSize}, 1024) . " - ";
-        $json .= num2human($BackupsByDay{$day}{NumOfFiles}) . "<br />";
-    }
-
-    return $json;
+    return rickshaw_json(\%RickshawData);
 }
 
 sub bangstat_db_query_statistics {
@@ -114,7 +107,7 @@ sub bangstat_db_query_statistics_cumulated {
     $sth->execute();
 
     # gather information into hash
-    my %BackupsByDate = ();
+    my %CumulateByDate = ();
     while (my $dbrow=$sth->fetchrow_hashref()) {
         my ($date, $time) = split(/\s+/,$dbrow->{'Start'});
 
@@ -129,17 +122,30 @@ sub bangstat_db_query_statistics_cumulated {
         my $Runtime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
 
         # store cumulated statistics for each day
-        $BackupsByDate{$date}{time_start}       = str2time("$date 00:00:00");
-        $BackupsByDate{$date}{Runtime}          += $Runtime;
-        $BackupsByDate{$date}{TotFileSize}      += $dbrow->{'TotFileSize'},
-        $BackupsByDate{$date}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'},
-        $BackupsByDate{$date}{NumOfFiles}       += $dbrow->{'NumOfFiles'},
-        $BackupsByDate{$date}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'},
+        $CumulateByDate{$date}{time_start}       = "$date 00:00:00";
+        $CumulateByDate{$date}{Runtime}          += $Runtime;
+        $CumulateByDate{$date}{TotFileSize}      += $dbrow->{'TotFileSize'},
+        $CumulateByDate{$date}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'},
+        $CumulateByDate{$date}{NumOfFiles}       += $dbrow->{'NumOfFiles'},
+        $CumulateByDate{$date}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'},
     }
     # disconnect database
     $sth->finish();
 
-    return %BackupsByDate;
+    # reshape data structure similar to BackupsByPath
+    my %BackupsByDay;
+    foreach my $date (sort keys %CumulateByDate) {
+        push( @{$BackupsByDay{'Cumulated'}}, {
+            time_start       => $CumulateByDate{$date}{time_start},
+            Runtime          => $CumulateByDate{$date}{Runtime},
+            TotFileSize      => $CumulateByDate{$date}{TotFileSize},
+            TotFileSizeTrans => $CumulateByDate{$date}{TotFileSizeTrans},
+            NumOfFiles       => $CumulateByDate{$date}{NumOfFiles},
+            NumOfFilesTrans  => $CumulateByDate{$date}{NumOfFilesTrans},
+        });
+    }
+
+    return %BackupsByDay;
 }
 
 sub extract_rickshaw_data {

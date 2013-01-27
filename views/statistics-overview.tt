@@ -1,4 +1,4 @@
-<h2>Statistics Overview</h2>
+<h2>Cumulated backup statistics</h2>
 <div id="chart_container">
     <div id="chart_y_axis"></div>
     <div id="chart"></div>
