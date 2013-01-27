@@ -41,6 +41,10 @@ get '/statistics' => sub {
     };
 };
 
+get '/statistics/json' => sub {
+    return statistics_cumulated_json();
+};
+
 get '/statistics/:host/:share/json' => sub {
     my $share = statistics_decode_path(param('share'));
     return statistics_json(param('host'),$share);

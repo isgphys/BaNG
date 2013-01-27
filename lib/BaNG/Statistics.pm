@@ -8,6 +8,7 @@ use POSIX qw(floor);
 use Exporter 'import';
 our @EXPORT = qw(
     statistics_json
+    statistics_cumulated_json
     statistics_decode_path
 );
 
@@ -33,6 +34,24 @@ sub statistics_json {
     return rickshaw_json(\%RickshawData);
 }
 
+sub statistics_cumulated_json {
+    my ($days) = @_;
+    my $lastXdays = $days || 150;
+
+    bangstat_db_connect();
+    my %BackupsByDay = bangstat_db_query_statistics_cumulated($lastXdays);
+
+    my $json;
+    foreach my $day (sort keys %BackupsByDay) {
+        $json .= "$day ($BackupsByDay{$day}{time_start}) ==> ";
+        $json .= time2human($BackupsByDay{$day}{Runtime}) . " - ";
+        $json .= num2human($BackupsByDay{$day}{TotFileSize}, 1024) . " - ";
+        $json .= num2human($BackupsByDay{$day}{NumOfFiles}) . "<br />";
+    }
+
+    return $json;
+}
+
 sub bangstat_db_query_statistics {
     my ($host, $share, $lastXdays) = @_;
 
@@ -51,7 +70,7 @@ sub bangstat_db_query_statistics {
     # gather information into hash
     my %BackupsByPath;
     while (my $dbrow=$sth->fetchrow_hashref()) {
-        # reformat timestamp as "YY/MM/DD HH:MM:SS" for cross-browser compatibility
+        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
         (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
         (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
         my $hostname    = $dbrow->{'BkpFromHost'};
@@ -79,6 +98,48 @@ sub bangstat_db_query_statistics {
     $sth->finish();
 
     return %BackupsByPath;
+}
+
+sub bangstat_db_query_statistics_cumulated {
+    my ($lastXdays) = @_;
+
+    # query database
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT *
+        FROM statistic
+        WHERE Start > date_sub(now(), interval $lastXdays day)
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        ORDER BY Start;
+    ");
+    $sth->execute();
+
+    # gather information into hash
+    my %BackupsByDate = ();
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        my ($date, $time) = split(/\s+/,$dbrow->{'Start'});
+
+        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
+        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
+        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+        my $hostname    = $dbrow->{'BkpFromHost'};
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/://g; # remove colon separators
+
+        # compute runtime of backup in minutes with 2 digits
+        my $Runtime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+
+        # store cumulated statistics for each day
+        $BackupsByDate{$date}{time_start}       = str2time("$date 00:00:00");
+        $BackupsByDate{$date}{Runtime}          += $Runtime;
+        $BackupsByDate{$date}{TotFileSize}      += $dbrow->{'TotFileSize'},
+        $BackupsByDate{$date}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'},
+        $BackupsByDate{$date}{NumOfFiles}       += $dbrow->{'NumOfFiles'},
+        $BackupsByDate{$date}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'},
+    }
+    # disconnect database
+    $sth->finish();
+
+    return %BackupsByDate;
 }
 
 sub extract_rickshaw_data {
