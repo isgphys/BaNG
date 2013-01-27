@@ -11,8 +11,6 @@ our @EXPORT = qw(
     statistics_decode_path
 );
 
-my %BackupsByPath;
-my %RickshawData;
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles Runtime );
 
 sub statistics_decode_path {
@@ -29,10 +27,10 @@ sub statistics_json {
     my $lastXdays = $days || 150;
 
     bangstat_db_connect();
-    bangstat_db_query_statistics($host, $share, $lastXdays);
-    extract_rickshaw_data();
+    my %BackupsByShare = bangstat_db_query_statistics($host, $share, $lastXdays);
+    my %RickshawData   = extract_rickshaw_data(\%BackupsByShare);
 
-    return rickshaw_json();
+    return rickshaw_json(\%RickshawData);
 }
 
 sub bangstat_db_query_statistics {
@@ -51,7 +49,7 @@ sub bangstat_db_query_statistics {
     $sth->execute();
 
     # gather information into hash
-    %BackupsByPath = ();
+    my %BackupsByPath;
     while (my $dbrow=$sth->fetchrow_hashref()) {
         # reformat timestamp as "YY/MM/DD HH:MM:SS" for cross-browser compatibility
         (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
@@ -80,21 +78,22 @@ sub bangstat_db_query_statistics {
     # disconnect database
     $sth->finish();
 
-    return 1;
+    return %BackupsByPath;
 }
 
 sub extract_rickshaw_data {
+    my %datahash = %{shift()};
 
-    %RickshawData = ();
-    foreach my $bkppath (sort keys %BackupsByPath) {
+    my %rickshaw_data;
+    foreach my $bkppath (sort keys %datahash) {
         my (%min, %max);
         foreach my $field (@fields) {
             # find min- and maxima of given fields
-            $max{$field}  = sprintf("%.2f", max( map{$_->{$field}} @{$BackupsByPath{$bkppath}} ));
-            $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$BackupsByPath{$bkppath}} ));
+            $max{$field}  = sprintf("%.2f", max( map{$_->{$field}} @{$datahash{$bkppath}} ));
+            $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
             $max{$field}  = sprintf("%.2f", 2*$max{$field}) if ($min{$field} == $max{$field}); # prevent division by zero
         }
-        foreach my $bkp (@{$BackupsByPath{$bkppath}}) {
+        foreach my $bkp (@{$datahash{$bkppath}}) {
             my $t = str2time($bkp->{'time_start'}); # monotonically increasing coordinate to have single-valued function
 
             foreach my $field (@fields) {
@@ -109,17 +108,18 @@ sub extract_rickshaw_data {
                     $humanreadable = "\"" . num2human($bkp->{$field})  . "\"";
                 }
 
-                $RickshawData{Normalized}{$field}    .= qq|\n        { "x": $t, "y": $normalized },|;
-                $RickshawData{HumanReadable}{$field} .= qq|\n        { "x": $t, "y": $humanreadable },|;
+                $rickshaw_data{Normalized}{$field}    .= qq|\n        { "x": $t, "y": $normalized },|;
+                $rickshaw_data{HumanReadable}{$field} .= qq|\n        { "x": $t, "y": $humanreadable },|;
             }
         }
         last;
     }
 
-    return 1;
+    return %rickshaw_data;
 }
 
 sub rickshaw_json {
+    my %datahash = %{shift()};
 
     my %color = (
         "Runtime"          => "#00CC00",
@@ -134,8 +134,8 @@ sub rickshaw_json {
         $json .= qq|{\n|;
         $json .= qq|    "name"          : "$field",\n|;
         $json .= qq|    "color"         : "$color{$field}",\n|;
-        $json .= qq|    "data"          : [$RickshawData{Normalized}{$field}\n    ],\n|;
-        $json .= qq|    "humanReadable" : [$RickshawData{HumanReadable}{$field}\n    ]\n|;
+        $json .= qq|    "data"          : [$datahash{Normalized}{$field}\n    ],\n|;
+        $json .= qq|    "humanReadable" : [$datahash{HumanReadable}{$field}\n    ]\n|;
         $json .= qq|},\n|;
     }
     $json .= "]\n";
