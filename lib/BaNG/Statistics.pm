@@ -29,9 +29,8 @@ sub statistics_json {
 
     bangstat_db_connect();
     my %BackupsByShare = bangstat_db_query_statistics($host, $share, $lastXdays);
-    my %RickshawData   = extract_rickshaw_data(\%BackupsByShare);
 
-    return rickshaw_json(\%RickshawData);
+    return rickshaw_json(\%BackupsByShare);
 }
 
 sub statistics_cumulated_json {
@@ -40,9 +39,8 @@ sub statistics_cumulated_json {
 
     bangstat_db_connect();
     my %BackupsByDay = bangstat_db_query_statistics_cumulated($lastXdays);
-    my %RickshawData = extract_rickshaw_data(\%BackupsByDay);
 
-    return rickshaw_json(\%RickshawData);
+    return rickshaw_json(\%BackupsByDay);
 }
 
 sub bangstat_db_query_statistics {
@@ -148,7 +146,7 @@ sub bangstat_db_query_statistics_cumulated {
     return %BackupsByDay;
 }
 
-sub extract_rickshaw_data {
+sub rickshaw_json {
     my %datahash = %{shift()};
 
     my %rickshaw_data;
@@ -182,12 +180,6 @@ sub extract_rickshaw_data {
         last;
     }
 
-    return %rickshaw_data;
-}
-
-sub rickshaw_json {
-    my %datahash = %{shift()};
-
     my %color = (
         "Runtime"          => "#00CC00",
         "NumOfFiles"       => "#0066B3",
@@ -201,17 +193,14 @@ sub rickshaw_json {
         $json .= qq|{\n|;
         $json .= qq|    "name"          : "$field",\n|;
         $json .= qq|    "color"         : "$color{$field}",\n|;
-        $json .= qq|    "data"          : [$datahash{Normalized}{$field}\n    ],\n|;
-        $json .= qq|    "humanReadable" : [$datahash{HumanReadable}{$field}\n    ]\n|;
+        $json .= qq|    "data"          : [$rickshaw_data{Normalized}{$field}\n    ],\n|;
+        $json .= qq|    "humanReadable" : [$rickshaw_data{HumanReadable}{$field}\n    ]\n|;
         $json .= qq|},\n|;
     }
     $json .= "]\n";
 
-    # sanitize json by removing trailing spaces
-    $json =~ s/\},(\s*)\]/\}$1\]/g;
-
-    # minimize json by removing all whitespaces
-    $json =~ s/\s+//g;
+    $json =~ s/\},(\s*)\]/\}$1\]/g; # sanitize json by removing trailing spaces
+    $json =~ s/\s+//g;              # minimize json by removing all whitespaces
 
     return $json;
 }
