@@ -13,6 +13,7 @@ our @EXPORT = qw(
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles Runtime );
+my $lastXdays_default = 150;
 
 sub statistics_decode_path {
     my ($path) = @_;
@@ -25,7 +26,7 @@ sub statistics_decode_path {
 
 sub statistics_json {
     my ($host, $share, $days) = @_;
-    my $lastXdays = $days || 150;
+    my $lastXdays = $days || $lastXdays_default;
 
     bangstat_db_connect();
     my %BackupsByShare = bangstat_db_query_statistics($host, $share, $lastXdays);
@@ -35,7 +36,7 @@ sub statistics_json {
 
 sub statistics_cumulated_json {
     my ($days) = @_;
-    my $lastXdays = $days || 150;
+    my $lastXdays = $days || $lastXdays_default;
 
     bangstat_db_connect();
     my %BackupsByDay = bangstat_db_query_statistics_cumulated($lastXdays);
