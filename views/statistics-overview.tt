@@ -1,1 +1,15 @@
 <h2>Statistics Overview</h2>
+<div id="chart_container">
+    <div id="chart_y_axis"></div>
+    <div id="chart"></div>
+    <div id="chart_legend"></div>
+    <form id="chart_toggler">
+        <input type="radio" name="offset" value="line" checked> <label>line</label>
+        <input type="radio" name="offset" value="zero"> <label>stack</label>
+    </form>
+    <div id="chart_slider"></div>
+</div>
+<script>
+    var jsonURL = '<%json_url%>';
+</script>
+<script src="/javascripts/rickshaw-graph.js"></script>

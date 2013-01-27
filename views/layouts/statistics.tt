@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>BaNG - 2013</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/ico" href="/favicon">
+        <link rel="stylesheet" href="/css/screen.css">
+        <link rel="stylesheet" href="/css/rickshaw.css">
+        <link rel="stylesheet" href="/css/rickshaw-graph.css">
+        <link rel="stylesheet" href="/css/jquery-ui.css">
+        <script src="/javascripts/d3.js"></script>
+        <script src="/javascripts/rickshaw.js"></script>
+        <script src="/javascripts/jquery.js"></script>
+        <script src="/javascripts/jquery-ui.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="ethz_logo">
+                <img width="177" height="45" alt="ETH Zurich" src="http://www.phys.ethz.ch/phys/design/ETHlogo_177.png">
+            </div>
+            <div id="ethz_logo_background"></div>
+            <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
+        </div>
+        <div id="infonav">
+        </div>
+        <div id="navigation">
+            <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
+            <a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host configs</a>
+            <a href="/config/global" <% IF section == 'global-config' %>class="active"<% END %>>Global Settings</a>
+            <a href="/statistics" <% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
+        </div>
+        <% IF error %>
+        <div id="error">
+            <p><% error %></p>
+        </div>
+        <% END %>
+        <div id="content">
+            <% content %>
+        </div>
+    </body>
+</html>

@@ -35,12 +35,6 @@ get '/config/all' => sub {
     };
 };
 
-get '/statistics' => sub {
-    template 'statistics-overview', {
-        section   => 'statistics',
-    };
-};
-
 get '/statistics/json' => sub {
     return statistics_cumulated_json();
 };
@@ -48,6 +42,14 @@ get '/statistics/json' => sub {
 get '/statistics/:host/:share/json' => sub {
     my $share = statistics_decode_path(param('share'));
     return statistics_json(param('host'),$share);
+};
+
+get '/statistics' => sub {
+    template 'statistics-overview', {
+        section   => 'statistics',
+        json_url  => "/statistics/json",
+    },{ layout    => 'statistics'
+    };
 };
 
 get '/statistics/:host/:share' => sub {
@@ -59,6 +61,6 @@ get '/statistics/:host/:share' => sub {
         host      => $host,
         share     => statistics_decode_path(param('share')),
         json_url  => "/statistics/$host/$share/json",
-    },{ layout    => 0
+    },{ layout    => 'statistics'
     };
 };
