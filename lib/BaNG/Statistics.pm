@@ -20,7 +20,7 @@ my $lastXdays_default = 150;
 sub statistics_decode_path {
     my ($path) = @_;
 
-    $path =~ s|%|/|g;                               # decode percent signs to slashes
+    $path =~ s|_|/|g;                               # decode underscores to slashes
     $path = '/' . $path unless ($path =~ m|^/|);    # should always start with slash
 
     return $path;

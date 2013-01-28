@@ -14,7 +14,7 @@
 <select onchange="window.open(this.value,'_self');">
   <% FOREACH host IN hosts_shares.keys.sort %>
     <% FOR share = hosts_shares.$host %>
-    <option value="/statistics/<%host%>/<%share.replace('/','%')%>"><%host%>:<%share%></option>
+    <option value="/statistics/<%host%>/<%share.replace('/','_')%>"><%host%>:<%share%></option>
     <% END %>
   <% END %>
 </select>
