@@ -91,8 +91,10 @@ sub split_configname {
 }
 
 sub find_hosts {
-    my @configsavailable = find_host_configs("*_*.yaml", "$globalconfig{path_available}" );
-    my @configsenabled   = find_host_configs("*_*.yaml", "$globalconfig{path_enabled}" );
+    my ($host) = @_;
+    undef %hosts;
+    my @configsavailable = find_host_configs("$host\_*.yaml", "$globalconfig{path_available}" );
+    my @configsenabled   = find_host_configs("$host\_*.yaml", "$globalconfig{path_enabled}" );
 
     foreach my $configfile (@configsavailable) {
         my ($hostname,$group) = split_configname($configfile);

@@ -131,10 +131,6 @@ body {
     border: none;
 }
 
-div.os_minilogo {
-    display: inline-block;
-}
-
 #configslist {
     width: 700px;
 }
@@ -198,6 +194,19 @@ div.os_minilogo {
 
 #config tr:nth-child(even) {
     background-color: lightgray;
+}
+
+#hostinfo {
+    width: 300px;
+    margin-right: 20px;
+}
+
+#hostinfo th {
+       text-align: left;
+}
+
+#hostinfo th.active {
+    background-color: lightgreen;
 }
 
 #loader {

@@ -27,12 +27,54 @@ get '/config/global' => sub {
 
 get '/config/all' => sub {
     get_global_config();
-    find_hosts();
+    find_hosts("*");
 
     template 'configs-overview' => {
         section  => 'configs-overview',
         hosts    => \%hosts ,
     };
+};
+
+get '/host' => sub {
+
+    template 'host-search', {
+        section   => 'host',
+    };
+};
+
+
+get '/host/:host' => sub {
+    get_global_config();
+    find_hosts(param('host'));
+
+    template 'host', {
+        section   => 'host',
+        host      => param('host'),
+        hosts     => \%hosts ,
+    };
+};
+
+get '/host/search' => sub {
+
+    template 'host-search' => {
+        section => 'host',
+    };
+};
+
+post '/host/search' => sub {
+    my $host = '';
+    if(param('search_text') && param('search_text') =~ /[a-z0-9\-]{1,255}/i)
+    {
+        $host = param('search_text');
+        return redirect sprintf('/host/%s', $host);
+    }
+    else
+    {
+        return template 'host' => {
+            section => 'host',
+            error   => 'Requested host is not available'
+        };
+    }
 };
 
 get '/statistics/json' => sub {

@@ -1,0 +1,21 @@
+<h2>Host Info</h2>
+<h3><% host %></h3>
+  <% FOREACH hostname IN hosts.keys.sort %>
+    <div style="float:left">
+    <table id="hostinfo" class="tablesorter">
+      <thead>
+        <tr>
+          <th<% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>><% hosts.$hostname.group %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% FOREACH config IN  hosts.$hostname.hostconfig.sort %>
+          <tr>
+            <td><% config %></td>
+            <td><% hosts.$hostname.hostconfig.$config %></td>
+          </tr>
+        <% END %>
+      </tbody>
+    </table>
+    </div>
+  <% END %>

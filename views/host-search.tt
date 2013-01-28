@@ -1,0 +1,7 @@
+<h1>Search a Host</h1>
+<div id="host_search">
+<form id="host_search" name="host_search" method="post" action="/host/search">
+    <input type="text" name="search_text" id="host_search_text">
+    <input class="show_loader" type="submit" name ="search_button" value="search">
+</form>
+</div>

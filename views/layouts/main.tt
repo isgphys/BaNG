@@ -35,6 +35,7 @@
             <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
             <a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host configs</a>
             <a href="/config/global" <% IF section == 'global-config' %>class="active"<% END %>>Global Settings</a>
+            <a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a>
             <a href="/statistics" <% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
         </div>
         <% IF error %>
