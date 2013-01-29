@@ -1,15 +1,79 @@
-<h2>Statistics for <%host%>:<%share%></h2>
-<div id="chart_container">
-    <div id="chart_y_axis"></div>
-    <div id="chart"></div>
-    <div id="chart_legend"></div>
-    <form id="chart_toggler">
-        <input type="radio" name="offset" value="line" checked> <label>line</label>
-        <input type="radio" name="offset" value="zero"> <label>stack</label>
-    </form>
-    <div id="chart_slider"></div>
-</div>
-<script>
-    var jsonURL = '<%json_url%>';
-</script>
-<script src="/javascripts/rickshaw-graph.js"></script>
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>BaNG - 2013</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/ico" href="/favicon">
+        <link rel="stylesheet" href="/css/screen.css">
+        <link rel="stylesheet" href="/css/rickshaw.css">
+        <link rel="stylesheet" href="/css/rickshaw-graph.css">
+        <link rel="stylesheet" href="/css/jquery-ui.css">
+        <script src="/javascripts/d3.js"></script>
+        <script src="/javascripts/rickshaw.js"></script>
+        <script src="/javascripts/jquery.js"></script>
+        <script src="/javascripts/jquery-ui.js"></script>
+        <script src="/javascripts/jquery.chained.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="ethz_logo">
+                <img width="177" height="45" alt="ETH Zurich" src="http://www.phys.ethz.ch/phys/design/ETHlogo_177.png">
+            </div>
+            <div id="ethz_logo_background"></div>
+            <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
+        </div>
+        <div id="infonav">
+        </div>
+        <div id="navigation">
+            <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
+            <a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host configs</a>
+            <a href="/config/global" <% IF section == 'global-config' %>class="active"<% END %>>Global Settings</a>
+            <a href="/statistics" <% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
+        </div>
+        <% IF error %>
+        <div id="error">
+            <p><% error %></p>
+        </div>
+        <% END %>
+        <div id="content">
+            <h2><%title%></h2>
+            <div id="chart_container">
+                <div id="chart_y_axis"></div>
+                <div id="chart"></div>
+                <div id="chart_legend"></div>
+                <form id="chart_toggler">
+                    <input type="radio" name="offset" value="line" checked> <label>line</label>
+                    <input type="radio" name="offset" value="zero"> <label>stack</label>
+                </form>
+                <div id="chart_slider"></div>
+            </div>
+            <script>
+                var jsonURL = '<%json_url%>';
+            </script>
+            <script src="/javascripts/rickshaw-graph.js"></script>
+            <div id="select-host-share">
+                <p>View statistics of
+                    <select id="select-host">
+                        <option value="">&lt;host&gt;</option>
+                      <% FOREACH hostavail IN hosts_shares.keys.sort %>
+                        <option value="<%hostavail%>" <% IF hostavail==host %>selected<% END %>><%hostavail%></option>
+                      <% END %>
+                    </select>
+                    <select id="select-share" onchange="window.open(this.value,'_self');">
+                        <option value="">&lt;share&gt;</option>
+                      <% FOREACH hostavail IN hosts_shares.keys.sort %>
+                       <% FOR shareavail = hosts_shares.$hostavail %>
+                        <option value="/statistics/<%hostavail%>/<%shareavail.replace('/','_')%>" class="<%hostavail%>"><%shareavail%></option>
+                       <% END %>
+                      <% END %>
+                    </select>
+                </p>
+            </div>
+            <script>
+                $(document).ready(function(){
+                    $("#select-share").chainedTo("#select-host");
+                });
+            </script>
+        </div>
+    </body>
+</html>
