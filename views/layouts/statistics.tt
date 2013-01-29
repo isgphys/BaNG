@@ -12,6 +12,7 @@
         <script src="/javascripts/rickshaw.js"></script>
         <script src="/javascripts/jquery.js"></script>
         <script src="/javascripts/jquery-ui.js"></script>
+        <script src="/javascripts/jquery.chained.js"></script>
     </head>
     <body>
         <div id="header">

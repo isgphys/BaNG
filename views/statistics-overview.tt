@@ -9,18 +9,30 @@
     </form>
     <div id="chart_slider"></div>
 </div>
-
-<p>View specific share
-<select onchange="window.open(this.value,'_self');">
-  <% FOREACH host IN hosts_shares.keys.sort %>
-    <% FOR share = hosts_shares.$host %>
-    <option value="/statistics/<%host%>/<%share.replace('/','_')%>"><%host%>:<%share%></option>
-    <% END %>
-  <% END %>
-</select>
-</p>
-
 <script>
     var jsonURL = '<%json_url%>';
 </script>
 <script src="/javascripts/rickshaw-graph.js"></script>
+<div id="select-host-share">
+    <p>View statistics of
+        <select id="select-host">
+            <option value="">&lt;host&gt;</option>
+          <% FOREACH hostavail IN hosts_shares.keys.sort %>
+            <option value="<%hostavail%>" <% IF hostavail==host %>selected<% END %>><%hostavail%></option>
+          <% END %>
+        </select>
+        <select id="select-share" onchange="window.open(this.value,'_self');">
+            <option value="">&lt;share&gt;</option>
+          <% FOREACH hostavail IN hosts_shares.keys.sort %>
+           <% FOR shareavail = hosts_shares.$hostavail %>
+            <option value="/statistics/<%hostavail%>/<%shareavail.replace('/','_')%>" class="<%hostavail%>"><%shareavail%></option>
+           <% END %>
+          <% END %>
+        </select>
+    </p>
+</div>
+<script>
+    $(document).ready(function(){
+        $("#select-share").chainedTo("#select-host");
+    });
+</script>
