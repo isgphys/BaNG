@@ -225,7 +225,3 @@ body {
     text-align: center;
     display: none;
 }
-
-#hosts .expander {
-    cursor: pointer
-}
