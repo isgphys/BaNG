@@ -191,13 +191,15 @@ sub rickshaw_json {
             # find min- and maxima of given fields
             $max{$field}  = sprintf("%.2f", max( map{$_->{$field}} @{$datahash{$bkppath}} ));
             $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
-            $max{$field}  = sprintf("%.2f", 2*$max{$field}) if ($min{$field} == $max{$field}); # prevent division by zero
         }
         foreach my $bkp (@{$datahash{$bkppath}}) {
             my $t = str2time($bkp->{'time_start'}); # monotonically increasing coordinate to have single-valued function
 
             foreach my $field (@fields) {
-                my $normalized = ($bkp->{$field} - $min{$field}) / ($max{$field} - $min{$field});
+                my $normalized = 0.5;
+                if( $min{$field} != $max{$field} ) {
+                    $normalized = ($bkp->{$field} - $min{$field}) / ($max{$field} - $min{$field});
+                }
 
                 my $humanreadable;
                 if( $field eq 'Runtime' ) {
