@@ -20,14 +20,14 @@
             <td class="expander">
               <% hosts.$hostname.configfile %>
                 <div id="config_details" class="conf_details">
-                    <table>
-                      <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
-                        <tr>
-                            <td><% hostconf %></td>
-                            <td><% hosts.$hostname.hostconfig.$hostconf %></td>
-                        </tr>
-                      <% END %>
-                    </table>
+                  <table>
+                    <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
+                      <tr>
+                        <td><% hostconf %></td>
+                        <td><% hosts.$hostname.hostconfig.$hostconf %></td>
+                      </tr>
+                    <% END %>
+                  </table>
                 </div>
             </td>
             <td>

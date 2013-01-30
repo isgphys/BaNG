@@ -163,6 +163,11 @@ body {
     background-color: lightgreen;
 }
 
+#configslist .expander {
+    width: 400px;
+    cursor: pointer
+}
+
 #config_details table {
     width: 380px;
 }

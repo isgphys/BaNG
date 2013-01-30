@@ -15,7 +15,7 @@
 
                 $("#configslist div.conf_details").hide();
 
-                $("#configslist tr").click(function(){
+                $("#configslist td").click(function(){
                     $(this).find("div.conf_details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });
