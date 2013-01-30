@@ -9,6 +9,9 @@
     float       : left;
     width       : 40px;
 }
+#chart_y_axis .y_ticks text {
+    visibility  : hidden;
+}
 #chart_legend, #chart_toggler {
     float       : left;
     margin-top  : 10px;
