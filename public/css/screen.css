@@ -155,20 +155,24 @@ body {
     width: 100px;
 }
 
+#configslist tr:nth-child(odd) {
+    background-color: #eee;
+
+}
 #configslist tr.active {
     background-color: lightgreen;
 }
 
-.config_details table {
+#config_details table {
     width: 380px;
 }
 
-.config_details tr:nth-child(odd) {
+#config_details table tr:nth-child(odd) {
     background-color: lightblue;
 }
 
-.config_details tr:nth-child(even) {
-    background-color: lightgray;
+#config_details tr:nth-child(even) {
+    background-color: #eee;
 }
 
 #config {
@@ -193,7 +197,7 @@ body {
 }
 
 #config tr:nth-child(even) {
-    background-color: lightgray;
+    background-color: #eee;
 }
 
 #hostinfo {
@@ -205,7 +209,7 @@ body {
        text-align: left;
 }
 
-#hostinfo th.active {
+#hostinfo tr.active {
     background-color: lightgreen;
 }
 

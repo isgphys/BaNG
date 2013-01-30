@@ -19,7 +19,7 @@
             </td>
             <td class="expander">
               <% hosts.$hostname.configfile %>
-                <div class="config_details">
+                <div id="config_details" class="conf_details">
                     <table>
                       <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
                         <tr>
