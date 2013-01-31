@@ -2,6 +2,8 @@ var PlotData;
 d3.json(jsonURL, function(json) {
     PlotData = json;
     if (PlotData.error) return alert(PlotData.error);
+    $('.loading_message').html('');
+    $('#chart_container').toggle();
     drawVisualization();
 });
 

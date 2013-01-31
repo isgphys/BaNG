@@ -37,6 +37,10 @@
         <%- END %>
         <div id="content">
             <h2><%title%></h2>
+            <div class="loading_message">
+                <img src="images/spinner.gif" width=25 alt="Loading animation">
+                Loading data...
+            </div>
             <div id="chart_container">
                 <div id="chart_y_axis"></div>
                 <div id="chart"></div>
@@ -71,6 +75,7 @@
             </div>
             <script>
                 $(document).ready(function(){
+                    $('#chart_container').toggle();
                     $("#select-share").chainedTo("#select-host");
                 });
             </script>
