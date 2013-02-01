@@ -78,7 +78,7 @@
       <% FOREACH defaultconf IN defaultsconfig.keys.sort %>
         <tr>
            <td>
-              <% defconf %>
+              <% defaultconf %>
             </td>
             <td>
               <% defaultsconfig.$defaultconf %>
