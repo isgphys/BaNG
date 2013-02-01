@@ -12,6 +12,7 @@
             $(document).ready(function(){
                 $('#configslist').tablesorter();
                 $('#config').tablesorter();
+                $('#config_default').tablesorter();
 
                 $("#configslist div.conf_details").hide();
 

@@ -100,15 +100,15 @@ body {
 }
 
 #content h1 {
-    font-size: 22px;
+    font-size: 18px;
 }
 
 #content h2 {
-    font-size: 20px;
+    font-size: 16px;
 }
 
 #content h3 {
-    font-size: 18px;
+    font-size: 14px;
 }
 
 #content ul li {
@@ -202,6 +202,31 @@ body {
 }
 
 #config tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#config_default {
+    width: 700px;
+}
+
+#config_default th {
+    text-align: left;
+    padding-left: 5px;
+}
+
+#config_default td {
+    padding-left: 5px;
+}
+
+#config_default tr {
+    height: 24px;
+}
+
+#config_default tr:nth-child(odd) {
+    background-color: lightblue;
+}
+
+#config_default tr:nth-child(even) {
     background-color: #eee;
 }
 

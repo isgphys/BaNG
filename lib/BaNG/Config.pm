@@ -18,6 +18,7 @@ our @EXPORT = qw(
     $config_global
     $servername
     get_global_config
+    get_default_config
     find_hosts
     find_available_hosts
     find_enabled_hosts
@@ -26,6 +27,7 @@ our @EXPORT = qw(
 );
 
 our %globalconfig;  # App-Settings
+our %defaultconfig;
 our %hosts;
 our $servername       = hostname;
 our $prefix           = getcwd();
@@ -40,8 +42,12 @@ sub get_global_config {
     my $global_settings  = LoadFile($config_global);
 
     $globalconfig{log_path}            = "$prefix/$global_settings->{LogFolder}";
-    $globalconfig{global_log_date}     =  strftime "$global_settings->{GlobalLogDate}", localtime;
-    $globalconfig{global_log_file}     = "$globalconfig{log_path}/$globalconfig{global_log_date}.log";
+
+    #$globalconfig{global_log_date}     =  strftime "$global_settings->{GlobalLogDate}", localtime;
+    my $log_date     =  strftime "$global_settings->{GlobalLogDate}", localtime;
+
+    $globalconfig{global_log_date}     = "$global_settings->{GlobalLogDate}";
+    $globalconfig{global_log_file}     = "$globalconfig{log_path}/$log_date.log";
 
     $globalconfig{path_available}      = "$config_path/$global_settings->{AvailableFolder}";
     $globalconfig{path_enabled}        = "$config_path/$global_settings->{EnabledFolder}";
@@ -52,6 +58,14 @@ sub get_global_config {
 
     $globalconfig{config_default}      = "$config_path/$global_settings->{DefaultConfig}";
     $globalconfig{config_default_nis}  = "$config_path/$global_settings->{DefaultNisConfig}";
+}
+
+sub get_default_config {
+
+    sanityfilecheck($config_global);
+
+    my $defaultconfig  = LoadFile($globalconfig{config_default});
+    return $defaultconfig;
 }
 
 sub sanityfilecheck {

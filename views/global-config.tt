@@ -65,3 +65,27 @@
       <% END %>
     </tbody>
 </table>
+
+<h3>Default Configfile:<% globalconfig.config_default %></h3>
+<table id="config_default" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+      <% FOREACH defaultconf IN defaultsconfig.keys.sort %>
+        <tr>
+           <td>
+              <% defconf %>
+            </td>
+            <td>
+              <% defaultsconfig.$defaultconf %>
+            </td>
+            </td>
+        </tr>
+      <% END %>
+    </tbody>
+</table>
+
