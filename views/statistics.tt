@@ -38,7 +38,7 @@
         <div id="content">
             <h2><%title%></h2>
             <div class="loading_message">
-                <img src="images/spinner.gif" width=25 alt="Loading animation">
+                <img src="/images/spinner.gif" width=25 alt="Loading animation">
                 Loading data...
             </div>
             <div id="chart_container">
