@@ -1,0 +1,13 @@
+
+#hostinfo {
+    width: 300px;
+    margin-right: 20px;
+}
+
+#hostinfo th {
+       text-align: left;
+}
+
+#hostinfo tr.active {
+    background-color: lightgreen;
+}

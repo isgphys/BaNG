@@ -1,0 +1,93 @@
+body {
+    padding: 0px;
+    margin: 0px;
+    font-family: verdana, arial, helvetica, sans-serif;
+}
+
+.center {
+    text-align : center;
+    padding-right : 0px;
+}
+
+#header {
+    background-image:url('/images/header.png');
+    background-color:#254370;
+    height: 65px;
+    width: 100%;
+}
+
+#ethz_logo {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+}
+
+#ethz_logo_background {
+    height: 100%;
+    width: 250px;
+    background-image:url('/images/header_gradient.png');
+}
+
+#site_title {
+    font-family: arial, helvetica, sans-serif;
+    position: absolute;
+    top: 20px;
+    left: 220px;
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+    color: white;
+    text-shadow: 0 0 2px black;
+}
+
+#error {
+    background-color: #ffa6a6;
+    border: 1px #f00 solid;
+    color: #f00;
+    font-weight: bold;
+    padding: 12px;
+    margin-top: 6px;
+}
+
+#infonav {
+    margin: 0px;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    background-color: #7997C9;
+    height: 22px;
+}
+
+#navigation {
+    margin: 0px;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    background-color: #C1CDE0;
+    height: 26px;
+    padding: 0 10 0 15px;
+}
+
+#navigation a.active {
+    background-color: #fff;
+    color: #000; 
+}
+
+#navigation a {
+    color: #000; 
+    text-decoration: none;
+    margin: 0px;
+    margin-right: 12px;
+    line-height: 26px;
+    font-size: 12px;
+    padding: 5px 10px 7px;
+}
+
+#loader {
+    position: absolute;
+    top: 400px;
+    width: 100%;
+    text-align: center;
+    display: none;
+}

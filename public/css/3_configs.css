@@ -1,0 +1,99 @@
+#config {
+    width: 700px;
+}
+
+#config th {
+    text-align: left;
+    padding-left: 5px;
+}
+
+#config td {
+    padding-left: 5px;
+}
+
+#config tr {
+    height: 24px;
+}
+
+#config tr:nth-child(odd) {
+    background-color: lightblue;
+}
+
+#config tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#config_default {
+    width: 700px;
+}
+
+#config_default th {
+    text-align: left;
+    padding-left: 5px;
+}
+
+#config_default td {
+    padding-left: 5px;
+}
+
+#config_default tr {
+    height: 24px;
+}
+
+#config_default tr:nth-child(odd) {
+    background-color: lightblue;
+}
+
+#config_default tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#configslist {
+    width: 700px;
+}
+
+#configslist th {
+    text-align: left;
+}
+
+#configslist td {
+    height: 24px;
+    vertical-align: top;
+    padding-top: 5px;
+}
+
+#configslist td.sw_logo {
+    height: 24px;
+    width: 20px;
+    vertical-align: top;
+}
+
+#configslist div.hosts_details {
+    width: 100px;
+}
+
+#configslist tr:nth-child(odd) {
+    background-color: #eee;
+
+}
+#configslist tr.active {
+    background-color: lightgreen;
+}
+
+#configslist .expander {
+    width: 400px;
+    cursor: pointer
+}
+
+#config_details table {
+    width: 380px;
+}
+
+#config_details table tr:nth-child(odd) {
+    background-color: lightblue;
+}
+
+#config_details tr:nth-child(even) {
+    background-color: #eee;
+}
+

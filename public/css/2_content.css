@@ -1,0 +1,48 @@
+
+#content {
+    margin: 12px;
+}
+
+#content h1 {}
+
+#content p.abstract {
+    font-size: 18px;
+    font-style: italic;
+}
+
+#content a {
+    color: #6081bb;
+}
+
+#content h1 {
+    font-size: 18px;
+}
+
+#content h2 {
+    font-size: 16px;
+}
+
+#content h3 {
+    font-size: 14px;
+}
+
+#content ul li {
+    margin: 6px 0;
+}
+
+#content table th {
+    background-color: #eee;
+}
+
+#content table tr.even {
+    background-color: #eee;
+}
+
+#content div.centered {
+    margin: 0px auto;
+}
+
+#content img {
+    border: none;
+}
+
