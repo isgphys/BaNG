@@ -15,7 +15,8 @@ our @EXPORT = qw(
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles Runtime );
-my $lastXdays_default = 150;
+my $lastXdays_default = 150;    # retrieve info of last 150 days from database
+my $BackupStartHour   = 20;     # backups started after 20:00 belong to next day
 
 sub statistics_decode_path {
     my ($path) = @_;
@@ -107,9 +108,8 @@ sub bangstat_db_query_statistics {
         my $Runtime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
 
         push( @{$BackupsByPath{$BkpFromPath}}, {
+            time_coord       => str2time($time_start),
             Runtime          => $Runtime,
-            time_start       => $time_start,
-            time_stop        => $time_stop,
             BkpFromPath      => $BkpFromPath,
             BkpToPath        => $dbrow->{'BkpToPath'},
             BkpFromHost      => $dbrow->{'BkpFromHost'},
@@ -154,13 +154,21 @@ sub bangstat_db_query_statistics_cumulated {
         # compute runtime of backup in minutes with 2 digits
         my $Runtime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
 
+        # backups started in the evening belong to next day
+        # use epoch as hash key for fast date incrementation
+        my $epoch = str2time("$date 00:00:00");
+        my ($ss,$mm,$hh,$DD,$MM,$YY,$zone) = strptime($dbrow->{'Start'});
+        if ($hh >= $BackupStartHour) {
+            $epoch += 24*3600;
+        }
+
         # store cumulated statistics for each day
-        $CumulateByDate{$date}{time_start}       = "$date 00:00:00";
-        $CumulateByDate{$date}{Runtime}          += $Runtime;
-        $CumulateByDate{$date}{TotFileSize}      += $dbrow->{'TotFileSize'},
-        $CumulateByDate{$date}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'},
-        $CumulateByDate{$date}{NumOfFiles}       += $dbrow->{'NumOfFiles'},
-        $CumulateByDate{$date}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'},
+        $CumulateByDate{$epoch}{time_coord}        = $epoch;
+        $CumulateByDate{$epoch}{Runtime}          += $Runtime;
+        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'},
+        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'},
+        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'},
+        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'},
     }
     # disconnect database
     $sth->finish();
@@ -169,7 +177,7 @@ sub bangstat_db_query_statistics_cumulated {
     my %BackupsByDay;
     foreach my $date (sort keys %CumulateByDate) {
         push( @{$BackupsByDay{'Cumulated'}}, {
-            time_start       => $CumulateByDate{$date}{time_start},
+            time_coord       => $CumulateByDate{$date}{time_coord},
             Runtime          => $CumulateByDate{$date}{Runtime},
             TotFileSize      => $CumulateByDate{$date}{TotFileSize},
             TotFileSizeTrans => $CumulateByDate{$date}{TotFileSizeTrans},
@@ -193,7 +201,7 @@ sub rickshaw_json {
             $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
         }
         foreach my $bkp (@{$datahash{$bkppath}}) {
-            my $t = str2time($bkp->{'time_start'}); # monotonically increasing coordinate to have single-valued function
+            my $t = $bkp->{'time_coord'}; # monotonically increasing coordinate to have single-valued function
 
             foreach my $field (@fields) {
                 my $normalized = 0.5;
