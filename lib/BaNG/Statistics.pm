@@ -173,6 +173,9 @@ sub bangstat_db_query_statistics_cumulated {
     # disconnect database
     $sth->finish();
 
+    # remove first day with incomplete information
+    delete $CumulateByDate{(sort keys %CumulateByDate)[0]};
+
     # reshape data structure similar to BackupsByPath
     my %BackupsByDay;
     foreach my $date (sort keys %CumulateByDate) {
