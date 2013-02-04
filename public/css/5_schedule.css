@@ -1,0 +1,16 @@
+#schedule {
+  width: 800px;
+}
+
+#schedule th {
+  text-align: center;
+  padding-left: 5px;
+}
+
+#schedule tr {
+    height: 24px;
+}
+
+#schedule tr:nth-child(even) {
+   background-color: #eee;
+}

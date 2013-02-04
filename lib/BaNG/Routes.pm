@@ -35,10 +35,34 @@ get '/config/all' => sub {
     };
 };
 
+get '/schedule' => sub {
+
+    template 'schedule-overview', {
+        section   => 'schedule',
+    };
+};
+
 get '/host' => sub {
 
     template 'host-search', {
         section   => 'host',
+    };
+};
+
+get '/host/add' => sub {
+
+    template 'host-edit', {
+        section   => 'host_edit',
+        title     => 'Create new Hostconfig',
+        add_entry_url => uri_for('/host/add'),
+    };
+};
+post '/host/add' => sub {
+
+    template 'host-edit', {
+        section   => 'host_edit',
+        title     => 'Well done!',
+        add_entry_url => uri_for('/host/add'),
     };
 };
 

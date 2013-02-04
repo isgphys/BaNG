@@ -39,6 +39,7 @@
         </div>
         <div id="navigation">
             <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
+            <a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule Overview</a>
             <a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host configs</a>
             <a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a>
             <a href="/config/global" <% IF section == 'global-config' %>class="active"<% END %>>Global Settings</a>
