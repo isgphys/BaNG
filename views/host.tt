@@ -20,4 +20,38 @@
                </tr>
             <%END%>
         </table>
+<h3>/etc/cron.d/bang (Demo)</h3>
+  <table id="schedule">
+    <thead>
+        <tr>
+            <th>Min</th>
+            <th>Hour</th>
+            <th>Day of Month</th>
+            <th>Month</th>
+            <th>Day of Week</th>
+            <th>User</th>
+            <th>Exec-Command</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td class="center">00</td>
+          <td class="center">20</td>
+          <td class="center">*</td>
+          <td class="center">*</td>
+          <td class="center">*</td>
+          <td class="center">root</td>
+          <td>/opt/bang-btrfs/bin/bang -g data -s phd-home_winprofile >/dev/null 2>&1</td>
+        </tr>
+        <tr>
+          <td class="center">45</td>
+          <td class="center">9</td>
+          <td class="center">*</td>
+          <td class="center">*</td>
+          <td class="center">*</td>
+          <td class="center">root</td>
+          <td>/opt/bang-btrfs/bin/bang-wipe -g data -s phd-home_winprofile >/dev/null 2>&1</td>
+        </tr>
+    </tbody>
+  </table>
     </div>
