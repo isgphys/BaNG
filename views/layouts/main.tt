@@ -37,9 +37,9 @@
         </div>
         <div id="infonav">
             <% IF not session.logged_in %>
-                <a href="/login">log in</a>
+                <a href="/login"><img title="Anmelden" src="/images/login.png" alt="Anmelden" /></a>
             <% ELSE %>
-                Hallo <% session.user %> -- <a href="/logout">log out</a>
+                <a href="/logout"><img title="Abmelden" src="/images/logout.png" alt="Abmelden" /></a>
             <% END %>
         </div>
         <div id="navigation">

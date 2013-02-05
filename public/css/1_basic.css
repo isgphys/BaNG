@@ -41,7 +41,7 @@ body {
     text-shadow: 0 0 2px black;
 }
 
-#error {
+#flash {
     background-color: #ffa6a6;
     border: 1px #f00 solid;
     color: #f00;
@@ -51,37 +51,39 @@ body {
 }
 
 #infonav {
-    margin: 0px;
+    text-decoration: none;
+    text-align: right;
     width: 100%;
     padding: 0px;
-    margin: 0px;
     background-color: #7997C9;
-    height: 22px;
+    height: 26px;
+}
+
+#infonav img {
+    padding: 5px 10px 7px 10px;
 }
 
 #navigation {
-    margin: 0px;
     width: 100%;
     padding: 0px;
     margin: 0px;
     background-color: #C1CDE0;
     height: 26px;
-    padding: 0 10 0 15px;
+    padding: 0px 0px 0px 0px;
 }
 
 #navigation a.active {
     background-color: #fff;
-    color: #000; 
+    color: #000;
 }
 
 #navigation a {
-    color: #000; 
+    color: #000;
     text-decoration: none;
     margin: 0px;
-    margin-right: 12px;
     line-height: 26px;
     font-size: 12px;
-    padding: 5px 10px 7px;
+    padding: 5px 10px 7px 10px;
 }
 
 #loader {

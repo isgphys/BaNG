@@ -11,7 +11,8 @@ prefix undef;
 
 get '/' => sub {
      template 'index' => {
-              section => 'dashboard'
+              'section' => 'dashboard',
+              'msg' => get_flash(),
      };
 };
 
@@ -36,7 +37,9 @@ post '/login' => sub {
         session user => params->{user};
         session 'logged_in' => true;
         debug("Logged in successfully: " . params->{user});
-        redirect session 'requested_path' || '/';
+        set_flash('You are logged in.');
+        #redirect session 'requested_path' || '/';
+        redirect '/';
     } else {
         debug("Login failed - password incorrect for " . params->{user});
         redirect '/login?failed=1';
@@ -45,5 +48,6 @@ post '/login' => sub {
 
 get '/logout' => sub {
     session->destroy;
+    set_flash('You are logged out.');
     return redirect '/';
 };
