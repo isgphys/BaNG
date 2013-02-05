@@ -15,3 +15,5 @@ default_mime_type:  'text/plain'
 logger:             'file'
 logger_format:      '%t [%L] %m'
 auto_reload:        '1'
+session: YAML
+session_dir: /tmp/dancer-sessions
