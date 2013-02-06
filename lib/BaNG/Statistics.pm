@@ -16,7 +16,7 @@ our @EXPORT = qw(
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles Runtime );
 my $lastXdays_default = 150;    # retrieve info of last 150 days from database
-my $BackupStartHour   = 20;     # backups started after 20:00 belong to next day
+my $BackupStartHour   = 18;     # backups started after 18:00 belong to next day
 
 sub statistics_decode_path {
     my ($path) = @_;
