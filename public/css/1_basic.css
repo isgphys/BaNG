@@ -50,18 +50,36 @@ body {
     margin-top: 6px;
 }
 
-#infonav {
+#topline {
     text-decoration: none;
     text-align: right;
-    width: 100%;
-    padding: 0px;
     background-color: #7997C9;
-    height: 26px;
+    height: 20px;
+    padding: 2px 10px 2px 10px;
 }
 
-#infonav img {
-    padding: 5px 10px 7px 10px;
+#topline a.button-login {
+    background: url("/images/login.png") no-repeat  scroll transparent;
+    color: #FFFFFF;
+    padding: 2px 5px 5px 10px;
 }
+
+#topline a.button-logout {
+    background: url("/images/logout.png") no-repeat scroll transparent;
+    color: #FFFFFF;
+    padding: 2px 5px 2px 10px;
+}
+
+#topline span.username {
+     padding-right: 5px;
+}
+
+.topright {
+    float: right;
+    padding-top: 2px;
+    width: 150px;
+}
+
 
 #navigation {
     width: 100%;

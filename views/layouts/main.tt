@@ -10,6 +10,8 @@
         <script src="/javascripts/jquery.tablesorter.js"></script>
         <script>
             $(document).ready(function(){
+                $("#flash").delay(2500).hide("slow");
+
                 $('#configslist').tablesorter();
                 $('#config').tablesorter();
                 $('#config_default').tablesorter();
@@ -35,12 +37,15 @@
             <div id="ethz_logo_background"></div>
             <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
         </div>
-        <div id="infonav">
-            <% IF not session.logged_in %>
-                <a href="/login"><img title="Anmelden" src="/images/login.png" alt="Anmelden" /></a>
-            <% ELSE %>
-                <a href="/logout"><img title="Abmelden" src="/images/logout.png" alt="Abmelden" /></a>
-            <% END %>
+        <div id="topline">
+            <div class="topright">
+                <%- IF not session.logged_in %>
+                    <a class="button-login" href="/login"></a>
+                <%- ELSE %>
+                <span class="username">Hallo <% session.user %> --</span>
+                    <a class="button-logout" href="/logout"></a>
+                <%- END %>
+            </div>
         </div>
         <div id="navigation">
             <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
