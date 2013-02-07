@@ -53,7 +53,7 @@ sub statistics_hosts_shares {
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT
         DISTINCT BkpFromHost, BkpFromPath
-        FROM statistic
+        FROM statistic_all
         WHERE Start > date_sub(now(), interval 10000 day)
         AND BkpToHost LIKE 'phd-bkp-gw\%'
         AND ( BkpFromPath LIKE '\%export\%' OR BkpFromPath LIKE '%imap%' )
@@ -85,7 +85,7 @@ sub bangstat_db_query_statistics {
     # query database
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
-        FROM statistic
+        FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays day)
         AND BkpFromHost = '$host'
         AND BkpFromPath LIKE '\%$share'
@@ -132,9 +132,10 @@ sub bangstat_db_query_statistics_cumulated {
     # query database
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
-        FROM statistic_job_sum
+        FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays day)
         AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND isThread is NULL
         ORDER BY Start;
     ");
     $sth->execute();
