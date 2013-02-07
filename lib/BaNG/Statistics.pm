@@ -54,7 +54,7 @@ sub statistics_hosts_shares {
         SELECT
         DISTINCT BkpFromHost, BkpFromPath
         FROM statistic_all
-        WHERE Start > date_sub(now(), interval 10000 day)
+        WHERE Start > date_sub(now(), interval $lastXdays_default day)
         AND BkpToHost LIKE 'phd-bkp-gw\%'
         AND ( BkpFromPath LIKE '\%export\%' OR BkpFromPath LIKE '%imap%' )
         ORDER BY BkpFromHost;
