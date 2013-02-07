@@ -14,7 +14,7 @@ our @EXPORT = qw(
     statistics_hosts_shares
 );
 
-my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles Runtime );
+my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
 my $lastXdays_default = 150;    # retrieve info of last 150 days from database
 my $BackupStartHour   = 18;     # backups started after 18:00 belong to next day
 
@@ -104,12 +104,13 @@ sub bangstat_db_query_statistics {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/://g; # remove colon separators
 
-        # compute runtime of backup in minutes with 2 digits
-        my $Runtime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+        # compute wall-clock runtime of backup in minutes with 2 digits
+        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
 
         push( @{$BackupsByPath{$BkpFromPath}}, {
             time_coord       => str2time($time_start),
-            Runtime          => $Runtime,
+            RealRuntime      => $RealRuntime,
+            TotRuntime       => $dbrow->{'Runtime'}/60.,
             BkpFromPath      => $BkpFromPath,
             BkpToPath        => $dbrow->{'BkpToPath'},
             BkpFromHost      => $dbrow->{'BkpFromHost'},
@@ -160,9 +161,13 @@ sub bangstat_db_query_statistics_cumulated {
             $epoch += 24*3600;
         }
 
+        # compute wall-clock runtime of backup in minutes with 2 digits
+        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+
         # store cumulated statistics for each day
         $CumulateByDate{$epoch}{time_coord}        = $epoch;
-        $CumulateByDate{$epoch}{Runtime}          += $dbrow->{'Runtime'}/60.;
+        $CumulateByDate{$epoch}{RealRuntime}      += $RealRuntime;
+        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'}/60.;
         $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
         $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
         $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
@@ -179,7 +184,8 @@ sub bangstat_db_query_statistics_cumulated {
     foreach my $date (sort keys %CumulateByDate) {
         push( @{$BackupsByDay{'Cumulated'}}, {
             time_coord       => $CumulateByDate{$date}{time_coord},
-            Runtime          => $CumulateByDate{$date}{Runtime},
+            RealRuntime      => $CumulateByDate{$date}{RealRuntime},
+            TotRuntime       => $CumulateByDate{$date}{TotRuntime},
             TotFileSize      => $CumulateByDate{$date}{TotFileSize},
             TotFileSizeTrans => $CumulateByDate{$date}{TotFileSizeTrans},
             NumOfFiles       => $CumulateByDate{$date}{NumOfFiles},
@@ -201,6 +207,12 @@ sub rickshaw_json {
             $max{$field}  = sprintf("%.2f", max( map{$_->{$field}} @{$datahash{$bkppath}} ));
             $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
         }
+        # use same normalization for both runtimes to ensure curves coincide
+        foreach my $field qw(RealRuntime TotRuntime) {
+            $max{$field}  = max( $max{RealRuntime}, $max{TotRuntime} );
+            $min{$field}  = min( $min{RealRuntime}, $min{TotRuntime} );
+        }
+
         foreach my $bkp (@{$datahash{$bkppath}}) {
             my $t = $bkp->{'time_coord'}; # monotonically increasing coordinate to have single-valued function
 
@@ -211,7 +223,7 @@ sub rickshaw_json {
                 }
 
                 my $humanreadable;
-                if( $field eq 'Runtime' ) {
+                if( $field =~ /Runtime/ ) {
                     $humanreadable = "\"" . time2human($bkp->{$field}) . "\"";
                 } elsif( $field =~ /Size/ ) {
                     $humanreadable = "\"" . num2human($bkp->{$field}, 1024.) . "\"";
@@ -227,7 +239,8 @@ sub rickshaw_json {
     }
 
     my %color = (
-        "Runtime"          => "#00CC00",
+        "RealRuntime"      => "#00CC00",
+        "TotRuntime"       => "#009900",
         "NumOfFiles"       => "#0066B3",
         "NumOfFilesTrans"  => "#330099",
         "TotFileSize"      => "#FFCC00",
