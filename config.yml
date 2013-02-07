@@ -17,3 +17,10 @@ logger_format:      '%t [%L] %m'
 auto_reload:        '1'
 session: YAML
 session_dir: /tmp/dancer-sessions
+auth_ldap:
+   server: 'ldaps://ldap.phys.ethz.ch'
+   user_base_dn: 'ou1=People,ou=Physik Departement,o=ethz,c=ch'
+   group_base_dn: 'ou1=Group,ou=Physik Departement,o=ethz,c=ch'
+   username_attribute: 'uid'
+   groupname_attribute: 'memberUid'
+   groups_allowed: 'isg'
