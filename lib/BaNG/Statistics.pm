@@ -132,7 +132,7 @@ sub bangstat_db_query_statistics_cumulated {
     # query database
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
-        FROM statistic
+        FROM statistic_job_sum
         WHERE Start > date_sub(now(), interval $lastXdays day)
         AND BkpToHost LIKE 'phd-bkp-gw\%'
         ORDER BY Start;
@@ -151,9 +151,6 @@ sub bangstat_db_query_statistics_cumulated {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/://g; # remove colon separators
 
-        # compute runtime of backup in minutes with 2 digits
-        my $Runtime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
-
         # backups started in the evening belong to next day
         # use epoch as hash key for fast date incrementation
         my $epoch = str2time("$date 00:00:00");
@@ -164,11 +161,11 @@ sub bangstat_db_query_statistics_cumulated {
 
         # store cumulated statistics for each day
         $CumulateByDate{$epoch}{time_coord}        = $epoch;
-        $CumulateByDate{$epoch}{Runtime}          += $Runtime;
-        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'},
-        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'},
-        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'},
-        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'},
+        $CumulateByDate{$epoch}{Runtime}          += $dbrow->{'Runtime'}/60.;
+        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
+        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
+        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
+        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'};
     }
     # disconnect database
     $sth->finish();
