@@ -48,7 +48,7 @@ post '/login' => sub {
 
 get '/logout' => sub {
     session->destroy;
-    debug("Logged out successfully: " . params->{user});
+    debug("Logged out successfully");
     set_flash('You are logged out.');
     return redirect '/';
 };

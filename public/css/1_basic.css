@@ -82,8 +82,7 @@ body {
     width: 150px;
 }
 
-
-#navigation {
+nav {
     width: 100%;
     padding: 0px;
     margin: 0px;
@@ -92,24 +91,76 @@ body {
     padding: 0px 0px 0px 0px;
 }
 
-#navigation a.active {
-    background-color: #fff;
-    color: #000;
-}
-
-#navigation a {
-    color: #000;
-    text-decoration: none;
-    margin: 0px;
-    line-height: 26px;
-    font-size: 12px;
-    padding: 5px 10px 7px 10px;
-}
-
-#loader {
-    position: absolute;
-    top: 400px;
-    width: 100%;
-    text-align: center;
+nav ul ul {
     display: none;
+}
+
+    nav ul li:hover > ul {
+        display: block;
+        font-color: #000;
+    }
+
+
+nav ul {
+    list-style: none;
+    position: relative;
+    display: inline-table;
+    margin: 0 ;
+    padding: 0;
+}
+nav ul:after {
+    content: ""; clear: both; display: block;
+}
+
+nav ul li {
+    float: left;
+}
+
+nav ul li a.active {
+   background-color: #fff;
+   color: #000;
+}
+
+nav ul li:hover {
+    background: lightgrey;
+}
+    nav ul li:hover a {
+        color: black;
+    }
+
+nav ul li a {
+    display: block;
+    padding: 0px 10px 0px 10px;
+    color: black;
+    text-decoration: none;
+    font-size: 12px;
+    line-height: 26px;
+}
+
+
+nav ul ul {
+    background: #C1CDE0;
+    padding: 0;
+    position: absolute;
+    top: 100%;
+}
+
+nav ul ul li {
+    float: none;
+    border-top: 2px solid #fff;
+    position: relative;
+}
+
+nav ul ul li a {
+    padding: 2px 10px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+nav ul ul li a:hover {
+    background: lightgray;
+}
+
+nav ul ul ul {
+    position: absolute; left: 100%; top:0;
 }

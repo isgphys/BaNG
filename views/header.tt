@@ -15,14 +15,29 @@
         <%- END %>
     </div>
 </div>
-<div id="navigation">
-    <a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a>
-    <a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule Overview</a>
-    <a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host configs</a>
-    <a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a>
-    <a href="/config/global" <% IF section == 'global-config' %>class="active"<% END %>>Global Settings</a>
-    <a href="/statistics" <% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
-</div>
+
+<nav>
+    <ul>
+        <li><a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a></li>
+        <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule Overview</a></li>
+        <li><a href="#" <% IF section == 'global-config' %>class="active"<% END %>>Configs</a>
+            <ul>
+                <li><a href="/config/global">Global Settings</a></li>
+                <li><a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host Configs</a></li>
+            </ul>
+        </li>
+        <li><a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a></li>
+        <li><a href="#" <% IF section == 'statistics' %>class="active"<% END %>>Graphics</a>
+            <ul>
+                <li><a href="/statistics">Cumulated Backup Statistics</a></li>
+                <li><a href="http://hobbit.phys.ethz.ch/bangstats" target="_blank">Backup Schedule</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+
+
 <% IF msg %>
 <div id="flash">
     <p><% msg %></p>
