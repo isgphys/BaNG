@@ -13,6 +13,7 @@ our @EXPORT = qw(
     statistics_decode_path
     statistics_hosts_shares
     statistics_groupshare_variations
+    statistics_schedule
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
@@ -233,6 +234,52 @@ sub statistics_groupshare_variations {
     }
 
     return %largest_variations;
+}
+
+sub statistics_schedule {
+
+    my $lastXdays = 1;  # last night only
+
+    bangstat_db_connect();
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT *
+        FROM statistic_all
+        WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND isThread is Null
+        ORDER BY Start;
+    ");
+    $sth->execute();
+
+    my %BackupsByTime;
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
+        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+        my $hostname    = $dbrow->{'BkpFromHost'};
+        my $systemBkp   = 0;
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/://g; # remove colon separators
+
+        # flag system backups
+        $systemBkp = 1 if ($BkpFromPath !~ m%/(export|var/imap)%);
+
+        push( @{$BackupsByTime{$time_start}}, {
+            time_start       => $time_start,
+            time_stop        => $time_stop,
+            BkpFromPath      => $BkpFromPath,
+            BkpToPath        => $dbrow->{'BkpToPath'},
+            BkpFromHost      => $dbrow->{'BkpFromHost'},
+            BkpToHost        => $dbrow->{'BkpToHost'},
+            TotFileSize      => num2human($dbrow->{'TotFileSize'}, 1024.),
+            TotFileSizeTrans => num2human($dbrow->{'TotFileSizeTrans'}, 1024.),
+            NumOfFiles       => num2human($dbrow->{'NumOfFiles'}),
+            NumOfFilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
+            SystemBkp        => $systemBkp,
+        });
+    }
+    $sth->finish();
+
+    return %BackupsByTime;
 }
 
 sub rickshaw_json {

@@ -50,3 +50,9 @@ get '/variations' => sub {
         largest_variations => \%largest_variations,
     };
 };
+
+get '/schedule/json' => sub {
+    my %schedule = statistics_schedule();
+    my %json_options = ( canonical => 1 );
+    return to_json(\%schedule, \%json_options);
+};
