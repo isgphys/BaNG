@@ -1,0 +1,12 @@
+<h2>Groupshares with largest variations</h2>
+  <%- FOREACH field IN largest_variations.keys.sort.reverse %>
+    <h3><% field %></h3>
+    <table>
+      <%- FOREACH item IN largest_variations.$field %>
+        <tr>
+            <td><% item.share %></td>
+            <td><% item.delta %></td>
+        </tr>
+      <%- END %>
+    </table>
+  <%- END %>

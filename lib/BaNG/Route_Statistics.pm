@@ -41,3 +41,12 @@ get '/:host/:share' => sub {
     },{ layout    => 0
     };
 };
+
+get '/variations' => sub {
+    my %largest_variations = statistics_groupshare_variations();
+
+    template 'largest_variations', {
+        section => 'statistics',
+        largest_variations => \%largest_variations,
+    };
+};

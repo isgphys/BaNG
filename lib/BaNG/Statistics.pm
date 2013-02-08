@@ -12,10 +12,13 @@ our @EXPORT = qw(
     statistics_cumulated_json
     statistics_decode_path
     statistics_hosts_shares
+    statistics_groupshare_variations
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
 my $lastXdays_default = 150;    # retrieve info of last 150 days from database
+my $lastXdays_variations = 10;  # find largest variation of the last X days
+my $topX_variations = 5;        # return the top X shares with largest variations
 my $BackupStartHour   = 18;     # backups started after 18:00 belong to next day
 
 sub statistics_decode_path {
@@ -77,6 +80,61 @@ sub statistics_hosts_shares {
     }
 
     return %hosts_shares;
+}
+
+sub statistics_groupshare_variations {
+
+    bangstat_db_connect();
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT BkpFromPath, TotFileSize, NumOfFiles
+        FROM statistic_all
+        WHERE Start > date_sub(now(), interval $lastXdays_variations day)
+        AND BkpFromHost = 'phd-san-gw2'
+        AND BkpFromPath LIKE '\%export/groupdata/\%'
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        ORDER BY Start;
+    ");
+    $sth->execute();
+
+    my %datahash;
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/://g; # remove colon separators
+
+        push( @{$datahash{$BkpFromPath}}, {
+            BkpFromPath      => $BkpFromPath,
+            TotFileSize      => $dbrow->{'TotFileSize'},
+            NumOfFiles       => $dbrow->{'NumOfFiles'},
+        });
+    }
+    $sth->finish();
+
+    my %largest_variations;
+    foreach my $field qw(TotFileSize NumOfFiles) {
+        # compute maximal variation for each share
+        my %delta;
+        foreach my $bkppath (keys %datahash) {
+            my $max = sprintf("%.2f", max( map{$_->{$field}} @{$datahash{$bkppath}} ));
+            my $min = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
+            $delta{$bkppath} = $max - $min;
+        }
+
+        # extract groupshares with largest variations (in absolute values)
+        my $count = 1;
+        my $base  = 1000.;
+        $base     = 1024. if $field =~ /Size/;
+        foreach my $bkppath (reverse sort {abs($delta{$a})<=>abs($delta{$b})} keys %delta) {
+            (my $sharename = $bkppath) =~ s|/export/||;
+            push( @{$largest_variations{$field}}, {
+                share => $sharename,
+                delta => num2human($delta{$bkppath}, $base),
+            });
+            last if $count >= $topX_variations;
+            $count++;
+        }
+    }
+
+    return %largest_variations;
 }
 
 sub bangstat_db_query_statistics {
