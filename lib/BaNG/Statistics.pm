@@ -35,9 +35,47 @@ sub statistics_json {
     my $lastXdays = $days || $lastXdays_default;
 
     bangstat_db_connect();
-    my %BackupsByShare = bangstat_db_query_statistics($host, $share, $lastXdays);
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT *
+        FROM statistic_all
+        WHERE Start > date_sub(now(), interval $lastXdays day)
+        AND BkpFromHost = '$host'
+        AND BkpFromPath LIKE '\%$share'
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        ORDER BY Start;
+    ");
+    $sth->execute();
 
-    return rickshaw_json(\%BackupsByShare);
+    # gather information into hash
+    my %BackupsByPath;
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
+        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
+        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+        my $hostname    = $dbrow->{'BkpFromHost'};
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/://g; # remove colon separators
+
+        # compute wall-clock runtime of backup in minutes with 2 digits
+        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+
+        push( @{$BackupsByPath{$BkpFromPath}}, {
+            time_coord       => str2time($time_start),
+            RealRuntime      => $RealRuntime,
+            TotRuntime       => $dbrow->{'Runtime'}/60.,
+            BkpFromPath      => $BkpFromPath,
+            BkpToPath        => $dbrow->{'BkpToPath'},
+            BkpFromHost      => $dbrow->{'BkpFromHost'},
+            BkpToHost        => $dbrow->{'BkpToHost'},
+            TotFileSize      => $dbrow->{'TotFileSize'},
+            TotFileSizeTrans => $dbrow->{'TotFileSizeTrans'},
+            NumOfFiles       => $dbrow->{'NumOfFiles'},
+            NumOfFilesTrans  => $dbrow->{'NumOfFilesTrans'},
+        });
+    }
+    $sth->finish();
+
+    return rickshaw_json(\%BackupsByPath);
 }
 
 sub statistics_cumulated_json {
@@ -45,7 +83,66 @@ sub statistics_cumulated_json {
     my $lastXdays = $days || $lastXdays_default;
 
     bangstat_db_connect();
-    my %BackupsByDay = bangstat_db_query_statistics_cumulated($lastXdays);
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT *
+        FROM statistic_all
+        WHERE Start > date_sub(now(), interval $lastXdays day)
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND isThread is NULL
+        ORDER BY Start;
+    ");
+    $sth->execute();
+
+    # gather information into hash
+    my %CumulateByDate = ();
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        my ($date, $time) = split(/\s+/,$dbrow->{'Start'});
+
+        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
+        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
+        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+        my $hostname    = $dbrow->{'BkpFromHost'};
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/://g; # remove colon separators
+
+        # backups started in the evening belong to next day
+        # use epoch as hash key for fast date incrementation
+        my $epoch = str2time("$date 00:00:00");
+        my ($ss,$mm,$hh,$DD,$MM,$YY,$zone) = strptime($dbrow->{'Start'});
+        if ($hh >= $BackupStartHour) {
+            $epoch += 24*3600;
+        }
+
+        # compute wall-clock runtime of backup in minutes with 2 digits
+        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+
+        # store cumulated statistics for each day
+        $CumulateByDate{$epoch}{time_coord}        = $epoch;
+        $CumulateByDate{$epoch}{RealRuntime}      += $RealRuntime;
+        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'}/60.;
+        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
+        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
+        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
+        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'};
+    }
+    $sth->finish();
+
+    # remove first day with incomplete information
+    delete $CumulateByDate{(sort keys %CumulateByDate)[0]};
+
+    # reshape data structure similar to BackupsByPath
+    my %BackupsByDay;
+    foreach my $date (sort keys %CumulateByDate) {
+        push( @{$BackupsByDay{'Cumulated'}}, {
+            time_coord       => $CumulateByDate{$date}{time_coord},
+            RealRuntime      => $CumulateByDate{$date}{RealRuntime},
+            TotRuntime       => $CumulateByDate{$date}{TotRuntime},
+            TotFileSize      => $CumulateByDate{$date}{TotFileSize},
+            TotFileSizeTrans => $CumulateByDate{$date}{TotFileSizeTrans},
+            NumOfFiles       => $CumulateByDate{$date}{NumOfFiles},
+            NumOfFilesTrans  => $CumulateByDate{$date}{NumOfFilesTrans},
+        });
+    }
 
     return rickshaw_json(\%BackupsByDay);
 }
@@ -73,6 +170,7 @@ sub statistics_hosts_shares {
 
         push( @{$hosts_shares{$hostname}}, @shares );
     }
+    $sth->finish();
 
     # filter duplicate shares
     foreach my $host (sort keys %hosts_shares) {
@@ -135,123 +233,6 @@ sub statistics_groupshare_variations {
     }
 
     return %largest_variations;
-}
-
-sub bangstat_db_query_statistics {
-    my ($host, $share, $lastXdays) = @_;
-
-    # query database
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
-        SELECT *
-        FROM statistic_all
-        WHERE Start > date_sub(now(), interval $lastXdays day)
-        AND BkpFromHost = '$host'
-        AND BkpFromPath LIKE '\%$share'
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
-        ORDER BY Start;
-    ");
-    $sth->execute();
-
-    # gather information into hash
-    my %BackupsByPath;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
-        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
-        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
-        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
-        my $hostname    = $dbrow->{'BkpFromHost'};
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g; # remove colon separators
-
-        # compute wall-clock runtime of backup in minutes with 2 digits
-        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
-
-        push( @{$BackupsByPath{$BkpFromPath}}, {
-            time_coord       => str2time($time_start),
-            RealRuntime      => $RealRuntime,
-            TotRuntime       => $dbrow->{'Runtime'}/60.,
-            BkpFromPath      => $BkpFromPath,
-            BkpToPath        => $dbrow->{'BkpToPath'},
-            BkpFromHost      => $dbrow->{'BkpFromHost'},
-            BkpToHost        => $dbrow->{'BkpToHost'},
-            TotFileSize      => $dbrow->{'TotFileSize'},
-            TotFileSizeTrans => $dbrow->{'TotFileSizeTrans'},
-            NumOfFiles       => $dbrow->{'NumOfFiles'},
-            NumOfFilesTrans  => $dbrow->{'NumOfFilesTrans'},
-        });
-    }
-    # disconnect database
-    $sth->finish();
-
-    return %BackupsByPath;
-}
-
-sub bangstat_db_query_statistics_cumulated {
-    my ($lastXdays) = @_;
-
-    # query database
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
-        SELECT *
-        FROM statistic_all
-        WHERE Start > date_sub(now(), interval $lastXdays day)
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
-        AND isThread is NULL
-        ORDER BY Start;
-    ");
-    $sth->execute();
-
-    # gather information into hash
-    my %CumulateByDate = ();
-    while (my $dbrow=$sth->fetchrow_hashref()) {
-        my ($date, $time) = split(/\s+/,$dbrow->{'Start'});
-
-        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
-        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
-        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
-        my $hostname    = $dbrow->{'BkpFromHost'};
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g; # remove colon separators
-
-        # backups started in the evening belong to next day
-        # use epoch as hash key for fast date incrementation
-        my $epoch = str2time("$date 00:00:00");
-        my ($ss,$mm,$hh,$DD,$MM,$YY,$zone) = strptime($dbrow->{'Start'});
-        if ($hh >= $BackupStartHour) {
-            $epoch += 24*3600;
-        }
-
-        # compute wall-clock runtime of backup in minutes with 2 digits
-        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
-
-        # store cumulated statistics for each day
-        $CumulateByDate{$epoch}{time_coord}        = $epoch;
-        $CumulateByDate{$epoch}{RealRuntime}      += $RealRuntime;
-        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'}/60.;
-        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
-        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
-        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
-        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'};
-    }
-    # disconnect database
-    $sth->finish();
-
-    # remove first day with incomplete information
-    delete $CumulateByDate{(sort keys %CumulateByDate)[0]};
-
-    # reshape data structure similar to BackupsByPath
-    my %BackupsByDay;
-    foreach my $date (sort keys %CumulateByDate) {
-        push( @{$BackupsByDay{'Cumulated'}}, {
-            time_coord       => $CumulateByDate{$date}{time_coord},
-            RealRuntime      => $CumulateByDate{$date}{RealRuntime},
-            TotRuntime       => $CumulateByDate{$date}{TotRuntime},
-            TotFileSize      => $CumulateByDate{$date}{TotFileSize},
-            TotFileSizeTrans => $CumulateByDate{$date}{TotFileSizeTrans},
-            NumOfFiles       => $CumulateByDate{$date}{NumOfFiles},
-            NumOfFilesTrans  => $CumulateByDate{$date}{NumOfFilesTrans},
-        });
-    }
-
-    return %BackupsByDay;
 }
 
 sub rickshaw_json {
