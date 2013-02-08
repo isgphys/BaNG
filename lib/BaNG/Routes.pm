@@ -11,7 +11,7 @@ use Auth::LDAP;
 prefix undef;
 
 get '/' => sub {
-     template 'index' => {
+     template 'dashboard' => {
               'section' => 'dashboard',
               'msg' => get_flash(),
      };
