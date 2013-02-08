@@ -19,7 +19,12 @@
 <nav>
     <ul>
         <li><a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a></li>
-        <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule Overview</a></li>
+        <li><a href="#" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a>
+            <ul>
+                <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule Overview (cronjobs)</a>
+                <li><a href="http://hobbit.phys.ethz.ch/bangstats" target="_blank">Schedule Gantt Graph (external)</a></li>
+            </ul>
+        </li>
         <li><a href="#" <% IF section == 'global-config' %>class="active"<% END %>>Configs</a>
             <ul>
                 <li><a href="/config/global">Global Settings</a></li>
@@ -29,12 +34,12 @@
         <li><a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a></li>
         <li><a href="#" <% IF section == 'tools' %>class="active"<% END %>>Tools</a>
             <ul>
-                <li><a href="/statistics">Cumulated Backup Statistics</a></li>
+                <li><a href="/statistics">Backup Statistics</a></li>
                 <li><a href="#">External Tools</a>
                     <ul>
-                        <li><a href="http://hobbit.phys.ethz.ch/bangstats" target="_blank">Backup Schedule</a></li>
                         <li><a href="https://admin.phys.ethz.ch/lvm2FS/index.pl#phd-bkp-gw" target="_blank">VMchart - LVM and BTRFS Monitoring</a></li>
                         <li><a href="https://admin.phys.ethz.ch/cacti/graph_view.php?action=tree&tree_id=5&leaf_id=233" target="_blank">Cacti Monitoring</a></li>
+                        <li><a href="http://hobbit.phys.ethz.ch/mrtg/fileserver-day.html" target="_blank">Fileserver Storage Monitoring</a></li>
                     </ul>
                 </li>
             </ul>

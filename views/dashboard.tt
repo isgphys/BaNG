@@ -1,24 +1,26 @@
 <h2>Dashboard</h2>
 <div>Hier kommen Status-Meldungen hin...</div>
 <div>Hier kommt etwas Statistik hin...</div>
+
 <div><pre>
-root@phd-bkp-gw:~/ ># di -f MTbufv1 -dm -w 10 -I btrfs,xfs
-Mount                                 fs Type      Mebis       Used       Free      Avail %Used
-/export/backup/data/server            btrfs    4194304.0  1742457.3  2451846.7  2223493.8   42%
-/export/backup/data/workstation       btrfs    3867964.0   411197.6  3456766.4  2902453.5   11%
-/export/backup/group/astro/astdata    btrfs   41943040.0 30911489.0 11031551.0 11029123.0   74%
-/export/backup/group/astro/astro1     btrfs    8388608.0  6900414.0  1488194.0  1189743.0   82%
-/export/backup/group/astro/astrocscs  xfs     51378185.8 48924587.8  2453598.0  2453598.0   95%
-/export/backup/group/astro/astrodata  btrfs   49639667.2 40572365.0  9067302.2  8838485.0   82%
-/export/backup/group/astro/astrogroup btrfs    4194304.0   151750.4  4042553.6  3796077.4    4%
-/export/backup/group/dphys            btrfs   36700160.0 19235967.1 17464192.9 16169002.7   52%
-/export/backup/group/igp/ggl          btrfs   19922944.0 16368750.2  3554193.8  1732753.4   82%
-/export/backup/group/igp/gseg         btrfs   15728640.0   979000.4 14749639.6 14745869.6    6%
-/export/backup/group/igp/pf           btrfs   17825792.0  7702898.2 10122893.8 10112881.7   43%
-/export/backup/group/ipp              btrfs    4194304.0     6956.1  4187347.9  4185312.0    0%
-/export/backup/group/itp              btrfs    4194304.0  2386448.0  1807856.0  1573352.9   57%
-/export/backup/system                 btrfs    4194304.0   939741.0  3254563.0  3251033.5   22%
-/export/backup/user/home              btrfs    6291456.0  2708399.9  3583056.1  3349064.6   43%
-/export/backup/user/mail              btrfs    6291456.0  1380339.9  4911116.1  4714718.3   22%
+root@phd-bkp-gw:~/ > di -f MT1 -dm -w 10 -I btrfs,xfs
+
+Mount                                 fs Type  %Used
+/export/backup/data/server            btrfs      42%
+/export/backup/data/workstation       btrfs      11%
+/export/backup/group/astro/astdata    btrfs      74%
+/export/backup/group/astro/astro1     btrfs      82%
+/export/backup/group/astro/astrocscs  xfs        95%
+/export/backup/group/astro/astrodata  btrfs      82%
+/export/backup/group/astro/astrogroup btrfs       4%
+/export/backup/group/dphys            btrfs      52%
+/export/backup/group/igp/ggl          btrfs      82%
+/export/backup/group/igp/gseg         btrfs       6%
+/export/backup/group/igp/pf           btrfs      43%
+/export/backup/group/ipp              btrfs       0%
+/export/backup/group/itp              btrfs      57%
+/export/backup/system                 btrfs      22%
+/export/backup/user/home              btrfs      43%
+/export/backup/user/mail              btrfs      22%
 </pre>
 </div>
