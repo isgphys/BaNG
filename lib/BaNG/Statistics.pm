@@ -345,7 +345,7 @@ sub time2human {
     my ($minutes) = @_;
 
     if ($minutes < 60) {
-        return "$minutes min";
+        return sprintf("%d min", $minutes);
     } else {
         return sprintf("\%dh\%02dmin", floor($minutes/60), $minutes%60);
     }
