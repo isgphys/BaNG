@@ -8,7 +8,7 @@ get '/' => sub {
     my %hosts_shares = statistics_hosts_shares();
 
     template 'statistics', {
-        section   => 'tools',
+        section   => 'statistics',
         title     => 'Cumulated Backup Statistics',
         json_url  => "/statistics/json",
         hosts_shares => \%hosts_shares,
@@ -32,7 +32,7 @@ get '/:host/:share' => sub {
     my %hosts_shares = statistics_hosts_shares();
 
     template 'statistics', {
-        section   => 'tools',
+        section   => 'statistics',
         title     => "Statistics for $host:$share",
         host      => $host,
         share     => $share,

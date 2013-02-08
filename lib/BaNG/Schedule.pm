@@ -8,10 +8,4 @@ our @EXPORT = qw(
 );
 
 
-sub read_cron_file {
-
-    my $file
-
-}
-
 1;

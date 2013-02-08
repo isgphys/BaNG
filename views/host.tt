@@ -1,57 +1,68 @@
 <h2>Host Info</h2>
 <h3><% host %></h3>
     <div>
-        <table id="hostinfo">
-            <thead>
-                <th colspan=2>Jobs (<%hosts.size%>)</th>
-            </thead>
-            <tbody>
-              <% IF hosts.size %>
-                <% FOREACH hostname IN hosts.keys.sort %>
-                  <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-                    <td><% hosts.$hostname.group %></td>
-                    <td><% hosts.$hostname.configfile %></td>
+      <table id="hostinfo">
+        <thead>
+          <th colspan=2>Jobs (<%hosts.size%>)</th>
+        </thead>
+        <tbody>
+          <% IF hosts.size %>
+            <% FOREACH hostname IN hosts.keys.sort %>
+              <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
+                <td><% hosts.$hostname.group %></td>
+                <td><% hosts.$hostname.configfile %></td>
+              </tr>
+            <% END %>
+          <% ELSE %>
+            <tr>
+              <td>N/A</td>
+            </tr>
+          <%END%>
+        </tbody>
+      </table>
+    </div>
+<br>
+    <div>
+        <h3>CronJobs (ego-run)</h3>
+          <table>
+            <% FOREACH hostname IN hosts.keys.sort %>
+              <% IF hosts.$hostname.cronconfig %>
+                <tr><td>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th colspan="7" align="left"><% hostname %></th>
+                      </tr>
+                      <tr>
+                        <th>Min</th>
+                        <th>Hour</th>
+                        <th>Day of Month</th>
+                        <th>Month</th>
+                        <th>Day of Week</th>
+                        <th>User</th>
+                        <th>Exec-Command</th>
+                      </tr>
+                    </thead>
+                    <% IF hosts.$hostname.cronconfig %>
+                      <% FOREACH worktyp IN hosts.$hostname.cronconfig.keys.sort %>
+                        <tr>
+                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MIN %></td>
+                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_HOUR %></td>
+                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFMONTH %></td>
+                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MONTH %></td>
+                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFWEEK %></td>
+                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_USER %></td>
+                          <td><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_COMMAND %></td>
+                       </tr>
+                  <% END %>
+                <% ELSE %>
+                  <tr>
+                    <td colspan="7" class="center">N/A</td>
                   </tr>
                 <% END %>
-              </tbody>
-            <% ELSE %>
-              <tr>
-                <td>N/A</td>
-               </tr>
-            <%END%>
-        </table>
-<h3>/etc/cron.d/bang (Demo)</h3>
-  <table id="schedule">
-    <thead>
-        <tr>
-            <th>Min</th>
-            <th>Hour</th>
-            <th>Day of Month</th>
-            <th>Month</th>
-            <th>Day of Week</th>
-            <th>User</th>
-            <th>Exec-Command</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td class="center">00</td>
-          <td class="center">20</td>
-          <td class="center">*</td>
-          <td class="center">*</td>
-          <td class="center">*</td>
-          <td class="center">root</td>
-          <td>/opt/bang-btrfs/bin/bang -g data -s phd-home_winprofile >/dev/null 2>&1</td>
-        </tr>
-        <tr>
-          <td class="center">45</td>
-          <td class="center">9</td>
-          <td class="center">*</td>
-          <td class="center">*</td>
-          <td class="center">*</td>
-          <td class="center">root</td>
-          <td>/opt/bang-btrfs/bin/bang-wipe -g data -s phd-home_winprofile >/dev/null 2>&1</td>
-        </tr>
-    </tbody>
-  </table>
-    </div>
+            </table>
+          </tr></td>
+        <% END %>
+      <%  END %>
+    </table>
+  </div>
