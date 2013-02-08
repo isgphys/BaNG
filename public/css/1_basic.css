@@ -2,6 +2,11 @@ body {
     padding: 0px;
     margin: 0px;
     font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 12px;
+}
+
+body pre {
+    font-family: monospace;
 }
 
 .center {
@@ -164,3 +169,13 @@ nav ul ul li a:hover {
 nav ul ul ul {
     position: absolute; left: 100%; top:0;
 }
+
+nav ul ul ul li {
+    border-left: 0px solid #fff;
+}
+
+nav ul ul ul li a {
+    padding-top: 0px;
+    border-left: 2px solid #fff;
+}
+
