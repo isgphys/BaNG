@@ -110,7 +110,7 @@ sub statistics_groupshare_variations {
     $sth->finish();
 
     my %largest_variations;
-    foreach my $field qw(TotFileSize NumOfFiles) {
+    foreach my $field (qw(TotFileSize NumOfFiles)) {
         # compute maximal variation for each share
         my %delta;
         foreach my $bkppath (keys %datahash) {
@@ -266,7 +266,7 @@ sub rickshaw_json {
             $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
         }
         # use same normalization for both runtimes to ensure curves coincide
-        foreach my $field qw(RealRuntime TotRuntime) {
+        foreach my $field (qw(RealRuntime TotRuntime)) {
             $max{$field}  = max( $max{RealRuntime}, $max{TotRuntime} );
             $min{$field}  = min( $min{RealRuntime}, $min{TotRuntime} );
         }
