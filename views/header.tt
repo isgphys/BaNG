@@ -21,8 +21,8 @@
         <li><a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a></li>
         <li><a href="#" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a>
             <ul>
-                <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule Overview (cronjobs)</a>
-                <li><a href="http://hobbit.phys.ethz.ch/bangstats" target="_blank">Schedule Gantt Graph (external)</a></li>
+                <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Overview (cronjobs)</a>
+                <li><a href="http://hobbit.phys.ethz.ch/bangstats" target="_blank">Gantt Graph (external)</a></li>
             </ul>
         </li>
         <li><a href="#" <% IF section == 'global-config' %>class="active"<% END %>>Configs</a>
@@ -32,9 +32,14 @@
             </ul>
         </li>
         <li><a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a></li>
+        <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
+            <ul>
+              <li><a href="/statistics">Overview</a></li>
+              <li><a href="/statistics/variations">Variations</a></li>
+            </ul>
+          </li>
         <li><a href="#" <% IF section == 'tools' %>class="active"<% END %>>Tools</a>
             <ul>
-                <li><a href="/statistics">Backup Statistics</a></li>
                 <li><a href="#">External Tools</a>
                     <ul>
                         <li><a href="https://admin.phys.ethz.ch/lvm2FS/index.pl#phd-bkp-gw" target="_blank">VMchart - LVM and BTRFS Monitoring</a></li>

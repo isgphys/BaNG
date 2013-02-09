@@ -52,6 +52,7 @@ sub get_global_config {
     $globalconfig{path_available}      = "$config_path/$global_settings->{AvailableFolder}";
     $globalconfig{path_enabled}        = "$config_path/$global_settings->{EnabledFolder}";
     $globalconfig{path_special}        = "$config_path/$global_settings->{SpecialFolder}";
+    $globalconfig{path_cronjobs}       = "$config_path/$global_settings->{CronJobsFolder}";
 
     $globalconfig{path_rsync}          = "$global_settings->{RSYNC}";
     $globalconfig{path_btrfs}          = "$global_settings->{BTRFS}";
@@ -72,7 +73,7 @@ sub sanityfilecheck {
     my ($file) = @_;
 
     if ( ! -f "$file" ){
-        logit("localhost","INTERNAL", "$file NOT available");
+#        logit("localhost","INTERNAL", "$file NOT available");
         return 0; #Need exit 0 for CLI
     }
     else {
@@ -120,6 +121,7 @@ sub find_hosts {
             'configfile' => $configfile,
             'css_class'  => '',
             'hostconfig' => read_configfile($hostname,$group),
+            'cronconfig' => read_cronfile($hostname,$group),
         };
     }
 
@@ -136,6 +138,7 @@ sub find_hosts {
 
 sub find_enabled_hosts {
     my @configfiles = find_host_configs("*_*.yaml", "$globalconfig{path_enabled}" );
+    undef %hosts;
 
     foreach my $configfile (@configfiles) {
         my ($hostname,$group) = split_configname($configfile);
@@ -187,6 +190,23 @@ sub read_configfile {
 
     }
     return $settings;
+}
+
+sub read_cronfile {
+    my ($host, $group) = @_;
+    my $cronfile;
+
+    $cronfile  = "$globalconfig{path_cronjobs}/cron_$host\_$group.yaml";
+
+    if ( sanityfilecheck($cronfile) ) {
+
+        my $settings_cron  = LoadFile($cronfile);
+
+        return $settings_cron;
+    }
+    else{
+       return 0;
+    }
 }
 
 1;

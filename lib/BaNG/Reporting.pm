@@ -13,7 +13,7 @@ our @EXPORT = qw(
     bangstat_db_connect
 );
 
-our %globalconfig;
+ our %globalconfig;
 our $bangstat_dbh;
 
 sub logit {
@@ -21,7 +21,7 @@ sub logit {
 
     my $timestamp = strftime "%b %d %H:%M:%S", localtime;
 
-    open  LOG,">>$globalconfig{global_log_file}" or die "$globalconfig{global_log_file}: $!";
+    open  LOG,">>$globalconfig{'global_log_file'}" or die "$globalconfig{'global_log_file'}: $!";
 #    open  LOG,">>BaNG::Config::$globalconfig{global_log_file}" or die ;
 #    print LOG "$timestamp $hostname $folder - $msg\n";
     close LOG;

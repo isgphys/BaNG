@@ -1,4 +1,4 @@
-<h2>Groupshares with largest variations</h2>
+<h2>Groupshares with largest variations (last 10 Days)</h2>
   <%- FOREACH field IN largest_variations.keys.sort.reverse %>
     <h3><% field %></h3>
     <table>
