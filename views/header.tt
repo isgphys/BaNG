@@ -35,6 +35,8 @@
         <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
             <ul>
               <li><a href="/statistics">Overview</a></li>
+              <li><a href="/statistics/schedule">Schedule of last night</a></li>
+              <li><a href="/statistics/schedule-all">Schedule by host</a></li>
               <li><a href="/statistics/variations">Variations</a></li>
             </ul>
           </li>

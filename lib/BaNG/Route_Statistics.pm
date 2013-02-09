@@ -65,7 +65,7 @@ get '/schedule-all.json' => sub {
 
 get '/schedule' => sub {
     template 'statistics-schedule', {
-        section   => 'tools',
+        section   => 'statistics',
         title     => "Backup schedule of last night",
         fullplot  => 0,
         json_url  => "/statistics/schedule.json",
@@ -75,7 +75,7 @@ get '/schedule' => sub {
 
 get '/schedule-all' => sub {
     template 'statistics-schedule', {
-        section   => 'tools',
+        section   => 'statistics',
         title     => "Backup schedule by host",
         fullplot  => 1,
         json_url  => "/statistics/schedule-all.json",
