@@ -237,8 +237,8 @@ sub statistics_groupshare_variations {
 }
 
 sub statistics_schedule {
-
-    my $lastXdays = 1;  # last night only
+    my ($days, $sortBy) = @_;
+    my $lastXdays = $days || $lastXdays_default;
 
     bangstat_db_connect();
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
@@ -251,19 +251,22 @@ sub statistics_schedule {
     ");
     $sth->execute();
 
-    my %BackupsByTime;
+    my %datahash;
     while (my $dbrow=$sth->fetchrow_hashref()) {
         (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
         (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
-        my $hostname    = $dbrow->{'BkpFromHost'};
-        my $systemBkp   = 0;
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/://g; # remove colon separators
 
         # flag system backups
-        $systemBkp = 1 if ($BkpFromPath !~ m%/(export|var/imap)%);
+        my $systemBkp = 0;
+        $systemBkp    = 1 if ($BkpFromPath !~ m%/(export|var/imap)%);
 
-        push( @{$BackupsByTime{$time_start}}, {
+        # hash constructed by host or time
+        my $sortKey = $dbrow->{'BkpFromHost'};
+        $sortKey    = $time_start if $sortBy =~ /time/;
+
+        push( @{$datahash{$sortKey}}, {
             time_start       => $time_start,
             time_stop        => $time_stop,
             BkpFromPath      => $BkpFromPath,
@@ -279,7 +282,7 @@ sub statistics_schedule {
     }
     $sth->finish();
 
-    return %BackupsByTime;
+    return %datahash;
 }
 
 sub rickshaw_json {

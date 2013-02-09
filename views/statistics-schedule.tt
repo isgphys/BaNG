@@ -13,7 +13,7 @@
     <body>
         <% INCLUDE header.tt %>
         <div id="content">
-            <h2>Backup schedule of last night</h2>
+            <h2><% title %></h2>
             <div class="loading_message">
                 <img src="/images/spinner.gif" width=25 alt="Loading animation">
                 Loading data...
@@ -22,11 +22,16 @@
                 <div id="graph"></div>
             </div>
             <script>
-                var PlotMiniChart   = 0;    // Toggle plotting the mini chart
-                var PlotTodaysLine  = 0;    // Toggle plotting today's line
+              <% IF fullplot %>
+                var PlotMiniChart   = 1;
+                var PlotTodaysLine  = 1;
+              <% ELSE %>
+                var PlotMiniChart   = 0;
+                var PlotTodaysLine  = 0;
                 var CustomLaneLabel = 'subLane[0].info.BkpFromHost';
                 var CustomInterval  = '[new Date(now.getFullYear(), now.getMonth(), now.getDate()-1, 16, 0, 0, 0),'
                                     + ' new Date(now.getFullYear(), now.getMonth(), now.getDate()  , 16, 0, 0, 0)]';
+              <% END %>
                 var backups;
                 d3.json('<% json_url %>', function(json) {
                     backups = json;

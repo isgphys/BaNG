@@ -52,7 +52,13 @@ get '/variations' => sub {
 };
 
 get '/schedule.json' => sub {
-    my %schedule = statistics_schedule();
+    my %schedule = statistics_schedule(1,'time');
+    my %json_options = ( canonical => 1 );
+    return to_json(\%schedule, \%json_options);
+};
+
+get '/schedule-all.json' => sub {
+    my %schedule = statistics_schedule(60,'host');
     my %json_options = ( canonical => 1 );
     return to_json(\%schedule, \%json_options);
 };
@@ -60,7 +66,19 @@ get '/schedule.json' => sub {
 get '/schedule' => sub {
     template 'statistics-schedule', {
         section   => 'tools',
+        title     => "Backup schedule of last night",
+        fullplot  => 0,
         json_url  => "/statistics/schedule.json",
+    },{ layout    => 0
+    };
+};
+
+get '/schedule-all' => sub {
+    template 'statistics-schedule', {
+        section   => 'tools',
+        title     => "Backup schedule by host",
+        fullplot  => 1,
+        json_url  => "/statistics/schedule-all.json",
     },{ layout    => 0
     };
 };
