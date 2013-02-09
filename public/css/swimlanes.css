@@ -1,101 +1,69 @@
-body {
-    cursor: default;
-}
-
-h1 {
-    font-size: 140%;
-    font-family: sans-serif;
-    text-align: center;
-    color: #1F4888;
-}
-
-table.plothost {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 20px;
-    margin-bottom: 50px;
-}
-
-.plothost td {
-    text-align: right;
-    padding-left: 40px;
-    padding-right: 40px;
-}
-
-img.plothost {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.tooltip {
-    padding: 10px;
-    font-family: sans-serif;
-    background-color: #AAA;
-    border: solid 1px #555;
-    border-radius: 6px;
-}
-
-.tooltip table {
-    border-spacing: 0px;
-}
-
-.tooltip tr {
-    font-size: 90%;
-    text-align: left;
-}
-
-.tooltip th {
-    font-weight: normal;
-}
-
 #graph {
-    text-align: center;
+    text-align      : center;
+}
+
+.loading_message {
+    margin-left : 55px;
+}
+.loading_message img {
+    vertical-align : middle;
 }
 
 .chart {
-    shape-rendering: crispEdges;
+    shape-rendering : crispEdges;
 }
 
-.mini text {
-    font: 9px sans-serif;
+.tooltip {
+    padding         : 10px;
+    font-family     : sans-serif;
+    background-color: #AAA;
+    border          : solid 1px #555;
+    border-radius   : 6px;
 }
-
-.main text {
-    font: 12px sans-serif;
+.tooltip table {
+    border-spacing  : 0px;
 }
-
-.month text {
-    text-anchor: start;
+.tooltip tr {
+    font-size       : 90%;
+    text-align      : left;
 }
-
-.todayLine {
-    stroke: blue;
-    stroke-width: 2.0;
-}
-
-.axis line, .axis path {
-    stroke: black;
+.tooltip th {
+    font-weight     : normal;
 }
 
 .miniItem {
-    stroke-width: 6;
+    stroke-width    : 6;
+}
+.mini text {
+    font            : 9px sans-serif;
+}
+.main text {
+    font            : 12px sans-serif;
+}
+.month text {
+    text-anchor     : start !important;
 }
 
-.systembkp {
-    stroke: #29C02A;
-    fill:   #2BC72B;
+.todayLine {
+    stroke          : blue;
+    stroke-width    : 2.0;
 }
-
-.databkp {
-    cursor: pointer;
-    stroke: #0050C0;
-    fill:   #0068F9;
+.axis line, .axis path {
+    stroke          : black;
 }
 
 .brush .extent {
-    stroke: gray;
-    fill: blue;
-    fill-opacity: .165;
+    stroke          : gray;
+    fill            : blue;
+    fill-opacity    : .165;
+}
+
+.systembkp {
+    stroke          : #29C02A;
+    fill            : #2BC72B;
+}
+.databkp {
+    cursor          : pointer;
+    stroke          : #0050C0;
+    fill            : #0068F9;
 }
