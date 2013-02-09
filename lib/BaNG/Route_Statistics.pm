@@ -51,8 +51,16 @@ get '/variations' => sub {
     };
 };
 
-get '/schedule/json' => sub {
+get '/schedule.json' => sub {
     my %schedule = statistics_schedule();
     my %json_options = ( canonical => 1 );
     return to_json(\%schedule, \%json_options);
+};
+
+get '/schedule' => sub {
+    template 'statistics-schedule', {
+        section   => 'tools',
+        json_url  => "/statistics/schedule.json",
+    },{ layout    => 0
+    };
 };

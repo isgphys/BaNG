@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>BaNG - 2013</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/ico" href="/favicon">
+        <link rel="stylesheet" href="/css/standard.css">
+        <link rel="stylesheet" href="/css/swimlanes.css">
+        <script src="/javascripts/d3.js"></script>
+        <script src="/javascripts/swimlanes.js"></script>
+        <script src="/javascripts/jquery.js"></script>
+    </head>
+    <body>
+        <% INCLUDE header.tt %>
+        <div id="content">
+            <h2>Backup schedule of last night</h2>
+            <div class="loading_message">
+                <img src="/images/spinner.gif" width=25 alt="Loading animation">
+                Loading data...
+            </div>
+            <div id="chart_container">
+                <div id="graph"></div>
+            </div>
+            <script>
+                var PlotMiniChart   = 0;    // Toggle plotting the mini chart
+                var PlotTodaysLine  = 0;    // Toggle plotting today's line
+                var CustomLaneLabel = 'subLane[0].info.BkpFromHost';
+                var CustomInterval  = '[new Date(now.getFullYear(), now.getMonth(), now.getDate()-1, 16, 0, 0, 0),'
+                                    + ' new Date(now.getFullYear(), now.getMonth(), now.getDate()  , 16, 0, 0, 0)]';
+                var backups;
+                d3.json('<% json_url %>', function(json) {
+                    backups = json;
+                    $('.loading_message').html('');
+                    ParseData();
+                    DrawSwimlanes();
+                });
+            </script>
+        </div>
+    </body>
+</html>
