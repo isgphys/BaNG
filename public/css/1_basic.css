@@ -149,6 +149,7 @@ nav ul ul {
     padding: 0;
     position: absolute;
     top: 100%;
+    z-index: 10000;
 }
 
 nav ul ul li {
