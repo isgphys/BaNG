@@ -9,7 +9,7 @@
             <table class="croninfosmall">
               <thead>
                 <tr >
-                  <th colspan="7" align="left"<%- IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<%- END %>><% hostname %></th>
+                  <th colspan="8" align="left"<%- IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<%- END %>><% hostname %></th>
                 </tr>
                 <tr>
                   <th class="center">Min</th>
@@ -19,6 +19,7 @@
                   <th class="center">Day of Week</th>
                   <th class="center">User</th>
                   <th>Exec-Command</th>
+                  <th class="center">Bulk allow</th>
                 </tr>
               </thead>
                 <% IF hosts.$hostname.cronconfig %>
@@ -31,11 +32,10 @@
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFWEEK %></td>
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_USER %></td>
                       <td><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_COMMAND %></td>
+                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.BULK_ALLOW %></td>
                     </tr>
                   <% END %>
                 <% ELSE %>
-                  <tr>
-                    <td colspan="7" class="center">N/A</td>
                   </tr>
                 <% END %>
             </table>
