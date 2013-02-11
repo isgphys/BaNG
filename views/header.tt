@@ -22,7 +22,6 @@
         <li><a href="#" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a>
             <ul>
                 <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Overview (cronjobs)</a>
-                <li><a href="http://hobbit.phys.ethz.ch/bangstats" target="_blank">Gantt Graph (external)</a></li>
             </ul>
         </li>
         <li><a href="#" <% IF section == 'global-config' %>class="active"<% END %>>Configs</a>
