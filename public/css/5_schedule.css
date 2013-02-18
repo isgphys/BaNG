@@ -9,3 +9,21 @@
 #croninfo .croninfosmall {
     width: 800px;
 }
+
+#croninfo tr.wipe {
+     background-color: #FFEAEA;
+}
+
+#croninfo tr.backup {
+     background-color: #CCFFFF;
+}
+
+#croninfo .hook {
+    background: url("/images/hook.gif") no-repeat  scroll transparent;
+    background-position: center center
+}
+
+#croninfo .notallow {
+    background: url("/images/not-allow.png") no-repeat  scroll transparent;
+    background-position: center center
+}

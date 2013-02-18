@@ -6,14 +6,17 @@ use BaNG::Route_Statistics;
 use BaNG::Route_Schedule;
 #use BaNG::Authent;
 use BaNG::Common;
+use BaNG::Hosts;
 use Auth::LDAP;
 
 prefix undef;
 
 get '/' => sub {
+    get_fsinfo();
      template 'dashboard' => {
               'section' => 'dashboard',
               'msg' => get_flash(),
+              'fsinfo' => \%fsinfo,
      };
 };
 

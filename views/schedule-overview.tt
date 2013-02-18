@@ -24,7 +24,7 @@
               </thead>
                 <% IF hosts.$hostname.cronconfig %>
                   <% FOREACH worktyp IN hosts.$hostname.cronconfig.keys.sort %>
-                    <tr>
+                    <tr <%- IF worktyp == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MIN %></td>
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_HOUR %></td>
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFMONTH %></td>
@@ -32,14 +32,14 @@
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFWEEK %></td>
                       <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_USER %></td>
                       <td><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_COMMAND %></td>
-                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.BULK_ALLOW %></td>
+                      <td<%- IF hosts.$hostname.cronconfig.$worktyp.BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                     </tr>
                   <% END %>
                 <% ELSE %>
                   </tr>
                 <% END %>
             </table>
-          </tr></td>
+          </tr>
         <% END %>
       <%  END %>
     </table>
