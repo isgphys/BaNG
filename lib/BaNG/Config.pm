@@ -7,7 +7,6 @@ use File::Find::Rule;
 use YAML::Tiny qw(LoadFile Dump);
 
 use Sys::Hostname;
-use File::Basename;
 
 use Exporter 'import';
 our @EXPORT = qw(
