@@ -19,7 +19,7 @@ sub get_fsinfo {
         @mounts = <MP>;
     close(MP);
 
-    foreach my $mount (@mounts){
+    foreach my $mount (sort(@mounts)){
         #/^([\/\w\d-]+)\s+([\w\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+).\s+([\/\w\d-]+)$/;
         $mount =~ qr/
                     ^(?<filesystem> [\/\w\d-]+)
