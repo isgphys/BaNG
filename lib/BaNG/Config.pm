@@ -7,6 +7,7 @@ use File::Find::Rule;
 use YAML::Tiny qw(LoadFile Dump);
 
 use Sys::Hostname;
+use Cwd 'abs_path';
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -29,7 +30,7 @@ our %globalconfig;  # App-Settings
 our %defaultconfig;
 our %hosts;
 our $servername       = hostname;
-our $prefix           = dirname($0);
+our $prefix           = dirname(abs_path($0));
 our $config_path      = "$prefix/etc";
 our $config_global    = "$config_path/bang_globals.yaml";
 
