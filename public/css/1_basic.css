@@ -15,6 +15,20 @@ body pre {
     padding-right : 0px;
 }
 
+.alert_red {
+    background-color: red;
+    font-weight: bold;
+}
+
+.alert_orange {
+    background-color: orange;
+    font-style: italic;
+}
+
+.alert_yellow {
+    background-color: yellow;
+}
+
 #header {
     background-image:url('/images/header.png');
     background-color:#254370;
