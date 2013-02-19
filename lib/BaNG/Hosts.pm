@@ -19,7 +19,7 @@ sub get_fsinfo {
         @mounts = <MP>;
     close(MP);
 
-    foreach my $mount (sort(@mounts)){
+    foreach my $mount (@mounts){
         #/^([\/\w\d-]+)\s+([\w\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+).\s+([\/\w\d-]+)$/;
         $mount =~ qr/
                     ^(?<filesystem> [\/\w\d-]+)
@@ -31,7 +31,7 @@ sub get_fsinfo {
                     .\s+(?<mountpt> [\/\w\d-]+)$
         /x ;
 
-        $fsinfo{$i} = {
+        $fsinfo{$+{mountpt}} = {
             'filesystem' => $+{filesystem},
             'mount'      => $+{mountpt},
             'fstyp'      => $+{fstyp},
@@ -40,7 +40,6 @@ sub get_fsinfo {
             'available'  => $+{available},
             'used_per'   => $+{usedper},
         };
-        $i++;
     }
 
     return 1;
