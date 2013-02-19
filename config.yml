@@ -13,7 +13,7 @@ default_mime_type:  'text/plain'
 logger:             'file'
 logger_format:      '%t [%L] %m'
 session: YAML
-session_dir: /tmp/dancer-sessions
+session_dir: /opt/BaNG/var/dancer-sessions
 auth_ldap:
    server: 'ldaps://ldap.phys.ethz.ch'
    user_base_dn: 'ou1=People,ou=Physik Departement,o=ethz,c=ch'
