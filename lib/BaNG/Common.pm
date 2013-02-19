@@ -1,6 +1,7 @@
 package BaNG::Common;
 
 use Dancer ':syntax';
+use POSIX qw(floor);
 
 use Exporter 'import';
 our @EXPORT = qw(

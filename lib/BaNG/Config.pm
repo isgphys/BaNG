@@ -6,8 +6,8 @@ use POSIX qw(strftime);
 use File::Find::Rule;
 use YAML::Tiny qw(LoadFile Dump);
 
-use Cwd qw(getcwd abs_path);
 use Sys::Hostname;
+use File::Basename;
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -30,7 +30,7 @@ our %globalconfig;  # App-Settings
 our %defaultconfig;
 our %hosts;
 our $servername       = hostname;
-our $prefix           = getcwd();
+our $prefix           = dirname($0);
 our $config_path      = "$prefix/etc";
 our $config_global    = "$config_path/bang_globals.yaml";
 
