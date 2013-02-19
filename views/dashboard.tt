@@ -3,18 +3,21 @@
 <div>Hier kommt etwas Statistik hin...</div>
 
 <div id="fsinfo">
+<h3>Backup-Server Disk Usage</h3>
   <table>
      <thead>
        <th>Mount</th>
        <th>FS-Typ</th>
+       <th>Available</th>
        <th>%Used</th>
      </thead>
      <tbody>
-       <%- FOREACH i IN fsinfo.keys.sort %>
+       <%- FOREACH mount IN fsinfo.keys.sort %>
          <tr>
-           <td><% fsinfo.$i.mount %></td>
-           <td class="center"><% fsinfo.$i.fstyp %></td>
-           <td class="center"><% fsinfo.$i.used_per %></td>
+           <td><% mount %></td>
+           <td class="center"><% fsinfo.$mount.fstyp %></td>
+           <td class="center"><% fsinfo.$mount.available %></td>
+           <td class="center <%- IF fsinfo.$mount.css_class %> <%- fsinfo.$mount.css_class %><%- END %>"><% fsinfo.$mount.used_per %></td>
          </tr>
        <%- END %>
      </tbody>
