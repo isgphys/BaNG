@@ -74,7 +74,7 @@ body pre {
 
 #topline {
     text-decoration: none;
-    text-align: right;
+//    text-align: right;
     background-color: #7997C9;
     height: 20px;
     padding: 2px 10px 2px 10px;
@@ -96,10 +96,18 @@ body pre {
      padding-right: 5px;
 }
 
+.topleft {
+    float: left;
+    padding-top: 2px;
+    width: 150px;
+    text-align: left;
+}
+
 .topright {
     float: right;
     padding-top: 2px;
     width: 150px;
+    text-align: right;
 }
 
 nav {

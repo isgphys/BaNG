@@ -13,11 +13,13 @@ prefix undef;
 
 get '/' => sub {
     get_fsinfo();
-     template 'dashboard' => {
-              'section' => 'dashboard',
-              'msg' => get_flash(),
-              'fsinfo' => \%fsinfo,
-     };
+
+    template 'dashboard' => {
+             'section' => 'dashboard',
+             'environment' => config->{environment},
+             'msg' => get_flash(),
+             'fsinfo' => \%fsinfo,
+    };
 };
 
 hook 'before' => sub {

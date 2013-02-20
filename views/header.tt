@@ -6,6 +6,9 @@
     <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
 </div>
 <div id="topline">
+    <div class="topleft">
+        <% environment %>
+    </div>
     <div class="topright">
         <%- IF not session.logged_in %>
             <a class="button-login" href="/login"></a>
