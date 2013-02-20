@@ -235,7 +235,7 @@ sub statistics_groupshare_variations {
         }
     }
 
-    return %largest_variations;
+    return \%largest_variations;
 }
 
 sub statistics_schedule {
