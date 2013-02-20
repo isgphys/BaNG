@@ -8,16 +8,10 @@ use POSIX qw(strftime);
 use IPC::Open3;
 use Net::Ping;
 use File::Find::Rule;
-use File::Basename;
 use Switch;
 
 my $version         = "1.0";    # BANG Multisync Version
 my $debuglevel      = 2;        #1 normal output, 2 ultimate output, 3 + rsync verbose!
-
-my $prefix          = dirname($0);
-my $config_path     = "$prefix/etc";
-my $config_global   = "$config_path/bang_globals.yaml";
-
 
 my @configfiles;
 my %settings;
@@ -31,28 +25,6 @@ my $conn_msg        = ('') x 2;
 
 my $host_source = "localhost";
 
-#################################
-# Get the global variables
-#
-sanityfilecheck($config_global);
-
-my $global_settings     = LoadFile($config_global);
-
-my $log_path            = "$prefix/$global_settings->{LogFolder}";
-my $global_log_date     =  strftime "$global_settings->{GlobalLogDate}", localtime;
-my $global_log_file     = "$log_path/$global_log_date.log";
-
-my $path_available      = "$config_path/$global_settings->{AvailableFolder}";
-my $path_enabled        = "$config_path/$global_settings->{EnabledFolder}";
-my $path_special        = "$config_path/$global_settings->{SpecialFolder}";
-
-my $rsync               = "$global_settings->{RSYNC}";
-my $btrfs               = "$global_settings->{BTRFS}";
-
-my $config_default      = "$config_path/$global_settings->{DefaultConfig}";
-my $config_default_nis  = "$config_path/$global_settings->{DefaultNisConfig}";
-
-sanityfilecheck($config_default);
 sanityfilecheck($config_default_nis);
 
 #################################
@@ -232,29 +204,6 @@ sub do_work {
     }
 }
 
-sub logit {
-    my ($hostname, $folder, $msg) = @_;
-
-    my $timestamp = strftime "%b %d %H:%M:%S", localtime;
-
-    open  LOG,">>$global_log_file" or die "$global_log_file: $!";
-    print LOG "$timestamp $hostname $folder - $msg\n";
-    close LOG;
-}
-
-sub sanityfilecheck {
-    my ($file) = @_;
-
-    if ( ! -f "$file" ){
-        print "$file NOT available!\n";
-        logit($host_source,"INTERNAL", "$file NOT available");
-        exit 0;
-    }
-    else {
-        return 1 ;
-    }
-}
-
 sub sanityprogcheck {
     my ($prog) = @_;
 
@@ -325,67 +274,6 @@ EOF
 #last backup: $LASTMSG
 #----------------------------------------------------
 }
-
-sub find_enabled_hosts {
-    my ($query, $searchpath) = @_;
-
-    my @files;
-    my $ffr_obj = File::Find::Rule->file()
-                                  ->name( $query  )
-                                  ->relative
-                                  ->maxdepth( 1 )
-                                  ->start ( $searchpath );
-
-    while (my $file = $ffr_obj->match()){
-        push @files, $file;
-    }
-    return @files;
-}
-
-sub read_configfile {
-    my ($host, $group) = @_;
-    my $configfile_host;
-
-    if ($group eq "NIS"){
-       $configfile_host  = $config_default_nis;
-    }
-    else{
-       $configfile_host  = "$path_enabled/$host\_$group.yaml";
-    }
-
-    if ( sanityfilecheck($configfile_host) ) {
-
-	$settings{$host}  = LoadFile($config_default);
-
-    if ($debug) {
-        print "\nDefault Settings:\n";
-        print Dump($settings{$host});
-        print "*** YAML ***\n\n"
-    }
-
-    my $settings_host  = LoadFile($configfile_host);
-
-    if ($debug) {
-        print "\nHost specific Settings: $configfile_host\n";
-        print Dump($settings_host);
-        print "*** YAML ***\n\n"
-    }
-
-    foreach my $key ( keys %{ $settings_host } ){
-        print "Host Config Keys: $key\n" if $debug && ($debuglevel ==2);
-        next if !$settings_host->{$key};
-        $settings{$host}->{$key} = $settings_host->{$key};
-    }
-
-    if ($debug) {
-        print "\nWORK Settings:\n";
-        print Dump($settings{$host});
-        print "*** YAML ***\n\n"
-    }
-    }
-    return $settings{$host};
-}
-
 
 sub get_queue_folders {
     my ($host, $group) = @_;

@@ -64,6 +64,7 @@ sub get_global_config {
 sub get_default_config {
 
     sanityfilecheck($config_global);
+    sanityfilecheck($globalconfig{config_default});
 
     my $defaultconfig  = LoadFile($globalconfig{config_default});
     return $defaultconfig;
