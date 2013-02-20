@@ -7,7 +7,7 @@
 </div>
 <div id="topline">
     <div class="topleft">
-        <% environment %>
+        <% request.remote_host %>
     </div>
     <div class="topright">
         <%- IF not session.logged_in %>
