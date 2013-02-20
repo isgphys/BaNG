@@ -7,23 +7,26 @@ prefix '/host';
 get '/' => sub {
 
     template 'host-search', {
-        section   => 'host',
+        remotehost => request->remote_host,
+        section    => 'host',
     };
 };
 
 get '/add' => sub {
 
     template 'host-edit', {
-        section   => 'host_edit',
-        title     => 'Create new Hostconfig',
+        section       => 'host_edit',
+        remotehost    => request->remote_host,
+        title         => 'Create new Hostconfig',
         add_entry_url => uri_for('/host/add'),
     };
 };
 post '/add' => sub {
 
     template 'host-edit', {
-        section   => 'host_edit',
-        title     => 'Well done!',
+        section       => 'host_edit',
+        remotehost    => request->remote_host,
+        title         => 'Well done!',
         add_entry_url => uri_for('/host/add'),
     };
 };
@@ -34,16 +37,18 @@ get '/:host' => sub {
     find_hosts(param('host'));
 
     template 'host', {
-        section   => 'host',
-        host      => param('host'),
-        hosts     => \%hosts ,
+        section    => 'host',
+        remotehost => request->remote_host,
+        host       => param('host'),
+        hosts      => \%hosts ,
     };
 };
 
 get '/search' => sub {
 
     template 'host-search' => {
-        section => 'host',
+        section    => 'host',
+        remotehost => request->remote_host,
     };
 };
 
@@ -57,8 +62,9 @@ post '/search' => sub {
     else
     {
         return template 'host' => {
-            section => 'host',
-            error   => 'Requested host is not available'
+            section    => 'host',
+            remotehost => request->remote_host,
+            error      => 'Requested host is not available'
         };
     }
 };

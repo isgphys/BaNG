@@ -8,11 +8,12 @@ get '/' => sub {
     my %hosts_shares = statistics_hosts_shares();
 
     template 'statistics', {
-        section   => 'statistics',
-        title     => 'Cumulated Backup Statistics',
-        json_url  => "/statistics/json",
+        section      => 'statistics',
+        remotehost   => request->remote_host,
+        title        => 'Cumulated Backup Statistics',
+        json_url     => "/statistics/json",
         hosts_shares => \%hosts_shares,
-    },{ layout    => 0
+    },{ layout       => 0
     };
 };
 
@@ -32,13 +33,14 @@ get '/:host/:share' => sub {
     my %hosts_shares = statistics_hosts_shares();
 
     template 'statistics', {
-        section   => 'statistics',
-        title     => "Statistics for $host:$share",
-        host      => $host,
-        share     => $share,
-        json_url  => "/statistics/$host/$shareurl/json",
+        section      => 'statistics',
+        remotehost   => request->remote_host,
+        title        => "Statistics for $host:$share",
+        host         => $host,
+        share        => $share,
+        json_url     => "/statistics/$host/$shareurl/json",
         hosts_shares => \%hosts_shares,
-    },{ layout    => 0
+    },{ layout       => 0
     };
 };
 
@@ -46,7 +48,8 @@ get '/variations' => sub {
     my %largest_variations = statistics_groupshare_variations();
 
     template 'largest_variations', {
-        section => 'statistics',
+        section            => 'statistics',
+        remotehost         => request->remote_host,
         largest_variations => \%largest_variations,
     };
 };
@@ -65,20 +68,22 @@ get '/schedule-all.json' => sub {
 
 get '/schedule' => sub {
     template 'statistics-schedule', {
-        section   => 'statistics',
-        title     => "Backup schedule of last night",
-        fullplot  => 0,
-        json_url  => "/statistics/schedule.json",
-    },{ layout    => 0
+        section    => 'statistics',
+        remotehost => request->remote_host,
+        title      => "Backup schedule of last night",
+        fullplot   => 0,
+        json_url   => "/statistics/schedule.json",
+    },{ layout     => 0
     };
 };
 
 get '/schedule-all' => sub {
     template 'statistics-schedule', {
-        section   => 'statistics',
-        title     => "Backup schedule by host",
-        fullplot  => 1,
-        json_url  => "/statistics/schedule-all.json",
-    },{ layout    => 0
+        section    => 'statistics',
+        remotehost => request->remote_host,
+        title      => "Backup schedule by host",
+        fullplot   => 1,
+        json_url   => "/statistics/schedule-all.json",
+    },{ layout     => 0
     };
 };

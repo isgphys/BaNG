@@ -9,8 +9,9 @@ get '/' => sub {
     find_hosts("*");
 
     template 'schedule-overview', {
-        section   => 'schedule',
-        hosts     => \%hosts ,
+        section    => 'schedule',
+        remotehost => request->remote_host,
+        hosts      => \%hosts ,
     };
 };
 

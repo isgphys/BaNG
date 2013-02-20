@@ -35,6 +35,7 @@ hook 'before' => sub {
 get '/login' => sub {
     template 'login', {
         #   'err' => $err,
+             'remotehost' => request->remote_host,
     };
 };
 
