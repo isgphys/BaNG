@@ -23,8 +23,9 @@ our $prefix;
 our $config_path;
 our $config_global;
 
-my $help            = 0;
+my $version         = '3.0';
 my $debug           = 1;
+my ($help, $showversion) = ('') x 2;
 my ($cfg_group, $bulk_type, $target_host, $nis_group) = ('') x 4;
 my $nthreads        = 1;
 
@@ -34,6 +35,7 @@ my $nthreads        = 1;
 #
 GetOptions (
     "h"     => \$help,
+    "v"     => \$showversion,
     "d"     => \$debug,
     "g=s"   => \$cfg_group,
     "s=s"   => \$target_host,
@@ -41,7 +43,9 @@ GetOptions (
     "th=i"  => \$nthreads,
 )
     or usage("Invalid commmand line options.");
-    usage("You must provide some arguments")    unless ($target_host || $cfg_group || $nis_group);
+    usage('')                                   if ( $help );
+    usage("Current version number: $version")   if ( $showversion );
+    usage("You must provide some arguments")    unless ($target_host || $cfg_group || $nis_group || $showversion);
     usage("Number of threads must be positive") unless ($nthreads && $nthreads > 0);
     usage("Don't mix the mode options")         if ( $target_host and $nis_group );
 
