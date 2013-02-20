@@ -157,7 +157,6 @@ sub statistics_hosts_shares {
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays_default day)
         AND BkpToHost LIKE 'phd-bkp-gw\%'
-        AND ( BkpFromPath LIKE '\%export\%' OR BkpFromPath LIKE '%imap%' )
         ORDER BY BkpFromHost;
     ");
     $sth->execute();
@@ -169,7 +168,10 @@ sub statistics_hosts_shares {
         $BkpFromPath =~ s/\s//g; # remove whitespace
         my ($empty, @shares) = split(/:/, $BkpFromPath);
 
-        push( @{$hosts_shares{$hostname}}, @shares );
+        foreach my $share (@shares) {
+            next unless $share =~ /export|imap/;
+            push( @{$hosts_shares{$hostname}}, $share );
+        }
     }
     $sth->finish();
 
