@@ -5,7 +5,6 @@ use BaNG::Common;
 use Date::Parse;
 use List::Util qw(min max);
 use List::MoreUtils qw(uniq);
-use POSIX qw(floor);
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -278,6 +277,7 @@ sub statistics_schedule {
             TotFileSizeTrans => num2human($dbrow->{'TotFileSizeTrans'}, 1024.),
             NumOfFiles       => num2human($dbrow->{'NumOfFiles'}),
             NumOfFilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
+            AvgFileSize      => num2human($dbrow->{'TotFileSize'}/$dbrow->{'NumOfFiles'},1024),
             SystemBkp        => $systemBkp,
         });
     }

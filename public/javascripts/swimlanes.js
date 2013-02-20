@@ -103,6 +103,7 @@ function ParseData() {
                                 TotFileSize      : bkp.TotFileSize,
                                 NumOfFiles       : bkp.NumOfFiles,
                                 NumOfFilesTrans  : bkp.NumOfFilesTrans,
+                                AvgFileSize      : bkp.AvgFileSize,
                                 BkpFromPath      : bkp.BkpFromPath,
                                 BkpFromHost      : bkp.BkpFromHost,
                                 BkpToPath        : bkp.BkpToPath,
@@ -487,6 +488,10 @@ function DrawSwimlanes() {
                 + "  <tr>"
                 + "    <th>Files:</th>"
                 + "    <td>" + d.info.NumOfFilesTrans + " files transferred of a total of " + d.info.NumOfFiles + "</td>"
+                + "  </tr>"
+                + "  <tr>"
+                + "    <th>Ratio: </th>"
+                + "    <td>" + d.info.AvgFileSize + " average file size</td>"
                 + "  </tr>"
                 + "  <tr>"
                 + "    <th>Time:</th>"
