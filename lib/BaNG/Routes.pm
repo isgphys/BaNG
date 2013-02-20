@@ -16,7 +16,7 @@ get '/' => sub {
 
     template 'dashboard' => {
              'section' => 'dashboard',
-             'environment' => request->remote_host(),
+             'remotehost' => request->remote_host,
              'msg' => get_flash(),
              'fsinfo' => \%fsinfo,
     };
