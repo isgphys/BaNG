@@ -5,13 +5,11 @@ use BaNG::Statistics;
 prefix '/statistics';
 
 get '/' => sub {
-    my %hosts_shares = statistics_hosts_shares();
-
     template 'statistics', {
         section   => 'statistics',
         title     => 'Cumulated Backup Statistics',
         json_url  => "/statistics/json",
-        hosts_shares => \%hosts_shares,
+        hosts_shares => statistics_hosts_shares(),
     },{ layout    => 0
     };
 };
@@ -29,7 +27,6 @@ get '/:host/:share' => sub {
     my $host     = param('host');
     my $shareurl = param('share');
     my $share    = statistics_decode_path($shareurl);
-    my %hosts_shares = statistics_hosts_shares();
 
     template 'statistics', {
         section   => 'statistics',
@@ -37,7 +34,7 @@ get '/:host/:share' => sub {
         host      => $host,
         share     => $share,
         json_url  => "/statistics/$host/$shareurl/json",
-        hosts_shares => \%hosts_shares,
+        hosts_shares => statistics_hosts_shares(),
     },{ layout    => 0
     };
 };

@@ -178,7 +178,7 @@ sub statistics_hosts_shares {
         @{$hosts_shares{$host}} = uniq @{$hosts_shares{$host}};
     }
 
-    return %hosts_shares;
+    return \%hosts_shares;
 }
 
 sub statistics_groupshare_variations {
