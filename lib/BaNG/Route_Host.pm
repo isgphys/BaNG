@@ -34,7 +34,7 @@ post '/add' => sub {
 
 get '/:host' => sub {
     get_global_config();
-    find_hosts(param('host'));
+    get_host_config(param('host'));
 
     template 'host', {
         section    => 'host',

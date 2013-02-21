@@ -6,7 +6,7 @@ prefix '/schedule';
 
 get '/' => sub {
     get_global_config();
-    find_hosts("*");
+    get_host_config("*");
 
     template 'schedule-overview', {
         section    => 'schedule',

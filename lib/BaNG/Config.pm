@@ -19,7 +19,7 @@ our @EXPORT = qw(
     $servername
     get_global_config
     get_default_config
-    find_hosts
+    get_host_config
     read_configfile
     split_configname
 );
@@ -102,7 +102,7 @@ sub split_configname {
     return ($hostname,$groupname) ;
 }
 
-sub find_hosts {
+sub get_host_config {
     my ($host, $group) = @_;
     $host = $host || '*';
     $group = $group || '*';

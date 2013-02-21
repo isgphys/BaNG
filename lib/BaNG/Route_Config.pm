@@ -23,7 +23,7 @@ get '/global' => sub {
 
 get '/all' => sub {
     get_global_config();
-    find_hosts("*");
+    get_host_config("*");
 
     template 'configs-overview' => {
         section    => 'configs-overview',
