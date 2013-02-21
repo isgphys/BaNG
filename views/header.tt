@@ -7,7 +7,7 @@
 </div>
 <div id="topline">
     <div class="topleft">
-        Remotehost: <% remotehost %>
+        <% webDancerEnv %> Remotehost: <% remotehost %>
     </div>
     <div class="topright">
         <%- IF not session.logged_in %>
