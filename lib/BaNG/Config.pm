@@ -20,8 +20,6 @@ our @EXPORT = qw(
     get_global_config
     get_default_config
     find_hosts
-    find_available_hosts
-    find_enabled_hosts
     read_configfile
     split_configname
 );
@@ -49,9 +47,7 @@ sub get_global_config {
     $globalconfig{global_log_date}     = "$global_settings->{GlobalLogDate}";
     $globalconfig{global_log_file}     = "$globalconfig{log_path}/$log_date.log";
 
-    $globalconfig{path_available}      = "$config_path/$global_settings->{AvailableFolder}";
-    $globalconfig{path_enabled}        = "$config_path/$global_settings->{EnabledFolder}";
-    $globalconfig{path_special}        = "$config_path/$global_settings->{SpecialFolder}";
+    $globalconfig{path_hostconfig}      = "$config_path/$global_settings->{HostConfigFolder}";
     $globalconfig{path_cronjobs}       = "$config_path/$global_settings->{CronJobsFolder}";
 
     $globalconfig{path_rsync}          = "$global_settings->{RSYNC}";
@@ -109,60 +105,26 @@ sub split_configname {
 sub find_hosts {
     my ($host) = @_;
     undef %hosts;
-    my @configsavailable = find_host_configs("$host\_*.yaml", "$globalconfig{path_available}" );
-    my @configsenabled   = find_host_configs("$host\_*.yaml", "$globalconfig{path_enabled}" );
+    my @hostconfigs = find_host_configs("$host\_*.yaml", "$globalconfig{path_hostconfig}" );
 
-    foreach my $configfile (@configsavailable) {
-        my ($hostname,$group) = split_configname($configfile);
+    foreach my $hostconfigfile (@hostconfigs) {
+        my ($hostname,$group) = split_configname($hostconfigfile);
+        my $hostconfig = read_configfile($hostname,$group);
+        my $isEnabled  = $hostconfig->{BKP_ENABLED};
+        my $css_class  = $isEnabled ? "active " : "";
+        my $status     = $isEnabled ? "enabled" : "disabled";
 
         $hosts{"$hostname-$group"}= {
             'hostname'   => $hostname,
             'group'      => $group,
-            'status'     => "disabled",
-            'configfile' => $configfile,
-            'css_class'  => '',
-            'hostconfig' => read_configfile($hostname,$group),
+            'status'     => $status,
+            'configfile' => $hostconfigfile,
+            'css_class'  => $css_class,
+            'hostconfig' => $hostconfig,
             'cronconfig' => read_cronfile($hostname,$group),
         };
     }
 
-
-    foreach my $configfile (@configsenabled) {
-        my ($hostname,$group) = split_configname($configfile);
-
-        $hosts{"$hostname-$group"}{'status'} = "enabled";
-        $hosts{"$hostname-$group"}{'css_class'} .= "active ";
-    }
-
-    return 1;
-}
-
-sub find_enabled_hosts {
-    my @configfiles = find_host_configs("*_*.yaml", "$globalconfig{path_enabled}" );
-    undef %hosts;
-
-    foreach my $configfile (@configfiles) {
-        my ($hostname,$group) = split_configname($configfile);
-
-        $hosts{"$hostname-$group"}= {
-            group      => $group,
-            configfile => $configfile,
-        };
-    }
-    return 1;
-}
-
-sub find_available_hosts {
-    my @configfiles = find_host_configs("*_*.yaml", "$globalconfig{path_available}" );
-
-    foreach my $configfile (@configfiles) {
-        my ($hostname,$group) = split_configname($configfile);
-
-        $hosts{"$hostname-$group"}= {
-            group      => $group,
-            configfile => $configfile,
-        };
-    }
     return 1;
 }
 
@@ -175,7 +137,7 @@ sub read_configfile {
         $configfile_host  = $globalconfig{config_default_nis};
     }
     else{
-        $configfile_host  = "$globalconfig{path_available}/$host\_$group.yaml";
+        $configfile_host  = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
     }
 
     if ( sanityfilecheck($configfile_host) ) {
