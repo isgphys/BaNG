@@ -27,7 +27,7 @@ our $config_global;
 my $version         = '3.0';
 my $debug           = 1;
 my ($help, $showversion) = ('') x 2;
-my ($cfg_group, $bulk_type, $target_host, $nis_group) = ('') x 4;
+my ($cfg_group, $bulk_type, $target_host) = ('') x 3;
 my $nthreads        = 1;
 my $wipe            = 0;
 
@@ -41,15 +41,13 @@ GetOptions (
     "d|debug"      => \$debug,
     "g|group=s"    => \$cfg_group,
     "h|host=s"     => \$target_host,
-    "n|nis=s"      => \$nis_group,
     "t|threads=i"  => \$nthreads,
     "w|wipe"       => \$wipe,
 )
     or usage("Invalid commmand line options.");
     usage("Current version number: $version")   if ( $showversion );
-    usage("You must provide some arguments")    unless ($target_host || $cfg_group || $nis_group || $showversion);
+    usage("You must provide some arguments")    unless ($target_host || $cfg_group || $showversion);
     usage("Number of threads must be positive") unless ($nthreads && $nthreads > 0);
-    usage("Don't mix the mode options")         if ( $target_host and $nis_group );
 
 
 #################################
@@ -80,7 +78,6 @@ sub usage {
         $command -h <hostname> -g <group>   # back up given host and group
         $command -h <hostname>              # back up all groups of given host
         $command -g <group>                 # back up all hosts of given group
-        $command -n <nisgroup>              # back up all hosts:/paths defined by NIS group
         $command -v                         # show version number
         $command --help                     # show this help message
 
