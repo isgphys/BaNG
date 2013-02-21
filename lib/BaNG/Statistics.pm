@@ -157,7 +157,6 @@ sub statistics_hosts_shares {
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays_default day)
         AND BkpToHost LIKE 'phd-bkp-gw\%'
-        AND ( BkpFromPath LIKE '\%export\%' OR BkpFromPath LIKE '%imap%' )
         ORDER BY BkpFromHost;
     ");
     $sth->execute();
@@ -169,16 +168,23 @@ sub statistics_hosts_shares {
         $BkpFromPath =~ s/\s//g; # remove whitespace
         my ($empty, @shares) = split(/:/, $BkpFromPath);
 
-        push( @{$hosts_shares{$hostname}}, @shares );
+        # distinguish data and system shares
+        foreach my $share (@shares) {
+            my $type = 'datashare';
+            $type = 'systemshare' unless $share =~ /export|imap/;
+            push( @{$hosts_shares{$type}{$hostname}}, $share );
+        }
     }
     $sth->finish();
 
     # filter duplicate shares
-    foreach my $host (sort keys %hosts_shares) {
-        @{$hosts_shares{$host}} = uniq @{$hosts_shares{$host}};
+    foreach my $type (keys %hosts_shares) {
+        foreach my $host (keys %{$hosts_shares{$type}}) {
+            @{$hosts_shares{$type}{$host}} = uniq @{$hosts_shares{$type}{$host}};
+        }
     }
 
-    return %hosts_shares;
+    return \%hosts_shares;
 }
 
 sub statistics_groupshare_variations {
@@ -233,7 +239,7 @@ sub statistics_groupshare_variations {
         }
     }
 
-    return %largest_variations;
+    return \%largest_variations;
 }
 
 sub statistics_schedule {
