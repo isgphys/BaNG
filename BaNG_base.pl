@@ -1,5 +1,4 @@
 use YAML::Tiny qw(LoadFile Dump);
-use Data::Dumper;
 use threads qw(yield);
 use threads::shared;
 use Thread::Queue;
@@ -9,12 +8,6 @@ use IPC::Open3;
 use Net::Ping;
 use File::Find::Rule;
 use Switch;
-
-my $version         = "1.0";    # BANG Multisync Version
-my $debuglevel      = 2;        #1 normal output, 2 ultimate output, 3 + rsync verbose!
-
-my @configfiles;
-my %settings;
 
 my @queue;
 my $queue_typ       = 0;
@@ -354,61 +347,3 @@ sub get_queue_nishosts {
     }
     return @queue;
 }
-
-sub eval_rsync_options (){
-    my ($host) = @_;
-    print "Rsync_options_host: $host\n";
-    my $rsync_options = '';
-
-    if ( $settings{$host}->{BKP_RSYNC_ARCHIV} ){
-        $rsync_options .= "-ax ";
-    }
-    if ( $settings{$host}->{BKP_RSYNC_RELATIV} ){
-        $rsync_options .= "-R ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_HLINKS}){
-        $rsync_options .= "-H ";
-    }
-    if ($settings{$host}->{BKP_EXCLUDE_FILE}){
-        $rsync_options .= "--exclude-from=$config_path/$settings{$host}->{BKP_EXCLUDE_FILE} ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_RSHELL}){
-        if ($settings{$host}->{BKP_GWHOST}){
-            $rsync_options .= "-e $settings{$host}->{BKP_RSYNC_RSHELL} $settings{$host}->{BKP_GWHOST} ";
-        }else
-        {
-            $rsync_options .= "-e $settings{$host}->{BKP_RSYNC_RSHELL} ";
-        }
-    }
-    if ($settings{$host}->{BKP_RSYNC_RSHELL_PATH}){
-        $rsync_options .= "--rsync-path=$settings{$host}->{BKP_RSYNC_RSHELL_PATH} ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_DELETE}){
-        $rsync_options .= "--delete ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_DELETE_FORCE}){
-        $rsync_options .= "--force ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_NUM_IDS}){
-        $rsync_options .= "--numeric-ids ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_INPLACE}){
-        $rsync_options .= "--inplace ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_ACL}){
-        $rsync_options .= "--acls ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_XATTRS}){
-        $rsync_options .= "--xattrs ";
-    }
-    if ($settings{$host}->{BKP_RSYNC_OSX}){
-       $rsync_options .= "--no-D "
-    }
-    if ($debug && ($debuglevel == 3)){
-       $rsync_options .= "-v "
-    }
-    print "Rsync Options: $rsync_options\n" if $debug;
-    $rsync_options =~ s/\s+$//;
-    return $rsync_options;
-}
-

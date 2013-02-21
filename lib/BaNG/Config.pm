@@ -103,9 +103,11 @@ sub split_configname {
 }
 
 sub find_hosts {
-    my ($host) = @_;
+    my ($host, $group) = @_;
+    $host = $host || '*';
+    $group = $group || '*';
     undef %hosts;
-    my @hostconfigs = find_host_configs("$host\_*.yaml", "$globalconfig{path_hostconfig}" );
+    my @hostconfigs = find_host_configs("$host\_$group\.yaml", "$globalconfig{path_hostconfig}" );
 
     foreach my $hostconfigfile (@hostconfigs) {
         my ($hostname,$group) = split_configname($hostconfigfile);
