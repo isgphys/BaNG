@@ -26,8 +26,8 @@ my $nthreads        = 1;
 my $wipe            = '';
 my $help            = '';
 my $showversion     = '';
-my $group           = '';
-my $host            = '';
+my $group_arg       = '';
+my $host_arg        = '';
 
 
 #################################
@@ -35,7 +35,7 @@ my $host            = '';
 #
 parse_command_options();
 get_global_config();
-get_host_config($host, $group);
+get_host_config($host_arg, $group_arg);
 
 foreach my $config (keys %hosts) {
     if ( $wipe ) {
@@ -128,14 +128,14 @@ sub parse_command_options {
         "help"         => sub { usage('') },
         "v|version"    => \$showversion,
         "d|debug"      => \$debug,
-        "g|group=s"    => \$group,
-        "h|host=s"     => \$host,
+        "g|group=s"    => \$group_arg,
+        "h|host=s"     => \$host_arg,
         "t|threads=i"  => \$nthreads,
         "w|wipe"       => \$wipe,
     )
     or usage("Invalid commmand line options.");
     usage("Current version number: $version")   if ( $showversion );
-    usage("You must provide some arguments")    unless ($host || $group || $showversion);
+    usage("You must provide some arguments")    unless ($host_arg || $group_arg || $showversion);
     usage("Number of threads must be positive") unless ($nthreads && $nthreads > 0);
 }
 
