@@ -5,7 +5,6 @@ use Thread::Queue;
 use List::MoreUtils qw(uniq);
 use POSIX qw(strftime);
 use IPC::Open3;
-use Net::Ping;
 use File::Find::Rule;
 use Switch;
 
@@ -13,9 +12,6 @@ my @queue;
 my $queue_typ       = 0;
 my $queue_content   = '';
 my $conn_test       = 0;
-my $conn_status     = 0;
-my $conn_msg        = ('') x 2;
-
 my $host_source = "localhost";
 
 sanityfilecheck($config_default_nis);
@@ -35,8 +31,6 @@ if ( ! $nis_group ) {
         $queue_typ = 1;
         get_queue_folders($target_host, $cfg_group);
         print "Single Host-Mode: $target_host $cfg_group Threads: $settings{$target_host}->{BKP_THREADS_LIMIT}\n" if $debug;
-        ($conn_status, $conn_msg ) = chkClientConn($target_host, $settings{$target_host}->{BKP_GWHOST});
-        print "$conn_status, $conn_msg\n" if $debug;
         if ($conn_status == 1){
             $conn_test = 1; # online test successful
         }else
@@ -208,27 +202,6 @@ sub sanityprogcheck {
     else {
         return 1;
     }
-}
-
-sub chkClientConn {
-    my ($host, $gwhost) = @_;
-
-    my $state = 0;
-    my $msg   = "Host offline";
-    my $p     = Net::Ping->new("tcp",2);
-
-    if ($p->ping($host)){
-        $state = 1;
-        $msg   = "Host online";
-    }
-    elsif($gwhost){
-        $state = 1;
-        $msg   = "Host not pingable because behind a Gateway-Host";
-    }
-    logit($host_source,"INTERNAL", "$host $msg");
-    $p->close();
-
-    return $state, $msg;
 }
 
 sub chkLastBkp {

@@ -15,7 +15,7 @@ use Cwd 'abs_path';
 use File::Basename;
 use lib dirname(abs_path($0))."/lib";
 use Data::Dumper;
-
+use BaNG::Hosts;
 use BaNG::Config;
 our %globalconfig;
 our %defaultconfig;
@@ -34,6 +34,8 @@ my ($group, $host) = ('') x 2;
 my $nthreads        = 1;
 my $wipe            = 0;
 
+my $conn_status     = 0;
+my $conn_msg        = '';
 
 #################################
 # Get/Check command options
@@ -60,7 +62,8 @@ get_global_config();
 find_hosts($host, $group);
 eval_rsync_options($host,$group);
 
-
+($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
+print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
 
 sub eval_rsync_options {
     my ($host, $group) = @_;

@@ -2,10 +2,12 @@ package BaNG::Hosts;
 use Dancer ':syntax';
 use 5.010;
 use BaNG::Common;
+use Net::Ping;
 
 use Exporter 'import';
 our @EXPORT = qw(
     get_fsinfo
+    chkClientConn
     %fsinfo
 );
 
@@ -59,6 +61,26 @@ sub check_fill_level {
     }
 
     return $css_class;
+}
+
+sub chkClientConn {
+    my ($host, $gwhost) = @_;
+
+    my $state = 0;
+    my $msg   = "Host offline";
+    my $p     = Net::Ping->new("tcp",2);
+
+    if ($p->ping($host)){
+        $state = 1;
+        $msg   = "Host online";
+    }
+    elsif($gwhost){
+        $state = 1;
+        $msg   = "Host not pingable because behind a Gateway-Host";
+    }
+    $p->close();
+
+    return $state, $msg;
 }
 
 1;
