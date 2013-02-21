@@ -168,16 +168,20 @@ sub statistics_hosts_shares {
         $BkpFromPath =~ s/\s//g; # remove whitespace
         my ($empty, @shares) = split(/:/, $BkpFromPath);
 
+        # distinguish data and system shares
         foreach my $share (@shares) {
-            next unless $share =~ /export|imap/;
-            push( @{$hosts_shares{$hostname}}, $share );
+            my $type = 'datashare';
+            $type = 'systemshare' unless $share =~ /export|imap/;
+            push( @{$hosts_shares{$type}{$hostname}}, $share );
         }
     }
     $sth->finish();
 
     # filter duplicate shares
-    foreach my $host (sort keys %hosts_shares) {
-        @{$hosts_shares{$host}} = uniq @{$hosts_shares{$host}};
+    foreach my $type (keys %hosts_shares) {
+        foreach my $host (keys %{$hosts_shares{$type}}) {
+            @{$hosts_shares{$type}{$host}} = uniq @{$hosts_shares{$type}{$host}};
+        }
     }
 
     return \%hosts_shares;

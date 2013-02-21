@@ -37,27 +37,36 @@
             </script>
             <script src="/javascripts/rickshaw-graph.js"></script>
             <div id="select-host-share">
-                <p>View statistics of
-                    <select id="select-host">
+                <p>View statistics of a specific
+                  <%- FOREACH sharetype IN hosts_shares.keys.sort %>
+                    <%- IF sharetype=='datashare' %>
+                      data share
+                    <%- ELSE %>
+                      or system partition
+                    <%- END %>
+                    <select id="select-host-<%sharetype%>">
                         <option value="">&lt;host&gt;</option>
-                      <%- FOREACH hostavail IN hosts_shares.keys.sort %>
+                      <%- FOREACH hostavail IN hosts_shares.$sharetype.keys.sort %>
                         <option value="<%hostavail%>" <% IF hostavail==host %>selected<% END %>><%hostavail%></option>
                       <%- END %>
                     </select>
-                    <select id="select-share" onchange="window.open(this.value,'_self');">
+                    <select id="select-share-<%sharetype%>" onchange="window.open(this.value,'_self');">
                         <option value="">&lt;share&gt;</option>
-                      <%- FOREACH hostavail IN hosts_shares.keys.sort %>
-                       <%- FOR shareavail = hosts_shares.$hostavail %>
+                      <%- FOREACH hostavail IN hosts_shares.$sharetype.keys.sort %>
+                       <%- FOR shareavail = hosts_shares.$sharetype.$hostavail %>
                         <option value="/statistics/<%hostavail%>/<%shareavail.replace('/','_')%>" class="<%hostavail%>"><%shareavail%></option>
                        <%- END %>
                       <%- END %>
                     </select>
+                  <%- END %>
                 </p>
             </div>
             <script>
                 $(document).ready(function(){
                     $('#chart_container').toggle();
-                    $("#select-share").chainedTo("#select-host");
+                  <%- FOREACH sharetype IN hosts_shares.keys.sort %>
+                    $("#select-share-<%sharetype%>").chainedTo("#select-host-<%sharetype%>");
+                  <%- END %>
                 });
             </script>
         </div>
