@@ -10,61 +10,79 @@
 #
 use strict;
 use warnings;
-use Getopt::Long qw(:config no_auto_abbrev);
 use Cwd 'abs_path';
 use File::Basename;
 use lib dirname(abs_path($0))."/lib";
-use Data::Dumper;
+use Getopt::Long qw(:config no_auto_abbrev);
+
 use BaNG::Hosts;
 use BaNG::Config;
-our %globalconfig;
-our %defaultconfig;
 our %hosts;
-our $servername;
-our $prefix;
-our $config_path;
-our $config_global;
 
 my $version         = '3.0';
 my $debug           = 1;
 my $debuglevel      = 2;        #1 normal output, 2 ultimate output, 3 + rsync verbose!
-
-my ($help, $showversion) = ('') x 2;
-my ($group, $host) = ('') x 2;
 my $nthreads        = 1;
-my $wipe            = 0;
-
-my $conn_status     = 0;
-my $conn_msg        = '';
-
-#################################
-# Get/Check command options
-#
-GetOptions (
-    "help"         => sub { usage('') },
-    "v|version"    => \$showversion,
-    "d|debug"      => \$debug,
-    "g|group=s"    => \$group,
-    "h|host=s"     => \$host,
-    "t|threads=i"  => \$nthreads,
-    "w|wipe"       => \$wipe,
-)
-    or usage("Invalid commmand line options.");
-    usage("Current version number: $version")   if ( $showversion );
-    usage("You must provide some arguments")    unless ($host || $group || $showversion);
-    usage("Number of threads must be positive") unless ($nthreads && $nthreads > 0);
+my $wipe            = '';
+my $help            = '';
+my $showversion     = '';
+my $group           = '';
+my $host            = '';
 
 
 #################################
-# Get the configuration
+# Main
 #
+parse_command_options();
 get_global_config();
-find_hosts($host, $group);
-eval_rsync_options($host,$group);
+get_host_config($host, $group);
 
-($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
-print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
+foreach my $config (keys %hosts) {
+    if ( $wipe ) {
+        do_wipe(  $hosts{$config}->{hostname}, $hosts{$config}->{group});
+    } else {
+        do_backup($hosts{$config}->{hostname}, $hosts{$config}->{group});
+    }
+}
+exit 0;
 
+
+
+#################################
+# Make new backup
+#
+sub do_backup {
+    my ($host, $group) = @_;
+
+    # make sure backup is enabled
+    return unless $hosts{"$host-$group"}->{status} eq 'enabled';
+
+    # make sure host is online
+    my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
+    print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
+    die "Error: host is offline\n" unless $conn_status;
+
+    eval_rsync_options($host,$group);
+
+    print "Start backup of host $host group $group\n" if $debug;
+
+    return 1;
+}
+
+#################################
+# Wipe old backups
+#
+sub do_wipe {
+    my ($host, $group) = @_;
+
+    print "Wipe host $host group $group\n" if $debug;
+
+    return 1;
+}
+
+#################################
+# Evaluate rsync options
+#
 sub eval_rsync_options {
     my ($host, $group) = @_;
     my $rsync_options  = '';
@@ -100,6 +118,25 @@ sub eval_rsync_options {
     print "Rsync Options: $rsync_options\n" if $debug;
 
     return $rsync_options;
+}
+
+#################################
+# Get/Check command options
+#
+sub parse_command_options {
+    GetOptions (
+        "help"         => sub { usage('') },
+        "v|version"    => \$showversion,
+        "d|debug"      => \$debug,
+        "g|group=s"    => \$group,
+        "h|host=s"     => \$host,
+        "t|threads=i"  => \$nthreads,
+        "w|wipe"       => \$wipe,
+    )
+    or usage("Invalid commmand line options.");
+    usage("Current version number: $version")   if ( $showversion );
+    usage("You must provide some arguments")    unless ($host || $group || $showversion);
+    usage("Number of threads must be positive") unless ($nthreads && $nthreads > 0);
 }
 
 ##############
