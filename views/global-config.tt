@@ -10,6 +10,14 @@
     </td>
   </tr>
   <tr>
+  <tr>
+    <td>
+      Environment:
+    </td>
+    <td>
+      <% webDancerEnv %>
+    </td>
+  </tr>
     <td>
       App-Dir:
     </td>
