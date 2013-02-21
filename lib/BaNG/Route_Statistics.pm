@@ -8,6 +8,7 @@ get '/' => sub {
     template 'statistics', {
         section      => 'statistics',
         remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
         title        => 'Cumulated Backup Statistics',
         json_url     => "/statistics/json",
         hosts_shares => statistics_hosts_shares(),
@@ -32,6 +33,7 @@ get '/:host/:share' => sub {
     template 'statistics', {
         section      => 'statistics',
         remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
         title        => "Statistics for $host:$share",
         host         => $host,
         share        => $share,
@@ -45,6 +47,7 @@ get '/variations' => sub {
     template 'largest_variations', {
         section            => 'statistics',
         remotehost         => request->remote_host,
+        webDancerEnv       => config->{run_env},
         largest_variations => statistics_groupshare_variations(),
     };
 };
@@ -63,22 +66,24 @@ get '/schedule-all.json' => sub {
 
 get '/schedule' => sub {
     template 'statistics-schedule', {
-        section    => 'statistics',
-        remotehost => request->remote_host,
-        title      => "Backup schedule of last night",
-        fullplot   => 0,
-        json_url   => "/statistics/schedule.json",
-    },{ layout     => 0
+        section      => 'statistics',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        title        => "Backup schedule of last night",
+        fullplot     => 0,
+        json_url     => "/statistics/schedule.json",
+    },{ layout       => 0
     };
 };
 
 get '/schedule-all' => sub {
     template 'statistics-schedule', {
-        section    => 'statistics',
-        remotehost => request->remote_host,
-        title      => "Backup schedule by host",
-        fullplot   => 1,
-        json_url   => "/statistics/schedule-all.json",
-    },{ layout     => 0
+        section      => 'statistics',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        title        => "Backup schedule by host",
+        fullplot     => 1,
+        json_url     => "/statistics/schedule-all.json",
+    },{ layout       => 0
     };
 };

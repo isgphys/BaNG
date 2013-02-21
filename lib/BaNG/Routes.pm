@@ -17,7 +17,7 @@ get '/' => sub {
     template 'dashboard' => {
              'section' => 'dashboard',
              'remotehost' => request->remote_host,
-             'webDancerEnv' => $ENV{'DANCER_ENVIRONMENT'},
+             'webDancerEnv' => config->{run_env},
              'msg' => get_flash(),
              'fsinfo' => \%fsinfo,
     };

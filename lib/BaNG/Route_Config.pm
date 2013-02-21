@@ -10,6 +10,7 @@ get '/global' => sub {
     template 'global-config' => {
         section        => 'global-config',
         remotehost     => request->remote_host,
+        webDancerEnv   => config->{run_env},
         globalconfig   => \%globalconfig,
         defaultsconfig => get_default_config(),
         servername     => $servername,
@@ -24,9 +25,10 @@ get '/all' => sub {
     get_host_config("*");
 
     template 'configs-overview' => {
-        section    => 'configs-overview',
-        remotehost => request->remote_host,
-        hosts      => \%hosts ,
+        section      => 'configs-overview',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        hosts        => \%hosts ,
     };
 };
 
