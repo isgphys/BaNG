@@ -95,6 +95,11 @@ body pre {
      padding-right: 5px;
 }
 
+.devel {
+    color: #900000;
+    font-weight: bold;
+}
+
 .topleft {
     float: left;
     padding-top: 2px;

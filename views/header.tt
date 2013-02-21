@@ -6,8 +6,8 @@
     <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
 </div>
 <div id="topline">
-    <div class="topleft">
-        <% webDancerEnv %> Remotehost: <% remotehost %>
+    <div class="topleft <% IF webDancerEnv == 'development'%> devel<%END%>">
+        Remotehost: <% remotehost %>
     </div>
     <div class="topright">
         <%- IF not session.logged_in %>
