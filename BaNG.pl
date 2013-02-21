@@ -56,6 +56,8 @@ sub do_backup {
 
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{status} eq 'enabled';
+    # stop if trying to do bulk backup if it's not allowed
+    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW});
 
     # make sure host is online
     my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
