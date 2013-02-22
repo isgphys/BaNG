@@ -5,8 +5,8 @@
     <div id="ethz_logo_background"></div>
     <h1 id="site_title">ISG D-PHYS <u>Ba</u>ckup Solution - <u>N</u>ext <u>G</u>eneration</h1>
 </div>
-<div id="topline">
-    <div class="topleft <% IF webDancerEnv == 'development'%> devel<%END%>">
+<div id="topline" <% IF webDancerEnv == 'development'%>class="devel"<%END%>>
+    <div class="topleft">
         Remotehost: <% remotehost %>
     </div>
     <div class="topright">
