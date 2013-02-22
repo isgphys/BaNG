@@ -28,6 +28,9 @@ my $help            = '';
 my $showversion     = '';
 my $group_arg       = '';
 my $host_arg        = '';
+my $nthreads_arg    = '';
+
+my @queue;
 
 
 #################################
@@ -37,27 +40,85 @@ parse_command_options();
 get_global_config();
 get_host_config($host_arg, $group_arg);
 
+# run wipe jobs or fill queue with backup jobs
 foreach my $config (keys %hosts) {
     if ( $wipe ) {
         do_wipe(  $hosts{$config}->{hostname}, $hosts{$config}->{group});
     } else {
-        do_backup($hosts{$config}->{hostname}, $hosts{$config}->{group});
+        queue_backup($hosts{$config}->{hostname}, $hosts{$config}->{group});
     }
 }
+print "Queue: @queue\n" if $debug;
+
+# stop if queue is empty
+if( !@queue ) {
+    print "Exit because queue is empty.\n" if $debug;
+    exit 0;
+}
+
+# use threads to empty queue
+initialize_threads();
+
+
 exit 0;
 
 
+#################################
+# Initialize threads
+#
+sub initialize_threads {
+
+    # define number of threads
+    if( $nthreads_arg ){
+        # If nthreads was defined by cli argument, use it
+        $nthreads = $nthreads_arg;
+        print "Using nthreads = $nthreads from command line argument\n" if $debug;
+    } elsif ( $host_arg && $group_arg) {
+        # If no nthreads was given, and we back up a single host and group, get nthreads from its config
+        $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
+        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $debug;
+    }
+
+    return 1;
+}
+
+#################################
+# Add task to make new backup to queue
+#
+sub queue_backup {
+    my ($host, $group) = @_;
+
+    print "sub queue_backup($host, $group)\n" if $debug;
+
+    # make sure backup is enabled
+    return unless $hosts{"$host-$group"}->{status} eq 'enabled';
+    # stop if trying to do bulk backup if it's not allowed
+    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW});
+
+    # get list of partitions to back up
+    my (@src_part) = split ( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION});
+    print "Number of partitions: " . ($#src_part+1) . " ( @src_part )\n" if $debug;
+
+    # optionally queue each subfolder
+    foreach my $part (@src_part) {
+        if( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+            queue_remote_subfolders($host,$group, $part);
+        } else {
+            # queue whole partitions
+            push @queue, $part;
+        }
+    }
+
+    print "Queued backup of host $host group $group\n" if $debug;
+
+    return 1;
+}
 
 #################################
 # Make new backup
 #
 sub do_backup {
     my ($host, $group) = @_;
-
-    # make sure backup is enabled
-    return unless $hosts{"$host-$group"}->{status} eq 'enabled';
-    # stop if trying to do bulk backup if it's not allowed
-    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW});
 
     # make sure host is online
     my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
@@ -66,13 +127,19 @@ sub do_backup {
 
     eval_rsync_options($host,$group);
 
-    print "Start backup of host $host group $group\n" if $debug;
+    # if BKP_STORE_MODUS == BTRFS
+        # use rsync with btrfs snapshots
+    # else
+        # use rsync with --link-dest
+    # endif
+
+    print "Backup host $host group $group\n" if $debug;
 
     return 1;
 }
 
 #################################
-# Wipe old backups
+# Wipe old backup
 #
 sub do_wipe {
     my ($host, $group) = @_;
@@ -82,6 +149,25 @@ sub do_wipe {
     return 1;
 }
 
+#################################
+# Add list of remote folders to thread queue
+#
+sub queue_remote_subfolders {
+    my ($host, $group, $partition) = @_;
+
+    $partition =~ s/://;
+
+    my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
+    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
+    print "eval subfolders command: @remotedirlist\n" if $debug;
+
+    foreach my $remotedir (@remotedirlist) {
+        chomp $remotedir;
+        push @queue, $remotedir;
+    }
+
+    return 1;
+}
 #################################
 # Evaluate rsync options
 #
@@ -132,13 +218,13 @@ sub parse_command_options {
         "d|debug"      => \$debug,
         "g|group=s"    => \$group_arg,
         "h|host=s"     => \$host_arg,
-        "t|threads=i"  => \$nthreads,
+        "t|threads=i"  => \$nthreads_arg,
         "w|wipe"       => \$wipe,
     )
     or usage("Invalid commmand line options.");
-    usage("Current version number: $version")   if ( $showversion );
     usage("You must provide some arguments")    unless ($host_arg || $group_arg || $showversion);
-    usage("Number of threads must be positive") unless ($nthreads && $nthreads > 0);
+    usage("Current version number: $version")   if ( $showversion );
+    usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 }
 
 ##############
