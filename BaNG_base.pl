@@ -72,25 +72,6 @@ sub sanityprogcheck {
     }
 }
 
-sub chkLastBkp {
-    my ($dir) = @_;
-
-    my $bkpExist = 0;   # 0=no backup available, 1=previous backup available
-    my ($lastBkp, $msg);
-
-    if (( ! -d $dir ) || ( ! -e "$dir/lastdst")){
-        $bkpExist = 0;
-        $msg      = "no previous backup found!";
-    }
-    else{
-        $bkpExist = 1;
-        $lastBkp  = `cat $dir/lastdst`;
-        $msg      = $lastBkp;
-        chomp($msg);
-    }
-    return $bkpExist, $msg;
-}
-
 sub get_report_header {
     my $starttime  = `date`;
     my $startstamp = `date +%s`;

@@ -79,6 +79,17 @@ sub queue_backup {
     # stop if trying to do bulk backup if it's not allowed
     return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW});
 
+    # make sure host is online
+    my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
+    print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
+    if( !$conn_status ) {
+        print "Error: host $host is offline\n" if $debug;
+        return 1;
+    }
+
+    # check if last backup exists
+    my ($lastbkpExists, $lastbkp) = chkLastBkp($host, $group);
+
     # get list of partitions to back up
     my (@src_part) = split ( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION});
     print "Number of partitions: " . ($#src_part+1) . " ( @src_part )\n" if $debug;
@@ -86,10 +97,10 @@ sub queue_backup {
     # optionally queue each subfolder
     foreach my $part (@src_part) {
         if( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
-            queue_remote_subfolders($host,$group, $part);
+            queue_remote_subfolders($host,$group, $lastbkp, $part);
         } else {
             # queue whole partitions
-            push @queue, "${host}_${group}_$part";
+            push @queue, "${host}_${group}_${lastbkp}_${part}";
         }
     }
 
@@ -141,22 +152,11 @@ sub thread_work {
 #
 sub do_backup {
     my ($queue_content) = @_;
-    my ($host, $group, $path) = split( /_/, $queue_content);
+    my ($host, $group, $lastbkp, $path) = split( /_/, $queue_content);
 
-    print "sub do_backup( $host, $group, $path )\n" if $debug;
+    print "sub do_backup( $host, $group, $lastbkp, $path )\n" if $debug;
 
-    # make sure host is online
-    my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
-    print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
-    die "Error: host is offline\n" unless $conn_status;
-
-    eval_rsync_options($host,$group);
-
-    # if BKP_STORE_MODUS == BTRFS
-        # use rsync with btrfs snapshots
-    # else
-        # use rsync with --link-dest
-    # endif
+    my $rsync_options = eval_rsync_options($host,$group);
 
     print "Backup host $host group $group\n" if $debug;
 
@@ -178,7 +178,7 @@ sub do_wipe {
 # Add list of remote folders to thread queue
 #
 sub queue_remote_subfolders {
-    my ($host, $group, $partition) = @_;
+    my ($host, $group, $lastbkp, $partition) = @_;
 
     $partition =~ s/://;
 
@@ -188,7 +188,7 @@ sub queue_remote_subfolders {
 
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
-        push @queue, "${host}_${group}_$remotedir";
+        push @queue, "${host}_${group}_${lastbkp}_${remotedir}";
     }
 
     return 1;
@@ -213,6 +213,12 @@ sub eval_rsync_options {
     $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
     $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
 
+    # if BKP_STORE_MODUS == BTRFS
+        # use rsync with btrfs snapshots
+    # else
+        # use rsync with --link-dest
+    # endif
+
     if ($hostconfig->{BKP_RSYNC_RSHELL}){
         if ($hostconfig->{BKP_GWHOST}){
             $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST} ";
@@ -231,6 +237,31 @@ sub eval_rsync_options {
     print "Rsync Options: $rsync_options\n" if $debug;
 
     return $rsync_options;
+}
+
+#################################
+# Get/Check path of last backup
+#
+sub chkLastBkp {
+    my ($host, $group) = @_;
+
+    my ($lastbkpExists, $lastbkp);
+    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host" ;
+    my $lastdstfile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}" ;
+
+    if ( -d $bkpdir  && -e $lastdstfile ){
+        $lastbkpExists = 1;
+        $lastbkp       = `cat $lastdstfile`;
+        chomp($lastbkp);
+    } else {
+        $lastbkpExists = 0;
+        $lastbkp       = "no previous backup found!";
+    }
+
+    print "sub chkLastBkp: lastbkpExists = $lastbkpExists, lastbkp = $lastbkp\n" if $debug;
+
+    return $lastbkpExists, $lastbkp;
 }
 
 #################################
