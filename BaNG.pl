@@ -14,6 +14,8 @@ use Cwd 'abs_path';
 use File::Basename;
 use lib dirname(abs_path($0))."/lib";
 use Getopt::Long qw(:config no_auto_abbrev);
+use threads;
+use Thread::Queue;
 
 use BaNG::Hosts;
 use BaNG::Config;
@@ -31,6 +33,7 @@ my $host_arg        = '';
 my $nthreads_arg    = '';
 
 my @queue;
+my @threads;
 
 
 #################################
@@ -57,30 +60,11 @@ if( !@queue ) {
 }
 
 # use threads to empty queue
-initialize_threads();
+start_threads();
 
 
 exit 0;
 
-
-#################################
-# Initialize threads
-#
-sub initialize_threads {
-
-    # define number of threads
-    if( $nthreads_arg ){
-        # If nthreads was defined by cli argument, use it
-        $nthreads = $nthreads_arg;
-        print "Using nthreads = $nthreads from command line argument\n" if $debug;
-    } elsif ( $host_arg && $group_arg) {
-        # If no nthreads was given, and we back up a single host and group, get nthreads from its config
-        $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
-        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $debug;
-    }
-
-    return 1;
-}
 
 #################################
 # Add task to make new backup to queue
@@ -105,7 +89,7 @@ sub queue_backup {
             queue_remote_subfolders($host,$group, $part);
         } else {
             # queue whole partitions
-            push @queue, $part;
+            push @queue, "${host}_${group}_$part";
         }
     }
 
@@ -115,10 +99,51 @@ sub queue_backup {
 }
 
 #################################
+# Start threads
+#
+sub start_threads {
+
+    # define number of threads
+    if( $nthreads_arg ){
+        # If nthreads was defined by cli argument, use it
+        $nthreads = $nthreads_arg;
+        print "Using nthreads = $nthreads from command line argument\n" if $debug;
+    } elsif ( $host_arg && $group_arg) {
+        # If no nthreads was given, and we back up a single host and group, get nthreads from its config
+        $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
+        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $debug;
+    }
+
+    my $Q = Thread::Queue->new;
+    @threads = map threads->create( \&thread_work, $Q ), 1 .. $nthreads;
+    $Q->enqueue($_) for sort @queue;
+    $Q->enqueue( (undef) x $nthreads );
+    $_->join for @threads;
+
+    return 1;
+}
+
+#################################
+# Work done by each thread
+#
+sub thread_work {
+    my $Q   = shift;
+    my $tid = threads->tid;
+    while (my $queue_content = $Q->dequeue) {
+
+        print "Thread $tid working on $queue_content \n" if $debug;
+        do_backup($queue_content);
+    }
+}
+
+#################################
 # Make new backup
 #
 sub do_backup {
-    my ($host, $group) = @_;
+    my ($queue_content) = @_;
+    my ($host, $group, $path) = split( /_/, $queue_content);
+
+    print "sub do_backup( $host, $group, $path )\n" if $debug;
 
     # make sure host is online
     my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
@@ -163,7 +188,7 @@ sub queue_remote_subfolders {
 
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
-        push @queue, $remotedir;
+        push @queue, "${host}_${group}_$remotedir";
     }
 
     return 1;

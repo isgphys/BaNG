@@ -1,64 +1,10 @@
-use YAML::Tiny qw(LoadFile Dump);
-use threads qw(yield);
-use threads::shared;
-use Thread::Queue;
-use List::MoreUtils qw(uniq);
-use POSIX qw(strftime);
 use IPC::Open3;
-use File::Find::Rule;
-use Switch;
-
-my $queue_typ       = 0;
-my $queue_content   = '';
-my $host_source = "localhost";
 
 #################################
 # Sanity checks for programs
 #
 sanityprogcheck("$global_settings->{RSYNC}");
 sanityprogcheck("$global_settings->{BTRFS}");
-
-
-#*****************************************************************
-# Threading setup
-#
-my $Q = Thread::Queue->new;
-my @threads = map threads->create( \&thread, $Q ), 1 .. $nthreads;
-$Q->enqueue($_) for sort @queue;
-$Q->enqueue( (undef) x $nthreads );
-$_->join for @threads;
-
-sub thread {
-    my $Q   = shift;
-    my $tid = threads->tid;
-    while (my $queue_content = $Q->dequeue) {
-
-        #****** do work ******
-        logit($host_source, $queue_content, "initialize backup sequence");
-
-        if ($debug && ($debuglevel == 2)) {
-            switch ($queue_typ) {
-                case(1) {
-                    print "queue_switch: $queue_typ $target_host $queue_content\n";
-                    print "do_queue_work: $target_host $queue_content\n";
-                }
-                else    {
-                    print "queue_switch: $queue_typ - wrong queue_typ\n";
-                }
-            }
-        }
-
-        do_work($queue_typ, $queue_content, $conn_test);
-
-        logit($host_source, $queue_content , "backup sequence done");
-
-        #****** end work ******
-    }
-}
-
-#********************************************************************
-# Subroutine
-#*******************************************************************-
 
 ###########################
 # do the work!
@@ -161,20 +107,4 @@ EOF
 #Exclude-File: $EXCLUDEFROM
 #last backup: $LASTMSG
 #----------------------------------------------------
-}
-
-sub get_queue_hosts_enabled {
-    my ($kat) = @_;
-
-    @configfiles = find_enabled_hosts("*_$kat.yaml", $path_enabled);
-
-    print "Find enabled config: @configfiles\n" if $debug;
-
-    foreach my $configfile (@configfiles) {
-        my ($bulkhost) = $configfile =~ /^([\w\d-]+)_[\w\d-]+\.yaml/;
-        read_configfile($bulkhost, $kat);
-        print "Extracted bulk Hostname: $bulkhost\n" if $debug;
-        push @queue, $bulkhost;
-    }
-    return @queue;
 }
