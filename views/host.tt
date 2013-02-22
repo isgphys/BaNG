@@ -3,7 +3,8 @@
     <div>
       <table id="hostinfo">
         <thead>
-          <th colspan=2>Jobs (<%hosts.size%>)</th>
+          <th colspan="2">Jobs (<%hosts.size%>)</th>
+          <th>Bulk allow</th>
         </thead>
         <tbody>
           <% IF hosts.size %>
@@ -11,6 +12,7 @@
               <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
                 <td><% hosts.$hostname.group %></td>
                 <td><% hosts.$hostname.configfile %></td>
+                <td width=20 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
               </tr>
             <% END %>
           <% ELSE %>
@@ -31,7 +33,7 @@
                   <table>
                     <thead>
                       <tr>
-                        <th colspan="8" align="left"<%- IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<%- END %>><% hostname %></th>
+                        <th colspan="7" align="left"<%- IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<%- END %>><% hostname %></th>
                       </tr>
                       <tr>
                         <th>Min</th>
@@ -41,7 +43,6 @@
                         <th>Day of Week</th>
                         <th>User</th>
                         <th>Exec-Command</th>
-                        <th class="center">Bulk allow</th>
                       </tr>
                     </thead>
                     <% IF hosts.$hostname.cronconfig %>
@@ -54,12 +55,11 @@
                           <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFWEEK %></td>
                           <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_USER %></td>
                           <td><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_COMMAND %></td>
-                          <td<%- IF hosts.$hostname.cronconfig.$worktyp.BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                        </tr>
                   <% END %>
                 <% ELSE %>
                   <tr>
-                    <td colspan="8" class="center">N/A</td>
+                    <td colspan="7" class="center">N/A</td>
                   </tr>
                 <% END %>
             </table>
