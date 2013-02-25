@@ -119,7 +119,7 @@ sub get_host_config {
         my $isEnabled  = $hostconfig->{BKP_ENABLED};
         my $isBulk     = $hostconfig->{BKP_BULK_ALLOW};
         my $css_class  = $isEnabled ? "active " : "";
-           $css_class .= $isBulk ? "nobulk " : "";
+           $css_class .= $isBulk ? "" : "nobulk ";
         my $status     = $isEnabled ? "enabled" : "disabled";
 
         $hosts{"$hostname-$group"}= {
