@@ -5,6 +5,7 @@ use BaNG::Reporting;
 use POSIX qw(strftime);
 use File::Find::Rule;
 use YAML::Tiny qw(LoadFile Dump);
+use Data::Dumper;
 
 use Sys::Hostname;
 use Cwd 'abs_path';
@@ -13,6 +14,7 @@ use Exporter 'import';
 our @EXPORT = qw(
     %globalconfig
     %hosts
+    %cronjobs
     $prefix
     $config_path
     $config_global
@@ -20,6 +22,7 @@ our @EXPORT = qw(
     get_global_config
     get_default_config
     get_host_config
+    get_cronjob_config
     read_configfile
     split_configname
 );
@@ -27,6 +30,7 @@ our @EXPORT = qw(
 our %globalconfig;  # App-Settings
 our %defaultconfig;
 our %hosts;
+our %cronjobs;
 our $servername       = hostname;
 our $prefix           = dirname(abs_path($0));
 our $config_path      = "$prefix/etc";
@@ -113,7 +117,9 @@ sub get_host_config {
         my ($hostname,$group) = split_configname($hostconfigfile);
         my $hostconfig = read_configfile($hostname,$group);
         my $isEnabled  = $hostconfig->{BKP_ENABLED};
+        my $isBulk     = $hostconfig->{BKP_BULK_ALLOW};
         my $css_class  = $isEnabled ? "active " : "";
+           $css_class .= $isBulk ? "nobulk " : "";
         my $status     = $isEnabled ? "enabled" : "disabled";
 
         $hosts{"$hostname-$group"}= {
@@ -123,11 +129,34 @@ sub get_host_config {
             'configfile' => $hostconfigfile,
             'css_class'  => $css_class,
             'hostconfig' => $hostconfig,
-            'cronconfig' => read_cronfile($hostname,$group),
         };
     }
 
     return 1;
+}
+
+sub get_cronjob_config {
+
+    my $cronjobsfile  = "$globalconfig{path_cronjobs}/cronjobs.yaml";
+
+    if ( sanityfilecheck($cronjobsfile) ) {
+
+        my $cronjobslist  = LoadFile($cronjobsfile);
+        undef %cronjobs;
+
+        foreach my $cronjob ( keys %{$cronjobslist} ) {
+            my ($host,$group) = split( /_/, $cronjob );
+
+            $cronjobs{"$cronjob"}= {
+                'hostname' => $host,
+                'group'    => $group,
+                'ident'    => "$host-$group",
+                'BACKUP'   => $cronjobslist->{$cronjob}->{BACKUP},
+                'WIPE'     => $cronjobslist->{$cronjob}->{WIPE},
+            };
+        }
+        return 1;
+    }
 }
 
 sub read_configfile {
@@ -155,23 +184,6 @@ sub read_configfile {
 
     }
     return $settings;
-}
-
-sub read_cronfile {
-    my ($host, $group) = @_;
-    my $cronfile;
-
-    $cronfile  = "$globalconfig{path_cronjobs}/cron_$host\_$group.yaml";
-
-    if ( sanityfilecheck($cronfile) ) {
-
-        my $settings_cron  = LoadFile($cronfile);
-
-        return $settings_cron;
-    }
-    else{
-       return 0;
-    }
 }
 
 1;

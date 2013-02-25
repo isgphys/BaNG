@@ -1,13 +1,13 @@
 #croninfo {
-    width: 800px;
+    width: 500px;
 }
 
-#croninfo th.active {
-    background-color: lightgreen;
+.active {
+    background-color: lightgreen !important;
 }
 
 #croninfo .croninfosmall {
-    width: 800px;
+    width: 500px;
 }
 
 #croninfo tr.wipe {
@@ -26,4 +26,9 @@
 #croninfo .notallow {
     background: url("/images/not-allow.png") no-repeat  scroll transparent;
     background-position: center center
+}
+
+#croninfo .nobulk {
+    background: url("/images/nobulk.png") no-repeat  scroll transparent;
+    background-position: right center
 }

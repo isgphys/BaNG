@@ -1,70 +1,66 @@
 <h2>Host Info</h2>
 <h3><% host %></h3>
-    <div>
-      <table id="hostinfo">
-        <thead>
-          <th colspan="2">Jobs (<%hosts.size%>)</th>
-          <th>Bulk allow</th>
-        </thead>
-        <tbody>
-          <% IF hosts.size %>
-            <% FOREACH hostname IN hosts.keys.sort %>
-              <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-                <td><% hosts.$hostname.group %></td>
-                <td><% hosts.$hostname.configfile %></td>
-                <td width=20 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-              </tr>
-            <% END %>
-          <% ELSE %>
-            <tr>
-              <td>N/A</td>
+  <div>
+    <table id="hostinfo">
+      <thead>
+        <th colspan="2">Jobs (<%hosts.size%>)</th>
+        <th>Bulk allow</th>
+      </thead>
+      <tbody>
+        <% IF hosts.size %>
+          <% FOREACH hostname IN hosts.keys.sort %>
+            <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
+              <td><% hosts.$hostname.group %></td>
+              <td><% hosts.$hostname.configfile %></td>
+              <td width=20 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
             </tr>
-          <%END%>
-        </tbody>
-      </table>
-    </div>
-<br>
-    <div>
-        <h3>CronJobs (ego-run)</h3>
-          <table id="croninfo">
-            <% FOREACH hostname IN hosts.keys.sort %>
-              <% IF hosts.$hostname.cronconfig %>
-                <tr><td>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th colspan="7" align="left"<%- IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<%- END %>><% hostname %></th>
-                      </tr>
-                      <tr>
-                        <th>Min</th>
-                        <th>Hour</th>
-                        <th>Day of Month</th>
-                        <th>Month</th>
-                        <th>Day of Week</th>
-                        <th>User</th>
-                        <th>Exec-Command</th>
-                      </tr>
-                    </thead>
-                    <% IF hosts.$hostname.cronconfig %>
-                      <% FOREACH worktyp IN hosts.$hostname.cronconfig.keys.sort %>
-                        <tr <%- IF worktyp == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
-                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MIN %></td>
-                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_HOUR %></td>
-                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFMONTH %></td>
-                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MONTH %></td>
-                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFWEEK %></td>
-                          <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_USER %></td>
-                          <td><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_COMMAND %></td>
-                       </tr>
-                  <% END %>
-                <% ELSE %>
-                  <tr>
-                    <td colspan="7" class="center">N/A</td>
-                  </tr>
-                <% END %>
-            </table>
+          <% END %>
+        <% ELSE %>
+          <tr>
+            <td>N/A</td>
           </tr>
-        <% END %>
-      <%  END %>
+        <%END%>
+      </tbody>
     </table>
   </div>
+<br>
+  <div>
+    <h3>CronJobs (ego-run)</h3>
+      <table id="croninfo">
+        <% FOREACH hostname IN hosts.keys.sort %>
+          <% IF hosts.$hostname.cronconfig %>
+            <tr><td>
+              <table>
+                <thead>
+                  <tr>
+                    <th colspan="5" align="left"<%- IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<%- END %>><% hostname %></th>
+                  </tr>
+                  <tr>
+                    <th>Min</th>
+                    <th>Hour</th>
+                    <th>Day of Month</th>
+                    <th>Month</th>
+                    <th>Day of Week</th>
+                  </tr>
+                </thead>
+                <% IF hosts.$hostname.cronconfig %>
+                  <% FOREACH worktyp IN hosts.$hostname.cronconfig.keys.sort %>
+                    <tr <%- IF worktyp == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
+                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MIN %></td>
+                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_HOUR %></td>
+                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFMONTH %></td>
+                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_MONTH %></td>
+                      <td class="center"><% hosts.$hostname.cronconfig.$worktyp.CRONTAB_DAYOFWEEK %></td>
+                   </tr>
+              <% END %>
+            <% ELSE %>
+              <tr>
+                <td colspan="5" class="center">N/A</td>
+              </tr>
+            <% END %>
+        </table>
+      </tr>
+      <% END %>
+    <%  END %>
+  </table>
+</div>
