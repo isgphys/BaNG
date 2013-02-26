@@ -53,6 +53,7 @@ sub get_global_config {
 
     $globalconfig{path_hostconfig}      = "$config_path/$global_settings->{HostConfigFolder}";
     $globalconfig{path_cronjobs}       = "$config_path/$global_settings->{CronJobsFolder}";
+    $globalconfig{path_excludes}       = "$config_path/$global_settings->{ExcludesFolder}";
 
     $globalconfig{path_rsync}          = "$global_settings->{RSYNC}";
     $globalconfig{path_btrfs}          = "$global_settings->{BTRFS}";
