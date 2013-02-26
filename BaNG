@@ -156,9 +156,13 @@ sub do_backup {
 
     print "sub do_backup( $host, $group, $lastbkp, $path )\n" if $debug;
 
+    my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
+    my $target_path   = targetpath($host, $group);
+    $target_path     .= '/' . eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
 
     print "Backup host $host group $group\n" if $debug;
+    print "Rsync Command: $rsync_cmd $rsync_options $host$path $target_path\n" if $debug;
 
     return 1;
 }
@@ -226,13 +230,25 @@ sub eval_rsync_options {
 
     # use links if told to and if lastbkp exists
     if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
-        $rsync_options .= "--link-dest $hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host/$lastbkp ";
+        $rsync_options .= "--link-dest " . targetpath($host, $group) . "/$lastbkp ";
     }
 
     $rsync_options =~ s/\s+$//; # remove trailing space
     print "Rsync Options: $rsync_options\n" if $debug;
 
     return $rsync_options;
+}
+
+#################################
+# Define target path of backup
+#
+sub targetpath {
+    my ($host, $group) = @_;
+
+    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
+
+    return $target_path;
 }
 
 #################################
