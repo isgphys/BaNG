@@ -115,13 +115,13 @@ sub get_host_config {
 
     foreach my $hostconfigfile (@hostconfigs) {
         my ($hostname,$group) = split_configname($hostconfigfile);
-        my $hostconfig = read_configfile($hostname,$group);
-        my $isEnabled  = $hostconfig->{BKP_ENABLED};
-        my $isBulkbkp  = $hostconfig->{BKP_BULK_ALLOW};
-        my $isBulkwipe = $hostconfig->{WIPE_BULK_ALLOW};
-        my $css_class  = $isEnabled ? "active " : "";
-           $css_class .= $isBulkbkp == 0 && $isBulkwipe == 0 ? "nobulk " : "" ;
-        my $status     = $isEnabled ? "enabled" : "disabled";
+        my $hostconfig     = read_configfile($hostname,$group);
+        my $isEnabled      = $hostconfig->{BKP_ENABLED};
+        my $isBulkbkp      = $hostconfig->{BKP_BULK_ALLOW};
+        my $isBulkwipe     = $hostconfig->{WIPE_BULK_ALLOW};
+        my $css_class      = $isEnabled ? "active " : "";
+        my $nobulk_css_class = $isBulkbkp == 0 && $isBulkwipe == 0 ? "nobulk " : "" ;
+        my $status         = $isEnabled ? "enabled" : "disabled";
 
         $hosts{"$hostname-$group"}= {
             'hostname'   => $hostname,
@@ -129,6 +129,7 @@ sub get_host_config {
             'status'     => $status,
             'configfile' => $hostconfigfile,
             'css_class'  => $css_class,
+            'nobulk_css_class'  => $nobulk_css_class,
             'hostconfig' => $hostconfig,
         };
     }

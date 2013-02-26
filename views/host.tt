@@ -3,8 +3,14 @@
   <div>
     <table id="hostinfo">
       <thead>
-        <th colspan="2">Jobs (<%hosts.size%>)</th>
-        <th>Bulk allow</th>
+        <tr>
+            <th colspan="2" rowspan=2 align="left">Jobs (<%hosts.size%>)</th>
+            <th colspan="2" class="center">Bulk</th>
+        </tr>
+        <tr>
+            <th>Bkp</th>
+            <th>Wipe</th>
+        </tr>
       </thead>
       <tbody>
         <% IF hosts.size %>
@@ -12,7 +18,8 @@
             <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
               <td><% hosts.$hostname.group %></td>
               <td><% hosts.$hostname.configfile %></td>
-              <td width=20 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+              <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+              <td width=30 <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
             </tr>
           <% END %>
         <% ELSE %>
