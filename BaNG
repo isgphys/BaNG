@@ -94,14 +94,14 @@ sub queue_backup {
     my (@src_part) = split ( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION});
     print "Number of partitions: " . ($#src_part+1) . " ( @src_part )\n" if $debug;
 
-    # optionally queue each subfolder
-    foreach my $part (@src_part) {
-        if( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+    # optionally queue each subfolder of the partitions
+    if( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+        foreach my $part (@src_part) {
             queue_remote_subfolders($host,$group, $lastbkp, $part);
-        } else {
-            # queue whole partitions
-            push @queue, "${host}_${group}_${lastbkp}_${part}";
         }
+    } else {
+        # queue list of partitions as a whole
+        push @queue, "${host}_${group}_${lastbkp}_@src_part";
     }
 
     print "Queued backup of host $host group $group\n" if $debug;
