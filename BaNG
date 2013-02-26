@@ -158,11 +158,11 @@ sub do_backup {
 
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
-    my $target_path   = targetpath($host, $group);
-    $target_path     .= '/' . eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+    my $rsync_source  = "$host$path";
+    my $rsync_target  = eval_rsync_target($host, $group);
+    print "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target\n" if $debug;
 
     print "Backup host $host group $group\n" if $debug;
-    print "Rsync Command: $rsync_cmd $rsync_options $host$path $target_path\n" if $debug;
 
     return 1;
 }
@@ -198,6 +198,30 @@ sub queue_remote_subfolders {
     return 1;
 }
 #################################
+# Evaluate rsync target path
+#
+sub eval_rsync_target {
+    my ($host, $group) = @_;
+
+    my $rsync_target = targetpath($host, $group);
+
+    if ($hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+        $rsync_target .= "/current";
+
+        if ( !-d $rsync_target ) {
+            print "$globalconfig{path_btrfs} subvol create $rsync_target\n" if $debug;
+        }
+    } else {
+        if ( !-d $rsync_target ) {
+            print "mkdir -p $rsync_target\n" if $debug;
+        }
+
+        $rsync_target .= '/' . eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+    }
+
+    return $rsync_target;
+}
+#################################
 # Evaluate rsync options
 #
 sub eval_rsync_options {
@@ -216,9 +240,16 @@ sub eval_rsync_options {
     $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
     $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
     $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
+    $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
-    $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} "           if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
-    $rsync_options .= "--exclude-from=$config_path/$hostconfig->{BKP_EXCLUDE_FILE} " if $hostconfig->{BKP_EXCLUDE_FILE};
+    if ($hostconfig->{BKP_EXCLUDE_FILE}) {
+        my $excludefile = "$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+        } else {
+            print "Warning: excludefile $excludefile not found.\n" if $debug;
+        }
+    }
 
     if ($hostconfig->{BKP_RSYNC_RSHELL}){
         if ($hostconfig->{BKP_GWHOST}){
@@ -234,7 +265,6 @@ sub eval_rsync_options {
     }
 
     $rsync_options =~ s/\s+$//; # remove trailing space
-    print "Rsync Options: $rsync_options\n" if $debug;
 
     return $rsync_options;
 }
