@@ -88,7 +88,7 @@ sub queue_backup {
     }
 
     # check if last backup exists
-    my ($lastbkpExists, $lastbkp) = chkLastBkp($host, $group);
+    my $lastbkp = chkLastBkp($host, $group);
 
     # get list of partitions to back up
     my (@src_part) = split ( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION});
@@ -245,23 +245,19 @@ sub eval_rsync_options {
 sub chkLastBkp {
     my ($host, $group) = @_;
 
-    my ($lastbkpExists, $lastbkp);
+    my $lastbkp     = "nolastbkp";
     my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host" ;
-    my $lastdstfile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}" ;
+    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
+    my $lastdstfile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}";
 
     if ( -d $bkpdir  && -e $lastdstfile ){
-        $lastbkpExists = 1;
         $lastbkp       = `cat $lastdstfile`;
         chomp($lastbkp);
-    } else {
-        $lastbkpExists = 0;
-        $lastbkp       = "no previous backup found!";
     }
 
-    print "sub chkLastBkp: lastbkpExists = $lastbkpExists, lastbkp = $lastbkp\n" if $debug;
+    print "sub chkLastBkp: lastbkp = $lastbkp\n" if $debug;
 
-    return $lastbkpExists, $lastbkp;
+    return $lastbkp;
 }
 
 #################################
