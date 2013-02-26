@@ -2,7 +2,7 @@
     width: 500px;
 }
 
-.active {
+#croninfo .active {
     background-color: lightgreen !important;
 }
 

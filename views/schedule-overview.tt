@@ -6,9 +6,11 @@
         <table class="croninfosmall">
           <thead>
             <tr>
-              <th colspan="5" align="left" height="20"
-                <%- IF hosts.${cronjobs.$cronjob.ident}.css_class %> class="<% hosts.${cronjobs.$cronjob.ident}.css_class %>"
-                <%- END %>><% cronjobs.$cronjob.ident %>
+              <th colspan="6" align="left" height="20"
+                <%- IF hosts.${cronjobs.$cronjob.ident}.css_class %>
+                  class="<% hosts.${cronjobs.$cronjob.ident}.css_class %>"
+                  <%- END %>>
+                  <% cronjobs.$cronjob.ident %>
               </th>
             </tr>
             <tr>
@@ -17,6 +19,7 @@
               <th class="center">Day of Month</th>
               <th class="center">Month</th>
               <th class="center">Day of Week</th>
+              <th class="center">Bulk</th>
             </tr>
           </thead>
           <thbody>
@@ -28,10 +31,12 @@
                   <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
                   <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
                   <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
+                  <% IF jobtype == "BACKUP" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
+                  <td width=20 <%- IF hosts.${cronjobs.$cronjob.ident}.hostconfig.$bulkflag %> class="hook"<%- ELSE %> class="notallow"<%- END %>></td>
                 </tr>
               <% ELSE %>
                 <tr>
-                  <td colspan="5" class="center"><% jobtype %> - N/A</td>
+                  <td colspan="6" class="center"><% jobtype %> - N/A</td>
                 </tr>
               <% END %>
             <% END %>
