@@ -156,7 +156,7 @@ sub do_backup {
 
     print "sub do_backup( $host, $group, $lastbkp, $path )\n" if $debug;
 
-    my $rsync_options = eval_rsync_options($host,$group);
+    my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
 
     print "Backup host $host group $group\n" if $debug;
 
@@ -197,7 +197,7 @@ sub queue_remote_subfolders {
 # Evaluate rsync options
 #
 sub eval_rsync_options {
-    my ($host, $group) = @_;
+    my ($host, $group, $lastbkp) = @_;
     my $rsync_options  = '';
     my $hostconfig = $hosts{"$host-$group"}->{hostconfig};
 
@@ -213,11 +213,8 @@ sub eval_rsync_options {
     $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
     $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
 
-    # if BKP_STORE_MODUS == BTRFS
-        # use rsync with btrfs snapshots
-    # else
-        # use rsync with --link-dest
-    # endif
+    $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} "           if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
+    $rsync_options .= "--exclude-from=$config_path/$hostconfig->{BKP_EXCLUDE_FILE} " if $hostconfig->{BKP_EXCLUDE_FILE};
 
     if ($hostconfig->{BKP_RSYNC_RSHELL}){
         if ($hostconfig->{BKP_GWHOST}){
@@ -226,11 +223,10 @@ sub eval_rsync_options {
             $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} ";
         }
     }
-    if ($hostconfig->{BKP_RSYNC_RSHELL_PATH}){
-        $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} ";
-    }
-    if ($hostconfig->{BKP_EXCLUDE_FILE}){
-        $rsync_options .= "--exclude-from=$config_path/$hostconfig->{BKP_EXCLUDE_FILE} ";
+
+    # use links if told to and if lastbkp exists
+    if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
+        $rsync_options .= "--link-dest $hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host/$lastbkp ";
     }
 
     $rsync_options =~ s/\s+$//; # remove trailing space
