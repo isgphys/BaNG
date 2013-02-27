@@ -38,13 +38,15 @@ post '/add' => sub {
 get '/:host' => sub {
     get_global_config();
     get_host_config(param('host'));
+    get_cronjob_config();
 
     template 'host', {
         section    => 'host',
         remotehost => request->remote_host,
         webDancerEnv   => config->{run_env},
         host       => param('host'),
-        hosts      => \%hosts ,
+        hosts      => \%hosts,
+        cronjobs     => \%cronjobs,
     };
 };
 

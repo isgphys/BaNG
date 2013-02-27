@@ -42,7 +42,7 @@
             <% END %>
           </tbody>
         </table>
-      </td></tr><tr><td>&nbsp</td></tr>
+      </td></tr>
     <% END %>
   </table>
 </div>

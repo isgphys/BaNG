@@ -2,6 +2,10 @@
     width: 500px;
 }
 
+#croninfo td {
+    height: 20px;
+}
+
 #croninfo .active {
     background-color: lightgreen !important;
 }
