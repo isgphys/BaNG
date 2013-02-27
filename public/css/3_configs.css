@@ -56,6 +56,13 @@
     text-align: left;
 }
 
+#configslist img.look {
+    padding: 0px 5px 0px 2px;
+    content: url("/images/zoom-3.png") no-repeat transparent;
+    width: 15px;
+    height: 15px;
+}
+
 #configslist td {
     height: 24px;
     vertical-align: top;
@@ -82,7 +89,10 @@
 
 #configslist .expander {
     width: 400px;
-    cursor: pointer
+    cursor: pointer;
+    background: url("/images/go-bottom-3.png") no-repeat transparent;
+    background-size: 15px 15px;
+    background-position: 99% 7px;
 }
 
 #config_details table {
@@ -96,4 +106,3 @@
 #config_details tr:nth-child(even) {
     background-color: #eee;
 }
-
