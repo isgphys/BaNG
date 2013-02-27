@@ -12,7 +12,7 @@
       <% FOREACH hostname IN hosts.keys.sort %>
         <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
             <td>
-              <a href="/host/<%hosts.$hostname.hostname %>"><img class="look"> <% hosts.$hostname.hostname %></a>
+              <a href="/host/<%hosts.$hostname.hostname %>"><img class="look" src="/images/zoom-3.png"> <% hosts.$hostname.hostname %></a>
             </td>
             <td>
               <% hosts.$hostname.group %>

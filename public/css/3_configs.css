@@ -58,7 +58,6 @@
 
 #configslist img.look {
     padding: 0px 5px 0px 2px;
-    content: url("/images/zoom-3.png") no-repeat transparent;
     width: 15px;
     height: 15px;
 }
