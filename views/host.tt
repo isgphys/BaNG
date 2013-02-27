@@ -95,7 +95,7 @@
                 <% IF cronjobs.$cronjob.hostname == "BULK" || ( cronjobs.$cronjob.group == "BULK" && cronjobs.$cronjob.hostname == host ) %>
                     <% IF cronjobs.$cronjob.hostname == "BULK" %>
                         <% bulkident = host _ "-"_ cronjobs.$cronjob.group %>
-                        <% bulk_act = hosts.$runident.css_class %>
+                        <% bulk_act = hosts.$bulkident.css_class %>
                     <% ELSE %>
                         <% FOREACH curgroup IN hosts.keys.sort %>
                             <% IF hosts.$curgroup.status == "enabled" %><% bulk_act = hosts.$curgroup.css_class %><% ELSE %><% NEXT %><% END %>
