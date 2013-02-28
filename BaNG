@@ -174,7 +174,7 @@ sub execute_rsync {
 
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
-    my $rsync_source  = "$host\"$path\"";
+    my $rsync_source  = "$host$path";
     my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
     print "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target\n" if $debug;
 
@@ -254,11 +254,13 @@ sub queue_remote_subfolders {
 
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
-        push @queue, "${host}__${group}__${lastbkp}__${bkptimestamp}__:${remotedir}";
+        $remotedir =~ s| |\\ |g;
+        push @queue, "${host}__${group}__${lastbkp}__${bkptimestamp}__:'${remotedir}'";
     }
 
     return 1;
 }
+
 #################################
 # Evaluate rsync target path
 #
@@ -275,7 +277,7 @@ sub eval_rsync_target {
         }
     } else {
         if ( !-d $rsync_target ) {
-            mkdir $rsync_target;
+            system("mkdir -p $rsync_target");
         }
 
         $rsync_target .= "/$bkptimestamp";
@@ -399,7 +401,7 @@ sub chkLastBkp {
     my $lastBkpFile = LastBkpFile($host, $group);
 
     if ( -e $lastBkpFile ){
-        my $lastbkp = `cat $lastBkpFile`;
+        $lastbkp = `cat $lastBkpFile`;
         chomp($lastbkp);
     }
 
