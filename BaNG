@@ -102,7 +102,7 @@ sub queue_backup {
         }
     } else {
         # queue list of partitions as a whole
-        push @queue, "${host}_${group}_${lastbkp}_@src_part";
+        push @queue, "${host}__${group}__${lastbkp}__0__@src_part";
     }
 
     print "Queued backup of host $host group $group\n" if $debug;
@@ -153,12 +153,12 @@ sub thread_work {
 #
 sub do_backup {
     my ($queue_content) = @_;
-    my ($host, $group, $lastbkp, $path) = split( /_/, $queue_content);
+    my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content);
 
-    print "sub do_backup( $host, $group, $lastbkp, $path )\n" if $debug;
+    print "sub do_backup( $host, $group, $lastbkp, $bkptimestamp, $path )\n" if $debug;
 
     return unless createLockFile($host, $group, $path);
-    execute_rsync($host, $group, $lastbkp, $path);
+    execute_rsync($host, $group, $lastbkp, $bkptimestamp, $path);
     removeLockFile($host, $group, $path);
 
     return 1;
@@ -168,10 +168,9 @@ sub do_backup {
 # Excute rsync
 #
 sub execute_rsync {
-    my ($host, $group, $lastbkp, $path) = @_;
+    my ($host, $group, $lastbkp, $bkptimestamp, $path) = @_;
 
-    my $bkptimestamp  = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
-    chomp($bkptimestamp);
+    $bkptimestamp = eval_bkptimestamp($host, $group) unless $bkptimestamp;
 
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
@@ -228,6 +227,18 @@ sub do_wipe {
 }
 
 #################################
+# Evaluate backup timestamp
+#
+sub eval_bkptimestamp {
+    my ($host, $group) = @_;
+
+    my $bkptimestamp = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+    chomp($bkptimestamp);
+
+    return $bkptimestamp;
+}
+
+#################################
 # Add list of remote folders to thread queue
 #
 sub queue_remote_subfolders {
@@ -239,9 +250,11 @@ sub queue_remote_subfolders {
     my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
     print "eval subfolders command: @remotedirlist\n" if $debug;
 
+    my $bkptimestamp = eval_bkptimestamp($host, $group);
+
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
-        push @queue, "${host}_${group}_${lastbkp}_:${remotedir}";
+        push @queue, "${host}__${group}__${lastbkp}__${bkptimestamp}__:${remotedir}";
     }
 
     return 1;
