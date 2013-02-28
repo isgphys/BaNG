@@ -25,8 +25,8 @@ my $BackupStartHour      = 18;  # backups started after X o'clock belong to next
 sub statistics_decode_path {
     my ($path) = @_;
 
-    $path =~ s|_|/|g;                               # decode underscores to slashes
-    $path = '/' . $path unless ($path =~ m|^/|);    # should always start with slash
+    $path =~ s|_|/|g;                           # decode underscores to slashes
+    $path = '/' . $path unless $path =~ m|^/|;  # should always start with slash
 
     return $path;
 }
@@ -96,8 +96,8 @@ sub statistics_cumulated_json {
 
     # gather information into hash
     my %CumulateByDate = ();
-    while (my $dbrow=$sth->fetchrow_hashref()) {
-        my ($date, $time) = split(/\s+/,$dbrow->{'Start'});
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my ($date, $time) = split( /\s+/, $dbrow->{'Start'} );
 
         # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
         (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
@@ -110,8 +110,8 @@ sub statistics_cumulated_json {
         # use epoch as hash key for fast date incrementation
         my $epoch = str2time("$date 00:00:00");
         my ($ss,$mm,$hh,$DD,$MM,$YY,$zone) = strptime($dbrow->{'Start'});
-        if ($hh >= $BackupStartHour) {
-            $epoch += 24*3600;
+        if ( $hh >= $BackupStartHour ) {
+            $epoch += 24 * 3600;
         }
 
         # compute wall-clock runtime of backup in minutes with 2 digits
@@ -120,7 +120,7 @@ sub statistics_cumulated_json {
         # store cumulated statistics for each day
         $CumulateByDate{$epoch}{time_coord}        = $epoch;
         $CumulateByDate{$epoch}{RealRuntime}      += $RealRuntime;
-        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'}/60.;
+        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'} / 60.;
         $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
         $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
         $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
@@ -129,11 +129,11 @@ sub statistics_cumulated_json {
     $sth->finish();
 
     # remove first day with incomplete information
-    delete $CumulateByDate{(sort keys %CumulateByDate)[0]};
+    delete $CumulateByDate{( sort keys %CumulateByDate )[0]};
 
     # reshape data structure similar to BackupsByPath
     my %BackupsByDay;
-    foreach my $date (sort keys %CumulateByDate) {
+    foreach my $date ( sort keys %CumulateByDate ) {
         push( @{$BackupsByDay{'Cumulated'}}, {
             time_coord       => $CumulateByDate{$date}{time_coord},
             RealRuntime      => $CumulateByDate{$date}{RealRuntime},
@@ -162,11 +162,11 @@ sub statistics_hosts_shares {
     $sth->execute();
 
     my %hosts_shares;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $hostname    = $dbrow->{'BkpFromHost'};
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/\s//g; # remove whitespace
-        my ($empty, @shares) = split(/:/, $BkpFromPath);
+        my ($empty, @shares) = split( /:/, $BkpFromPath );
 
         # distinguish data and system shares
         foreach my $share (@shares) {
@@ -178,8 +178,8 @@ sub statistics_hosts_shares {
     $sth->finish();
 
     # filter duplicate shares
-    foreach my $type (keys %hosts_shares) {
-        foreach my $host (keys %{$hosts_shares{$type}}) {
+    foreach my $type ( keys %hosts_shares ) {
+        foreach my $host ( keys %{$hosts_shares{$type}} ) {
             @{$hosts_shares{$type}{$host}} = uniq @{$hosts_shares{$type}{$host}};
         }
     }
@@ -202,7 +202,7 @@ sub statistics_groupshare_variations {
     $sth->execute();
 
     my %datahash;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/://g; # remove colon separators
 
@@ -218,7 +218,7 @@ sub statistics_groupshare_variations {
     foreach my $field (qw(TotFileSize NumOfFiles)) {
         # compute maximal variation for each share
         my %delta;
-        foreach my $bkppath (keys %datahash) {
+        foreach my $bkppath ( keys %datahash ) {
             my $max = sprintf("%.2f", max( map{$_->{$field}} @{$datahash{$bkppath}} ));
             my $min = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
             $delta{$bkppath} = $max - $min;
@@ -228,7 +228,7 @@ sub statistics_groupshare_variations {
         my $count = 1;
         my $base  = 1000.;
         $base     = 1024. if $field =~ /Size/;
-        foreach my $bkppath (reverse sort {abs($delta{$a})<=>abs($delta{$b})} keys %delta) {
+        foreach my $bkppath ( reverse sort {abs($delta{$a})<=>abs($delta{$b})} keys %delta ) {
             (my $sharename = $bkppath) =~ s|/export/||;
             push( @{$largest_variations{$field}}, {
                 share => $sharename,
@@ -258,7 +258,7 @@ sub statistics_schedule {
     $sth->execute();
 
     my %datahash;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
         (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
         (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
@@ -266,7 +266,7 @@ sub statistics_schedule {
 
         # flag system backups
         my $systemBkp = 0;
-        $systemBkp    = 1 if ($BkpFromPath !~ m%/(export|var/imap)%);
+        $systemBkp    = 1 if ( $BkpFromPath !~ m%/(export|var/imap)% );
 
         # hash constructed by host or time
         my $sortKey = $dbrow->{'BkpFromHost'};
@@ -296,7 +296,7 @@ sub rickshaw_json {
     my %datahash = %{shift()};
 
     my %rickshaw_data;
-    foreach my $bkppath (sort keys %datahash) {
+    foreach my $bkppath ( sort keys %datahash ) {
         my (%min, %max);
         foreach my $field (@fields) {
             # find min- and maxima of given fields
@@ -305,23 +305,23 @@ sub rickshaw_json {
         }
         # use same normalization for both runtimes to ensure curves coincide
         foreach my $field (qw(RealRuntime TotRuntime)) {
-            $max{$field}  = max( $max{RealRuntime}, $max{TotRuntime} );
-            $min{$field}  = min( $min{RealRuntime}, $min{TotRuntime} );
+            $max{$field} = max( $max{RealRuntime}, $max{TotRuntime} );
+            $min{$field} = min( $min{RealRuntime}, $min{TotRuntime} );
         }
 
-        foreach my $bkp (@{$datahash{$bkppath}}) {
+        foreach my $bkp ( @{$datahash{$bkppath}} ) {
             my $t = $bkp->{'time_coord'}; # monotonically increasing coordinate to have single-valued function
 
             foreach my $field (@fields) {
                 my $normalized = 0.5;
-                if( $min{$field} != $max{$field} ) {
+                if ( $min{$field} != $max{$field} ) {
                     $normalized = ($bkp->{$field} - $min{$field}) / ($max{$field} - $min{$field});
                 }
 
                 my $humanreadable;
-                if( $field =~ /Runtime/ ) {
+                if ( $field =~ /Runtime/ ) {
                     $humanreadable = "\"" . time2human($bkp->{$field}) . "\"";
-                } elsif( $field =~ /Size/ ) {
+                } elsif ( $field =~ /Size/ ) {
                     $humanreadable = "\"" . num2human($bkp->{$field}, 1024.) . "\"";
                 } else {
                     $humanreadable = "\"" . num2human($bkp->{$field})  . "\"";
