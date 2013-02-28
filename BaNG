@@ -1,43 +1,35 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
-# copyright 2013 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
-# the terms of the GNU General Public License version 2 or any later
-# version.
+# Copyright 2013 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
+# the terms of the GNU General Public License version 2 or later.
 #
-# This is compiled with threading support
-#
-# 2013.02.20, Patrick Schmid <schmid@phys.ethz.ch> & Claude Becker <becker@phys.ethz.ch>
+# Authors: Patrick Schmid <schmid@phys.ethz.ch> & Claude Becker <becker@phys.ethz.ch>
 #
 use strict;
 use warnings;
 use Cwd 'abs_path';
 use File::Basename;
-use lib dirname(abs_path($0))."/lib";
 use Getopt::Long qw(:config no_auto_abbrev);
-use threads;
-use Thread::Queue;
 use IPC::Open3;
 use Mail::Sendmail;
+use threads;
+use Thread::Queue;
 
+use lib dirname(abs_path($0))."/lib";
 use BaNG::Hosts;
 use BaNG::Config;
 use BaNG::Reporting;
 our %hosts;
 
-my $version         = '3.0';
-my $debug           = 1;
-my $debuglevel      = 2;        #1 normal output, 2 ultimate output, 3 + rsync verbose!
-my $nthreads        = 1;
-my $wipe            = '';
-my $help            = '';
-my $showversion     = '';
-my $group_arg       = '';
-my $host_arg        = '';
-my $nthreads_arg    = '';
-
+my $version    = '3.0';
+my $debug      = 1;
+my $debuglevel = 2;
+my $wipe;
+my $group_arg;
+my $host_arg;
+my $nthreads_arg;
+my $nthreads;
 my @queue;
-my @threads;
-
 
 #################################
 # Main
@@ -46,30 +38,26 @@ parse_command_options();
 get_global_config();
 get_host_config($host_arg, $group_arg);
 
-# run wipe jobs or fill queue with backup jobs
 foreach my $config (keys %hosts) {
     if ( $wipe ) {
-        do_wipe(  $hosts{$config}->{hostname}, $hosts{$config}->{group});
+        wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     } else {
-        queue_backup($hosts{$config}->{hostname}, $hosts{$config}->{group});
+        queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
 }
 print "Queue: @queue\n" if $debug;
 
-# stop if queue is empty
 if( !@queue ) {
     print "Exit because queue is empty.\n" if $debug;
     exit 0;
 }
 
-# use threads to empty queue
 start_threads();
 
 exit 0;
 
-
 #################################
-# Add task to make new backup to queue
+# Queuing
 #
 sub queue_backup {
     my ($host, $group) = @_;
@@ -111,8 +99,28 @@ sub queue_backup {
     return 1;
 }
 
+sub queue_remote_subfolders {
+    my ($host, $group, $lastbkp, $partition) = @_;
+
+    $partition =~ s/://;
+
+    my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
+    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
+    print "eval subfolders command: @remotedirlist\n" if $debug;
+
+    my $bkptimestamp = eval_bkptimestamp($host, $group);
+
+    foreach my $remotedir (@remotedirlist) {
+        chomp $remotedir;
+        $remotedir =~ s| |\\ |g;
+        push @queue, "${host}__${group}__${lastbkp}__${bkptimestamp}__:'${remotedir}'";
+    }
+
+    return 1;
+}
+
 #################################
-# Start threads
+# Threading
 #
 sub start_threads {
 
@@ -125,10 +133,12 @@ sub start_threads {
         # If no nthreads was given, and we back up a single host and group, get nthreads from its config
         $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
         print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $debug;
+    } else {
+        $nthreads = 1;
     }
 
     my $Q = Thread::Queue->new;
-    @threads = map threads->create( \&thread_work, $Q ), 1 .. $nthreads;
+    my @threads = map threads->create( \&thread_work, $Q ), 1 .. $nthreads;
     $Q->enqueue($_) for sort @queue;
     $Q->enqueue( (undef) x $nthreads );
     $_->join for @threads;
@@ -136,9 +146,6 @@ sub start_threads {
     return 1;
 }
 
-#################################
-# Work done by each thread
-#
 sub thread_work {
     my $Q   = shift;
     my $tid = threads->tid;
@@ -157,8 +164,76 @@ sub thread_work {
 }
 
 #################################
-# Excute rsync
+# Rsync
 #
+sub eval_rsync_options {
+    my ($host, $group, $lastbkp) = @_;
+    my $rsync_options  = '';
+    my $hostconfig = $hosts{"$host-$group"}->{hostconfig};
+
+    $rsync_options .= "--stats ";
+    $rsync_options .= "-ax "            if $hostconfig->{BKP_RSYNC_ARCHIV};
+    $rsync_options .= "-R "             if $hostconfig->{BKP_RSYNC_RELATIV};
+    $rsync_options .= "-H "             if $hostconfig->{BKP_RSYNC_HLINKS};
+    $rsync_options .= "--delete "       if $hostconfig->{BKP_RSYNC_DELETE};
+    $rsync_options .= "--force "        if $hostconfig->{BKP_RSYNC_DELETE_FORCE};
+    $rsync_options .= "--numeric-ids "  if $hostconfig->{BKP_RSYNC_NUM_IDS};
+    $rsync_options .= "--inplace "      if $hostconfig->{BKP_RSYNC_INPLACE};
+    $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
+    $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
+    $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
+    $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
+    $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
+
+    if ($hostconfig->{BKP_EXCLUDE_FILE}) {
+        my $excludefile = "$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+        } else {
+            print "Warning: excludefile $excludefile not found.\n" if $debug;
+        }
+    }
+
+    if ($hostconfig->{BKP_RSYNC_RSHELL}){
+        if ($hostconfig->{BKP_GWHOST}){
+            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST} ";
+        } else {
+            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} ";
+        }
+    }
+
+    # use links if told to and if lastbkp exists
+    if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
+        $rsync_options .= "--link-dest " . targetpath($host, $group) . "/$lastbkp ";
+    }
+
+    $rsync_options =~ s/\s+$//; # remove trailing space
+
+    return $rsync_options;
+}
+
+sub eval_rsync_target {
+    my ($host, $group, $bkptimestamp) = @_;
+
+    my $rsync_target = targetpath($host, $group);
+
+    if ($hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+        $rsync_target .= "/current";
+
+        if ( !-d $rsync_target ) {
+            print "$globalconfig{path_btrfs} subvol create $rsync_target\n" if $debug;
+        }
+    } else {
+        if ( !-d $rsync_target ) {
+            system("mkdir -p $rsync_target");
+        }
+
+        $rsync_target .= "/$bkptimestamp";
+    }
+
+    return $rsync_target;
+}
+
 sub execute_rsync {
     my ($host, $group, $lastbkp, $bkptimestamp, $path) = @_;
 
@@ -211,9 +286,9 @@ sub execute_rsync {
 }
 
 #################################
-# Wipe old backup
+# Wipe old backups
 #
-sub do_wipe {
+sub wipe {
     my ($host, $group) = @_;
 
     print "Wipe host $host group $group\n" if $debug;
@@ -222,129 +297,20 @@ sub do_wipe {
 }
 
 #################################
-# Evaluate backup timestamp
+# Lockfile
 #
-sub eval_bkptimestamp {
-    my ($host, $group) = @_;
+sub LockFile {
+    my ($host, $group, $path) = @_;
 
-    my $bkptimestamp = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
-    chomp($bkptimestamp);
+    $path =~ s/^://g;
+    $path =~ s/\s:/\+/g;
+    $path =~ s/\//%/g;
+    my $lockfilename = "${host}_${group}_${path}";
+    my $lockfile = "$globalconfig{path_lockfiles}/$lockfilename";
 
-    return $bkptimestamp;
+    return $lockfile;
 }
 
-#################################
-# Add list of remote folders to thread queue
-#
-sub queue_remote_subfolders {
-    my ($host, $group, $lastbkp, $partition) = @_;
-
-    $partition =~ s/://;
-
-    my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
-    print "eval subfolders command: @remotedirlist\n" if $debug;
-
-    my $bkptimestamp = eval_bkptimestamp($host, $group);
-
-    foreach my $remotedir (@remotedirlist) {
-        chomp $remotedir;
-        $remotedir =~ s| |\\ |g;
-        push @queue, "${host}__${group}__${lastbkp}__${bkptimestamp}__:'${remotedir}'";
-    }
-
-    return 1;
-}
-
-#################################
-# Evaluate rsync target path
-#
-sub eval_rsync_target {
-    my ($host, $group, $bkptimestamp) = @_;
-
-    my $rsync_target = targetpath($host, $group);
-
-    if ($hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-        $rsync_target .= "/current";
-
-        if ( !-d $rsync_target ) {
-            print "$globalconfig{path_btrfs} subvol create $rsync_target\n" if $debug;
-        }
-    } else {
-        if ( !-d $rsync_target ) {
-            system("mkdir -p $rsync_target");
-        }
-
-        $rsync_target .= "/$bkptimestamp";
-    }
-
-    return $rsync_target;
-}
-
-#################################
-# Evaluate rsync options
-#
-sub eval_rsync_options {
-    my ($host, $group, $lastbkp) = @_;
-    my $rsync_options  = '';
-    my $hostconfig = $hosts{"$host-$group"}->{hostconfig};
-
-    $rsync_options .= "--stats ";
-    $rsync_options .= "-ax "            if $hostconfig->{BKP_RSYNC_ARCHIV};
-    $rsync_options .= "-R "             if $hostconfig->{BKP_RSYNC_RELATIV};
-    $rsync_options .= "-H "             if $hostconfig->{BKP_RSYNC_HLINKS};
-    $rsync_options .= "--delete "       if $hostconfig->{BKP_RSYNC_DELETE};
-    $rsync_options .= "--force "        if $hostconfig->{BKP_RSYNC_DELETE_FORCE};
-    $rsync_options .= "--numeric-ids "  if $hostconfig->{BKP_RSYNC_NUM_IDS};
-    $rsync_options .= "--inplace "      if $hostconfig->{BKP_RSYNC_INPLACE};
-    $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
-    $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
-    $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
-    $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
-    $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
-
-    if ($hostconfig->{BKP_EXCLUDE_FILE}) {
-        my $excludefile = "$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
-        if ( -e $excludefile ) {
-            $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
-        } else {
-            print "Warning: excludefile $excludefile not found.\n" if $debug;
-        }
-    }
-
-    if ($hostconfig->{BKP_RSYNC_RSHELL}){
-        if ($hostconfig->{BKP_GWHOST}){
-            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST} ";
-        } else {
-            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} ";
-        }
-    }
-
-    # use links if told to and if lastbkp exists
-    if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
-        $rsync_options .= "--link-dest " . targetpath($host, $group) . "/$lastbkp ";
-    }
-
-    $rsync_options =~ s/\s+$//; # remove trailing space
-
-    return $rsync_options;
-}
-
-#################################
-# Define target path of backup
-#
-sub targetpath {
-    my ($host, $group) = @_;
-
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
-
-    return $target_path;
-}
-
-#################################
-# create Lockfile of rsync job
-#
 sub createLockFile {
     my ($host, $group, $path) = @_;
 
@@ -360,24 +326,6 @@ sub createLockFile {
     }
 }
 
-#################################
-# Lockfile path and filename
-#
-sub LockFile {
-    my ($host, $group, $path) = @_;
-
-    $path =~ s/^://g;
-    $path =~ s/\s:/\+/g;
-    $path =~ s/\//%/g;
-    my $lockfilename = "${host}_${group}_${path}";
-    my $lockfile = "$globalconfig{path_lockfiles}/$lockfilename";
-
-    return $lockfile;
-}
-
-#################################
-# Remove lockfile of rsync job
-#
 sub removeLockFile {
     my ($host, $group, $path) = @_;
 
@@ -389,8 +337,18 @@ sub removeLockFile {
 }
 
 #################################
-# Get/Check path of last backup
+# LastBkpFile
 #
+sub LastBkpFile {
+    my ($host, $group) = @_;
+
+    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
+    my $lastBkpFile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}";
+
+    return $lastBkpFile;
+}
+
 sub chkLastBkp {
     my ($host, $group) = @_;
 
@@ -407,22 +365,6 @@ sub chkLastBkp {
     return $lastbkp;
 }
 
-#################################
-# LastBkpFile path and filename
-#
-sub LastBkpFile {
-    my ($host, $group) = @_;
-
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
-    my $lastBkpFile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}";
-
-    return $lastBkpFile;
-}
-
-#################################
-# Create lastbackup file
-#
 sub createLastBkpFile {
     my ($host, $group, $bkptimestamp) = @_;
 
@@ -433,31 +375,32 @@ sub createLastBkpFile {
 }
 
 #################################
-# Get/Check command options
+# Helper subroutines
 #
-sub parse_command_options {
-    GetOptions (
-        "help"         => sub { usage('') },
-        "v|version"    => \$showversion,
-        "d|debug"      => \$debug,
-        "g|group=s"    => \$group_arg,
-        "h|host=s"     => \$host_arg,
-        "t|threads=i"  => \$nthreads_arg,
-        "w|wipe"       => \$wipe,
-    )
-    or usage("Invalid commmand line options.");
-    usage("You must provide some arguments")    unless ($host_arg || $group_arg || $showversion);
-    usage("Current version number: $version")   if ( $showversion );
-    usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
+sub eval_bkptimestamp {
+    my ($host, $group) = @_;
+
+    my $bkptimestamp = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+    chomp($bkptimestamp);
+
+    return $bkptimestamp;
+}
+
+sub targetpath {
+    my ($host, $group) = @_;
+
+    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
+
+    return $target_path;
 }
 
 #################################
-# Report to bangstat mysql db
+# Reporting
 #
 sub db_report {
     my ($host, $group, $startstamp, $endstamp, $path, $targetpath ,$bkptimestamp, @outlines) = @_;
 
-    my %log_values;
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
         'Number of files'             => 'NumOfFiles',
@@ -473,31 +416,35 @@ sub db_report {
         'Total bytes received'        => 'TotBytesRcv',
     );
 
-    foreach my $outline (@outlines) {
+    my %log_values;
+    foreach my $outline ( @outlines ) {
         next unless $outline =~ m/:/;
         chomp $outline;
         my ($key, $value) = split(': ', $outline);
         foreach my $logkey ( keys %parse_log_keys ) {
-            if ($logkey eq $key) {
+            if ( $logkey eq $key ) {
                 $value =~ s/^\D*([\d.]+).*?$/$1/;
                 $log_values{$parse_log_keys{$logkey}} = $value;
             }
         }
     }
 
-    $path =~ s/'//g;
+    $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
     my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
     my $sql;
-    $sql .= "INSERT INTO statistic (BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, Start, Stop,";
-    $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans,";
-    $sql .= " LitData, MatchData, FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv) VALUES(";
-    $sql .= "'$host','$path', 'phd-bkp-gw','$targetpath','$bkptimestamp', $isSubfolderThread , FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'),";
-    $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}',";
-    $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}',";
-    $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}',";
-    $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}',";
-    $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}'";
+    $sql .= "INSERT INTO statistic (";
+    $sql .= " BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, Start, Stop, ";
+    $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
+    $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
+    $sql .= ") VALUES (";
+    $sql .= "'$host', '$path', 'phd-bkp-gw', '$targetpath', '$bkptimestamp', ";
+    $sql .= " $isSubfolderThread , FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
+    $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
+    $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
+    $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}', ";
+    $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
+    $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
 
     bangstat_db_connect();
@@ -506,9 +453,6 @@ sub db_report {
     $sth->finish();
 }
 
-#################################
-# Report by email
-#
 sub mail_report {
     my ( $host, $targetpath ) = @_;
 
@@ -524,8 +468,24 @@ sub mail_report {
 }
 
 #################################
-# Usage
+# Command line arguments
 #
+sub parse_command_options {
+
+    GetOptions (
+        "help"         => sub { usage('') },
+        "v|version"    => sub { usage("Current version number: $version") },
+        "d|debug"      => \$debug,
+        "g|group=s"    => \$group_arg,
+        "h|host=s"     => \$host_arg,
+        "t|threads=i"  => \$nthreads_arg,
+        "w|wipe"       => \$wipe,
+    )
+    or usage("Invalid commmand line options.");
+    usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
+    usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
+}
+
 sub usage {
     my ($message) = @_;
 
