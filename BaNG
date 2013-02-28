@@ -17,6 +17,7 @@ use Getopt::Long qw(:config no_auto_abbrev);
 use threads;
 use Thread::Queue;
 use IPC::Open3;
+use Mail::Sendmail;
 
 use BaNG::Hosts;
 use BaNG::Config;
@@ -63,7 +64,6 @@ if( !@queue ) {
 
 # use threads to empty queue
 start_threads();
-
 
 exit 0;
 
@@ -504,6 +504,23 @@ sub db_report {
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
     $sth->execute();
     $sth->finish();
+}
+
+#################################
+# Report by email
+#
+sub mail_report {
+    my ( $host, $targetpath ) = @_;
+
+    my %mail = (
+        To      => 'schmid@phys.ethz.ch',
+        From    => 'root@phys.ethz.ch',
+        Subject => "Backup report of ($host): success",
+        Message => "* * * Backup report * * *\n\nBacking up: $host:$targetpath\n\n* * * Backup successfull * * *\n",
+    );
+    sendmail(%mail) or print "mail_report error: $Mail::Sendmail::error";
+
+    return 1;
 }
 
 #################################
