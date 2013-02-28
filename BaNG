@@ -145,22 +145,13 @@ sub thread_work {
     while (my $queue_content = $Q->dequeue) {
 
         print "Thread $tid working on $queue_content \n" if $debug;
-        do_backup($queue_content);
+
+        my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content);
+
+        return unless createLockFile($host, $group, $path);
+        execute_rsync($host, $group, $lastbkp, $bkptimestamp, $path);
+        removeLockFile($host, $group, $path);
     }
-}
-
-#################################
-# Make new backup
-#
-sub do_backup {
-    my ($queue_content) = @_;
-    my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content);
-
-    print "sub do_backup( $host, $group, $lastbkp, $bkptimestamp, $path )\n" if $debug;
-
-    return unless createLockFile($host, $group, $path);
-    execute_rsync($host, $group, $lastbkp, $bkptimestamp, $path);
-    removeLockFile($host, $group, $path);
 
     return 1;
 }
