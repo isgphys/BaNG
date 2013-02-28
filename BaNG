@@ -20,6 +20,7 @@ use IPC::Open3;
 
 use BaNG::Hosts;
 use BaNG::Config;
+use BaNG::Reporting;
 our %hosts;
 
 my $version         = '3.0';
@@ -170,7 +171,8 @@ sub do_backup {
 sub execute_rsync {
     my ($host, $group, $lastbkp, $bkptimestamp, $path) = @_;
 
-    $bkptimestamp = eval_bkptimestamp($host, $group) unless $bkptimestamp;
+    $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
+    my $startstamp = `date +%s`;
 
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
@@ -208,7 +210,9 @@ sub execute_rsync {
         }
     }
     else{
+        my $endstamp = `date +%s`;
         createLastBkpFile($host, $group, $bkptimestamp);
+        db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, @outlines);
         print "Backup successful for host $host group $group path $path!\n" if $debug;
     }
 
@@ -285,6 +289,7 @@ sub eval_rsync_target {
 
     return $rsync_target;
 }
+
 #################################
 # Evaluate rsync options
 #
@@ -293,6 +298,7 @@ sub eval_rsync_options {
     my $rsync_options  = '';
     my $hostconfig = $hosts{"$host-$group"}->{hostconfig};
 
+    $rsync_options .= "--stats ";
     $rsync_options .= "-ax "            if $hostconfig->{BKP_RSYNC_ARCHIV};
     $rsync_options .= "-R "             if $hostconfig->{BKP_RSYNC_RELATIV};
     $rsync_options .= "-H "             if $hostconfig->{BKP_RSYNC_HLINKS};
@@ -452,6 +458,61 @@ sub parse_command_options {
     usage("You must provide some arguments")    unless ($host_arg || $group_arg || $showversion);
     usage("Current version number: $version")   if ( $showversion );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
+}
+
+#################################
+# Report to bangstat mysql db
+#
+sub db_report {
+    my ($host, $group, $startstamp, $endstamp, $path, $targetpath ,$bkptimestamp, @outlines) = @_;
+
+    my %log_values;
+    my %parse_log_keys = (
+        'last backup'                 => 'LastBkp',
+        'Number of files'             => 'NumOfFiles',
+        'Number of files transferred' => 'NumOfFilesTrans',
+        'Total file size'             => 'TotFileSize',
+        'Total transferred file size' => 'TotFileSizeTrans',
+        'Literal data'                => 'LitData',
+        'Matched data'                => 'MatchData',
+        'File list size'              => 'FileListSize',
+        'File list generation time'   => 'FileListGenTime',
+        'File list transfer time'     => 'FileListTransTime',
+        'Total bytes sent'            => 'TotBytesSent',
+        'Total bytes received'        => 'TotBytesRcv',
+    );
+
+    foreach my $outline (@outlines) {
+        next unless $outline =~ m/:/;
+        chomp $outline;
+        my ($key, $value) = split(': ', $outline);
+        foreach my $logkey ( keys %parse_log_keys ) {
+            if ($logkey eq $key) {
+                $value =~ s/^\D*([\d.]+).*?$/$1/;
+                $log_values{$parse_log_keys{$logkey}} = $value;
+            }
+        }
+    }
+
+    $path =~ s/'//g;
+    my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
+
+    my $sql;
+    $sql .= "INSERT INTO statistic (BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, Start, Stop,";
+    $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans,";
+    $sql .= " LitData, MatchData, FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv) VALUES(";
+    $sql .= "'$host','$path', 'phd-bkp-gw','$targetpath','$bkptimestamp', $isSubfolderThread , FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'),";
+    $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}',";
+    $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}',";
+    $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}',";
+    $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}',";
+    $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}'";
+    $sql .= ")";
+
+    bangstat_db_connect();
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
+    $sth->execute();
+    $sth->finish();
 }
 
 #################################
