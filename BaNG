@@ -444,6 +444,8 @@ sub db_report {
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
     $sth->execute();
     $sth->finish();
+
+    return 1;
 }
 
 sub mail_report {
