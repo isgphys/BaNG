@@ -16,6 +16,7 @@ use lib dirname(abs_path($0))."/lib";
 use Getopt::Long qw(:config no_auto_abbrev);
 use threads;
 use Thread::Queue;
+use IPC::Open3;
 
 use BaNG::Hosts;
 use BaNG::Config;
@@ -156,17 +157,54 @@ sub do_backup {
 
     print "sub do_backup( $host, $group, $lastbkp, $path )\n" if $debug;
 
+    return unless createLockFile($host, $group, $path);
+    execute_rsync($host, $group, $lastbkp, $path);
+    removeLockFile($host, $group, $path);
+
+    return 1;
+}
+
+sub execute_rsync {
+    my ($host, $group, $lastbkp, $path) = @_;
+
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
     my $rsync_source  = "$host$path";
     my $rsync_target  = eval_rsync_target($host, $group);
     print "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target\n" if $debug;
 
-    return unless createLockFile($host, $group, $path);
+    print "Executing rsync for host $host group $group path $path\n" if $debug;
 
-    print "Backup host $host group $group\n" if $debug;
+    local(*HIS_IN, *HIS_OUT, *HIS_ERR);
+    #sleep(rand($nthreads));
 
-    removeLockFile($host, $group, $path);
+    my $rsyncpid = open3(
+       *HIS_IN,
+       *HIS_OUT,
+       *HIS_ERR,
+       "$rsync_cmd $rsync_options $rsync_source $rsync_target"
+    );
+    my @outlines = <HIS_OUT>;
+    my @errlines = <HIS_ERR>;
+    close HIS_IN;
+    close HIS_OUT;
+    close HIS_ERR;
+
+    print "Rsync STDOUT: @outlines\n" if ($debug && @outlines);
+    print "Rsync STDERR: @errlines\n" if ($debug && @errlines);
+    print "Rsync child exited with status of $?\n" if $?;
+
+    my $errcode = 0;
+    if ( @errlines ){
+        foreach my $errline (@errlines) {
+            chomp $errline;
+            ($errcode) = $errline = /.* \(code (\d+)/;
+            print "Rsync errorcode: $errcode\n" if $errcode;
+        }
+    }
+    else{
+        print "Backup successful for host $host group $group path $path!\n" if $debug;
+    }
 
     return 1;
 }
@@ -217,7 +255,7 @@ sub eval_rsync_target {
         }
     } else {
         if ( !-d $rsync_target ) {
-            print "mkdir -p $rsync_target\n" if $debug;
+            mkdir $rsync_target;
         }
 
         $rsync_target .= '/' . eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
