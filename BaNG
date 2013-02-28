@@ -15,7 +15,7 @@ use Mail::Sendmail;
 use threads;
 use Thread::Queue;
 
-use lib dirname(abs_path($0))."/lib";
+use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Hosts;
 use BaNG::Config;
 use BaNG::Reporting;
@@ -38,7 +38,7 @@ parse_command_options();
 get_global_config();
 get_host_config($host_arg, $group_arg);
 
-foreach my $config (keys %hosts) {
+foreach my $config ( keys %hosts ) {
     if ( $wipe ) {
         wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     } else {
@@ -47,7 +47,7 @@ foreach my $config (keys %hosts) {
 }
 print "Queue: @queue\n" if $debug;
 
-if( !@queue ) {
+if ( !@queue ) {
     print "Exit because queue is empty.\n" if $debug;
     exit 0;
 }
@@ -60,19 +60,20 @@ exit 0;
 # Queuing
 #
 sub queue_backup {
-    my ($host, $group) = @_;
+    my ( $host, $group ) = @_;
 
     print "sub queue_backup($host, $group)\n" if $debug;
 
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{status} eq 'enabled';
+
     # stop if trying to do bulk backup if it's not allowed
-    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW});
+    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
     # make sure host is online
-    my ($conn_status, $conn_msg ) = chkClientConn($host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST});
+    my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
-    if( !$conn_status ) {
+    if ( !$conn_status ) {
         print "Error: host $host is offline\n" if $debug;
         return 1;
     }
@@ -81,13 +82,13 @@ sub queue_backup {
     my $lastbkp = chkLastBkp($host, $group);
 
     # get list of partitions to back up
-    my (@src_part) = split ( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION});
+    my (@src_part) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
     print "Number of partitions: " . ($#src_part+1) . " ( @src_part )\n" if $debug;
 
     # optionally queue each subfolder of the partitions
-    if( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
         foreach my $part (@src_part) {
-            queue_remote_subfolders($host,$group, $lastbkp, $part);
+            queue_remote_subfolders( $host, $group, $lastbkp, $part );
         }
     } else {
         # queue list of partitions as a whole
@@ -125,11 +126,11 @@ sub queue_remote_subfolders {
 sub start_threads {
 
     # define number of threads
-    if( $nthreads_arg ){
+    if ( $nthreads_arg ) {
         # If nthreads was defined by cli argument, use it
         $nthreads = $nthreads_arg;
         print "Using nthreads = $nthreads from command line argument\n" if $debug;
-    } elsif ( $host_arg && $group_arg) {
+    } elsif ( $host_arg && $group_arg ) {
         # If no nthreads was given, and we back up a single host and group, get nthreads from its config
         $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
         print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $debug;
@@ -149,15 +150,15 @@ sub start_threads {
 sub thread_work {
     my $Q   = shift;
     my $tid = threads->tid;
-    while (my $queue_content = $Q->dequeue) {
+    while ( my $queue_content = $Q->dequeue ) {
 
         print "Thread $tid working on $queue_content \n" if $debug;
 
-        my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content);
+        my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content );
 
-        return unless createLockFile($host, $group, $path);
-        execute_rsync($host, $group, $lastbkp, $bkptimestamp, $path);
-        removeLockFile($host, $group, $path);
+        return unless createLockFile( $host, $group, $path );
+        execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
+        removeLockFile( $host, $group, $path );
     }
 
     return 1;
@@ -168,8 +169,8 @@ sub thread_work {
 #
 sub eval_rsync_options {
     my ($host, $group, $lastbkp) = @_;
-    my $rsync_options  = '';
-    my $hostconfig = $hosts{"$host-$group"}->{hostconfig};
+    my $rsync_options = '';
+    my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
 
     $rsync_options .= "--stats ";
     $rsync_options .= "-ax "            if $hostconfig->{BKP_RSYNC_ARCHIV};
@@ -185,7 +186,7 @@ sub eval_rsync_options {
     $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
-    if ($hostconfig->{BKP_EXCLUDE_FILE}) {
+    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
         my $excludefile = "$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
         if ( -e $excludefile ) {
             $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
@@ -194,8 +195,8 @@ sub eval_rsync_options {
         }
     }
 
-    if ($hostconfig->{BKP_RSYNC_RSHELL}){
-        if ($hostconfig->{BKP_GWHOST}){
+    if ( $hostconfig->{BKP_RSYNC_RSHELL} ) {
+        if ( $hostconfig->{BKP_GWHOST} ) {
             $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST} ";
         } else {
             $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} ";
@@ -217,7 +218,7 @@ sub eval_rsync_target {
 
     my $rsync_target = targetpath($host, $group);
 
-    if ($hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         $rsync_target .= "/current";
 
         if ( !-d $rsync_target ) {
@@ -249,22 +250,15 @@ sub execute_rsync {
     print "Executing rsync for host $host group $group path $path\n" if $debug;
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
-    #sleep(rand($nthreads));
-
-    my $rsyncpid = open3(
-       *HIS_IN,
-       *HIS_OUT,
-       *HIS_ERR,
-       "$rsync_cmd $rsync_options $rsync_source $rsync_target"
-    );
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" );
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;
     close HIS_OUT;
     close HIS_ERR;
 
-    print "Rsync STDOUT: @outlines\n" if ($debug && @outlines);
-    print "Rsync STDERR: @errlines\n" if ($debug && @errlines);
+    print "Rsync STDOUT: @outlines\n" if ( $debug && @outlines );
+    print "Rsync STDERR: @errlines\n" if ( $debug && @errlines );
     print "Rsync child exited with status of $?\n" if $?;
 
     my $errcode = 0;
@@ -274,8 +268,7 @@ sub execute_rsync {
             ($errcode) = $errline = /.* \(code (\d+)/;
             print "Rsync errorcode: $errcode\n" if $errcode;
         }
-    }
-    else{
+    } else {
         my $endstamp = `date +%s`;
         createLastBkpFile($host, $group, $bkptimestamp);
         db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, @outlines);
@@ -306,7 +299,7 @@ sub LockFile {
     $path =~ s/\s:/\+/g;
     $path =~ s/\//%/g;
     my $lockfilename = "${host}_${group}_${path}";
-    my $lockfile = "$globalconfig{path_lockfiles}/$lockfilename";
+    my $lockfile     = "$globalconfig{path_lockfiles}/$lockfilename";
 
     return $lockfile;
 }
@@ -355,7 +348,7 @@ sub chkLastBkp {
     my $lastbkp = 'nolastbkp';
     my $lastBkpFile = LastBkpFile($host, $group);
 
-    if ( -e $lastBkpFile ){
+    if ( -e $lastBkpFile ) {
         $lastbkp = `cat $lastBkpFile`;
         chomp($lastbkp);
     }
@@ -472,16 +465,15 @@ sub mail_report {
 #
 sub parse_command_options {
 
-    GetOptions (
-        "help"         => sub { usage('') },
-        "v|version"    => sub { usage("Current version number: $version") },
-        "d|debug"      => \$debug,
-        "g|group=s"    => \$group_arg,
-        "h|host=s"     => \$host_arg,
-        "t|threads=i"  => \$nthreads_arg,
-        "w|wipe"       => \$wipe,
-    )
-    or usage("Invalid commmand line options.");
+    GetOptions(
+        "help"        => sub { usage('') },
+        "v|version"   => sub { usage("Current version number: $version") },
+        "d|debug"     => \$debug,
+        "g|group=s"   => \$group_arg,
+        "h|host=s"    => \$host_arg,
+        "t|threads=i" => \$nthreads_arg,
+        "w|wipe"      => \$wipe,
+    ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 }
@@ -489,7 +481,7 @@ sub parse_command_options {
 sub usage {
     my ($message) = @_;
 
-    if (defined $message && length $message) {
+    if ( defined $message && length $message ) {
         $message .= "\n"
             unless $message =~ /\n$/;
     }
