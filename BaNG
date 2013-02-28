@@ -164,13 +164,19 @@ sub do_backup {
     return 1;
 }
 
+#################################
+# Excute rsync
+#
 sub execute_rsync {
     my ($host, $group, $lastbkp, $path) = @_;
 
+    my $bkptimestamp  = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+    chomp($bkptimestamp);
+
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
-    my $rsync_source  = "$host$path";
-    my $rsync_target  = eval_rsync_target($host, $group);
+    my $rsync_source  = "$host\"$path\"";
+    my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
     print "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target\n" if $debug;
 
     print "Executing rsync for host $host group $group path $path\n" if $debug;
@@ -203,6 +209,7 @@ sub execute_rsync {
         }
     }
     else{
+        createLastBkpFile($host, $group, $bkptimestamp);
         print "Backup successful for host $host group $group path $path!\n" if $debug;
     }
 
@@ -234,7 +241,7 @@ sub queue_remote_subfolders {
 
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
-        push @queue, "${host}_${group}_${lastbkp}_${remotedir}";
+        push @queue, "${host}_${group}_${lastbkp}_:${remotedir}";
     }
 
     return 1;
@@ -243,7 +250,7 @@ sub queue_remote_subfolders {
 # Evaluate rsync target path
 #
 sub eval_rsync_target {
-    my ($host, $group) = @_;
+    my ($host, $group, $bkptimestamp) = @_;
 
     my $rsync_target = targetpath($host, $group);
 
@@ -258,7 +265,7 @@ sub eval_rsync_target {
             mkdir $rsync_target;
         }
 
-        $rsync_target .= '/' . eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+        $rsync_target .= "/$bkptimestamp";
     }
 
     return $rsync_target;
@@ -375,19 +382,42 @@ sub removeLockFile {
 sub chkLastBkp {
     my ($host, $group) = @_;
 
-    my $lastbkp     = "nolastbkp";
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
-    my $lastdstfile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}";
+    my $lastbkp = 'nolastbkp';
+    my $lastBkpFile = LastBkpFile($host, $group);
 
-    if ( -d $bkpdir  && -e $lastdstfile ){
-        $lastbkp       = `cat $lastdstfile`;
+    if ( -e $lastBkpFile ){
+        my $lastbkp = `cat $lastBkpFile`;
         chomp($lastbkp);
     }
 
     print "sub chkLastBkp: lastbkp = $lastbkp\n" if $debug;
 
     return $lastbkp;
+}
+
+#################################
+# LastBkpFile path and filename
+#
+sub LastBkpFile {
+    my ($host, $group) = @_;
+
+    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
+    my $lastBkpFile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}";
+
+    return $lastBkpFile;
+}
+
+#################################
+# Create lastbackup file
+#
+sub createLastBkpFile {
+    my ($host, $group, $bkptimestamp) = @_;
+
+    my $lastBkpFile = LastBkpFile($host, $group);
+    system("echo \"$bkptimestamp\" > $lastBkpFile");
+
+    return 1;
 }
 
 #################################
@@ -409,7 +439,7 @@ sub parse_command_options {
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 }
 
-##############
+#################################
 # Usage
 #
 sub usage {
