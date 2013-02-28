@@ -162,7 +162,11 @@ sub do_backup {
     my $rsync_target  = eval_rsync_target($host, $group);
     print "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target\n" if $debug;
 
+    return unless createLockFile($host, $group, $path);
+
     print "Backup host $host group $group\n" if $debug;
+
+    removeLockFile($host, $group, $path);
 
     return 1;
 }
@@ -279,6 +283,52 @@ sub targetpath {
     my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
 
     return $target_path;
+}
+
+#################################
+# create Lockfile of rsync job
+#
+sub createLockFile {
+    my ($host, $group, $path) = @_;
+
+    my $lockfile = LockFile($host, $group, $path);
+
+    if ( -e $lockfile ) {
+        print "ERROR: lockfile $lockfile still exists\n";
+        return 0;
+    } else {
+        system("touch \"$lockfile\"") and print "ERROR: could not create lockfile $lockfile\n";
+        print "Created lockfile $lockfile.\n" if $debug;
+        return 1;
+    }
+}
+
+#################################
+# Lockfile path and filename
+#
+sub LockFile {
+    my ($host, $group, $path) = @_;
+
+    $path =~ s/^://g;
+    $path =~ s/\s:/\+/g;
+    $path =~ s/\//%/g;
+    my $lockfilename = "${host}_${group}_${path}";
+    my $lockfile = "$globalconfig{path_lockfiles}/$lockfilename";
+
+    return $lockfile;
+}
+
+#################################
+# Remove lockfile of rsync job
+#
+sub removeLockFile {
+    my ($host, $group, $path) = @_;
+
+    my $lockfile = LockFile($host, $group, $path);
+    print "Removed lockfile $lockfile.\n" if $debug;
+    unlink $lockfile;
+
+    return 1;
 }
 
 #################################

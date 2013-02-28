@@ -51,9 +51,10 @@ sub get_global_config {
     $globalconfig{global_log_date}     = "$global_settings->{GlobalLogDate}";
     $globalconfig{global_log_file}     = "$globalconfig{log_path}/$log_date.log";
 
-    $globalconfig{path_hostconfig}      = "$config_path/$global_settings->{HostConfigFolder}";
+    $globalconfig{path_hostconfig}     = "$config_path/$global_settings->{HostConfigFolder}";
     $globalconfig{path_cronjobs}       = "$config_path/$global_settings->{CronJobsFolder}";
     $globalconfig{path_excludes}       = "$config_path/$global_settings->{ExcludesFolder}";
+    $globalconfig{path_lockfiles}      = "$config_path/$global_settings->{LocksFolder}";
 
     $globalconfig{path_rsync}          = "$global_settings->{RSYNC}";
     $globalconfig{path_btrfs}          = "$global_settings->{BTRFS}";
