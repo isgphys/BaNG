@@ -24,6 +24,7 @@ our %hosts;
 my $version    = '3.0';
 my $debug      = 1;
 my $debuglevel = 2;
+my $dryrun     = 0;
 my $wipe;
 my $group_arg;
 my $host_arg;
@@ -250,7 +251,7 @@ sub execute_rsync {
     print "Executing rsync for host $host group $group path $path\n" if $debug;
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
-    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" );
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" ) unless $dryrun;
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;
@@ -285,6 +286,7 @@ sub wipe {
     my ($host, $group) = @_;
 
     print "Wipe host $host group $group\n" if $debug;
+    # execute_wipe unless $dryrun;
 
     return 1;
 }
@@ -313,7 +315,9 @@ sub createLockFile {
         print "ERROR: lockfile $lockfile still exists\n";
         return 0;
     } else {
-        system("touch \"$lockfile\"") and print "ERROR: could not create lockfile $lockfile\n";
+        unless $dryrun {
+            system("touch \"$lockfile\"") and print "ERROR: could not create lockfile $lockfile\n";
+        }
         print "Created lockfile $lockfile.\n" if $debug;
         return 1;
     }
@@ -323,8 +327,8 @@ sub removeLockFile {
     my ($host, $group, $path) = @_;
 
     my $lockfile = LockFile($host, $group, $path);
+    unlink $lockfile unless $dryrun;
     print "Removed lockfile $lockfile.\n" if $debug;
-    unlink $lockfile;
 
     return 1;
 }
@@ -362,7 +366,7 @@ sub createLastBkpFile {
     my ($host, $group, $bkptimestamp) = @_;
 
     my $lastBkpFile = LastBkpFile($host, $group);
-    system("echo \"$bkptimestamp\" > $lastBkpFile");
+    system("echo \"$bkptimestamp\" > $lastBkpFile") unless $dryrun;
 
     return 1;
 }
@@ -442,7 +446,7 @@ sub db_report {
 
     bangstat_db_connect();
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
-    $sth->execute();
+    $sth->execute() unless $dryrun;
     $sth->finish();
 
     return 1;
@@ -457,7 +461,9 @@ sub mail_report {
         Subject => "Backup report of ($host): success",
         Message => "* * * Backup report * * *\n\nBacking up: $host:$targetpath\n\n* * * Backup successfull * * *\n",
     );
-    sendmail(%mail) or print "mail_report error: $Mail::Sendmail::error";
+    unless $dryrun {
+        sendmail(%mail) or print "mail_report error: $Mail::Sendmail::error";
+    }
 
     return 1;
 }
@@ -471,6 +477,7 @@ sub parse_command_options {
         "help"        => sub { usage('') },
         "v|version"   => sub { usage("Current version number: $version") },
         "d|debug"     => \$debug,
+        "n|dry-run"   => \$dryrun,
         "g|group=s"   => \$group_arg,
         "h|host=s"    => \$host_arg,
         "t|threads=i" => \$nthreads_arg,
@@ -503,6 +510,7 @@ sub usage {
 
         Optional Arguments:
 
+        -n              # dry-run without making changes
         -t <nr>         # number of threads, default: 1
         -w              # wipe the backup
         -d              # show debugging messages
