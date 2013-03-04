@@ -61,7 +61,7 @@ exit 0;
 # Queuing
 #
 sub queue_backup {
-    my ( $host, $group ) = @_;
+    my ($host, $group) = @_;
 
     print "sub queue_backup($host, $group)\n" if $debug;
 
