@@ -251,7 +251,8 @@ sub execute_rsync {
     print "Executing rsync for host $host group $group path $path\n" if $debug;
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
-    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" ) unless $dryrun;
+    $rsync_cmd = "echo $rsync_cmd" if $dryrun;
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" );
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;
@@ -414,6 +415,10 @@ sub db_report {
     );
 
     my %log_values;
+    foreach my $logkey ( keys %parse_log_keys ) {
+        $log_values{$parse_log_keys{$logkey}} = 'NULL';
+    }
+
     foreach my $outline ( @outlines ) {
         next unless $outline =~ m/:/;
         chomp $outline;
