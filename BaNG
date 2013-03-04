@@ -315,7 +315,7 @@ sub createLockFile {
         print "ERROR: lockfile $lockfile still exists\n";
         return 0;
     } else {
-        unless $dryrun {
+        unless ($dryrun) {
             system("touch \"$lockfile\"") and print "ERROR: could not create lockfile $lockfile\n";
         }
         print "Created lockfile $lockfile.\n" if $debug;
@@ -461,7 +461,7 @@ sub mail_report {
         Subject => "Backup report of ($host): success",
         Message => "* * * Backup report * * *\n\nBacking up: $host:$targetpath\n\n* * * Backup successfull * * *\n",
     );
-    unless $dryrun {
+    unless ($dryrun) {
         sendmail(%mail) or print "mail_report error: $Mail::Sendmail::error";
     }
 
