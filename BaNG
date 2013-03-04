@@ -453,10 +453,10 @@ sub db_report {
 }
 
 sub mail_report {
-    my ( $host, $targetpath ) = @_;
+    my ($host, $targetpath) = @_;
 
     my %mail = (
-        To      => 'schmid@phys.ethz.ch',
+        To      => $globalconfig{report_to},
         From    => 'root@phys.ethz.ch',
         Subject => "Backup report of ($host): success",
         Message => "* * * Backup report * * *\n\nBacking up: $host:$targetpath\n\n* * * Backup successfull * * *\n",

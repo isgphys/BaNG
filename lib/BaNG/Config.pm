@@ -61,6 +61,8 @@ sub get_global_config {
 
     $globalconfig{config_default}      = "$config_path/$global_settings->{DefaultConfig}";
     $globalconfig{config_default_nis}  = "$config_path/$global_settings->{DefaultNisConfig}";
+
+    $globalconfig{report_to}           = "$global_settings->{ReportTo}";
 }
 
 sub get_default_config {
