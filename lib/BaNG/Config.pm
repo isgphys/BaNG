@@ -31,15 +31,15 @@ our %globalconfig;  # App-Settings
 our %defaultconfig;
 our %hosts;
 our %cronjobs;
-our $prefix;
 our $config_path;
 our $config_global;
 our $servername = hostname;
+our $prefix = dirname( abs_path($0) );
 
 sub get_global_config {
     my ($prefix_arg) = @_;
 
-    $prefix        = $prefix_arg || dirname( abs_path($0) );
+    $prefix        = $prefix_arg if $prefix_arg;
     $config_path   = "$prefix/etc";
     $config_global = "$config_path/bang_globals.yaml";
 
