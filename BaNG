@@ -503,8 +503,8 @@ sub usage {
     my $command = $0;
     $command    =~ s#^.*/##;
 
-    print STDERR (
-        $message, qq(
+    print <<EOF;
+        $message
         Usage Examples:
 
         $command -h <hostname> -g <group>   # back up given host and group
@@ -519,7 +519,7 @@ sub usage {
         -t <nr>         # number of threads, default: 1
         -w              # wipe the backup
         -d              # show debugging messages
-    \n)
-    );
+
+EOF
     exit 0;
 }
