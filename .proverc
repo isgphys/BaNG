@@ -1,0 +1,6 @@
+# run several tests in parallel
+-j6
+# shuffle to run in random order
+-s
+# recursively descend into subfolders
+-r
