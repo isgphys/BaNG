@@ -28,6 +28,7 @@ my $dryrun     = 0;
 my $wipe;
 my $group_arg;
 my $host_arg;
+my $prefix_arg;
 my $nthreads_arg;
 my $nthreads;
 my @queue;
@@ -36,7 +37,7 @@ my @queue;
 # Main
 #
 parse_command_options();
-get_global_config();
+get_global_config($prefix_arg);
 get_host_config($host_arg, $group_arg);
 
 foreach my $config ( keys %hosts ) {
@@ -485,6 +486,7 @@ sub parse_command_options {
         "n|dry-run"   => \$dryrun,
         "g|group=s"   => \$group_arg,
         "h|host=s"    => \$host_arg,
+        "p|prefix=s"  => \$prefix_arg,
         "t|threads=i" => \$nthreads_arg,
         "w|wipe"      => \$wipe,
     ) or usage("Invalid commmand line options.");
@@ -517,6 +519,7 @@ sub usage {
 
         -n              # dry-run without making changes
         -t <nr>         # number of threads, default: 1
+        -p <path>       # override path to folder containing etc/
         -w              # wipe the backup
         -d              # show debugging messages
 
