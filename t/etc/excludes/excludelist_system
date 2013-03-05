@@ -1,0 +1,7 @@
+- /proc/
+- /tmp/
+- /sys/
+- /var/cache/
+- /var/tmp/
+- /opt/trafdb/
+- /opt/sniffer/tmp/

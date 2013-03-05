@@ -1,0 +1,6 @@
+---
+BKP_ENABLED:            1
+BKP_SOURCE_PARTITION:   ":/Users"
+BKP_PREFIX:             "system"
+BKP_RSYNC_RSHELL_PATH:  "/opt/local/bin/rsync"
+BKP_RSYNC_OSX:          1
