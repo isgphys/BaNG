@@ -1,14 +1,11 @@
 package BaNG::Config;
 
-use Dancer ':syntax';
-use BaNG::Reporting;
-use POSIX qw(strftime);
-use File::Find::Rule;
-use YAML::Tiny qw(LoadFile Dump);
-use Data::Dumper;
-
-use Sys::Hostname;
 use Cwd 'abs_path';
+use Dancer ':syntax';
+use File::Find::Rule;
+use POSIX qw(strftime);
+use Sys::Hostname;
+use YAML::Tiny qw(LoadFile Dump);
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -27,14 +24,14 @@ our @EXPORT = qw(
     split_configname
 );
 
-our %globalconfig;  # App-Settings
+our %globalconfig;
 our %defaultconfig;
 our %hosts;
 our %cronjobs;
 our $config_path;
 our $config_global;
 our $servername = hostname;
-our $prefix = dirname( abs_path($0) );
+our $prefix     = dirname( abs_path($0) );
 
 sub get_global_config {
     my ($prefix_arg) = @_;
@@ -44,48 +41,42 @@ sub get_global_config {
     $config_global = "$config_path/bang_globals.yaml";
 
     sanityfilecheck($config_global);
+    my $global_settings = LoadFile($config_global);
+    my $log_date = strftime "$global_settings->{GlobalLogDate}", localtime;
 
-    my $global_settings  = LoadFile($config_global);
+    $globalconfig{log_path}           = "$prefix/$global_settings->{LogFolder}";
+    $globalconfig{global_log_file}    = "$globalconfig{log_path}/$log_date.log";
+    $globalconfig{global_log_date}    = "$global_settings->{GlobalLogDate}";
+    $globalconfig{report_to}          = "$global_settings->{ReportTo}";
 
-    $globalconfig{log_path}            = "$prefix/$global_settings->{LogFolder}";
+    $globalconfig{config_default}     = "$config_path/$global_settings->{DefaultConfig}";
+    $globalconfig{config_default_nis} = "$config_path/$global_settings->{DefaultNisConfig}";
 
-    #$globalconfig{global_log_date}     =  strftime "$global_settings->{GlobalLogDate}", localtime;
-    my $log_date     =  strftime "$global_settings->{GlobalLogDate}", localtime;
+    $globalconfig{path_hostconfig}    = "$config_path/$global_settings->{HostConfigFolder}";
+    $globalconfig{path_cronjobs}      = "$config_path/$global_settings->{CronJobsFolder}";
+    $globalconfig{path_excludes}      = "$config_path/$global_settings->{ExcludesFolder}";
+    $globalconfig{path_lockfiles}     = "$config_path/$global_settings->{LocksFolder}";
 
-    $globalconfig{global_log_date}     = "$global_settings->{GlobalLogDate}";
-    $globalconfig{global_log_file}     = "$globalconfig{log_path}/$log_date.log";
-
-    $globalconfig{path_hostconfig}     = "$config_path/$global_settings->{HostConfigFolder}";
-    $globalconfig{path_cronjobs}       = "$config_path/$global_settings->{CronJobsFolder}";
-    $globalconfig{path_excludes}       = "$config_path/$global_settings->{ExcludesFolder}";
-    $globalconfig{path_lockfiles}      = "$config_path/$global_settings->{LocksFolder}";
-
-    $globalconfig{path_rsync}          = "$global_settings->{RSYNC}";
-    $globalconfig{path_btrfs}          = "$global_settings->{BTRFS}";
-
-    $globalconfig{config_default}      = "$config_path/$global_settings->{DefaultConfig}";
-    $globalconfig{config_default_nis}  = "$config_path/$global_settings->{DefaultNisConfig}";
-
-    $globalconfig{report_to}           = "$global_settings->{ReportTo}";
+    $globalconfig{path_rsync}         = "$global_settings->{RSYNC}";
+    $globalconfig{path_btrfs}         = "$global_settings->{BTRFS}";
 }
 
 sub get_default_config {
 
     sanityfilecheck($config_global);
     sanityfilecheck($globalconfig{config_default});
-
     my $defaultconfig  = LoadFile($globalconfig{config_default});
+
     return $defaultconfig;
 }
 
 sub sanityfilecheck {
     my ($file) = @_;
 
-    if ( ! -f "$file" ){
-#        logit("localhost","INTERNAL", "$file NOT available");
-        return 0; #Need exit 0 for CLI
-    }
-    else {
+    if ( !-f "$file" ) {
+        # logit("localhost","INTERNAL", "$file NOT available");
+        return 0;    # FIXME CLI should check return value
+    } else {
         return 1;
     }
 }
@@ -95,14 +86,15 @@ sub find_host_configs {
 
     my @files;
     my $ffr_obj = File::Find::Rule->file()
-                                  ->name( $query  )
+                                  ->name($query)
                                   ->relative
-                                  ->maxdepth( 1 )
-                                  ->start ( $searchpath );
+                                  ->maxdepth(1)
+                                  ->start($searchpath);
 
-    while (my $file = $ffr_obj->match()){
-        push @files, $file;
+    while ( my $file = $ffr_obj->match() ) {
+        push( @files, $file );
     }
+
     return @files;
 }
 
@@ -111,34 +103,35 @@ sub split_configname {
 
     my ($hostname,$groupname) = $configfile =~ /^([\w\d-]+)_([\w\d-]+)\.yaml/;
 
-    return ($hostname,$groupname) ;
+    return ($hostname,$groupname);
 }
 
 sub get_host_config {
     my ($host, $group) = @_;
-    $host = $host || '*';
+
+    $host  = $host  || '*';
     $group = $group || '*';
     undef %hosts;
     my @hostconfigs = find_host_configs("$host\_$group\.yaml", "$globalconfig{path_hostconfig}" );
 
     foreach my $hostconfigfile (@hostconfigs) {
         my ($hostname,$group) = split_configname($hostconfigfile);
-        my $hostconfig     = read_configfile($hostname,$group);
-        my $isEnabled      = $hostconfig->{BKP_ENABLED};
-        my $isBulkbkp      = $hostconfig->{BKP_BULK_ALLOW};
-        my $isBulkwipe     = $hostconfig->{WIPE_BULK_ALLOW};
-        my $css_class      = $isEnabled ? "active " : "";
-        my $nobulk_css_class = $isBulkbkp == 0 && $isBulkwipe == 0 ? "nobulk " : "" ;
-        my $status         = $isEnabled ? "enabled" : "disabled";
+        my $hostconfig        = read_configfile($hostname, $group);
+        my $isEnabled         = $hostconfig->{BKP_ENABLED};
+        my $isBulkbkp         = $hostconfig->{BKP_BULK_ALLOW};
+        my $isBulkwipe        = $hostconfig->{WIPE_BULK_ALLOW};
+        my $status            = $isEnabled ? "enabled" : "disabled";
+        my $css_class         = $isEnabled ? "active " : "";
+        my $nobulk_css_class  = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? "nobulk " : "";
 
-        $hosts{"$hostname-$group"}= {
-            'hostname'   => $hostname,
-            'group'      => $group,
-            'status'     => $status,
-            'configfile' => $hostconfigfile,
-            'css_class'  => $css_class,
-            'nobulk_css_class'  => $nobulk_css_class,
-            'hostconfig' => $hostconfig,
+        $hosts{"$hostname-$group"} = {
+            'hostname'         => $hostname,
+            'group'            => $group,
+            'status'           => $status,
+            'configfile'       => $hostconfigfile,
+            'css_class'        => $css_class,
+            'nobulk_css_class' => $nobulk_css_class,
+            'hostconfig'       => $hostconfig,
         };
     }
 
@@ -147,17 +140,17 @@ sub get_host_config {
 
 sub get_cronjob_config {
 
-    my $cronjobsfile  = "$globalconfig{path_cronjobs}/cronjobs.yaml";
+    my $cronjobsfile = "$globalconfig{path_cronjobs}/cronjobs.yaml";
 
     if ( sanityfilecheck($cronjobsfile) ) {
 
-        my $cronjobslist  = LoadFile($cronjobsfile);
         undef %cronjobs;
+        my $cronjobslist = LoadFile($cronjobsfile);
 
         foreach my $cronjob ( keys %{$cronjobslist} ) {
-            my ($host,$group) = split( /_/, $cronjob );
+            my ($host, $group) = split( /_/, $cronjob );
 
-            $cronjobs{"$cronjob"}= {
+            $cronjobs{"$cronjob"} = {
                 'hostname' => $host,
                 'group'    => $group,
                 'ident'    => "$host-$group",
@@ -165,34 +158,34 @@ sub get_cronjob_config {
                 'WIPE'     => $cronjobslist->{$cronjob}->{WIPE},
             };
         }
-        return 1;
     }
+
+    return 1;
 }
 
 sub read_configfile {
     my ($host, $group) = @_;
+
     my $configfile_host;
     my $settings;
 
-    if ($group eq "NIS"){
-        $configfile_host  = $globalconfig{config_default_nis};
-    }
-    else{
-        $configfile_host  = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
+    if ( $group eq "NIS" ) {
+        $configfile_host = $globalconfig{config_default_nis};
+    } else {
+        $configfile_host = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
     }
 
     if ( sanityfilecheck($configfile_host) ) {
 
-        $settings = LoadFile($globalconfig{config_default});
+        $settings         = LoadFile($globalconfig{config_default});
+        my $settings_host = LoadFile($configfile_host);
 
-        my $settings_host  = LoadFile($configfile_host);
-
-        foreach my $key ( keys %{ $settings_host } ){
-            next if !$settings_host->{$key};
+        foreach my $key ( keys %{$settings_host} ) {
+            next unless $settings_host->{$key};
             $settings->{$key} = $settings_host->{$key};
         }
-
     }
+
     return $settings;
 }
 
