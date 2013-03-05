@@ -223,11 +223,11 @@ sub eval_rsync_target {
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         $rsync_target .= "/current";
 
-        if ( !-d $rsync_target ) {
+        if ( !-d $rsync_target  && !$dryrun ) {
             print "$globalconfig{path_btrfs} subvol create $rsync_target\n" if $debug;
         }
     } else {
-        if ( !-d $rsync_target ) {
+        if ( !-d $rsync_target && !$dryrun ) {
             system("mkdir -p $rsync_target");
         }
 
