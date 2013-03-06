@@ -265,6 +265,8 @@ sub execute_rsync {
     print "Rsync child exited with status of $?\n" if $?;
 
     my $errcode = 0;
+    my $endstamp = `date +%s`;
+
     if ( @errlines ){
         foreach my $errline (@errlines) {
             chomp $errline;
@@ -272,11 +274,11 @@ sub execute_rsync {
             print "Rsync errorcode: $errcode\n" if $errcode;
         }
     } else {
-        my $endstamp = `date +%s`;
         createLastBkpFile($host, $group, $bkptimestamp);
-        db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, @outlines);
         print "Backup successful for host $host group $group path $path!\n" if $debug;
     }
+
+    db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, $errcode, @outlines);
 
     return 1;
 }
@@ -398,7 +400,7 @@ sub targetpath {
 # Reporting
 #
 sub db_report {
-    my ($host, $group, $startstamp, $endstamp, $path, $targetpath ,$bkptimestamp, @outlines) = @_;
+    my ($host, $group, $startstamp, $endstamp, $path, $targetpath ,$bkptimestamp, $errcode, @outlines) = @_;
 
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
@@ -437,12 +439,12 @@ sub db_report {
 
     my $sql;
     $sql .= "INSERT INTO statistic (";
-    $sql .= " BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, Start, Stop, ";
+    $sql .= " BkpFromHost, BkpGroup,  BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, Start, Stop, ";
     $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
-    $sql .= "'$host', '$path', 'phd-bkp-gw', '$targetpath', '$bkptimestamp', ";
-    $sql .= " $isSubfolderThread , FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
+    $sql .= "'$host', '$group', '$path', 'phd-bkp-gw', '$targetpath', '$bkptimestamp', ";
+    $sql .= " $isSubfolderThread , '$errcode'  , FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
     $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}', ";
