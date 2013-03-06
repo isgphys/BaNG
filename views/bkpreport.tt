@@ -1,25 +1,32 @@
 <div>
-    <h3>Backup Report (Demo Layout)</h3>
-    <table width="700" border="1">
-        <% FOREACH hostgroup IN RecentBackups.keys.sort %>
-            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
-          <% FOREACH bkp IN RecentBackups.$hostgroup %>
-                <table>
-                    <tr>
-                        <th>Group: <% hostgroup %></th>
-                    </tr>
-                    <tr height="25">
-                        <th>Status    <% bkp.ErrStatus %></th>
-                        <th>Starttime <% bkp.Starttime %></th>
-                        <th>Endtime   <% bkp.Stoptime  %></th>
-                        <th>ToPath    <% bkp.BkpToPath %></th>
-                        <th>FromPath  <% bkp.BkpFromPath %></th>
-                        <th>LastBkp   <% bkp.LastBkp   %></th>
-                        <th>isThread  <% bkp.isThread  %></th>
-                    </tr>
-                </table>
-          <% END %>
-            </td></tr>
-        <% END %>
+    <h3>Backup Report</h3>
+    <table border="0">
+        <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
+            <thead>
+                <tr>
+                    <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                </tr>
+                <tr>
+                    <th>Status    </th>
+                    <th>Starttime </th>
+                    <th>Endtime   </th>
+                    <th>FromPath  </th>
+                    <th>LastBkp   </th>
+                    <th>isThread  </th>
+                </tr>
+            </thead>
+            <tbody>
+                <%- FOREACH bkp IN RecentBackups.$hostgroup %>
+                    <tr height="20">
+                        <td class="center"><% bkp.ErrStatus %></th>
+                        <td><% bkp.Starttime %></th>
+                        <td><% bkp.Stoptime  %></th>
+                        <td><% bkp.BkpFromPath %></th>
+                        <td><% bkp.LastBkp   %></th>
+                        <td class="center"><% bkp.isThread  %></th>
+                     </tr>
+                <%- END %>
+            </tbody>
+        <%- END %>
     </table>
 </div>

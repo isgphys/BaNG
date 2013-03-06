@@ -52,7 +52,7 @@ sub bangstat_recentbackups {
     bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
-        FROM statistic
+        FROM recent_backups
         WHERE Start > date_sub(now(), interval 5 day)
         AND BkpFromHost = '$host'
         AND BkpToHost LIKE 'phd-bkp-gw\%'
