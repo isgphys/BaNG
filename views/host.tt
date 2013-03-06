@@ -33,7 +33,6 @@
     </table>
 </div>
 
-<br>
 <div>
     <div style="float:left;">
         <h3>CronJobs (Single-Run)</h3>
@@ -142,4 +141,7 @@
         </table>
     </div>
 </div>
-
+<div style="clear:both;">
+<br>
+    <% INCLUDE bkpreport.tt %>
+</div>
