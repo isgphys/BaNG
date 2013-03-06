@@ -14,6 +14,7 @@ use IPC::Open3;
 use Mail::Sendmail;
 use threads;
 use Thread::Queue;
+use Template;
 
 use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Hosts;
@@ -161,6 +162,7 @@ sub thread_work {
         return unless createLockFile( $host, $group, $path );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
         removeLockFile( $host, $group, $path );
+        hobbit_report( $host, $group );
     }
 
     return 1;
@@ -473,6 +475,37 @@ sub mail_report {
     unless ($dryrun) {
         sendmail(%mail) or print "mail_report error: $Mail::Sendmail::error";
     }
+
+    return 1;
+}
+
+sub hobbit_report {
+    my ($host, $group)  = @_;
+
+    my %RecentBackups = bangstat_recentbackups($host);
+    my $RecentBackups = { RecentBackups => \%RecentBackups };
+
+    my $topcolor = 'green';
+    foreach my $key (keys %RecentBackups) {
+        $topcolor = 'red' if $RecentBackups{$key}[0]{ErrStatus};
+    }
+
+    my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
+    my $DATE      = `date`;
+    chomp $DATE;
+
+    my $hobbitreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";
+
+    my $tt = Template->new(
+        START_TAG  => '<%',
+        END_TAG    => '%>',
+    );
+    my $report;
+    $tt->process('views/bkpreport.tt', $RecentBackups, \$report) or die $tt->error();
+    $hobbitreport .= $report;
+    print "$hobbitreport" if ( $debug && $debuglevel >=2 );
+
+    send_hobbit_report($hobbitreport) unless $dryrun;
 
     return 1;
 }

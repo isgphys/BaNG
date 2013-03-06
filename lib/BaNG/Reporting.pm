@@ -4,6 +4,7 @@ use Dancer ':syntax';
 use POSIX qw(strftime);
 use BaNG::Config;
 use YAML::Tiny;
+use IO::Socket;
 use DBI;
 
 use Exporter 'import';
@@ -11,6 +12,8 @@ our @EXPORT = qw(
     logit
     $bangstat_dbh
     bangstat_db_connect
+    bangstat_recentbackups
+    send_hobbit_report
 );
 
 our %globalconfig;
@@ -43,5 +46,54 @@ sub bangstat_db_connect {
     return 1;
 }
 
-1;
+sub bangstat_recentbackups {
+    my ($host) = @_;
 
+    bangstat_db_connect($globalconfig{config_bangstat});
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT *
+        FROM statistic
+        WHERE Start > date_sub(now(), interval 5 day)
+        AND BkpFromHost = '$host'
+        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        ORDER BY Start DESC;
+    ");
+    $sth->execute();
+
+    my %RecentBackups;
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        my $BkpGroup = $dbrow->{'BkpGroup'} || 'NA';
+        push( @{$RecentBackups{"$host-$BkpGroup"}}, {
+            Starttime   => $dbrow->{'Start'},
+            Stoptime    => $dbrow->{'Stop'},
+            BkpFromPath => $dbrow->{'BkpFromPath'},
+            BkpToPath   => $dbrow->{'BkpToPath'},
+            isThread    => $dbrow->{'isThread'},
+            LastBkp     => $dbrow->{'LastBkp'},
+            ErrStatus   => $dbrow->{'ErrStatus'},
+            BkpGroup    => $BkpGroup,
+        });
+    }
+    $sth->finish();
+
+    return %RecentBackups;
+}
+
+sub send_hobbit_report {
+    my ($report) = @_;
+
+    my $socket=IO::Socket::INET->new(
+        PeerAddr => 'hobbit.phys.ethz.ch',
+        PeerPort => '1984',
+        Proto    => 'tcp',
+    );
+
+    if ( defined $socket and $socket != 0 ) {
+        $socket->print("$report");
+        $socket->close();
+    }
+
+    return 1;
+}
+
+1;

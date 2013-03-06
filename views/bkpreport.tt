@@ -1,0 +1,25 @@
+<div>
+    <h3>Backup Report (Demo Layout)</h3>
+    <table width="700" border="1">
+        <% FOREACH hostgroup IN RecentBackups.keys.sort %>
+            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
+          <% FOREACH bkp IN RecentBackups.$hostgroup %>
+                <table>
+                    <tr>
+                        <th>Group: <% hostgroup %></th>
+                    </tr>
+                    <tr height="25">
+                        <th>Status    <% bkp.ErrStatus %></th>
+                        <th>Starttime <% bkp.Starttime %></th>
+                        <th>Endtime   <% bkp.Stoptime  %></th>
+                        <th>ToPath    <% bkp.BkpToPath %></th>
+                        <th>FromPath  <% bkp.BkpFromPath %></th>
+                        <th>LastBkp   <% bkp.LastBkp   %></th>
+                        <th>isThread  <% bkp.isThread  %></th>
+                    </tr>
+                </table>
+          <% END %>
+            </td></tr>
+        <% END %>
+    </table>
+</div>
