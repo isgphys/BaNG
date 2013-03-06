@@ -13,7 +13,7 @@ our @EXPORT = qw(
     bangstat_db_connect
 );
 
- our %globalconfig;
+our %globalconfig;
 our $bangstat_dbh;
 
 sub logit {
@@ -28,8 +28,9 @@ sub logit {
 }
 
 sub bangstat_db_connect {
+    my ($ConfigBangstat) = @_;
 
-    my $yaml = YAML::Tiny->read($BaNG::Config::config_path . "/bangstat_db.yaml");
+    my $yaml = YAML::Tiny->read($ConfigBangstat);
     my $DBhostname = $yaml->[0]{DBhostname};
     my $DBusername = $yaml->[0]{DBusername};
     my $DBdatabase = $yaml->[0]{DBdatabase};

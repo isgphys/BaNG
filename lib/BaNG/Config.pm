@@ -51,6 +51,7 @@ sub get_global_config {
 
     $globalconfig{config_default}     = "$config_path/$global_settings->{DefaultConfig}";
     $globalconfig{config_default_nis} = "$config_path/$global_settings->{DefaultNisConfig}";
+    $globalconfig{config_bangstat}    = "$config_path/$global_settings->{BangstatConfig}";
 
     $globalconfig{path_hostconfig}    = "$config_path/$global_settings->{HostConfigFolder}";
     $globalconfig{path_cronjobs}      = "$config_path/$global_settings->{CronJobsFolder}";

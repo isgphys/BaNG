@@ -449,8 +449,9 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
+    print "SQL command: $sql\n" if ( $debug && $debuglevel >=2 );
 
-    bangstat_db_connect();
+    bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
     $sth->execute() unless $dryrun;
     $sth->finish();

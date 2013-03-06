@@ -2,6 +2,7 @@ package BaNG::Statistics;
 use Dancer ':syntax';
 use BaNG::Reporting;
 use BaNG::Common;
+use BaNG::Config;
 use Date::Parse;
 use List::Util qw(min max);
 use List::MoreUtils qw(uniq);
@@ -35,7 +36,8 @@ sub statistics_json {
     my ($host, $share, $days) = @_;
     my $lastXdays = $days || $lastXdays_default;
 
-    bangstat_db_connect();
+    get_global_config();
+    bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
@@ -83,7 +85,8 @@ sub statistics_cumulated_json {
     my ($days) = @_;
     my $lastXdays = $days || $lastXdays_default;
 
-    bangstat_db_connect();
+    get_global_config();
+    bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
@@ -150,7 +153,8 @@ sub statistics_cumulated_json {
 
 sub statistics_hosts_shares {
 
-    bangstat_db_connect();
+    get_global_config();
+    bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT
         DISTINCT BkpFromHost, BkpFromPath
@@ -189,7 +193,8 @@ sub statistics_hosts_shares {
 
 sub statistics_groupshare_variations {
 
-    bangstat_db_connect();
+    get_global_config();
+    bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT BkpFromPath, TotFileSize, NumOfFiles
         FROM statistic_all
@@ -246,7 +251,8 @@ sub statistics_schedule {
     my ($days, $sortBy) = @_;
     my $lastXdays = $days || $lastXdays_default;
 
-    bangstat_db_connect();
+    get_global_config();
+    bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
