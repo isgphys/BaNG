@@ -1,7 +1,6 @@
 package BaNG::Reporting;
 
 use Dancer ':syntax';
-use POSIX qw(strftime);
 use BaNG::Config;
 use YAML::Tiny;
 use IO::Socket;
@@ -9,7 +8,6 @@ use DBI;
 
 use Exporter 'import';
 our @EXPORT = qw(
-    logit
     $bangstat_dbh
     bangstat_db_connect
     bangstat_recentbackups
@@ -18,17 +16,6 @@ our @EXPORT = qw(
 
 our %globalconfig;
 our $bangstat_dbh;
-
-sub logit {
-    my ($hostname, $folder, $msg) = @_;
-
-    my $timestamp = strftime "%b %d %H:%M:%S", localtime;
-
-    open  LOG,">>$globalconfig{'global_log_file'}" or die "$globalconfig{'global_log_file'}: $!";
-#    open  LOG,">>BaNG::Config::$globalconfig{global_log_file}" or die ;
-#    print LOG "$timestamp $hostname $folder - $msg\n";
-    close LOG;
-}
 
 sub bangstat_db_connect {
     my ($ConfigBangstat) = @_;

@@ -12,6 +12,7 @@ use File::Basename;
 use Getopt::Long qw(:config no_auto_abbrev);
 use IPC::Open3;
 use Mail::Sendmail;
+use POSIX qw(strftime);
 use threads;
 use Thread::Queue;
 use Template;
@@ -65,7 +66,7 @@ exit 0;
 sub queue_backup {
     my ($host, $group) = @_;
 
-    print "sub queue_backup($host, $group)\n" if $debug;
+    logit( $host, $group, "sub queue_backup($host, $group)" );
 
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{status} eq 'enabled';
@@ -75,9 +76,9 @@ sub queue_backup {
 
     # make sure host is online
     my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
-    print "chkClientConn: $conn_status, $conn_msg\n" if $debug;
+    logit( $host, $group, "chkClientConn: $conn_status, $conn_msg" );
     if ( !$conn_status ) {
-        print "Error: host $host is offline\n" if $debug;
+        logit( $host, $group, "Error: host $host is offline" );
         return 1;
     }
 
@@ -86,7 +87,7 @@ sub queue_backup {
 
     # get list of partitions to back up
     my (@src_part) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
-    print "Number of partitions: " . ($#src_part+1) . " ( @src_part )\n" if $debug;
+    logit( $host, $group, "Number of partitions: " . ($#src_part+1) . " ( @src_part )" );
 
     # optionally queue each subfolder of the partitions
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
@@ -98,7 +99,7 @@ sub queue_backup {
         push @queue, "${host}__${group}__${lastbkp}__0__@src_part";
     }
 
-    print "Queued backup of host $host group $group\n" if $debug;
+    logit( $host, $group, "Queued backup of host $host group $group" );
 
     return 1;
 }
@@ -110,7 +111,7 @@ sub queue_remote_subfolders {
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
     my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
-    print "eval subfolders command: @remotedirlist\n" if $debug;
+    logit( $host, $group, "eval subfolders command: @remotedirlist" );
 
     my $bkptimestamp = eval_bkptimestamp($host, $group);
 
@@ -155,15 +156,16 @@ sub thread_work {
     my $tid = threads->tid;
     while ( my $queue_content = $Q->dequeue ) {
 
-        print "Thread $tid working on $queue_content \n" if $debug;
-
         my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content );
+
+        logit( $host, $group, "Thread $tid working on $queue_content" );
 
         return unless createLockFile( $host, $group, $path );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
         create_snapshot( $host, $group );
         removeLockFile( $host, $group, $path );
         hobbit_report( $host, $group );
+
     }
 
     return 1;
@@ -196,7 +198,7 @@ sub eval_rsync_options {
         if ( -e $excludefile ) {
             $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
         } else {
-            print "Warning: excludefile $excludefile not found.\n" if $debug;
+            logit( $host, $group, "Warning: excludefile $excludefile not found." );
         }
     }
 
@@ -227,7 +229,7 @@ sub eval_rsync_target {
         $rsync_target .= "/current";
 
         if ( !-d $rsync_target  && !$dryrun ) {
-            print "$globalconfig{path_btrfs} subvol create $rsync_target\n" if $debug;
+            logit( $host, $group, "$globalconfig{path_btrfs} subvol create $rsync_target" );
         }
     } else {
         if ( !-d $rsync_target && !$dryrun ) {
@@ -250,9 +252,9 @@ sub execute_rsync {
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
     my $rsync_source  = "$host$path";
     my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
-    print "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target\n" if $debug;
+    logit( $host, $group, "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target" );
 
-    print "Executing rsync for host $host group $group path $path\n" if $debug;
+    logit( $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
     $rsync_cmd = "echo $rsync_cmd" if $dryrun;
@@ -263,9 +265,9 @@ sub execute_rsync {
     close HIS_OUT;
     close HIS_ERR;
 
-    print "Rsync STDOUT: @outlines\n" if ( $debug && @outlines );
-    print "Rsync STDERR: @errlines\n" if ( $debug && @errlines );
-    print "Rsync child exited with status of $?\n" if $?;
+    logit( $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $debuglevel >=2 );
+    logit( $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
+    logit( $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
 
     my $errcode = 0;
     my $endstamp = `date +%s`;
@@ -274,11 +276,11 @@ sub execute_rsync {
         foreach my $errline (@errlines) {
             chomp $errline;
             ($errcode) = $errline = /.* \(code (\d+)/;
-            print "Rsync errorcode: $errcode\n" if $errcode;
+            logit( $host, $group, "Rsync errorcode: $errcode" );
         }
     } else {
         createLastBkpFile($host, $group, $bkptimestamp);
-        print "Backup successful for host $host group $group path $path!\n" if $debug;
+        logit( $host, $group, "Backup successful for host $host group $group path $path!" );
     }
 
     db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, $errcode, @outlines);
@@ -301,8 +303,8 @@ sub create_snapshot {
     my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest";
     $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
 
-    print "Create snapshot for host $host group $group using $btrfs_snapshot_cmd\n" if $debug;
-    system($btrfs_snapshot_cmd) and print "ERROR: creating snapshot for $host - $group: $!\n";
+    logit( $host, $group, "Create snapshot for host $host group $group using $btrfs_snapshot_cmd" );
+    system($btrfs_snapshot_cmd) and logit( $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
 
     return 1;
 }
@@ -313,7 +315,7 @@ sub create_snapshot {
 sub wipe {
     my ($host, $group) = @_;
 
-    print "Wipe host $host group $group\n" if $debug;
+    logit( $host, $group, "Wipe host $host group $group" );
     # execute_wipe unless $dryrun;
 
     return 1;
@@ -340,13 +342,13 @@ sub createLockFile {
     my $lockfile = LockFile($host, $group, $path);
 
     if ( -e $lockfile ) {
-        print "ERROR: lockfile $lockfile still exists\n";
+        logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
         return 0;
     } else {
         unless ($dryrun) {
-            system("touch \"$lockfile\"") and print "ERROR: could not create lockfile $lockfile\n";
+            system("touch \"$lockfile\"") and logit( $host, $group, "ERROR: could not create lockfile $lockfile" );
         }
-        print "Created lockfile $lockfile.\n" if $debug;
+        logit( $host, $group, "Created lockfile $lockfile." );
         return 1;
     }
 }
@@ -356,7 +358,7 @@ sub removeLockFile {
 
     my $lockfile = LockFile($host, $group, $path);
     unlink $lockfile unless $dryrun;
-    print "Removed lockfile $lockfile.\n" if $debug;
+    logit( $host, $group, "Removed lockfile $lockfile." );
 
     return 1;
 }
@@ -385,7 +387,7 @@ sub chkLastBkp {
         chomp($lastbkp);
     }
 
-    print "sub chkLastBkp: lastbkp = $lastbkp\n" if $debug;
+    logit( $host, $group, "sub chkLastBkp: lastbkp = $lastbkp" );
 
     return $lastbkp;
 }
@@ -475,7 +477,7 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
-    print "SQL command: $sql\n" if ( $debug && $debuglevel >=2 );
+    logit( $host, $group, "SQL command: $sql" ) if ( $debuglevel >=2 );
 
     bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
@@ -486,7 +488,7 @@ sub db_report {
 }
 
 sub mail_report {
-    my ($host, $targetpath) = @_;
+    my ($host, $group, $targetpath) = @_;
 
     my %mail = (
         To      => $globalconfig{report_to},
@@ -495,7 +497,7 @@ sub mail_report {
         Message => "* * * Backup report * * *\n\nBacking up: $host:$targetpath\n\n* * * Backup successfull * * *\n",
     );
     unless ($dryrun) {
-        sendmail(%mail) or print "mail_report error: $Mail::Sendmail::error";
+        sendmail(%mail) or logit( $host, $group, "mail_report error: $Mail::Sendmail::error" );
     }
 
     return 1;
@@ -525,9 +527,28 @@ sub hobbit_report {
     my $report;
     $tt->process('views/hobbitreport.tt', $RecentBackups, \$report) or die $tt->error();
     $hobbitreport .= $report;
-    print "$hobbitreport" if ( $debug && $debuglevel >=2 );
 
     send_hobbit_report($hobbitreport) unless $dryrun;
+
+    return 1;
+}
+
+sub logit {
+    my ($host, $group, $msg) = @_;
+
+    my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
+    my $logdate    = strftime $globalconfig{global_log_date}, localtime;
+    my $logfile    = "$globalconfig{'log_path'}/${host}-${group}_$logdate.log";
+    my $logmessage = "$timestamp $host-$group : $msg";
+    $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
+
+    print $logmessage if $debug;
+
+    #unless ($dryrun) {
+        open  LOG, ">>", $logfile or print "Error opening logfile $logfile: $!\n";
+        print LOG $logmessage;
+        close LOG;
+    #}
 
     return 1;
 }
@@ -550,6 +571,10 @@ sub parse_command_options {
     ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
+
+    $debug = 1 if $dryrun;
+
+    return 1;
 }
 
 sub usage {
