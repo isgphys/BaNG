@@ -83,7 +83,7 @@
 
 }
 #configslist tr.active {
-    background-color: lightgreen;
+    background-color: #99FF99;
 }
 
 #configslist .expander {
