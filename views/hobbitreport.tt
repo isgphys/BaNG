@@ -1,0 +1,32 @@
+<div>
+    <h3>Backup Report</h3>
+    <table border="0">
+        <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
+            <thead>
+                <tr>
+                    <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                </tr>
+                <tr>
+                    <th>Status    </th>
+                    <th>Starttime </th>
+                    <th>Endtime   </th>
+                    <th>FromPath  </th>
+                    <th>LastBkp   </th>
+                    <th>isThread  </th>
+                </tr>
+            </thead>
+            <tbody>
+                <%- FOREACH bkp IN RecentBackups.$hostgroup %>
+                    <tr height="20">
+                        <td class="center"><% bkp.ErrStatus %></th>
+                        <td><% bkp.Starttime %></th>
+                        <td><% bkp.Stoptime  %></th>
+                        <td><% bkp.BkpFromPath %></th>
+                        <td><% bkp.LastBkp   %></th>
+                        <td class="center"><% bkp.isThread  %></th>
+                     </tr>
+                <%- END %>
+            </tbody>
+        <%- END %>
+    </table>
+</div>

@@ -501,7 +501,7 @@ sub hobbit_report {
         END_TAG    => '%>',
     );
     my $report;
-    $tt->process('views/bkpreport.tt', $RecentBackups, \$report) or die $tt->error();
+    $tt->process('views/hobbitreport.tt', $RecentBackups, \$report) or die $tt->error();
     $hobbitreport .= $report;
     print "$hobbitreport" if ( $debug && $debuglevel >=2 );
 
