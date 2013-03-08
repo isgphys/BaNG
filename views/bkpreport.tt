@@ -1,32 +1,36 @@
 <div>
     <h3>Backup Report</h3>
-    <table border="0">
+    <table id="bkpreport"border="0">
         <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
-            <thead>
-                <tr>
-                    <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
-                </tr>
-                <tr>
-                    <th>Status    </th>
-                    <th>Starttime </th>
-                    <th>Endtime   </th>
-                    <th>FromPath  </th>
-                    <th>LastBkp   </th>
-                    <th>isThread  </th>
-                </tr>
-            </thead>
-            <tbody>
-                <%- FOREACH bkp IN RecentBackups.$hostgroup %>
-                    <tr height="20">
-                        <td class="center"><% bkp.ErrStatus %></th>
-                        <td><% bkp.Starttime %></th>
-                        <td><% bkp.Stoptime  %></th>
-                        <td><% bkp.BkpFromPath %></th>
-                        <td><% bkp.LastBkp   %></th>
-                        <td class="center"><% bkp.isThread  %></th>
-                     </tr>
-                <%- END %>
-            </tbody>
+            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
+                <table width=700 border="0">
+                    <thead>
+                        <tr>
+                            <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <th>Starttime</th>
+                            <th>Endtime</th>
+                            <th>FromPath</th>
+                            <th>LastBkp</th>
+                            <th>isThread</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%- FOREACH bkp IN RecentBackups.$hostgroup %>
+                        <tr height="20">
+                            <td <%- IF bkp.ErrStatus == 0 %>class="ok"<%- ELSE %>class="notok"<%- END %>></td>
+                            <td><% bkp.Starttime %></td>
+                            <td><% bkp.Stoptime  %></td>
+                            <td><% bkp.BkpFromPath %></td>
+                            <td><% bkp.LastBkp   %></td>
+                            <td <%- IF bkp.isThread %>class="hook" %><% END %></td>
+                        </tr>
+                        <%- END %>
+                    </tbody>
+                </table>
+            </td></tr>
         <%- END %>
     </table>
 </div>
