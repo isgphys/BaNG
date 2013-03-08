@@ -161,6 +161,7 @@ sub thread_work {
 
         return unless createLockFile( $host, $group, $path );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
+        create_snapshot( $host, $group );
         removeLockFile( $host, $group, $path );
         hobbit_report( $host, $group );
     }
@@ -281,6 +282,27 @@ sub execute_rsync {
     }
 
     db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, $errcode, @outlines);
+
+    return 1;
+}
+
+#################################
+# Create btrfs snapshot
+#
+sub create_snapshot {
+    my ( $host, $group ) = @_;
+
+    return 1 unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
+
+    my $btrfs_cmd             = $globalconfig{path_btrfs};
+    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
+    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . eval_bkptimestamp( $host, $group );
+
+    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest";
+    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
+
+    print "Create snapshot for host $host group $group using $btrfs_snapshot_cmd\n" if $debug;
+    system($btrfs_snapshot_cmd) and print "ERROR: creating snapshot for $host - $group: $!\n";
 
     return 1;
 }
