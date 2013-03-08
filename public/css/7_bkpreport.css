@@ -1,0 +1,29 @@
+#bkpreport {
+    width: 700px;
+}
+
+#bkpreport td {
+    height: 20px;
+}
+
+#bkpreport .active {
+    background-color: #99FF99 !important;
+}
+
+#bkpreport .ok {
+    background: url("/images/face-cool.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+
+#bkpreport .notok {
+    background: url("/images/face-angry.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+
+#bkpreport .hook {
+    background: url("/images/hook.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 15px 15px;
+}
