@@ -6,24 +6,25 @@
 #content h1 {}
 
 #content p.abstract {
-    font-size: 18px;
+    font-size: 12px;
     font-style: italic;
 }
 
 #content a {
     color: #6081bb;
+    text-decoration: none;
 }
 
 #content h1 {
-    font-size: 18px;
+    font-size: 14px;
 }
 
 #content h2 {
-    font-size: 16px;
+    font-size: 12px;
 }
 
 #content h3 {
-    font-size: 14px;
+    font-size: 10px;
 }
 
 #content ul li {

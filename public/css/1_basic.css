@@ -3,10 +3,10 @@ body {
     padding: 0px;
     margin: 0px;
     font-family: verdana, arial, helvetica, sans-serif;
-    font-size: 12px;
+    font-size: 10px;
 }
 
-body pre {
+ody pre {
     font-family: monospace;
 }
 
@@ -53,7 +53,7 @@ body pre {
     position: absolute;
     top: 20px;
     left: 220px;
-    font-size: 18pt;
+    font-size: 16pt;
     font-weight: bold;
     margin: 0px;
     padding: 0px;
@@ -165,7 +165,7 @@ nav ul li a {
     padding: 0px 10px 0px 10px;
     color: black;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 10px;
     line-height: 26px;
 }
 
