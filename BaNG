@@ -274,9 +274,10 @@ sub execute_rsync {
 
     if ( @errlines ){
         foreach my $errline (@errlines) {
-            chomp $errline;
-            ($errcode) = $errline = /.* \(code (\d+)/;
-            logit( $host, $group, "Rsync errorcode: $errcode" );
+            if ( $errline =~ /.* \(code (\d+)/ ) {
+                $errcode = $1;
+                logit( $host, $group, "Rsync errorcode: $errcode" );
+            }
         }
     } else {
         createLastBkpFile($host, $group, $bkptimestamp);
