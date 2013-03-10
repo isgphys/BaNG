@@ -70,7 +70,7 @@ sub chkClientConn {
     my $msg   = "Host offline";
     my $p     = Net::Ping->new("tcp",2);
 
-    if ($p->ping($host)){
+    if ($p->ping("$host.ethz.ch")){
         $state = 1;
         $msg   = "Host online";
     }
