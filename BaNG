@@ -25,7 +25,7 @@ use BaNG::Reporting;
 my $version    = '3.0';
 my $debug      = 1;
 my $debuglevel = 2;
-my $dryrun     = 0;
+my $dryrun;
 my $wipe;
 my $group_arg;
 my $host_arg;
