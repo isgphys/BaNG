@@ -176,7 +176,7 @@ sub thread_work {
         return unless createLockFile( $host, $group, $path );
         logit( $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
-        create_snapshot( $host, $group );
+        create_btrfs_snapshot( $host, $group );
         removeLockFile( $host, $group, $path );
         hobbit_report( $host, $group );
     }
@@ -241,12 +241,12 @@ sub eval_rsync_target {
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         $rsync_target .= "/current";
 
-        if ( !-d $rsync_target  && !$dryrun ) {
-            logit( $host, $group, "$globalconfig{path_btrfs} subvol create $rsync_target" );
+        if ( !-d $rsync_target ) {
+            create_btrfs_subvolume( $host, $group, $rsync_target );
         }
     } else {
-        if ( !-d $rsync_target && !$dryrun ) {
-            system("mkdir -p $rsync_target");
+        if ( !-d $rsync_target ) {
+            system("mkdir -p $rsync_target") unless $dryrun;
         }
 
         $rsync_target .= "/$bkptimestamp";
@@ -303,12 +303,24 @@ sub execute_rsync {
 }
 
 #################################
-# Create btrfs snapshot
+# Btrfs
 #
-sub create_snapshot {
+sub create_btrfs_subvolume {
+    my ( $host, $group, $path ) = @_;
+
+    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvol create $path";
+    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $dryrun;
+
+    logit( $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
+    system($btrfs_subvolume_cmd) and logit( $host, $group, "ERROR: creating subvolume for $host-$group: $!" );
+
+    return 1;
+}
+
+sub create_btrfs_snapshot {
     my ( $host, $group ) = @_;
 
-    return 1 unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
+    return unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
 
     my $btrfs_cmd             = $globalconfig{path_btrfs};
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
