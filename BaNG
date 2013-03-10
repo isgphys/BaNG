@@ -572,9 +572,9 @@ sub logit {
     print $logmessage if $debug;
 
     unless ($dryrun) {
-        open  LOG, ">>", $logfile or print "Error opening logfile $logfile: $!\n";
-        print LOG $logmessage;
-        close LOG;
+        open my $log, ">>", $logfile or print "Error opening logfile $logfile: $!\n";
+        print {$log} $logmessage;
+        close $log;
     }
 
     return 1;
