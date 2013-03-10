@@ -31,7 +31,6 @@ my $group_arg;
 my $host_arg;
 my $prefix_arg;
 my $nthreads_arg;
-my $nthreads;
 my @queue;
 
 #################################
@@ -141,6 +140,7 @@ sub queue_remote_subfolders {
 sub start_threads {
 
     # define number of threads
+    my $nthreads;
     if ( $nthreads_arg ) {
         # If nthreads was defined by cli argument, use it
         $nthreads = $nthreads_arg;
