@@ -559,11 +559,11 @@ sub logit {
 
     print $logmessage if $debug;
 
-    #unless ($dryrun) {
+    unless ($dryrun) {
         open  LOG, ">>", $logfile or print "Error opening logfile $logfile: $!\n";
         print LOG $logmessage;
         close LOG;
-    #}
+    }
 
     return 1;
 }
