@@ -540,7 +540,8 @@ sub hobbit_report {
         END_TAG    => '%>',
     );
     my $report;
-    $tt->process('views/hobbitreport.tt', $RecentBackups, \$report) or die $tt->error();
+    $tt->process('views/hobbitreport.tt', $RecentBackups, \$report)
+        or logit( $host, $group, "Error generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 
     send_hobbit_report($hobbitreport) unless $dryrun;
