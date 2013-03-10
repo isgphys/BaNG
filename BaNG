@@ -49,7 +49,6 @@ foreach my $config ( keys %hosts ) {
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
 }
-print "Queue: @queue\n" if $debug;
 
 if ( !@queue ) {
     print "Exit because queue is empty.\n" if $debug;
@@ -96,7 +95,14 @@ sub queue_backup {
         }
     } else {
         # queue list of partitions as a whole
-        push @queue, "${host}__${group}__${lastbkp}__0__@src_part";
+        my $bkpjob = {
+            host         => $host,
+            group        => $group,
+            path         => "@src_part",
+            lastbkp      => $lastbkp,
+            bkptimestamp => 0,
+        };
+        push( @queue, $bkpjob );
     }
 
     logit( $host, $group, "Queued backup of host $host group $group" );
@@ -106,19 +112,25 @@ sub queue_backup {
 
 sub queue_remote_subfolders {
     my ($host, $group, $lastbkp, $partition) = @_;
-
     $partition =~ s/://;
 
+    my $bkptimestamp  = eval_bkptimestamp($host, $group);
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
     my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
     logit( $host, $group, "eval subfolders command: @remotedirlist" );
 
-    my $bkptimestamp = eval_bkptimestamp($host, $group);
-
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
         $remotedir =~ s| |\\ |g;
-        push @queue, "${host}__${group}__${lastbkp}__${bkptimestamp}__:'${remotedir}'";
+
+        my $bkpjob = {
+            host         => $host,
+            group        => $group,
+            path         => ":'${remotedir}'",
+            lastbkp      => $lastbkp,
+            bkptimestamp => $bkptimestamp,
+        };
+        push( @queue, $bkpjob );
     }
 
     return 1;
@@ -154,17 +166,20 @@ sub start_threads {
 sub thread_work {
     my ($Q) = @_;
 
-    while ( my $queue_content = $Q->dequeue ) {
-        my $tid = threads->tid;
-        my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content );
+    while ( my $bkpjob = $Q->dequeue ) {
+        my $tid          = threads->tid;
+        my $host         = $bkpjob->{host};
+        my $group        = $bkpjob->{group};
+        my $path         = $bkpjob->{path};
+        my $lastbkp      = $bkpjob->{lastbkp};
+        my $bkptimestamp = $bkpjob->{bkptimestamp};
 
         return unless createLockFile( $host, $group, $path );
-        logit( $host, $group, "Thread $tid working on $queue_content" );
+        logit( $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
         create_snapshot( $host, $group );
         removeLockFile( $host, $group, $path );
         hobbit_report( $host, $group );
-
     }
 
     return 1;
