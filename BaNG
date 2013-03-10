@@ -152,15 +152,14 @@ sub start_threads {
 }
 
 sub thread_work {
-    my $Q   = shift;
-    my $tid = threads->tid;
-    while ( my $queue_content = $Q->dequeue ) {
+    my ($Q) = @_;
 
+    while ( my $queue_content = $Q->dequeue ) {
+        my $tid = threads->tid;
         my ($host, $group, $lastbkp, $bkptimestamp, $path) = split( /__/, $queue_content );
 
-        logit( $host, $group, "Thread $tid working on $queue_content" );
-
         return unless createLockFile( $host, $group, $path );
+        logit( $host, $group, "Thread $tid working on $queue_content" );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
         create_snapshot( $host, $group );
         removeLockFile( $host, $group, $path );
