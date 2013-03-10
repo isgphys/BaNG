@@ -21,7 +21,6 @@ use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Hosts;
 use BaNG::Config;
 use BaNG::Reporting;
-our %hosts;
 
 my $version    = '3.0';
 my $debug      = 1;
