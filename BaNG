@@ -144,7 +144,7 @@ sub start_threads {
 
     my $Q = Thread::Queue->new;
     my @threads = map threads->create( \&thread_work, $Q ), 1 .. $nthreads;
-    $Q->enqueue($_) for sort @queue;
+    $Q->enqueue($_) for @queue;
     $Q->enqueue( (undef) x $nthreads );
     $_->join for @threads;
 
