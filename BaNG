@@ -23,8 +23,8 @@ use BaNG::Config;
 use BaNG::Reporting;
 
 my $version    = '3.0';
-my $debug      = 1;
 my $debuglevel = 2;
+my $debug;
 my $dryrun;
 my $wipe;
 my $group_arg;
