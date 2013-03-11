@@ -12,7 +12,6 @@ our @EXPORT = qw(
 
 
 sub get_fsinfo {
-    my $df;
     my @mounts;
     my %fsinfo;
 
