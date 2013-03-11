@@ -12,14 +12,13 @@ use Auth::LDAP;
 prefix undef;
 
 get '/' => sub {
-    get_fsinfo();
 
     template 'dashboard' => {
              'section' => 'dashboard',
              'remotehost' => request->remote_host,
              'webDancerEnv' => config->{run_env},
              'msg' => get_flash(),
-             'fsinfo' => \%fsinfo,
+             'fsinfo' => get_fsinfo(),
     };
 };
 

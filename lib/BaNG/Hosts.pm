@@ -8,14 +8,13 @@ use Exporter 'import';
 our @EXPORT = qw(
     get_fsinfo
     chkClientConn
-    %fsinfo
 );
 
-our %fsinfo;
 
 sub get_fsinfo {
     my $df;
     my @mounts;
+    my %fsinfo;
 
     open(MP, "df -T | grep backup |");
         @mounts = <MP>;
@@ -45,7 +44,7 @@ sub get_fsinfo {
         };
     }
 
-    return 1;
+    return \%fsinfo;
 }
 
 sub check_fill_level {
