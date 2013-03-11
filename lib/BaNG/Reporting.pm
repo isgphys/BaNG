@@ -2,6 +2,8 @@ package BaNG::Reporting;
 
 use Dancer ':syntax';
 use BaNG::Config;
+use Date::Parse;
+use DateTime;
 use YAML::Tiny;
 use IO::Socket;
 use DBI;
@@ -36,11 +38,14 @@ sub bangstat_db_connect {
 sub bangstat_recentbackups {
     my ($host) = @_;
 
+    my $lastXdays    = 5;
+    my $BkpStartHour = 18;
+
     bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
         SELECT *
         FROM recent_backups
-        WHERE Start > date_sub(now(), interval 5 day)
+        WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost = '$host'
         AND BkpToHost LIKE 'phd-bkp-gw\%'
         ORDER BY Start DESC;
@@ -48,6 +53,7 @@ sub bangstat_recentbackups {
     $sth->execute();
 
     my %RecentBackups;
+    my %RecentBackupTimes;
     while (my $dbrow=$sth->fetchrow_hashref()) {
         my $BkpGroup = $dbrow->{'BkpGroup'} || 'NA';
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
@@ -60,8 +66,69 @@ sub bangstat_recentbackups {
             ErrStatus   => $dbrow->{'ErrStatus'},
             BkpGroup    => $BkpGroup,
         });
+        push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
+            Starttime   => $dbrow->{'Start'},
+            BkpFromPath => $dbrow->{'BkpFromPath'},
+            BkpToPath   => $dbrow->{'BkpToPath'},
+            Host        => $host,
+            BkpGroup    => $BkpGroup,
+        });
     }
     $sth->finish();
+
+    # scan for missing backups
+    my $now     = DateTime->now( time_zone => 'Europe/Zurich' );
+    my $tonight = str2time( $now->date() . " $BkpStartHour:00:00" );
+    foreach my $hostpath ( keys %RecentBackupTimes ) {
+        my $thatnight = $tonight;
+        my @bkp = @{$RecentBackupTimes{$hostpath}};
+        my $missingBkpFromPath = $bkp[0]->{BkpFromPath} || 'NA';
+        my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
+        my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
+        my $missingHost        = $bkp[0]->{Host}        || 'NA';
+
+        foreach my $Xdays (1..$lastXdays) {
+            my $isMissing = 0;
+
+            if ( !@bkp ) {
+                # a backup is missing if list is already empty
+                $isMissing = 1;
+            } else {
+                # or if no backup occured during that day
+                my $latestbkp = str2time( $bkp[0]->{Starttime} );
+                unless ( $latestbkp > $thatnight - 24*3600
+                      && $latestbkp < $thatnight ) {
+                    $isMissing = 1;
+                }
+            }
+
+            if ( $isMissing ) {
+                # add empty entry for missing backups
+                my $missingday = DateTime->from_epoch(
+                    epoch     => $thatnight - 24*3600,
+                    time_zone => 'Europe/Zurich',
+                )->strftime('%Y-%m-%d');
+                my $nobkp = {
+                    Starttime   => $missingday,
+                    Stoptime    => '',
+                    BkpFromPath => $missingBkpFromPath,
+                    BkpToPath   => $missingBkpToPath,
+                    isThread    => '',
+                    LastBkp     => '',
+                    ErrStatus   => 99,
+                    BkpGroup    => $missingBkpGroup,
+                };
+                splice( @{$RecentBackups{"$missingHost-$missingBkpGroup"}}, $Xdays-1, 0, $nobkp);
+            } else {
+                # remove successful backups of that day from list
+                while ( @bkp && str2time($bkp[0]->{Starttime}) > $thatnight - 24*3600 ) {
+                    shift @bkp;
+                }
+            }
+            # then look at previous day
+            $thatnight -= 24*3600;
+        }
+    }
 
     return %RecentBackups;
 }
