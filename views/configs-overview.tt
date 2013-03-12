@@ -14,15 +14,15 @@
             <td>
               <a href="/host/<%hosts.$hostname.hostname %>"><img class="look" src="/images/zoom-3.png"> <% hosts.$hostname.hostname %></a>
             </td>
-            <td>
+            <td class="center">
               <% hosts.$hostname.group %>
             </td>
             <td class="expander more">
               <% hosts.$hostname.configfile %>
                 <div id="config_details" class="conf_details">
-                  <table>
+                  <table class="configfile">
                     <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
-                      <tr>
+                      <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="noDefault"<% END %>>
                         <td><% hostconf %></td>
                         <td><% hosts.$hostname.hostconfig.$hostconf %></td>
                       </tr>
@@ -30,7 +30,7 @@
                   </table>
                 </div>
             </td>
-            <td>
+            <td class="center">
               <% hosts.$hostname.status %>
             </td>
         </tr>
