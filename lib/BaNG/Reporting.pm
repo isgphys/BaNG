@@ -75,59 +75,58 @@ sub bangstat_recentbackups {
     }
     $sth->finish();
 
-#     # scan for missing backups
-#     my $now     = DateTime->now( time_zone => 'Europe/Zurich' );
-#     my $tonight = str2time( $now->date() . " $BkpStartHour:00:00" );
-#     foreach my $hostpath ( keys %RecentBackupTimes ) {
-#         my $thatnight = $tonight;
-#         my @bkp = @{$RecentBackupTimes{$hostpath}};
-#         my $missingBkpFromPath = $bkp[0]->{BkpFromPath} || 'NA';
-#         my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
-#         my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
-#         my $missingHost        = $bkp[0]->{Host}        || 'NA';
-# 
-#         foreach my $Xdays (1..$lastXdays) {
-#             my $isMissing = 0;
-# 
-#             if ( !@bkp ) {
-#                 # a backup is missing if list is already empty
-#                 $isMissing = 1;
-#             } else {
-#                 # or if no backup occured during that day
-#                 my $latestbkp = str2time( $bkp[0]->{Starttime} );
-#                 unless ( $latestbkp > $thatnight - 24*3600
-#                       && $latestbkp < $thatnight ) {
-#                     $isMissing = 1;
-#                 }
-#             }
-# 
-#             if ( $isMissing ) {
-#                 # add empty entry for missing backups
-#                 my $missingday = DateTime->from_epoch(
-#                     epoch     => $thatnight - 24*3600,
-#                     time_zone => 'Europe/Zurich',
-#                 )->strftime('%Y-%m-%d');
-#                 my $nobkp = {
-#                     Starttime   => $missingday,
-#                     Stoptime    => '',
-#                     BkpFromPath => $missingBkpFromPath,
-#                     BkpToPath   => $missingBkpToPath,
-#                     isThread    => '',
-#                     LastBkp     => '',
-#                     ErrStatus   => 99,
-#                     BkpGroup    => $missingBkpGroup,
-#                 };
-#                 splice( @{$RecentBackups{"$missingHost-$missingBkpGroup"}}, $Xdays-1, 0, $nobkp);
-#             } else {
-#                 # remove successful backups of that day from list
-#                 while ( @bkp && str2time($bkp[0]->{Starttime}) > $thatnight - 24*3600 ) {
-#                     shift @bkp;
-#                 }
-#             }
-#             # then look at previous day
-#             $thatnight -= 24*3600;
-#         }
-#     }
+    # scan for missing backups
+    my $now     = time;
+    my $today   = `date -d \@$now +"%Y-%m-%d"`;
+    my $tonight = str2time( "$today $BkpStartHour:00:00" );
+    foreach my $hostpath ( keys %RecentBackupTimes ) {
+        my $thatnight = $tonight;
+        my @bkp = @{$RecentBackupTimes{$hostpath}};
+        my $missingBkpFromPath = $bkp[0]->{BkpFromPath} || 'NA';
+        my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
+        my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
+        my $missingHost        = $bkp[0]->{Host}        || 'NA';
+
+        foreach my $Xdays (1..$lastXdays) {
+            my $isMissing = 0;
+
+            if ( !@bkp ) {
+                # a backup is missing if list is already empty
+                $isMissing = 1;
+            } else {
+                # or if no backup occured during that day
+                my $latestbkp = str2time( $bkp[0]->{Starttime} );
+                unless ( $latestbkp > $thatnight - 24*3600
+                      && $latestbkp < $thatnight ) {
+                    $isMissing = 1;
+                }
+            }
+
+            if ( $isMissing ) {
+                # add empty entry for missing backups
+                my $missingepoch = $thatnight - 24*3600;
+                my $missingday   = `date -d \@$missingepoch +"%Y-%m-%d"`;
+                my $nobkp = {
+                    Starttime   => $missingday,
+                    Stoptime    => '',
+                    BkpFromPath => $missingBkpFromPath,
+                    BkpToPath   => $missingBkpToPath,
+                    isThread    => '',
+                    LastBkp     => '',
+                    ErrStatus   => 99,
+                    BkpGroup    => $missingBkpGroup,
+                };
+                splice( @{$RecentBackups{"$missingHost-$missingBkpGroup"}}, $Xdays-1, 0, $nobkp);
+            } else {
+                # remove successful backups of that day from list
+                while ( @bkp && str2time($bkp[0]->{Starttime}) > $thatnight - 24*3600 ) {
+                    shift @bkp;
+                }
+            }
+            # then look at previous day
+            $thatnight -= 24*3600;
+        }
+    }
 
     return %RecentBackups;
 }
