@@ -2,11 +2,11 @@ body {
     cursor: default;
     padding: 0px;
     margin: 0px;
-    font-family: verdana, arial, helvetica, sans-serif;
+    font-family: sans-serif;
     font-size: 10px;
 }
 
-ody pre {
+body pre {
     font-family: monospace;
 }
 
@@ -49,7 +49,6 @@ ody pre {
 }
 
 #site_title {
-    font-family: arial, helvetica, sans-serif;
     position: absolute;
     top: 20px;
     left: 220px;

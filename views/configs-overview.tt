@@ -1,4 +1,10 @@
 <h2>Host configs</h2>
+<div id="configs_filter">
+    <form id="filter-form">Filter Configslist:
+        <input name="filter" id="filter" value="" maxlength="30" size="30" type="text">
+    </form> (Click on a Config-File entry to show details)
+</div>
+
 <table id="configslist" class="tablesorter">
     <thead>
         <tr>
