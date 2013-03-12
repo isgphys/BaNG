@@ -16,7 +16,7 @@
 }
 
 #config tr:nth-child(odd) {
-    background-color: lightblue;
+    background-color: #ddd;
 }
 
 #config tr:nth-child(even) {
@@ -52,6 +52,12 @@
     width: 700px;
 }
 
+#configslist a {
+    color: #6081BB;
+    text-decoration: none;
+    font-weight:bold;
+}
+
 #configslist th {
     text-align: left;
 }
@@ -78,10 +84,19 @@
     width: 100px;
 }
 
-#configslist tr:nth-child(odd) {
-    background-color: #eee;
+#configslist tr.noDefault{
+    background-color: #ff9999 !important;
 
 }
+
+#configslist tr:nth-child(odd) {
+    background-color: #ddd;
+}
+
+#configslist tr:nth-child(even) {
+    background-color: #eee;
+}
+
 #configslist tr.active {
     background-color: #99FF99;
 }
@@ -99,9 +114,14 @@
 }
 
 #config_details table tr:nth-child(odd) {
-    background-color: lightblue;
+    background-color: #ddd;
 }
 
 #config_details tr:nth-child(even) {
     background-color: #eee;
 }
+
+#config_details td {
+    height: 18px;
+}
+

@@ -5,11 +5,19 @@
 }
 
 #hostinfo tr.active {
-    background-color: #99FF99;
+    background-color: #99FF99 !important;
 }
 
 #hostinfo td {
     height: 20px;
+}
+
+#hostinfo tr:nth-child(odd) {
+    background-color: #ddd;
+}
+
+#hostinfo tr:nth-child(even) {
+    background-color: #eee;
 }
 
 tr.wipe {
