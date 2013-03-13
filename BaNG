@@ -57,9 +57,12 @@ if ( !@queue ) {
 start_threads();
 
 foreach my $hostgroup (@subfolder_hosts) {
-    my $host  = $hostgroup->{'host'};
-    my $group = $hostgroup->{'group'};
+    my $host         = $hostgroup->{'host'};
+    my $group        = $hostgroup->{'group'};
+    my $bkptimestamp = $hostgroup->{'bkptimestamp'};
+
     create_btrfs_snapshot( $host, $group );
+    createLastBkpFile($host, $group, $bkptimestamp);
     hobbit_report( $host, $group );
 }
 
@@ -140,8 +143,9 @@ sub queue_remote_subfolders {
     }
 
     my $hostgroup = {
-        host   => $host,
-        group  => $group,
+        host         => $host,
+        group        => $group,
+        bkptimestamp => $bkptimestamp,
     };
     push( @subfolder_hosts, $hostgroup );
 
@@ -281,8 +285,8 @@ sub execute_rsync {
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
     my $rsync_source  = "$host$path";
     my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
-    logit( $host, $group, "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target" );
 
+    logit( $host, $group, "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target" );
     logit( $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
@@ -309,7 +313,7 @@ sub execute_rsync {
             }
         }
     } else {
-        createLastBkpFile($host, $group, $bkptimestamp);
+        createLastBkpFile($host, $group, $bkptimestamp) unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
         logit( $host, $group, "Backup successful for host $host group $group path $path!" );
     }
 
@@ -439,6 +443,7 @@ sub createLastBkpFile {
 
     my $lastBkpFile = LastBkpFile($host, $group);
     system("echo \"$bkptimestamp\" > $lastBkpFile") unless $dryrun;
+    logit( $host, $group, "Write lastBkpFile: $bkptimestamp \-\> $lastBkpFile" );
 
     return 1;
 }
