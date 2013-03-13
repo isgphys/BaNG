@@ -56,17 +56,8 @@ if ( !@queue ) {
 
 start_threads();
 
-foreach my $hostgroup (@subfolder_hosts) {
-    my $host         = $hostgroup->{'host'};
-    my $group        = $hostgroup->{'group'};
-    my $bkptimestamp = $hostgroup->{'bkptimestamp'};
+finish_backupjob($_) foreach @subfolder_hosts;
 
-    create_btrfs_snapshot( $host, $group );
-    createLastBkpFile($host, $group, $bkptimestamp);
-    hobbit_report( $host, $group );
-    mail_report( $host, $group );
-    logit( $host, $group, "Backup successful for host $host group $group!" );
-}
 
 exit 0;
 
@@ -144,12 +135,12 @@ sub queue_remote_subfolders {
         push( @queue, $bkpjob );
     }
 
-    my $hostgroup = {
+    my $bkpjob = {
         host         => $host,
         group        => $group,
         bkptimestamp => $bkptimestamp,
     };
-    push( @subfolder_hosts, $hostgroup );
+    push( @subfolder_hosts, $bkpjob );
 
     return 1;
 }
@@ -197,10 +188,12 @@ sub thread_work {
         logit( $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
         unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
-            create_btrfs_snapshot( $host, $group );
-            hobbit_report( $host, $group );
-            mail_report( $host, $group );
-            logit( $host, $group, "Backup successful for host $host group $group!" );
+            my $bkpjob = {
+                host         => $host,
+                group        => $group,
+                bkptimestamp => $bkptimestamp,
+            };
+            finish_backupjob($bkpjob);
         }
         removeLockFile( $host, $group, $path );
     }
@@ -473,6 +466,20 @@ sub targetpath {
     return $target_path;
 }
 
+sub finish_backupjob {
+    my ($bkpjob) = @_;
+    my $host         = $bkpjob->{'host'};
+    my $group        = $bkpjob->{'group'};
+    my $bkptimestamp = $bkpjob->{'bkptimestamp'};
+
+    create_btrfs_snapshot( $host, $group );
+    createLastBkpFile($host, $group, $bkptimestamp);
+    hobbit_report( $host, $group );
+    mail_report( $host, $group );
+    logit( $host, $group, "Backup successful for host $host group $group!" );
+
+    return 1;
+}
 #################################
 # Reporting
 #
