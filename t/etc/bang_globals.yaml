@@ -1,18 +1,1 @@
-# ---------------
-# Global settings
-# ---------------
-DefaultConfig:    bang_defaults.yaml
-DefaultNisConfig: bang_nis_defaults.yaml
-#
-HostConfigFolder: hosts
-CronJobsFolder:   cronjobs
-ExcludesFolder:   excludes
-LocksFolder:      lockfiles
-LogFolder:        logs
-#
-GlobalLogDate:    "%Y-%m"
-#
-RSYNC:            /usr/bin/rsync
-BTRFS:            /usr/local/bin/btrfs
-#
-ReportTo:         testuser@phys.ethz.ch	            # email-address for reporting (comma separated)
+../../etc/bang_globals.yaml

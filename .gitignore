@@ -2,3 +2,5 @@
 *.swp
 etc/bangstat_db.yaml
 sessions/*
+t/etc/bangstat_db.yaml
+TODO

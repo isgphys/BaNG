@@ -64,6 +64,7 @@ foreach my $hostgroup (@subfolder_hosts) {
     create_btrfs_snapshot( $host, $group );
     createLastBkpFile($host, $group, $bkptimestamp);
     hobbit_report( $host, $group );
+    logit( $host, $group, "Backup successful for host $host group $group!" );
 }
 
 exit 0;
@@ -74,7 +75,7 @@ exit 0;
 sub queue_backup {
     my ($host, $group) = @_;
 
-    logit( $host, $group, "sub queue_backup($host, $group)" );
+    logit( $host, $group, "Queueing backup for host $host group $group" );
 
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{status} eq 'enabled';
@@ -197,6 +198,7 @@ sub thread_work {
         unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
             create_btrfs_snapshot( $host, $group );
             hobbit_report( $host, $group );
+            logit( $host, $group, "Backup successful for host $host group $group!" );
         }
         removeLockFile( $host, $group, $path );
     }
@@ -231,7 +233,7 @@ sub eval_rsync_options {
         if ( -e $excludefile ) {
             $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
         } else {
-            logit( $host, $group, "Warning: excludefile $excludefile not found." );
+            logit( $host, $group, "Warning: could not find excludefile $excludefile." );
         }
     }
 
@@ -314,7 +316,7 @@ sub execute_rsync {
         }
     } else {
         createLastBkpFile($host, $group, $bkptimestamp) unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
-        logit( $host, $group, "Backup successful for host $host group $group path $path!" );
+        logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
 
     db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $bkptimestamp, $errcode, @outlines);
@@ -349,7 +351,7 @@ sub create_btrfs_snapshot {
     my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest";
     $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
 
-    logit( $host, $group, "Create snapshot for host $host group $group using $btrfs_snapshot_cmd" );
+    logit( $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
     system($btrfs_snapshot_cmd) and logit( $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
 
     return 1;
@@ -433,7 +435,7 @@ sub chkLastBkp {
         chomp($lastbkp);
     }
 
-    logit( $host, $group, "sub chkLastBkp: lastbkp = $lastbkp" );
+    logit( $host, $group, "Found lastbkp = $lastbkp" );
 
     return $lastbkp;
 }
@@ -530,6 +532,8 @@ sub db_report {
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
     $sth->execute() unless $dryrun;
     $sth->finish();
+
+    logit( $host, $group, "Bangstat report sent.");
 
     return 1;
 }
