@@ -32,6 +32,7 @@ my $host_arg;
 my $prefix_arg;
 my $nthreads_arg;
 my @queue;
+my @subfolder_hosts;
 
 #################################
 # Main
@@ -54,6 +55,13 @@ if ( !@queue ) {
 }
 
 start_threads();
+
+foreach my $hostgroup (@subfolder_hosts) {
+    my $host  = $hostgroup->{'host'};
+    my $group = $hostgroup->{'group'};
+    create_btrfs_snapshot( $host, $group );
+    hobbit_report( $host, $group );
+}
 
 exit 0;
 
@@ -103,7 +111,7 @@ sub queue_backup {
         push( @queue, $bkpjob );
     }
 
-    logit( $host, $group, "Queued backup of host $host group $group" );
+    logit( $host, $group, "End of queueing backup of host $host group $group" );
 
     return 1;
 }
@@ -130,6 +138,12 @@ sub queue_remote_subfolders {
         };
         push( @queue, $bkpjob );
     }
+
+    my $hostgroup = {
+        host   => $host,
+        group  => $group,
+    };
+    push( @subfolder_hosts, $hostgroup );
 
     return 1;
 }
@@ -176,9 +190,11 @@ sub thread_work {
         return unless createLockFile( $host, $group, $path );
         logit( $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
-        create_btrfs_snapshot( $host, $group );
+        unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+            create_btrfs_snapshot( $host, $group );
+            hobbit_report( $host, $group );
+        }
         removeLockFile( $host, $group, $path );
-        hobbit_report( $host, $group );
     }
 
     return 1;
@@ -556,6 +572,7 @@ sub hobbit_report {
     $hobbitreport .= $report;
 
     send_hobbit_report($hobbitreport) unless $dryrun;
+    logit( $host, $group, "Hobbit report sent.");
 
     return 1;
 }
