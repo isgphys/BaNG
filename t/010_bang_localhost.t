@@ -32,6 +32,7 @@ like(   $output,    qr|Create btrfs snapshot for host localhost group $group|   
 like(   $output,    qr|Write lastBkpFile:|                                       , "Write lastBkpFile for localhost $group"             );
 like(   $output,    qr|Bangstat report sent|                                     , "Bangstat report sent for localhost $group"          );
 like(   $output,    qr|Hobbit report sent|                                       , "Hobbit report sent for localhost $group"            );
+like(   $output,    qr|Mail report sent|                                         , "Mail report sent for localhost $group"              );
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 like(   $output,    qr|Removed lockfile|                                         , "Removed lockfile for localhost $group"              );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );

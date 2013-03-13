@@ -64,6 +64,7 @@ foreach my $hostgroup (@subfolder_hosts) {
     create_btrfs_snapshot( $host, $group );
     createLastBkpFile($host, $group, $bkptimestamp);
     hobbit_report( $host, $group );
+    mail_report( $host, $group );
     logit( $host, $group, "Backup successful for host $host group $group!" );
 }
 
@@ -198,6 +199,7 @@ sub thread_work {
         unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
             create_btrfs_snapshot( $host, $group );
             hobbit_report( $host, $group );
+            mail_report( $host, $group );
             logit( $host, $group, "Backup successful for host $host group $group!" );
         }
         removeLockFile( $host, $group, $path );
@@ -539,17 +541,19 @@ sub db_report {
 }
 
 sub mail_report {
-    my ($host, $group, $targetpath) = @_;
+    my ($host, $group) = @_;
 
     my %mail = (
         To      => $globalconfig{report_to},
         From    => 'root@phys.ethz.ch',
-        Subject => "Backup report of ($host): success",
-        Message => "* * * Backup report * * *\n\nBacking up: $host:$targetpath\n\n* * * Backup successfull * * *\n",
+        Subject => "Backup report of ($host-$group): success",
+        Message => "* * * Backup report * * *\n\nBacking up: $host-$group\n\n* * * Backup successfull * * *\n",
     );
     unless ($dryrun) {
         sendmail(%mail) or logit( $host, $group, "mail_report error: $Mail::Sendmail::error" );
     }
+
+    logit( $host, $group, "Mail report sent.");
 
     return 1;
 }
