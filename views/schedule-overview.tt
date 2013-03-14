@@ -14,11 +14,11 @@
               </th>
             </tr>
             <tr>
-              <th class="center">Min</th>
               <th class="center">Hour</th>
-              <th class="center">Day of Month</th>
+              <th class="center">Min</th>
               <th class="center">Month</th>
               <th class="center">Day of Week</th>
+              <th class="center">Day of Month</th>
               <th class="center">Bulk</th>
             </tr>
           </thead>
@@ -26,11 +26,11 @@
             <% FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
               <% IF cronjobs.$cronjob.$jobtype %>
                 <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
-                  <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
                   <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
-                  <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
+                  <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
                   <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
                   <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
+                  <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
                   <% IF jobtype == "BACKUP" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
                   <td width=20 <%- IF hosts.${cronjobs.$cronjob.ident}.hostconfig.$bulkflag %> class="hook"<%- ELSE %> class="notallow"<%- END %>></td>
                 </tr>
