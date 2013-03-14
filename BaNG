@@ -311,7 +311,6 @@ sub execute_rsync {
             }
         }
     } else {
-        createLastBkpFile($host, $group, $bkptimestamp) unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
         logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
 
