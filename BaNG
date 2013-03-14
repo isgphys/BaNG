@@ -255,6 +255,10 @@ sub eval_rsync_target {
 
     my $rsync_target = targetpath($host, $group);
 
+    if ( !-d $rsync_target ) {
+        system("mkdir -p $rsync_target") unless $dryrun;
+    }
+
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         $rsync_target .= "/current";
 
@@ -262,10 +266,6 @@ sub eval_rsync_target {
             create_btrfs_subvolume( $host, $group, $rsync_target );
         }
     } else {
-        if ( !-d $rsync_target ) {
-            system("mkdir -p $rsync_target") unless $dryrun;
-        }
-
         $rsync_target .= "/$bkptimestamp";
     }
 
@@ -325,7 +325,7 @@ sub execute_rsync {
 sub create_btrfs_subvolume {
     my ( $host, $group, $path ) = @_;
 
-    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvol create $path";
+    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume create $path";
     $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $dryrun;
 
     logit( $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
