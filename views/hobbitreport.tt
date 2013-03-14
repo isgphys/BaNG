@@ -1,44 +1,47 @@
-<div>
-    <h3>Backup Report</h3>
-    <table id="bkpreport"border="0">
-        <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
-            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
-                <table width=700 border="0">
-                    <thead>
-                        <tr>
-                            <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
-                        </tr>
-                        <tr>
-                            <th align="center">Status</th>
-                            <th align="center">Starttime</th>
-                            <th align="center">Endtime</th>
-                            <th align="center">FromPath</th>
-                            <th align="center">LastBkp</th>
-                            <th align="center">isThread</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <%- FOREACH bkp IN RecentBackups.$hostgroup %>
-                        <tr height="20">
-                            <td align="center">
-                                <%- IF bkp.ErrStatus == 0 %>
-                                    <IMG SRC="/hobbit/gifs/daduke/green.gif" ALT="green" HEIGHT="16" WIDTH="16" BORDER=0>
-                                <%- ELSEIF ( bkp.ErrStatus == 23 || bkp.ErrStatus == 24) %>
-                                    <IMG SRC="/hobbit/gifs/daduke/green.gif" ALT="green" HEIGHT="16" WIDTH="16" BORDER=0>
-                                <% ELSE %>
-                                    <IMG SRC="/hobbit/gifs/daduke/red.gif" ALT="red" HEIGHT="16" WIDTH="16" BORDER=0>
-                                <%- END %>
-                            </td>
-                            <td align="center"><% bkp.Starttime %></td>
-                            <td align="center"><% bkp.Stoptime  %></td>
-                            <td align="center"><% bkp.BkpFromPath %></td>
-                            <td align="center"><% bkp.LastBkp %></td>
-                            <td align="center"><% bkp.isThread %></td>
-                        </tr>
-                        <%- END %>
-                    </tbody>
-                </table>
-            </td></tr>
-        <%- END %>
-    </table>
-</div>
+<h3>Backup Report</h3>
+<table>
+    <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
+        <tr><td style=" border-width:1px; border-style:solid; padding:4px">
+            <table width="800">
+                <thead>
+                    <tr>
+                        <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                    </tr>
+                    <tr>
+                        <th width="40">Status</th>
+                        <th>Starttime</th>
+                        <th>Endtime</th>
+                        <th>FromPath</th>
+                        <th>LastBkp</th>
+                        <th>isThread</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%- FOREACH bkp IN RecentBackups.$hostgroup %>
+                    <tr>
+                        <%- FILTER collapse %>
+                        <td>
+                            <% IF bkp.ErrStatus == 0 %>
+                                <% hobbitcolor = 'green' %>
+                            <% ELSIF ( bkp.ErrStatus == 23 || bkp.ErrStatus == 24 ) %>
+                                <% hobbitcolor = 'yellow' %>
+                            <% ELSIF bkp.ErrStatus == 99 %>
+                                <% hobbitcolor = 'purple' %>
+                            <% ELSE %>
+                                <% hobbitcolor = 'red' %>
+                            <% END %>
+                            <%- '<IMG SRC=/hobbit/gifs/daduke/' _ hobbitcolor _'.gif ALT='_ hobbitcolor _' HEIGHT=16 WIDTH=16 TITLE="Error Status: '_ bkp.ErrStatus _'">' %>
+                        </td>
+                        <% END -%>
+                        <td align="center"><% bkp.Starttime %></td>
+                        <td align="center"><% bkp.Stoptime  %></td>
+                        <td align="center"><% bkp.BkpFromPath %></td>
+                        <td align="center"><% bkp.LastBkp %></td>
+                        <td align="center"><% IF bkp.isThread %><IMG SRC=/hobbit/gifs/daduke/green.gif ALT="is Thread" HEIGHT=16 WIDTH=16><% END %></td>
+                    </tr>
+                    <%- END %>
+                </tbody>
+            </table>
+        </td></tr>
+    <%- END %>
+</table>
