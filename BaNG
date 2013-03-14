@@ -85,6 +85,7 @@ sub queue_backup {
 
     # check if last backup exists
     my $lastbkp = chkLastBkp($host, $group);
+    my $bkptimestamp  = eval_bkptimestamp($host, $group);
 
     # get list of partitions to back up
     my (@src_part) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
@@ -93,7 +94,7 @@ sub queue_backup {
     # optionally queue each subfolder of the partitions
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
         foreach my $part (@src_part) {
-            queue_remote_subfolders( $host, $group, $lastbkp, $part );
+            queue_remote_subfolders( $host, $group, $lastbkp, $bkptimestamp, $part );
         }
     } else {
         # queue list of partitions as a whole
@@ -102,7 +103,7 @@ sub queue_backup {
             group        => $group,
             path         => "@src_part",
             lastbkp      => $lastbkp,
-            bkptimestamp => 0,
+            bkptimestamp => $bkptimestamp,
         };
         push( @queue, $bkpjob );
     }
@@ -113,10 +114,9 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ($host, $group, $lastbkp, $partition) = @_;
+    my ($host, $group, $lastbkp, $bkptimestamp, $partition) = @_;
     $partition =~ s/://;
 
-    my $bkptimestamp  = eval_bkptimestamp($host, $group);
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
     my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
     logit( $host, $group, "eval subfolders command: @remotedirlist" );
