@@ -343,7 +343,7 @@ sub create_btrfs_snapshot {
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
     my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . eval_bkptimestamp( $host, $group );
 
-    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest";
+    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
     $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
 
     logit( $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
