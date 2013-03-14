@@ -96,6 +96,14 @@ sub queue_backup {
         foreach my $part (@src_part) {
             queue_remote_subfolders( $host, $group, $lastbkp, $bkptimestamp, $part );
         }
+
+        my $bkpjob = {
+            host         => $host,
+            group        => $group,
+            bkptimestamp => $bkptimestamp,
+        };
+        push( @subfolder_hosts, $bkpjob );
+
     } else {
         # queue list of partitions as a whole
         my $bkpjob = {
@@ -134,13 +142,6 @@ sub queue_remote_subfolders {
         };
         push( @queue, $bkpjob );
     }
-
-    my $bkpjob = {
-        host         => $host,
-        group        => $group,
-        bkptimestamp => $bkptimestamp,
-    };
-    push( @subfolder_hosts, $bkpjob );
 
     return 1;
 }
@@ -335,13 +336,13 @@ sub create_btrfs_subvolume {
 }
 
 sub create_btrfs_snapshot {
-    my ( $host, $group ) = @_;
+    my ( $host, $group, $bkptimestamp ) = @_;
 
     return unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
 
     my $btrfs_cmd             = $globalconfig{path_btrfs};
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
-    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . eval_bkptimestamp( $host, $group );
+    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . $bkptimestamp;
 
     my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
     $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
@@ -472,8 +473,8 @@ sub finish_backupjob {
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
 
-    create_btrfs_snapshot( $host, $group );
-    createLastBkpFile($host, $group, $bkptimestamp);
+    create_btrfs_snapshot( $host, $group, $bkptimestamp );
+    createLastBkpFile( $host, $group, $bkptimestamp );
     hobbit_report( $host, $group );
     mail_report( $host, $group );
     logit( $host, $group, "Backup successful for host $host group $group!" );
