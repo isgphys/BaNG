@@ -1,11 +1,13 @@
 <h2>Host Info</h2>
 <h3><% host %></h3>
 <div>
-    <table id="hostinfo">
+    <table id="hostinfo" style=" border-width:1px; border-style:solid; padding:4px>"
         <thead>
             <tr>
                 <th colspan="2" rowspan=2 align="left">Jobs (<%hosts.size%>)</th>
                 <th colspan="2" class="center">Bulk</th>
+                <th rowspan="2" class="center">SubFolder</th>
+                <th rowspan="2" class="center">Threads</th>
                 <th rowspan="2" class="center">Status</th>
             </tr>
             <tr>
@@ -21,6 +23,8 @@
                         <td><% hosts.$hostname.configfile %></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
                         <td class="center"><% hosts.$hostname.status %></td>
                     </tr>
                 <% END %>
@@ -49,21 +53,21 @@
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th>Min</th>
                                     <th>Hour</th>
-                                    <th>Day of Month</th>
+                                    <th>Min</th>
                                     <th>Month</th>
                                     <th>Day of Week</th>
+                                    <th>Day of Month</th>
                                 </tr>
                             </thead>
                             <% FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
                                 <% IF cronjobs.$cronjob.$jobtype %>
                                     <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
                                         <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
                                         <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
                                         <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
                                     </tr>
                                 <% ELSE %>
                                     <tr>
@@ -101,11 +105,11 @@
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th>Min</th>
                                         <th>Hour</th>
-                                        <th>Day of Month</th>
+                                        <th>Min</th>
                                         <th>Month</th>
                                         <th>Day of Week</th>
+                                        <th>Day of Month</th>
                                        <th>Bulk</th>
                                    </tr>
                                 </thead>
@@ -113,11 +117,11 @@
                                 <% FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
                                     <% IF cronjobs.$cronjob.$jobtype %>
                                         <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
-                                            <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
                                             <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
-                                            <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
+                                            <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
                                             <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
                                             <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
+                                            <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
                                             <% IF jobtype == "BACKUP" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
                                             <td width=20
                                                 <%- IF hosts.$bulkident.hostconfig.$bulkflag %>
