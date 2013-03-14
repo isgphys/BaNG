@@ -1,32 +1,44 @@
 <div>
     <h3>Backup Report</h3>
-    <table border="0">
+    <table id="bkpreport"border="0">
         <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
-            <thead>
-                <tr>
-                    <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
-                </tr>
-                <tr>
-                    <th>Status    </th>
-                    <th>Starttime </th>
-                    <th>Endtime   </th>
-                    <th>FromPath  </th>
-                    <th>LastBkp   </th>
-                    <th>isThread  </th>
-                </tr>
-            </thead>
-            <tbody>
-                <%- FOREACH bkp IN RecentBackups.$hostgroup %>
-                    <tr height="20">
-                        <td class="center"><% bkp.ErrStatus %></th>
-                        <td><% bkp.Starttime %></th>
-                        <td><% bkp.Stoptime  %></th>
-                        <td><% bkp.BkpFromPath %></th>
-                        <td><% bkp.LastBkp   %></th>
-                        <td class="center"><% bkp.isThread  %></th>
-                     </tr>
-                <%- END %>
-            </tbody>
+            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
+                <table width=700 border="0">
+                    <thead>
+                        <tr>
+                            <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                        </tr>
+                        <tr>
+                            <th align="center">Status</th>
+                            <th align="center">Starttime</th>
+                            <th align="center">Endtime</th>
+                            <th align="center">FromPath</th>
+                            <th align="center">LastBkp</th>
+                            <th align="center">isThread</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%- FOREACH bkp IN RecentBackups.$hostgroup %>
+                        <tr height="20">
+                            <td align="center">
+                                <%- IF bkp.ErrStatus == 0 %>
+                                    <IMG SRC="/hobbit/gifs/daduke/green.gif" ALT="green" HEIGHT="16" WIDTH="16" BORDER=0>
+                                <%- ELSEIF ( bkp.ErrStatus == 23 || bkp.ErrStatus == 24) %>
+                                    <IMG SRC="/hobbit/gifs/daduke/green.gif" ALT="green" HEIGHT="16" WIDTH="16" BORDER=0>
+                                <% ELSE %>
+                                    <IMG SRC="/hobbit/gifs/daduke/red.gif" ALT="red" HEIGHT="16" WIDTH="16" BORDER=0>
+                                <%- END %>
+                            </td>
+                            <td align="center"><% bkp.Starttime %></td>
+                            <td align="center"><% bkp.Stoptime  %></td>
+                            <td align="center"><% bkp.BkpFromPath %></td>
+                            <td align="center"><% bkp.LastBkp %></td>
+                            <td align="center"><% bkp.isThread %></td>
+                        </tr>
+                        <%- END %>
+                    </tbody>
+                </table>
+            </td></tr>
         <%- END %>
     </table>
 </div>
