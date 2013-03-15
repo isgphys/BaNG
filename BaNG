@@ -523,12 +523,12 @@ sub db_report {
 
     my $sql;
     $sql .= "INSERT INTO statistic (";
-    $sql .= " BkpFromHost, BkpGroup,  BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, Start, Stop, ";
+    $sql .= " BkpFromHost, BkpGroup,  BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
     $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
     $sql .= "'$host', '$group', '$path', 'phd-bkp-gw', '$targetpath', '$bkptimestamp', ";
-    $sql .= " $isSubfolderThread , '$errcode'  , FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
+    $sql .= " $isSubfolderThread , '$errcode', 0, FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
     $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}', ";
