@@ -127,7 +127,7 @@ sub queue_remote_subfolders {
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
     my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
-    logit( $host, $group, "eval subfolders command: @remotedirlist" );
+    logit( $host, $group, "eval subfolders command:\n @remotedirlist" );
 
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
@@ -587,9 +587,10 @@ sub hobbit_report {
     my $tt = Template->new(
         START_TAG  => '<%',
         END_TAG    => '%>',
+        INCLUDE_PATH => "$prefix/views",
     );
     my $report;
-    $tt->process('views/hobbitreport.tt', $RecentBackups, \$report)
+    $tt->process('hobbitreport.tt', $RecentBackups, \$report)
         or logit( $host, $group, "Error generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 
