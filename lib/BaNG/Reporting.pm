@@ -180,7 +180,7 @@ sub send_hobbit_report {
 }
 
 sub db_report {
-    my ($host, $group, $startstamp, $endstamp, $path, $targetpath ,$bkptimestamp, $errcode, @outlines) = @_;
+    my ($host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, @outlines) = @_;
 
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
@@ -223,7 +223,7 @@ sub db_report {
     $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
-    $sql .= "'$host', '$group', '$path', 'phd-bkp-gw', '$targetpath', '$bkptimestamp', ";
+    $sql .= "'$host', '$group', '$path', 'phd-bkp-gw', '$targetpath', '$lastbkp', ";
     $sql .= " $isSubfolderThread , '$errcode', 0, FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
