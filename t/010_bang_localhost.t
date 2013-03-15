@@ -28,6 +28,7 @@ like(   $output,    qr|Executing rsync for host localhost group $group path :/| 
 unlike( $output,    qr|\-\-linkdest|                                             , "Rsync without --link-dest for localhost $group"     );
 like(   $output,    qr|\-\-exclude\-from=t/etc/excludes/excludelist_system |     , "Rsync with excludefile for localhost $group"        );
 like(   $output,    qr|Rsync successful for host localhost group $group|         , "Rsync successful for localhost $group"              );
+like(   $output,    qr|Touch current folder for host localhost group $group|     , "Touch current folder for localhost $group"          );
 like(   $output,    qr|Create btrfs snapshot for host localhost group $group|    , "Create btrfs snapshot for localhost $group"         );
 like(   $output,    qr|Write lastBkpFile:|                                       , "Write lastBkpFile for localhost $group"             );
 like(   $output,    qr|Bangstat report sent|                                     , "Bangstat report sent for localhost $group"          );

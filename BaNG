@@ -343,9 +343,13 @@ sub create_btrfs_snapshot {
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
     my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . $bkptimestamp;
 
+    my $touch_current_cmd    = "touch $btrfs_snapshot_source >/dev/null 2>&1";
+    $touch_current_cmd       = "echo $touch_current_cmd" if $dryrun;
+    logit( $host, $group, "Touch current folder for host $host group $group" );
+    system($touch_current_cmd) and logit( $host, $group, "ERROR: touching current folder for $host-$group: $!" );
+
     my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
     $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
-
     logit( $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
     system($btrfs_snapshot_cmd) and logit( $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
 
