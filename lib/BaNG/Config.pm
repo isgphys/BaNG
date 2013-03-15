@@ -60,6 +60,10 @@ sub get_global_config {
 
     $globalconfig{path_rsync}         = "$global_settings->{RSYNC}";
     $globalconfig{path_btrfs}         = "$global_settings->{BTRFS}";
+
+    $globalconfig{debug}              = "$global_settings->{Debug}";
+    $globalconfig{debuglevel}         = "$global_settings->{DebugLevel}";
+    $globalconfig{dryrun}             = "$global_settings->{Dryrun}";
 }
 
 sub get_default_config {

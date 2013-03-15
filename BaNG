@@ -11,9 +11,6 @@ use Cwd qw( abs_path );
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
 use IPC::Open3;
-use Mail::Sendmail;
-use POSIX qw( strftime );
-use Template;
 use threads;
 use Thread::Queue;
 
@@ -23,15 +20,15 @@ use BaNG::Config;
 use BaNG::Reporting;
 
 my $version    = '3.0';
-my $debuglevel = 2;
-my $debug;
-my $dryrun;
 my $wipe;
 my $hobbitonly;
 my $group_arg;
 my $host_arg;
 my $prefix_arg;
 my $nthreads_arg;
+my $debug_arg;
+my $debuglevel_arg;
+my $dryrun_arg;
 my @queue;
 my @subfolder_hosts;
 
@@ -40,6 +37,7 @@ my @subfolder_hosts;
 #
 parse_command_options();
 get_global_config($prefix_arg);
+cli_args_override_global_config();
 get_host_config($host_arg, $group_arg);
 
 foreach my $config ( keys %hosts ) {
@@ -53,7 +51,7 @@ foreach my $config ( keys %hosts ) {
 }
 
 if ( !@queue ) {
-    print "Exit because queue is empty.\n" if $debug;
+    print "Exit because queue is empty.\n" if $globalconfig{debug};
     exit 0;
 }
 
@@ -157,11 +155,11 @@ sub start_threads {
     if ( $nthreads_arg ) {
         # If nthreads was defined by cli argument, use it
         $nthreads = $nthreads_arg;
-        print "Using nthreads = $nthreads from command line argument\n" if $debug;
+        print "Using nthreads = $nthreads from command line argument\n" if $globalconfig{debug};
     } elsif ( $host_arg && $group_arg ) {
         # If no nthreads was given, and we back up a single host and group, get nthreads from its config
         $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
-        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $debug;
+        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $globalconfig{debug};
     } else {
         $nthreads = 1;
     }
@@ -222,7 +220,7 @@ sub eval_rsync_options {
     $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
     $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
     $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
-    $rsync_options .= "-v "             if ($debug && ($debuglevel == 3));
+    $rsync_options .= "-v "             if ($globalconfig{debug} && ($globalconfig{debuglevel} == 3));
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
@@ -258,7 +256,7 @@ sub eval_rsync_target {
     my $rsync_target = targetpath($host, $group);
 
     if ( !-d $rsync_target ) {
-        system("mkdir -p $rsync_target") unless $dryrun;
+        system("mkdir -p $rsync_target") unless $globalconfig{dryrun};
     }
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
@@ -289,7 +287,7 @@ sub execute_rsync {
     logit( $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
-    $rsync_cmd = "echo $rsync_cmd" if $dryrun;
+    $rsync_cmd = "echo $rsync_cmd" if $globalconfig{dryrun};
     my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" );
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
@@ -297,7 +295,7 @@ sub execute_rsync {
     close HIS_OUT;
     close HIS_ERR;
 
-    logit( $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $debuglevel >=2 );
+    logit( $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $globalconfig{debuglevel} >=2 );
     logit( $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
     logit( $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
 
@@ -327,7 +325,7 @@ sub create_btrfs_subvolume {
     my ( $host, $group, $path ) = @_;
 
     my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume create $path";
-    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $dryrun;
+    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $globalconfig{dryrun};
 
     logit( $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
     system($btrfs_subvolume_cmd) and logit( $host, $group, "ERROR: creating subvolume for $host-$group: $!" );
@@ -345,12 +343,12 @@ sub create_btrfs_snapshot {
     my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . $bkptimestamp;
 
     my $touch_current_cmd    = "touch $btrfs_snapshot_source >/dev/null 2>&1";
-    $touch_current_cmd       = "echo $touch_current_cmd" if $dryrun;
+    $touch_current_cmd       = "echo $touch_current_cmd" if $globalconfig{dryrun};
     logit( $host, $group, "Touch current folder for host $host group $group" );
     system($touch_current_cmd) and logit( $host, $group, "ERROR: touching current folder for $host-$group: $!" );
 
     my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $dryrun;
+    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $globalconfig{dryrun};
     logit( $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
     system($btrfs_snapshot_cmd) and logit( $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
 
@@ -364,7 +362,7 @@ sub wipe {
     my ($host, $group) = @_;
 
     logit( $host, $group, "Wipe host $host group $group" );
-    # execute_wipe unless $dryrun;
+    # execute_wipe unless $globalconfig{dryrun};
 
     return 1;
 }
@@ -393,7 +391,7 @@ sub createLockFile {
         logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
         return 0;
     } else {
-        unless ($dryrun) {
+        unless ($globalconfig{dryrun}) {
             system("touch \"$lockfile\"") and logit( $host, $group, "ERROR: could not create lockfile $lockfile" );
         }
         logit( $host, $group, "Created lockfile $lockfile." );
@@ -405,7 +403,7 @@ sub removeLockFile {
     my ($host, $group, $path) = @_;
 
     my $lockfile = LockFile($host, $group, $path);
-    unlink $lockfile unless $dryrun;
+    unlink $lockfile unless $globalconfig{dryrun};
     logit( $host, $group, "Removed lockfile $lockfile." );
 
     return 1;
@@ -444,7 +442,7 @@ sub createLastBkpFile {
     my ($host, $group, $bkptimestamp) = @_;
 
     my $lastBkpFile = LastBkpFile($host, $group);
-    system("echo \"$bkptimestamp\" > $lastBkpFile") unless $dryrun;
+    system("echo \"$bkptimestamp\" > $lastBkpFile") unless $globalconfig{dryrun};
     logit( $host, $group, "Write lastBkpFile: $bkptimestamp \-\> $lastBkpFile" );
 
     return 1;
@@ -487,146 +485,6 @@ sub finish_backupjob {
 }
 
 #################################
-# Reporting
-#
-sub db_report {
-    my ($host, $group, $startstamp, $endstamp, $path, $targetpath ,$bkptimestamp, $errcode, @outlines) = @_;
-
-    my %parse_log_keys = (
-        'last backup'                 => 'LastBkp',
-        'Number of files'             => 'NumOfFiles',
-        'Number of files transferred' => 'NumOfFilesTrans',
-        'Total file size'             => 'TotFileSize',
-        'Total transferred file size' => 'TotFileSizeTrans',
-        'Literal data'                => 'LitData',
-        'Matched data'                => 'MatchData',
-        'File list size'              => 'FileListSize',
-        'File list generation time'   => 'FileListGenTime',
-        'File list transfer time'     => 'FileListTransTime',
-        'Total bytes sent'            => 'TotBytesSent',
-        'Total bytes received'        => 'TotBytesRcv',
-    );
-
-    my %log_values;
-    foreach my $logkey ( keys %parse_log_keys ) {
-        $log_values{$parse_log_keys{$logkey}} = 'NULL';
-    }
-
-    foreach my $outline ( @outlines ) {
-        next unless $outline =~ m/:/;
-        chomp $outline;
-        my ($key, $value) = split(': ', $outline);
-        foreach my $logkey ( keys %parse_log_keys ) {
-            if ( $logkey eq $key ) {
-                $value =~ s/^\D*([\d.]+).*?$/$1/;
-                $log_values{$parse_log_keys{$logkey}} = $value;
-            }
-        }
-    }
-
-    $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
-    my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
-
-    my $sql;
-    $sql .= "INSERT INTO statistic (";
-    $sql .= " BkpFromHost, BkpGroup,  BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
-    $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
-    $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
-    $sql .= ") VALUES (";
-    $sql .= "'$host', '$group', '$path', 'phd-bkp-gw', '$targetpath', '$bkptimestamp', ";
-    $sql .= " $isSubfolderThread , '$errcode', 0, FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
-    $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
-    $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
-    $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}', ";
-    $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
-    $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
-    $sql .= ")";
-    logit( $host, $group, "SQL command: $sql" ) if ( $debuglevel >=2 );
-
-    bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
-    $sth->execute() unless $dryrun;
-    $sth->finish();
-
-    logit( $host, $group, "Bangstat report sent.");
-
-    return 1;
-}
-
-sub mail_report {
-    my ($host, $group) = @_;
-
-    my %mail = (
-        To      => $globalconfig{report_to},
-        From    => 'root@phys.ethz.ch',
-        Subject => "Backup report of ($host-$group): success",
-        Message => "* * * Backup report * * *\n\nBacking up: $host-$group\n\n* * * Backup successfull * * *\n",
-    );
-    unless ($dryrun) {
-        sendmail(%mail) or logit( $host, $group, "mail_report error: $Mail::Sendmail::error" );
-    }
-
-    logit( $host, $group, "Mail report sent.");
-
-    return 1;
-}
-
-sub hobbit_report {
-    my ($host, $group)  = @_;
-
-    my %RecentBackups = bangstat_recentbackups($host);
-    my $RecentBackups = { RecentBackups => \%RecentBackups };
-
-    my $topcolor = 'green';
-    my $errcode;
-    foreach my $key (keys %RecentBackups) {
-        $errcode  = $RecentBackups{$key}[0]{ErrStatus};
-        $topcolor = 'red' if ( $errcode gt 0 && !( $errcode eq 23 || $errcode eq 24 || $errcode eq 99 ));
-    }
-
-    my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
-    my $DATE      = `date`;
-    chomp $DATE;
-
-    my $hobbitreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";
-
-    my $tt = Template->new(
-        START_TAG  => '<%',
-        END_TAG    => '%>',
-        INCLUDE_PATH => "$prefix/views",
-    );
-    my $report;
-    $tt->process('hobbitreport.tt', $RecentBackups, \$report)
-        or logit( $host, $group, "Error generating hobbit report template: " . $tt->error() );
-    $hobbitreport .= $report;
-
-    send_hobbit_report($hobbitreport) unless $dryrun;
-    logit( $host, $group, "Hobbit report sent.");
-
-    return 1;
-}
-
-sub logit {
-    my ($host, $group, $msg) = @_;
-
-    my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
-    my $logdate    = strftime $globalconfig{global_log_date}, localtime;
-    my $logfile    = "$globalconfig{'log_path'}/${host}-${group}_$logdate.log";
-    my $logmessage = "$timestamp $host-$group : $msg";
-    $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
-
-    print $logmessage if $debug;
-
-    unless ($dryrun) {
-        open my $log, ">>", $logfile or print "Error opening logfile $logfile: $!\n";
-        print {$log} $logmessage;
-        close $log;
-    }
-
-    return 1;
-}
-
-#################################
 # Command line arguments
 #
 sub parse_command_options {
@@ -634,8 +492,8 @@ sub parse_command_options {
     GetOptions(
         "help"        => sub { usage('') },
         "v|version"   => sub { usage("Current version number: $version") },
-        "d|debug"     => \$debug,
-        "n|dry-run"   => \$dryrun,
+        "d|debug"     => \$debug_arg,
+        "n|dry-run"   => \$dryrun_arg,
         "g|group=s"   => \$group_arg,
         "h|host=s"    => \$host_arg,
         "p|prefix=s"  => \$prefix_arg,
@@ -646,7 +504,16 @@ sub parse_command_options {
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 
-    $debug = 1 if $dryrun;
+    $debug_arg = 1 if $dryrun_arg;
+
+    return 1;
+}
+
+sub cli_args_override_global_config {
+
+    $globalconfig{debug}      = $debug_arg      if $debug_arg;
+    $globalconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
+    $globalconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
 
     return 1;
 }
