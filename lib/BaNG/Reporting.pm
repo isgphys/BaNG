@@ -43,14 +43,14 @@ sub bangstat_db_connect {
 }
 
 sub bangstat_set_jobstatus {
-    my ($host, $group, $bkptimestamp, $status) = @_;
+    my ($host, $group, $lastbkp, $status) = @_;
 
     my $SQL = qq(
         UPDATE statistic
         SET JobStatus = '$status'
         WHERE BkpFromHost = '$host'
         AND BkpGroup = '$group'
-        AND LastBkp = '$bkptimestamp';
+        AND LastBkp = '$lastbkp';
     );
 
     bangstat_db_connect($globalconfig{config_bangstat});
