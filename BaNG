@@ -477,6 +477,7 @@ sub finish_backupjob {
 
     create_btrfs_snapshot( $host, $group, $bkptimestamp );
     createLastBkpFile( $host, $group, $bkptimestamp );
+    bangstat_set_jobstatus( $host, $group, $bkptimestamp, '1' );
     hobbit_report( $host, $group );
     mail_report( $host, $group );
     logit( $host, $group, "Backup successful for host $host group $group!" );

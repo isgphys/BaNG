@@ -14,6 +14,7 @@ use Exporter 'import';
 our @EXPORT = qw(
     $bangstat_dbh
     bangstat_db_connect
+    bangstat_set_jobstatus
     bangstat_recentbackups
     send_hobbit_report
     db_report
@@ -37,6 +38,29 @@ sub bangstat_db_connect {
     $bangstat_dbh = DBI->connect(
         "DBI:mysql:database=$DBdatabase:host=$DBhostname:port=3306", $DBusername, $DBpassword
     );
+
+    return 1;
+}
+
+sub bangstat_set_jobstatus {
+    my ($host, $group, $bkptimestamp, $status) = @_;
+
+    my $SQL = qq(
+        UPDATE statistic
+        SET JobStatus = '$status'
+        WHERE BkpFromHost = '$host'
+        AND BkpGroup = '$group'
+        AND LastBkp = '$bkptimestamp';
+    );
+
+    bangstat_db_connect($globalconfig{config_bangstat});
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare($SQL);
+    $sth->execute() unless $globalconfig{dryrun};
+    $sth->finish();
+
+    $SQL =~ s/;.*/;/sg;
+    logit( $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $globalconfig{debug} && $globalconfig{debuglevel} >= 2 );
+    logit( $host, $group, "Set jobstatus to $status for host $host group $group" ) if $globalconfig{debug};
 
     return 1;
 }
@@ -207,7 +231,7 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
-    logit( $host, $group, "SQL command: $sql" ) if ( $globalconfig{debuglevel} >=2 );
+    logit( $host, $group, "DB Report SQL command: $sql" ) if ( $globalconfig{debuglevel} >=2 );
 
     bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
