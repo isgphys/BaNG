@@ -42,9 +42,9 @@ sub bangstat_db_connect {
 }
 
 sub bangstat_recentbackups {
-    my ($host) = @_;
+    my ($host, $lastXdays) = @_;
 
-    my $lastXdays    = 5;
+    $lastXdays = $lastXdays || 5;
     my $BkpStartHour = 18;
 
     bangstat_db_connect($globalconfig{config_bangstat});
@@ -52,7 +52,7 @@ sub bangstat_recentbackups {
         SELECT *
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
-        AND BkpFromHost = '$host'
+        AND BkpFromHost like '$host'
         AND BkpToHost LIKE 'phd-bkp-gw\%'
         ORDER BY Start DESC;
     ");

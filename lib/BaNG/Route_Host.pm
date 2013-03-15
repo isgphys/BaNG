@@ -40,7 +40,7 @@ get '/:host' => sub {
     get_global_config();
     get_host_config(param('host'));
     get_cronjob_config();
-    my %RecentBackups = bangstat_recentbackups(param('host'));
+    my %RecentBackups = bangstat_recentbackups( param('host') );
 
     template 'host', {
         section    => 'host',
