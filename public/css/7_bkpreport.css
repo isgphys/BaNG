@@ -16,8 +16,14 @@
     background-size: 20px 20px;
 }
 
-#bkpreport .notok {
+#bkpreport .bad {
     background: url("/images/face-angry.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+
+#bkpreport .notok {
+    background: url("/images/important.png") no-repeat transparent;
     background-position: center center;
     background-size: 20px 20px;
 }
