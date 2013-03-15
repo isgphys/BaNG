@@ -58,9 +58,7 @@ if ( !@queue ) {
 }
 
 start_threads();
-
 finish_backupjob($_) foreach @subfolder_hosts;
-
 
 exit 0;
 
@@ -487,6 +485,7 @@ sub finish_backupjob {
 
     return 1;
 }
+
 #################################
 # Reporting
 #
