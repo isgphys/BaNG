@@ -15,7 +15,7 @@ sub get_fsinfo {
     my @mounts;
     my %fsinfo;
 
-    open(MP, "df -T | grep backup |");
+    open(MP, "df -T | grep backup | grep -v nfs |");
         @mounts = <MP>;
     close(MP);
 
