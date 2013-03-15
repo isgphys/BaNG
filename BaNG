@@ -575,7 +575,7 @@ sub hobbit_report {
     my $errcode;
     foreach my $key (keys %RecentBackups) {
         $errcode  = $RecentBackups{$key}[0]{ErrStatus};
-        $topcolor = 'red' if ( $errcode gt 0 && !( $errcode eq 23 || $errcode eq 24 ));
+        $topcolor = 'red' if ( $errcode gt 0 && !( $errcode eq 23 || $errcode eq 24 || $errcode eq 99 ));
     }
 
     my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
