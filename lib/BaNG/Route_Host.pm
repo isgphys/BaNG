@@ -52,31 +52,3 @@ get '/:host' => sub {
 	RecentBackups => \%RecentBackups,
     };
 };
-
-get '/search' => sub {
-
-    template 'host-search' => {
-        section    => 'host',
-        remotehost => request->remote_host,
-        webDancerEnv   => config->{run_env},
-    };
-};
-
-post '/search' => sub {
-    my $host = '';
-    if(param('search_text') && param('search_text') =~ /[a-z0-9\-]{1,255}/i)
-    {
-        $host = param('search_text');
-        return redirect sprintf('/host/%s', $host);
-    }
-    else
-    {
-        return template 'host' => {
-            section      => 'host',
-            remotehost   => request->remote_host,
-            webDancerEnv => config->{run_env},
-            error        => 'Requested host is not available'
-        };
-    }
-};
-

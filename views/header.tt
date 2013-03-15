@@ -33,7 +33,6 @@
                 <li><a href="/config/global">Global Settings</a></li>
             </ul>
         </li>
-        <li><a href="/host" <% IF section == 'host' %>class="active"<% END %>>Host Info</a></li>
         <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
             <ul>
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
