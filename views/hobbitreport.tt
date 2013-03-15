@@ -13,7 +13,7 @@
                         <th>Endtime</th>
                         <th>FromPath</th>
                         <th>LastBkp</th>
-                        <th>isThread</th>
+                        <th>Threaded</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,7 +37,7 @@
                         <td align="center"><% bkp.Stoptime  %></td>
                         <td align="center"><% bkp.BkpFromPath %></td>
                         <td align="center"><% bkp.LastBkp %></td>
-                        <td align="center"><% IF bkp.isThread %><IMG SRC=/hobbit/gifs/daduke/green.gif ALT="is Thread" HEIGHT=16 WIDTH=16><% END %></td>
+                        <td align="center"><% IF bkp.isThread %><IMG SRC=/hobbit/gifs/daduke/green-tick.gif ALT="is Thread" HEIGHT=16 WIDTH=16><% END %></td>
                     </tr>
                     <%- END %>
                 </tbody>
