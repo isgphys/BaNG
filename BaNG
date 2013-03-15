@@ -27,6 +27,7 @@ my $debuglevel = 2;
 my $debug;
 my $dryrun;
 my $wipe;
+my $hobbitonly;
 my $group_arg;
 my $host_arg;
 my $prefix_arg;
@@ -44,6 +45,8 @@ get_host_config($host_arg, $group_arg);
 foreach my $config ( keys %hosts ) {
     if ( $wipe ) {
         wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+    } elsif ( $hobbitonly  ) {
+        hobbit_report( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     } else {
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
@@ -639,6 +642,7 @@ sub parse_command_options {
         "p|prefix=s"  => \$prefix_arg,
         "t|threads=i" => \$nthreads_arg,
         "w|wipe"      => \$wipe,
+        "hobbit"      => \$hobbitonly,
     ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
@@ -675,6 +679,7 @@ sub usage {
         -t <nr>         # number of threads, default: 1
         -p <path>       # override path to folder containing etc/
         -w              # wipe the backup
+        --hobbit        # send only hobbit report
         -d              # show debugging messages
 
 EOF

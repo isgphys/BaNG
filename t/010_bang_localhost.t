@@ -50,4 +50,7 @@ $group = 'missingexclude';
 $output = `$bangcmd -h localhost -g $group`;
 like(   $output,    qr|Warning: could not find excludefile|                      , "Warn about missing excludefile for localhost $group");
 
+$output = `$bangcmd  --hobbit -h localhost -g snapshot-simple`;
+like(   $output,    qr|Hobbit report sent\.\s*Exit because queue is empty|       , "Hobbit only command argument sends report"          );
+
 done_testing();
