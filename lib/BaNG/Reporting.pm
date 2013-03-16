@@ -60,7 +60,7 @@ sub bangstat_set_jobstatus {
 
     $SQL =~ s/;.*/;/sg;
     logit( $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $globalconfig{debug} && $globalconfig{debuglevel} >= 2 );
-    logit( $host, $group, "Set jobstatus to $status for host $host group $group" ) if $globalconfig{debug};
+    logit( $host, $group, "Set jobstatus to $status for host $host group $group" );
 
     return 1;
 }
