@@ -326,7 +326,7 @@ sub execute_rsync {
 sub create_btrfs_subvolume {
     my ( $host, $group, $path ) = @_;
 
-    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume create $path";
+    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume create $path >/dev/null 2>&1";
     $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $globalconfig{dryrun};
 
     logit( $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
