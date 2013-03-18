@@ -4,13 +4,16 @@
     <table id="hostinfo" style=" border-width:1px; border-style:solid; padding:4px>"
         <thead>
             <tr>
-                <th colspan="2" rowspan=2 align="left">Jobs (<%hosts.size%>)</th>
+                <th colspan="2" align="left">Jobs (<%hosts.size%>)</th>
                 <th colspan="2" class="center">Bulk</th>
                 <th rowspan="2" class="center">SubFolder</th>
                 <th rowspan="2" class="center">Threads</th>
+                <th rowspan="2" class="center">Modus</th>
                 <th rowspan="2" class="center">Status</th>
             </tr>
             <tr>
+                <th align="left">Group</th>
+                <th align="left">Configfile</th>
                 <th>Bkp</th>
                 <th>Wipe</th>
             </tr>
@@ -25,6 +28,7 @@
                         <td width=30 <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
+                        <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
                         <td class="center"><% hosts.$hostname.status %></td>
                     </tr>
                 <% END %>
@@ -49,7 +53,7 @@
                                 <tr>
                                     <th colspan="5" align="left"
                                         <%- IF hosts.${cronjobs.$cronjob.ident}.css_class %> class="<% hosts.${cronjobs.$cronjob.ident}.css_class %>"<%- END %>>
-                                        <% cronjobs.$cronjob.ident %>
+                                        <% cronjobs.$cronjob.hostname _ "_" _ cronjobs.$cronjob.group %>
                                     </th>
                                 </tr>
                                 <tr>
@@ -100,8 +104,8 @@
                             <table class="croninfosmall">
                                 <thead>
                                     <tr>
-                                        <th colspan="6" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
-                                            <%- cronjobs.$cronjob.ident -%>
+                                        <th colspan="7" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
+                                            <% cronjobs.$cronjob.hostname _ "_" _ cronjobs.$cronjob.group %>
                                         </th>
                                     </tr>
                                     <tr>
@@ -110,7 +114,8 @@
                                         <th>Month</th>
                                         <th>Day of Week</th>
                                         <th>Day of Month</th>
-                                       <th>Bulk</th>
+                                        <th>Bulk</th>
+                                        <th width="40">Threads</th>
                                    </tr>
                                 </thead>
                                 <tbody>
@@ -130,6 +135,7 @@
                                                     class="notallow"
                                                 <%- END %>>
                                             </td>
+                                            <td class="center"><% cronjobs.$cronjob.$jobtype.THREADS %></td>
                                         </tr>
                                     <% ELSE %>
                                         <tr>

@@ -1,6 +1,6 @@
 
 #hostinfo {
-    width: 510px;
+    width: 580px;
     margin-right: 20px;
 }
 
@@ -10,6 +10,8 @@
 
 #hostinfo td {
     height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #hostinfo tr:nth-child(odd) {
