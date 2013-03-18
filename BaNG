@@ -314,7 +314,7 @@ sub execute_rsync {
     } else {
         logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
-
+    sleep 1;
     db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, @outlines);
 
     return 1;
