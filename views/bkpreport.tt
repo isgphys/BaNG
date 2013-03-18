@@ -14,7 +14,7 @@
                             <th>Endtime</th>
                             <th>FromPath</th>
                             <th>LastBkp</th>
-                            <th>isThread</th>
+                            <th>Threaded</th>
                         </tr>
                     </thead>
                     <tbody>
