@@ -78,7 +78,7 @@ sub bangstat_recentbackups {
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost like '$host'
         AND BkpToHost LIKE 'phd-bkp-gw\%'
-        ORDER BY Start DESC;
+        ORDER BY BkpGroup, Start DESC;
     ");
     $sth->execute();
 
