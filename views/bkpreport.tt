@@ -6,15 +6,16 @@
                 <table width=700 border="0">
                     <thead>
                         <tr>
-                            <th colspan="6">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                            <th colspan="7">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
                         </tr>
                         <tr>
-                            <th>Status</th>
-                            <th>Starttime</th>
-                            <th>Endtime</th>
+                            <th width="50">Status</th>
+                            <th width="100">Starttime</th>
+                            <th width="100">Endtime</th>
+                            <th width="60">Runtime</th>
                             <th>FromPath</th>
-                            <th>LastBkp</th>
-                            <th>Threaded</th>
+                            <th width="100">LastBkp</th>
+                            <th width="60">Threaded</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -24,9 +25,10 @@
                                 <%- IF bkp.ErrStatus == 0 %>class="ok"<%- ELSIF bkp.ErrStatus == 99 %>class="notok" <% ELSE %>class="bad"<%- END %>></td>
                             <td class="center"><% bkp.Starttime %></td>
                             <td class="center"><% bkp.Stoptime  %></td>
+                            <td class="center"><% bkp.Runtime  %></td>
                             <td class="center"><% bkp.BkpFromPath %></td>
                             <td class="center"><% bkp.LastBkp   %></td>
-                            <td <%- IF bkp.isThread %>class="hook" %><% END %></td>
+                            <td <%- IF bkp.isThread %>class="hook" %><% END %>></td>
                         </tr>
                         <%- END %>
                     </tbody>

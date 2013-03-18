@@ -2,6 +2,7 @@ package BaNG::Reporting;
 
 use Dancer ':syntax';
 use BaNG::Config;
+use BaNG::Common;
 use Date::Parse;
 use DBI;
 use IO::Socket;
@@ -73,7 +74,7 @@ sub bangstat_recentbackups {
 
     bangstat_db_connect($globalconfig{config_bangstat});
     my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
-        SELECT *
+        SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost like '$host'
@@ -89,6 +90,7 @@ sub bangstat_recentbackups {
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
+            Runtime     => time2human($dbrow->{'Runtime'}),
             BkpFromPath => $dbrow->{'BkpFromPath'},
             BkpToPath   => $dbrow->{'BkpToPath'},
             isThread    => $dbrow->{'isThread'},
@@ -140,6 +142,7 @@ sub bangstat_recentbackups {
                 my $nobkp = {
                     Starttime   => $missingday,
                     Stoptime    => '',
+                    Runtime     => '',
                     BkpFromPath => $missingBkpFromPath,
                     BkpToPath   => $missingBkpToPath,
                     isThread    => '',
