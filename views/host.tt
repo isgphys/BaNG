@@ -4,15 +4,15 @@
     <table id="hostinfo" style=" border-width:1px; border-style:solid; padding:4px>"
         <thead>
             <tr>
-                <th colspan="2" align="left">Jobs (<%hosts.size%>)</th>
-                <th colspan="2" class="center">Bulk</th>
+                <th colspan="3" align="left">Jobs (<%hosts.size%>)</th>
+                <th colspan="2" class="center">Bulk allow</th>
                 <th rowspan="2" class="center">SubFolder</th>
                 <th rowspan="2" class="center">Threads</th>
-                <th rowspan="2" class="center">Modus</th>
-                <th rowspan="2" class="center">Status</th>
+                <th rowspan="2" class="center">Mode</th>
             </tr>
             <tr>
-                <th align="left">Group</th>
+                <th align="left">Enabled</th>
+                <th align="center">Group</th>
                 <th align="left">Configfile</th>
                 <th>Bkp</th>
                 <th>Wipe</th>
@@ -22,14 +22,14 @@
             <% IF hosts.size %>
                 <% FOREACH hostname IN hosts.keys.sort %>
                     <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-                        <td><% hosts.$hostname.group %></td>
+                        <td <%- IF hosts.$hostname.status == 'enabled' %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td class="center"><% hosts.$hostname.group %></td>
                         <td><% hosts.$hostname.configfile %></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
-                        <td class="center"><% hosts.$hostname.status %></td>
                     </tr>
                 <% END %>
             <% ELSE %>
@@ -45,44 +45,42 @@
     <div style="float:left;">
         <h3>CronJobs (Single-Run)</h3>
         <table id="croninfo">
-            <% FOREACH cronjob IN cronjobs.keys.sort %>
-                <% IF hosts.${cronjobs.$cronjob.ident} %>
-                    <tr><td style=" border-width:1px; border-style:solid; padding:4px">
-                        <table class="croninfosmall">
-                            <thead>
-                                <tr>
-                                    <th colspan="5" align="left"
-                                        <%- IF hosts.${cronjobs.$cronjob.ident}.css_class %> class="<% hosts.${cronjobs.$cronjob.ident}.css_class %>"<%- END %>>
-                                        <% cronjobs.$cronjob.hostname _ "_" _ cronjobs.$cronjob.group %>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>Hour</th>
-                                    <th>Min</th>
-                                    <th>Month</th>
-                                    <th>Day of Week</th>
-                                    <th>Day of Month</th>
-                                </tr>
-                            </thead>
+            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
+                <table class="croninfosmall">
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th>Type</th>
+                            <th>Hour</th>
+                            <th>Min</th>
+                            <th>Month</th>
+                            <th>Day of Week</th>
+                            <th>Day of Month</th>
+                        </tr>
+                    </thead>
+                    <% FOREACH cronjob IN cronjobs.keys.sort %>
+                        <% IF hosts.${cronjobs.$cronjob.ident} %>
                             <% FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
                                 <% IF cronjobs.$cronjob.$jobtype %>
-                                    <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
-                                        <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
-                                    </tr>
+                                <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
+                                    <td class="center"><% cronjobs.$cronjob.group %></td>
+                                    <td class="center"><% jobtype %></td>
+                                    <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
+                                    <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
+                                    <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
+                                    <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
+                                    <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
+                                </tr>
                                 <% ELSE %>
-                                    <tr>
-                                        <td colspan="5" class="center"><% jobtype %> - N/A</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="7" class="center"><% jobtype %> - N/A</td>
+                                </tr>
                                 <% END %>
                             <% END %>
-                        </table>
-                    </tr>
-                <% END %>
-            <% END %>
+                        <% END %>
+                    <% END %>
+                </table>
+            </tr>
         </table>
     </div>
 
