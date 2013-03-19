@@ -12,14 +12,19 @@
        <th>%Used</th>
      </thead>
      <tbody>
-       <%- FOREACH mount IN fsinfo.keys.sort %>
-         <tr>
-           <td><% mount %></td>
-           <td class="center"><% fsinfo.$mount.fstyp %></td>
-           <td class="center"><% fsinfo.$mount.available %></td>
-           <td class="center <%- IF fsinfo.$mount.css_class %> <%- fsinfo.$mount.css_class %><%- END %>"><% fsinfo.$mount.used_per %></td>
-         </tr>
-       <%- END %>
+         <div>
+             <%- FOREACH mount IN fsinfo.keys.sort %>
+             <tr>
+                 <td><% mount %></td>
+                 <td class="center"><% fsinfo.$mount.fstyp %></td>
+                 <td class="center"><% fsinfo.$mount.available %></td>
+                 <td class="center <%- IF fsinfo.$mount.css_class %> <%- fsinfo.$mount.css_class %><%- END %>"><% fsinfo.$mount.used_per %></td>
+             </tr>
+             <%- END %>
+         </div>
+         <div>
+             <%- INCLUDE 'bkpreport-overview.tt' %>
+         </div>
      </tbody>
    </table>
 </div>

@@ -151,5 +151,5 @@
 </div>
 <div style="clear:both;">
 <br>
-    <%- INCLUDE bkpreport.tt %>
+    <%- INCLUDE 'host-bkpreport.tt' %>
 </div>
