@@ -29,6 +29,11 @@ body pre {
     background-color: yellow;
 }
 
+.jobrun {
+    background: url("/images/job-run.png") no-repeat  scroll transparent;
+    background-position: center center;
+}
+
 #header {
     background-image:url('/images/header.png');
     background-color:#254370;

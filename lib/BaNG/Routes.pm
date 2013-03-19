@@ -7,11 +7,14 @@ use BaNG::Route_Schedule;
 #use BaNG::Authent;
 use BaNG::Common;
 use BaNG::Hosts;
+use BaNG::Config;
+use BaNG::Reporting;
 use Auth::LDAP;
 
 prefix undef;
 
 get '/' => sub {
+    get_global_config();
 
     template 'dashboard' => {
              'section' => 'dashboard',
@@ -19,6 +22,7 @@ get '/' => sub {
              'webDancerEnv' => config->{run_env},
              'msg' => get_flash(),
              'fsinfo' => get_fsinfo(),
+             'RecentBackupsAll' => bangstat_recentbackups_all(),
     };
 };
 

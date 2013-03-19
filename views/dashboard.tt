@@ -23,8 +23,8 @@
              <%- END %>
          </div>
          <div>
-             <%- INCLUDE 'bkpreport-overview.tt' %>
          </div>
      </tbody>
    </table>
 </div>
+<%- INCLUDE 'bkpreport-overview.tt' %>

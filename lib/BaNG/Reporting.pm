@@ -17,6 +17,7 @@ our @EXPORT = qw(
     bangstat_db_connect
     bangstat_set_jobstatus
     bangstat_recentbackups
+    bangstat_recentbackups_all
     send_hobbit_report
     db_report
     mail_report
@@ -78,7 +79,8 @@ sub bangstat_recentbackups {
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost like '$host'
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND BkpToHost LIKE 'phd-bkp-gw'
+        AND JobStatus = '1'
         ORDER BY BkpGroup, Start DESC;
     ");
     $sth->execute();
@@ -163,6 +165,43 @@ sub bangstat_recentbackups {
     }
 
     return %RecentBackups;
+}
+
+sub bangstat_recentbackups_all {
+    my ($host, $lastXhours) = @_;
+
+    $lastXhours = $lastXhours || 24;
+
+    bangstat_db_connect($globalconfig{config_bangstat});
+    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+        SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
+        FROM recent_backups
+        WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
+        AND BkpFromHost like '%'
+        AND BkpToHost LIKE 'phd-bkp-gw'
+        ORDER BY Start DESC;
+    ");
+    $sth->execute();
+
+    my %RecentBackupsAll;
+    while (my $dbrow=$sth->fetchrow_hashref()) {
+        push( @{$RecentBackupsAll{'Data'}}, {
+            Starttime   => $dbrow->{'Start'},
+            Stoptime    => $dbrow->{'Stop'},
+            Runtime     => time2human($dbrow->{'Runtime'}),
+            BkpFromPath => $dbrow->{'BkpFromPath'},
+            BkpToPath   => $dbrow->{'BkpToPath'},
+            isThread    => $dbrow->{'isThread'},
+            LastBkp     => $dbrow->{'LastBkp'},
+            ErrStatus   => $dbrow->{'ErrStatus'},
+            JobStatus   => $dbrow->{'JobStatus'},
+            BkpGroup    => $dbrow->{'BkpGroup'} || 'NA',
+            BkpHost     => $dbrow->{'BkpFromHost'},
+        });
+    }
+    $sth->finish();
+
+    return \%RecentBackupsAll;
 }
 
 sub send_hobbit_report {
