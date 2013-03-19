@@ -257,7 +257,7 @@ sub statistics_schedule {
         SELECT *
         FROM statistic_all
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND BkpToHost LIKE 'phd-bkp-gw'
         AND isThread is Null
         ORDER BY Start;
     ");
@@ -289,7 +289,7 @@ sub statistics_schedule {
             TotFileSizeTrans => num2human($dbrow->{'TotFileSizeTrans'}, 1024.),
             NumOfFiles       => num2human($dbrow->{'NumOfFiles'}),
             NumOfFilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
-            AvgFileSize      => num2human($dbrow->{'TotFileSize'}/$dbrow->{'NumOfFiles'},1024),
+            AvgFileSize      => $dbrow->{'NumOfFiles'} ? num2human($dbrow->{'TotFileSize'}/$dbrow->{'NumOfFiles'},1024) : 0,
             SystemBkp        => $systemBkp,
         });
     }

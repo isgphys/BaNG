@@ -236,9 +236,9 @@ sub eval_rsync_options {
 
     if ( $hostconfig->{BKP_RSYNC_RSHELL} ) {
         if ( $hostconfig->{BKP_GWHOST} ) {
-            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST} ";
+            $rsync_options .= "-e '$hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST}' 'rsh $host'";
         } else {
-            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} ";
+            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $host";
         }
     }
 
@@ -282,15 +282,14 @@ sub execute_rsync {
 
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
-    my $rsync_source  = "$host$path";
     my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
 
-    logit( $host, $group, "Rsync Command: $rsync_cmd $rsync_options $rsync_source $rsync_target" );
+    logit( $host, $group, "Rsync Command: $rsync_cmd $rsync_options$path $rsync_target" );
     logit( $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
     $rsync_cmd = "echo $rsync_cmd" if $globalconfig{dryrun};
-    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options $rsync_source $rsync_target" );
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options$path $rsync_target" );
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;
@@ -314,7 +313,7 @@ sub execute_rsync {
     } else {
         logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
-    sleep 1;
+    sleep(rand(5));
     db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, @outlines);
 
     return 1;
