@@ -234,6 +234,11 @@ sub eval_rsync_options {
         }
     }
 
+    # use links if told to and if lastbkp exists
+    if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
+        $rsync_options .= "--link-dest " . targetpath($host, $group) . "/$lastbkp ";
+    }
+
     if ( $hostconfig->{BKP_RSYNC_RSHELL} ) {
         if ( $hostconfig->{BKP_GWHOST} ) {
             $rsync_options .= "-e '$hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST}' 'rsh $host'";
@@ -242,10 +247,6 @@ sub eval_rsync_options {
         }
     }
 
-    # use links if told to and if lastbkp exists
-    if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
-        $rsync_options .= "--link-dest " . targetpath($host, $group) . "/$lastbkp ";
-    }
 
     $rsync_options =~ s/\s+$//; # remove trailing space
 
