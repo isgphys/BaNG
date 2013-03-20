@@ -179,7 +179,7 @@ sub bangstat_recentbackups_all {
         WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
         AND BkpToHost LIKE 'phd-bkp-gw'
-        ORDER BY Start DESC;
+        ORDER BY JobStatus, Start DESC;
     ");
     $sth->execute();
 
