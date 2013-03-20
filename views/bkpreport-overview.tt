@@ -21,7 +21,7 @@
                     <tbody>
                         <%- FOREACH bkp IN RecentBackupsAll.Data %>
                         <tr height="20">
-                            <td <%- IF bkp.JobStatus %>class="hook" <% ELSE %>class="jobrun"<%- END -%>></td>
+                            <td <%- IF bkp.JobStatus %>class="hook" title="Job done" <% ELSE %>class="jobrun" title="Still running"<%- END -%>></td>
                             <td class="center"><% bkp.BkpHost %></td>
                             <td class="center"><% bkp.BkpGroup %></td>
                             <td title="Rsync Error Status: <% bkp.ErrStatus %>"
