@@ -51,7 +51,7 @@ foreach my $config ( keys %hosts ) {
 }
 
 if ( !@queue ) {
-    print "Exit because queue is empty.\n" if $globalconfig{debug};
+    print "Exit because queue is empty.\n" if ( $globalconfig{debug} && !$wipe );
     exit 0;
 }
 
@@ -336,6 +336,18 @@ sub create_btrfs_subvolume {
     return 1;
 }
 
+sub delete_btrfs_subvolume {
+    my ( $host, $group, $path ) = @_;
+
+    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume delete $path >/dev/null 2>&1";
+    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $globalconfig{dryrun};
+
+    logit( $host, $group, "Delete btrfs subvolume: $btrfs_subvolume_cmd" );
+    system($btrfs_subvolume_cmd) and logit( $host, $group, "ERROR: deleting subvolume for $host-$group: $!" );
+
+    return 1;
+}
+
 sub create_btrfs_snapshot {
     my ( $host, $group, $bkptimestamp ) = @_;
 
@@ -364,8 +376,45 @@ sub create_btrfs_snapshot {
 sub wipe {
     my ($host, $group) = @_;
 
+    # make sure wipe is enabled
+    return unless $hosts{"$host-$group"}->{hostconfig}->{WIPE_ENABLED};
+
+    # stop if trying to do bulk wipe if it's not allowed
+    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{WIPE_BULK_ALLOW} );
+
     logit( $host, $group, "Wipe host $host group $group" );
-    # execute_wipe unless $globalconfig{dryrun};
+
+    # count existing backups
+    my $bkpdir   = targetpath( $host, $group );
+    my $bkpkeep  = $hosts{"$host-$group"}->{hostconfig}->{BKP_KEEP};
+    my $bkpcount = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -not -name "current" | wc -l`;
+    chomp $bkpcount;
+    logit( $host, $group, "Wipe existing: $bkpcount, keeping: $bkpkeep for host $host group $group" );
+
+    # don't wipe if there are not enough bkps
+    my $wipenum  = $bkpcount - $bkpkeep;
+    if ( $wipenum <= 0 ) {
+        logit( $host, $group, "Wipe nothing to do for host $host group $group" );
+        return 1;
+    }
+
+    # get list of folders to wipe
+    my @wipedirs = `find $bkpdir  -mindepth 1 -maxdepth 1 -type d -not -name "current" | sort -n | head -n $wipenum`;
+    chomp ($_) for @wipedirs;
+
+    # remove subvolumes or folders
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+        delete_btrfs_subvolume( $host, $group, join(' ', @wipedirs) );
+    } else {
+        my $rmcmd = 'rm -Rf';
+        $rmcmd = "echo $rmcmd" if $globalconfig{dryrun};
+        foreach my $dir (@wipedirs) {
+            logit( $host, $group, "Wipe $rmcmd $dir for host $host group $group" );
+            system("$rmcmd $dir") and logit( $host, $group, "ERROR: removing folder $dir for $host-$group: $!" );
+        }
+    }
+
+    logit( $host, $group, "Wipe successful of host $host group $group" );
 
     return 1;
 }
