@@ -1,10 +1,9 @@
 <h2>Dashboard</h2>
-<div>Hier kommen Status-Meldungen hin...</div>
-<div>Hier kommt etwas Statistik hin...</div>
-
-<div id="fsinfo">
+<%- INCLUDE 'bkpreport-overview.tt' -%>
+<div id="fsinfo" style="float:left;">
 <h3>Backup-Server Disk Usage</h3>
-  <table>
+  Total Backup Mounts: <% fsinfo.size %>
+  <table style="border-width:1px; border-style:solid; padding:4px">
      <thead>
        <th>Mount</th>
        <th>FS-Typ</th>
@@ -27,4 +26,3 @@
      </tbody>
    </table>
 </div>
-<%- INCLUDE 'bkpreport-overview.tt' %>
