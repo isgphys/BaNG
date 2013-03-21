@@ -1,18 +1,33 @@
 .systembkp {
-    stroke          : #29C02A;
     fill            : #2BC72B;
+    stroke          : #29C02A;
 }
 .databkp {
     cursor          : pointer;
-    stroke          : #0050C0;
     fill            : #0068F9;
-}
-[class*="astro-"] {
-    fill            : red;
+    stroke          : #0050C0;
 }
 [class*="dphys-"] {
-    fill            : yellow;
+    fill            : #0054a0;
+    stroke          : #0050C0;
+}
+[class*="astro-"] {
+    fill            : #800CFF;
+    stroke          : #422069;
 }
 [class*="client-"] {
-    fill            : purple;
+    fill            : #DA7A9F;
+    stroke          : #DA7A9F;
+}
+[class*="igp-"] {
+    fill            : #5F2E05;
+    stroke          : #4B1C01;
+}
+[class*="-workstation"] {
+    fill            : #48A8CA;
+    stroke          : #48A8CA;
+}
+.dphys-system {
+    fill            : #2BC72B;
+    stroke          : #29C02A;
 }
