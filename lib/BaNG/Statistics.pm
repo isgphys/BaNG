@@ -38,7 +38,7 @@ sub statistics_json {
 
     get_global_config();
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays day)
@@ -87,7 +87,7 @@ sub statistics_cumulated_json {
 
     get_global_config();
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays day)
@@ -155,7 +155,7 @@ sub statistics_hosts_shares {
 
     get_global_config();
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT
         DISTINCT BkpFromHost, BkpFromPath
         FROM statistic_all
@@ -195,7 +195,7 @@ sub statistics_groupshare_variations {
 
     get_global_config();
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT BkpFromPath, TotFileSize, NumOfFiles
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays_variations day)
@@ -253,7 +253,7 @@ sub statistics_schedule {
 
     get_global_config();
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)

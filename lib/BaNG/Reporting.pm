@@ -56,7 +56,7 @@ sub bangstat_set_jobstatus {
     );
 
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare($SQL);
+    my $sth = $bangstat_dbh->prepare($SQL);
     $sth->execute() unless $globalconfig{dryrun};
     $sth->finish();
 
@@ -74,7 +74,7 @@ sub bangstat_recentbackups {
     my $BkpStartHour = 18;
 
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
@@ -173,7 +173,7 @@ sub bangstat_recentbackups_all {
     $lastXhours = $lastXhours || 24;
 
     bangstat_db_connect($globalconfig{config_bangstat});
-    my $sth = $BaNG::Reporting::bangstat_dbh->prepare("
+    my $sth = $bangstat_dbh->prepare("
         SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
         FROM recent_backups
         WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
@@ -277,7 +277,7 @@ sub db_report {
 
     unless ( $globalconfig{dryrun} ) {
         bangstat_db_connect($globalconfig{config_bangstat});
-        my $sth = $BaNG::Reporting::bangstat_dbh->prepare($sql);
+        my $sth = $bangstat_dbh->prepare($sql);
         $sth->execute();
         $sth->finish();
     }
