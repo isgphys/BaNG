@@ -19,7 +19,7 @@ use BaNG::Hosts;
 use BaNG::Config;
 use BaNG::Reporting;
 
-my $version    = '3.0';
+my $version = '3.1';
 my $wipe;
 my $hobbitonly;
 my $group_arg;
