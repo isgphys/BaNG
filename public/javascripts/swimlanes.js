@@ -68,12 +68,19 @@ function ParseData() {
                     for (var j = 0; j < subLane.length; j++) {
                         var item = subLane[j];
 
+                        var bkpclass = item.info.BkpGroup;
+                        if ( item.info.SystemBkp ) {
+                            bkpclass += ' systembkp';
+                        } else {
+                            bkpclass += ' databkp';
+                        }
+
                         items.push({
                             id    : item.id,
                             lane  : laneId,
                             start : item.start,
                             end   : item.end,
-                            class : item.info.SystemBkp ? 'systembkp' : 'databkp',
+                            class : bkpclass,
                             info  : item.info
                         });
                     }
@@ -109,6 +116,7 @@ function ParseData() {
                                 BkpToPath        : bkp.BkpToPath,
                                 BkpToHost        : bkp.BkpToHost,
                                 SystemBkp        : bkp.SystemBkp,
+                                BkpGroup         : bkp.BkpGroup,
                                 TimeStart        : getTime(tS),
                                 TimeStop         : getTime(tE),
                                 TimeElapsed      : time2human(tE-tS)
@@ -500,6 +508,10 @@ function DrawSwimlanes() {
                 + "  <tr>"
                 + "    <th>Path:</th>"
                 + "    <td>" + d.info.BkpFromPath + "</td>"
+                + "  </tr>"
+                + "  <tr>"
+                + "    <th>Group:</th>"
+                + "    <td>" + d.info.BkpGroup + "</td>"
                 + "  </tr>"
                 + "</table>"
             );

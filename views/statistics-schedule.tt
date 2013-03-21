@@ -6,6 +6,7 @@
         <link rel="icon" type="image/ico" href="/favicon">
         <link rel="stylesheet" href="/css/standard.css">
         <link rel="stylesheet" href="/css/swimlanes.css">
+        <link rel="stylesheet" href="/css/statistics_schedule.css">
         <script src="/javascripts/d3.js"></script>
         <script src="/javascripts/swimlanes.js"></script>
         <script src="/javascripts/jquery.js"></script>

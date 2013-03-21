@@ -57,13 +57,3 @@
     fill            : blue;
     fill-opacity    : .165;
 }
-
-.systembkp {
-    stroke          : #29C02A;
-    fill            : #2BC72B;
-}
-.databkp {
-    cursor          : pointer;
-    stroke          : #0050C0;
-    fill            : #0068F9;
-}

@@ -291,6 +291,7 @@ sub statistics_schedule {
             NumOfFilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
             AvgFileSize      => $dbrow->{'NumOfFiles'} ? num2human($dbrow->{'TotFileSize'}/$dbrow->{'NumOfFiles'},1024) : 0,
             SystemBkp        => $systemBkp,
+            BkpGroup         => $dbrow->{'BkpGroup'} || 'NoBkpGroup',
         });
     }
     $sth->finish();
