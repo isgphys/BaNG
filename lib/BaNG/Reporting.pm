@@ -275,12 +275,10 @@ sub db_report {
     $sql .= ")";
     logit( $host, $group, "DB Report SQL command: $sql" ) if ( $globalconfig{debuglevel} >=2 );
 
-    unless ( $globalconfig{dryrun} ) {
-        bangstat_db_connect($globalconfig{config_bangstat});
-        my $sth = $bangstat_dbh->prepare($sql);
-        $sth->execute();
-        $sth->finish();
-    }
+    bangstat_db_connect($globalconfig{config_bangstat});
+    my $sth = $bangstat_dbh->prepare($sql);
+    $sth->execute() unless $globalconfig{dryrun};
+    $sth->finish();
 
     logit( $host, $group, "Bangstat report sent.");
 
