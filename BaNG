@@ -297,6 +297,8 @@ sub execute_rsync {
     close HIS_OUT;
     close HIS_ERR;
 
+    waitpid( $rsyncpid, 0 );
+
     logit( $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $globalconfig{debuglevel} >=2 );
     logit( $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
     logit( $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
@@ -314,7 +316,6 @@ sub execute_rsync {
     } else {
         logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
-    sleep(rand(5));
     db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, @outlines);
 
     return 1;
