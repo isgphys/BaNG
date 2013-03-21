@@ -69,7 +69,7 @@ sub queue_backup {
     logit( $host, $group, "Queueing backup for host $host group $group" );
 
     # make sure backup is enabled
-    return unless $hosts{"$host-$group"}->{status} eq 'enabled';
+    return unless $hosts{"$host-$group"}->{hostconfig}->{BKP_ENABLED};
 
     # stop if trying to do bulk backup if it's not allowed
     return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
