@@ -211,3 +211,8 @@ nav ul ul ul li a {
     border-left: 2px solid #fff;
 }
 
+#fsinfo {
+    float: left;
+    margin-left: 20px;
+}
+

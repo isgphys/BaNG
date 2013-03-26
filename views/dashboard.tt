@@ -1,6 +1,6 @@
 <h2>Dashboard</h2>
 <%- INCLUDE 'bkpreport-overview.tt' -%>
-<div id="fsinfo" style="float:left;">
+<div id="fsinfo">
 <h3>Backup-Server Disk Usage</h3>
   Total Backup Mounts: <% fsinfo.size %>
   <table style="border-width:1px; border-style:solid; padding:4px">
