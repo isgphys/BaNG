@@ -22,7 +22,12 @@
                         <%- FOREACH bkp IN RecentBackups.$hostgroup %>
                         <tr height="20">
                             <td title="Rsync Error Status: <% bkp.ErrStatus %>"
-                                <%- IF bkp.ErrStatus == 0 %> class="ok"<%- ELSIF bkp.ErrStatus == 99 %> class="notok" <% ELSE %> class="bad"<% END %>></td>
+                                <%- IF bkp.ErrStatus == 0 %> class="ok"
+                                <%- ELSIF bkp.ErrStatus == 99 %> class="notok" 
+                                <%- ELSIF bkp.ErrStatus == 23 %> class="notok" 
+                                <%- ELSIF bkp.ErrStatus == 24 %> class="notok" 
+                                <% ELSE %> class="bad"<% END %>>
+                            </td>
                             <td class="center"><% bkp.Starttime %></td>
                             <td class="center"><% bkp.Stoptime %></td>
                             <td class="center"><% bkp.Runtime %></td>
