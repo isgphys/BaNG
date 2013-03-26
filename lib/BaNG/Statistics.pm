@@ -18,7 +18,7 @@ our @EXPORT = qw(
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
-my $lastXdays_default    = 150; # retrieve info of last X days from database
+my $lastXdays_default    = 90;  # retrieve info of last X days from database
 my $lastXdays_variations = 10;  # find largest variation of the last X days
 my $topX_variations      = 5;   # return the top X shares with largest variations
 my $BackupStartHour      = 18;  # backups started after X o'clock belong to next day
