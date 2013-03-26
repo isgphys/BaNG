@@ -1,0 +1,24 @@
+<div id="fsinfo">
+<h3>Actually Running Jobs</h3>
+  Total Running Jobs: <% lockfiles.size %>
+  <table style="border-width:1px; border-style:solid; padding:4px;">
+     <thead>
+       <th>Host</th>
+       <th>Group</th>
+       <th>Work on</th>
+     </thead>
+     <tbody>
+         <div>
+             <%- FOREACH lockfile IN lockfiles %>
+             <tr>
+                 <td><% lockfile.host %></td>
+                 <td><% lockfile.group %></td>
+                 <td><% lockfile.path %></td>
+             </tr>
+             <%- END %>
+         </div>
+         <div>
+         </div>
+     </tbody>
+   </table>
+</div>

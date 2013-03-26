@@ -1,28 +1,4 @@
 <h2>Dashboard</h2>
 <%- INCLUDE 'bkpreport-overview.tt' -%>
-<div id="fsinfo">
-<h3>Backup-Server Disk Usage</h3>
-  Total Backup Mounts: <% fsinfo.size %>
-  <table style="border-width:1px; border-style:solid; padding:4px">
-     <thead>
-       <th>Mount</th>
-       <th>FS-Typ</th>
-       <th>Available</th>
-       <th>%Used</th>
-     </thead>
-     <tbody>
-         <div>
-             <%- FOREACH mount IN fsinfo.keys.sort %>
-             <tr>
-                 <td><% mount %></td>
-                 <td class="center"><% fsinfo.$mount.fstyp %></td>
-                 <td class="center"><% fsinfo.$mount.available %></td>
-                 <td class="center <%- IF fsinfo.$mount.css_class %> <%- fsinfo.$mount.css_class %><%- END %>"><% fsinfo.$mount.used_per %></td>
-             </tr>
-             <%- END %>
-         </div>
-         <div>
-         </div>
-     </tbody>
-   </table>
-</div>
+<%- INCLUDE 'running-jobs.tt' -%>
+<%- INCLUDE 'host-fsinfo.tt' -%>
