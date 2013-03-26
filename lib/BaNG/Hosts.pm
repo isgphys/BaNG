@@ -2,12 +2,17 @@ package BaNG::Hosts;
 use Dancer ':syntax';
 use 5.010;
 use BaNG::Common;
+use BaNG::Config;
+use BaNG::Reporting;
 use Net::Ping;
 
 use Exporter 'import';
 our @EXPORT = qw(
     get_fsinfo
     chkClientConn
+    createLockFile
+    removeLockFile
+    getLockFiles
 );
 
 
@@ -79,6 +84,79 @@ sub chkClientConn {
     $p->close();
 
     return $state, $msg;
+}
+
+#################################
+# Lockfile
+#
+sub LockFile {
+    my ($host, $group, $path) = @_;
+
+    $path =~ s/^://g;
+    $path =~ s/\s:/\+/g;
+    $path =~ s/\//%/g;
+    my $lockfilename = "${host}_${group}_${path}";
+    my $lockfile     = "$globalconfig{path_lockfiles}/$lockfilename.lock";
+
+    return $lockfile;
+}
+
+sub splitLockFileName {
+    my ($lockfile) = @_;
+    my ($host, $group, $path) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock/;
+
+    $path =~ s/%/\//g;
+    $path =~ s/\'//g;
+
+    return $host, $group, $path;
+}
+
+sub createLockFile {
+    my ($host, $group, $path) = @_;
+
+    my $lockfile = LockFile($host, $group, $path);
+
+    if ( -e $lockfile ) {
+        logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
+        return 0;
+    } else {
+        unless ($globalconfig{dryrun}) {
+            system("touch \"$lockfile\"") and logit( $host, $group, "ERROR: could not create lockfile $lockfile" );
+        }
+        logit( $host, $group, "Created lockfile $lockfile" );
+        return 1;
+    }
+}
+
+sub removeLockFile {
+    my ($host, $group, $path) = @_;
+
+    my $lockfile = LockFile($host, $group, $path);
+    unlink $lockfile unless $globalconfig{dryrun};
+    logit( $host, $group, "Removed lockfile $lockfile" );
+
+    return 1;
+}
+
+sub getLockFiles {
+    my @lockfiles;
+    my $ffr_obj = File::Find::Rule->file()
+    ->name("*.lock")
+    ->relative
+    ->maxdepth(1)
+    ->start($globalconfig{path_lockfiles});
+
+    while ( my $lockfile = $ffr_obj->match() ) {
+        my ($host, $group, $path) = splitLockFileName($lockfile);
+        my $file = {
+            'host'  => $host,
+            'group' => $group,
+            'path'  => $path,
+        };
+        push( @lockfiles, $file );
+    }
+
+    return \@lockfiles;
 }
 
 1;

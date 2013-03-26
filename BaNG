@@ -420,48 +420,6 @@ sub wipe {
 }
 
 #################################
-# Lockfile
-#
-sub LockFile {
-    my ($host, $group, $path) = @_;
-
-    $path =~ s/^://g;
-    $path =~ s/\s:/\+/g;
-    $path =~ s/\//%/g;
-    my $lockfilename = "${host}_${group}_${path}";
-    my $lockfile     = "$globalconfig{path_lockfiles}/$lockfilename";
-
-    return $lockfile;
-}
-
-sub createLockFile {
-    my ($host, $group, $path) = @_;
-
-    my $lockfile = LockFile($host, $group, $path);
-
-    if ( -e $lockfile ) {
-        logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
-        return 0;
-    } else {
-        unless ($globalconfig{dryrun}) {
-            system("touch \"$lockfile\"") and logit( $host, $group, "ERROR: could not create lockfile $lockfile" );
-        }
-        logit( $host, $group, "Created lockfile $lockfile." );
-        return 1;
-    }
-}
-
-sub removeLockFile {
-    my ($host, $group, $path) = @_;
-
-    my $lockfile = LockFile($host, $group, $path);
-    unlink $lockfile unless $globalconfig{dryrun};
-    logit( $host, $group, "Removed lockfile $lockfile." );
-
-    return 1;
-}
-
-#################################
 # LastBkpFile
 #
 sub LastBkpFile {
