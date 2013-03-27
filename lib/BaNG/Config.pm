@@ -147,6 +147,7 @@ sub get_host_config {
 sub get_cronjob_config {
 
     my $cronjobsfile = "$globalconfig{path_cronjobs}/cronjobs.yaml";
+    my %sortedcronjobs;
 
     if ( sanityfilecheck($cronjobsfile) ) {
 
@@ -164,9 +165,23 @@ sub get_cronjob_config {
                 'WIPE'     => $cronjobslist->{$cronjob}->{WIPE},
             };
         }
+
+        my $id = 1;
+        foreach my $cronjob ( sort sort_cronjob_by_backup_time keys %cronjobs ) {
+            my $PastMidnight = ( $cronjobs{$cronjob}->{BACKUP}->{HOUR} >= 18 ) ? 0 : 1;
+            $sortedcronjobs{sprintf("$PastMidnight%05d", $id)} = $cronjobs{$cronjob};
+            $id++;
+        }
     }
 
-    return 1;
+    return \%sortedcronjobs;
+}
+
+sub sort_cronjob_by_backup_time {
+    sprintf("%02d%02d", $cronjobs{$a}->{BACKUP}->{HOUR}, $cronjobs{$a}->{BACKUP}->{MIN})
+    <=>
+    sprintf("%02d%02d", $cronjobs{$b}->{BACKUP}->{HOUR}, $cronjobs{$b}->{BACKUP}->{MIN})
+    ;
 }
 
 sub read_configfile {
