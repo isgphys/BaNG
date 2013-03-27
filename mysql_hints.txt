@@ -1,0 +1,41 @@
+use bangstat;
+
+describe statistic;
+
+set profiling = 1;
+show profiles;
+show profile for query 1;
+
+ALTER TABLE mytable ENGINE = MyISAM;
+ALTER TABLE mytable ENGINE = InnoDB;
+
+************************/////////IN-PRODUCTION/////////////*********************
+
+CREATE OR REPLACE VIEW statistic_job_sum AS SELECT MIN(Start) as Start, MAX(Stop) as Stop, SUM(TIMESTAMPDIFF(Second, Start , Stop)) as Runtime,
+BkpFromHost, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
+BkpFromPath) as BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
+SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
+SUM(TotFileSizeTrans) as TotFileSizeTrans
+FROM statistic
+WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
+GROUP BY LastBkp, bkptopath
+ORDER BY LastBkp;
+
+
+CREATE OR REPLACE VIEW statistic_job_thread AS SELECT Start, Stop, TIMESTAMPDIFF(Second, Start , Stop) as Runtime,
+BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
+NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
+FROM statistic
+WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
+AND isThread = 1;
+
+
+CREATE OR REPLACE VIEW statistic_all AS SELECT * FROM statistic_job_sum UNION SELECT * FROM statistic_job_thread;
+
+
+CREATE OR REPLACE VIEW recent_backups AS SELECT MIN(Start) as Start, MAX(Stop) as Stop, BkpFromHost,
+IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),BkpFromPath) as BkpFromPath,
+BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, ErrStatus, JobStatus
+FROM statistic
+WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
+GROUP BY LastBkp, bkptopath order by LastBkp;
