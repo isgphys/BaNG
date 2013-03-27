@@ -27,6 +27,8 @@ get '/' => sub {
 };
 
 get '/bkpreport-overview' => sub {
+    get_global_config();
+
     template 'bkpreport-overview' => {
              'RecentBackupsAll' => bangstat_recentbackups_all(),
     },{ layout => 0
