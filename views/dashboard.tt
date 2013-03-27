@@ -1,4 +1,22 @@
 <h2>Dashboard</h2>
-<%- INCLUDE 'bkpreport-overview.tt' -%>
+<div id="bkpreport-overview" style="float:left;">
+    <div class="loading_message">
+        <img src="/images/spinner.gif" width=25 alt="Loading animation">
+        Loading Backup Report Overview
+    </div>
+</div>
 <%- INCLUDE 'running-jobs.tt' -%>
 <%- INCLUDE 'host-fsinfo.tt' -%>
+<script>
+    $(window).load(function() {
+        $.ajax({
+            url: '/bkpreport-overview',
+            success: function(content) {
+                $('#bkpreport-overview').html(content);
+            },
+            error: function() {
+                $('#bkpreport-overview > .loading_message').html('An error occured while loading the page.');
+            }
+        });
+    });
+</script>

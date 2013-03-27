@@ -23,7 +23,13 @@ get '/' => sub {
              'msg' => get_flash(),
              'fsinfo' => get_fsinfo(),
              'lockfiles' => getLockFiles(),
+    };
+};
+
+get '/bkpreport-overview' => sub {
+    template 'bkpreport-overview' => {
              'RecentBackupsAll' => bangstat_recentbackups_all(),
+    },{ layout => 0
     };
 };
 
