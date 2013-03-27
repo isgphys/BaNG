@@ -107,6 +107,8 @@ sub splitLockFileName {
 
     $path =~ s/%/\//g;
     $path =~ s/\'//g;
+    $path =~ s/\+/ :/g;
+    $path =~ s/^\//:\//g;
 
     return $host, $group, $path;
 }
