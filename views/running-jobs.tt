@@ -1,5 +1,5 @@
 <div id="lockinfo">
-<h3>Actually Running Tasks</h3>
+<h3>Currently Running Tasks</h3>
   Total Running Tasks: <% lockfiles.size %>
   <table style="border-width:1px; border-style:solid; padding:4px; min-width: 300px;">
      <thead>
