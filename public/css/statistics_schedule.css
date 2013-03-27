@@ -1,9 +1,11 @@
+.mainItem {
+    cursor          : pointer;
+}
 .systembkp {
     fill            : #2BC72B;
     stroke          : #29C02A;
 }
 .databkp {
-    cursor          : pointer;
     fill            : #0068F9;
     stroke          : #0050C0;
 }

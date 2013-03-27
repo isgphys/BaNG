@@ -478,9 +478,7 @@ function DrawSwimlanes() {
 
     // redirect to plotHost when clicking on data backups
     function onclick(d, i) {
-        if(d.class == 'databkp') {
-            window.location = "/statistics/" + d.info.BkpFromHost + '/' + d.info.BkpFromPath.replace(/\//g,'_');
-        }
+        window.location = "/statistics/" + d.info.BkpFromHost + '/' + d.info.BkpFromPath.replace(/\//g,'_');
     }
 
     // functions to update tooltip when moving mouse
