@@ -58,27 +58,29 @@
                             <th>Day of Month</th>
                         </tr>
                     </thead>
-                    <%- FOREACH cronjob IN cronjobs.keys.sort %>
-                        <%- IF hosts.${cronjobs.$cronjob.ident} %>
-                            <%- FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
+                    <tbody>
+                    <%- FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
+                        <%- FOREACH cronjob IN cronjobs.keys.sort %>
+                            <%- IF hosts.${cronjobs.$cronjob.ident} %>
                                 <%- IF cronjobs.$cronjob.$jobtype %>
-                                <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
-                                    <td class="center"><% cronjobs.$cronjob.group %></td>
-                                    <td class="center"><% jobtype %></td>
-                                    <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
-                                    <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
-                                    <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
-                                    <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
-                                    <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
-                                </tr>
+                                    <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
+                                        <td class="center"><% cronjobs.$cronjob.group %></td>
+                                        <td class="center"><% jobtype %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.MONTH %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.DOW %></td>
+                                        <td class="center"><% cronjobs.$cronjob.$jobtype.DOM %></td>
+                                    </tr>
                                 <%- ELSE %>
-                                <tr>
-                                    <td colspan="7" class="center"><% jobtype %> - N/A</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="7" class="center"><% jobtype %> - N/A</td>
+                                    </tr>
                                 <%- END %>
                             <%- END %>
                         <%- END %>
-                    <%- END %>
+                        <%- END %>
+                    </tbody>
                 </table>
             </tr>
         </table>

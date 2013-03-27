@@ -22,12 +22,11 @@
             </tr>
         </thead>
         <tbody>
-            <% FOREACH jobtype = [ 'BACKUP','WIPE' ] %>
+            <% FOREACH jobtype = [ 'BACKUP' ] %>
                 <% FOREACH cronjob IN cronjobs.keys.sort %>
-                    <% IF cronjobs.$cronjob.$jobtype %>
+                    <% IF cronjobs.$cronjob.$jobtype.HOUR != '' %>
                         <tr <%- IF jobtype == "WIPE"  %> class="wipe" <% ELSE %> class="backup"<%- END %>>
                             <td><% cronjobs.$cronjob.hostname %></td>
-                            <td class="center"><% cronjob %></td>
                             <td class="center"><% cronjobs.$cronjob.group %></td>
                             <td class="center"><% cronjobs.$cronjob.$jobtype.HOUR %></td>
                             <td class="center"><% cronjobs.$cronjob.$jobtype.MIN %></td>
