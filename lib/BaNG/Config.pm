@@ -11,7 +11,6 @@ use Exporter 'import';
 our @EXPORT = qw(
     %globalconfig
     %hosts
-    %cronjobs
     $prefix
     $config_path
     $config_global
@@ -27,7 +26,6 @@ our @EXPORT = qw(
 our %globalconfig;
 our %defaultconfig;
 our %hosts;
-our %cronjobs;
 our $config_path;
 our $config_global;
 our $servername = hostname;
@@ -147,41 +145,46 @@ sub get_host_config {
 sub get_cronjob_config {
 
     my $cronjobsfile = "$globalconfig{path_cronjobs}/cronjobs.yaml";
+    my %unsortedcronjobs;
     my %sortedcronjobs;
 
     if ( sanityfilecheck($cronjobsfile) ) {
 
-        undef %cronjobs;
         my $cronjobslist = LoadFile($cronjobsfile);
 
         foreach my $cronjob ( keys %{$cronjobslist} ) {
             my ($host, $group) = split( /_/, $cronjob );
 
-            $cronjobs{"$cronjob"} = {
-                'hostname' => $host,
-                'group'    => $group,
-                'ident'    => "$host-$group",
-                'BACKUP'   => $cronjobslist->{$cronjob}->{BACKUP},
-                'WIPE'     => $cronjobslist->{$cronjob}->{WIPE},
+            $unsortedcronjobs{"$cronjob"} = {
+                'host'   => $host,
+                'group'  => $group,
+                'ident'  => "$host-$group",
+                'backup' => $cronjobslist->{$cronjob}->{BACKUP},
+                'wipe'   => $cronjobslist->{$cronjob}->{WIPE},
             };
         }
 
         my $id = 1;
-        foreach my $cronjob ( sort sort_cronjob_by_backup_time keys %cronjobs ) {
-            my $PastMidnight = ( $cronjobs{$cronjob}->{BACKUP}->{HOUR} >= 18 ) ? 0 : 1;
-            $sortedcronjobs{sprintf("$PastMidnight%05d", $id)} = $cronjobs{$cronjob};
-            $id++;
+        foreach my $jobtype ( qw( backup wipe ) ) {
+            foreach my $cronjob ( sort {
+                sprintf("%02d%02d", $unsortedcronjobs{$a}->{$jobtype}->{HOUR}, $unsortedcronjobs{$a}->{$jobtype}->{MIN})
+                <=>
+                sprintf("%02d%02d", $unsortedcronjobs{$b}->{$jobtype}->{HOUR}, $unsortedcronjobs{$b}->{$jobtype}->{MIN})
+                } keys %unsortedcronjobs ) {
+                my $PastMidnight = ( $unsortedcronjobs{$cronjob}->{$jobtype}->{HOUR} >= 18 ) ? 0 : 1;
+
+                $sortedcronjobs{$jobtype}{sprintf("$jobtype$PastMidnight%05d", $id)} = {
+                    'hostname' => $unsortedcronjobs{$cronjob}{host},
+                    'group'    => $unsortedcronjobs{$cronjob}{group},
+                    'ident'    => $unsortedcronjobs{$cronjob}{ident},
+                    'cron'     => $unsortedcronjobs{$cronjob}{$jobtype},
+                };
+                $id++;
+            }
         }
     }
 
     return \%sortedcronjobs;
-}
-
-sub sort_cronjob_by_backup_time {
-    sprintf("%02d%02d", $cronjobs{$a}->{BACKUP}->{HOUR}, $cronjobs{$a}->{BACKUP}->{MIN})
-    <=>
-    sprintf("%02d%02d", $cronjobs{$b}->{BACKUP}->{HOUR}, $cronjobs{$b}->{BACKUP}->{MIN})
-    ;
 }
 
 sub read_configfile {
