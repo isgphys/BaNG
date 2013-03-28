@@ -15,7 +15,7 @@
                             <th width="60">Runtime</th>
                             <th>FromPath</th>
                             <th width="100">LastBkp</th>
-                            <th width="60">Threaded</th>
+                            <th width="60">Forked</th>
                         </tr>
                     </thead>
                     <tbody>

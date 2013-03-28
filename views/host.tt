@@ -4,16 +4,18 @@
     <table id="hostinfo" style=" border-width:1px; border-style:solid; padding:4px>"
         <thead>
             <tr>
-                <th colspan="3" align="left">Jobs (<%hosts.size%>)</th>
+                <th colspan="2" align="left">Jobs (<%hosts.size%>)</th>
+                <th colspan="2" align="center">Enabled</th>
                 <th colspan="2" class="center">Bulk allow</th>
                 <th rowspan="2" class="center">SubFolder</th>
-                <th rowspan="2" class="center">Threads</th>
+                <th rowspan="2" class="center">Forks</th>
                 <th rowspan="2" class="center">Mode</th>
             </tr>
             <tr>
-                <th align="left">Enabled</th>
                 <th align="center">Group</th>
                 <th align="left">Configfile</th>
+                <th>Bkp</th>
+                <th>Wipe</th>
                 <th>Bkp</th>
                 <th>Wipe</th>
             </tr>
@@ -22,9 +24,10 @@
             <%- IF hosts.size %>
                 <%- FOREACH hostname IN hosts.keys.sort %>
                     <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-                        <td <%- IF hosts.$hostname.status == 'enabled' %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td class="center"><% hosts.$hostname.group %></td>
                         <td><% hosts.$hostname.configfile %></td>
+                        <td <%- IF hosts.$hostname.hostconfig.BKP_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td <%- IF hosts.$hostname.hostconfig.WIPE_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
@@ -115,7 +118,7 @@
                                         <th>Day of Week</th>
                                         <th>Day of Month</th>
                                         <th>Bulk</th>
-                                        <th width="40">Threads</th>
+                                        <th width="40">Forks</th>
                                    </tr>
                                 </thead>
                                 <tbody>
