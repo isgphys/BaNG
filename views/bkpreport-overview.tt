@@ -3,23 +3,22 @@ Total Backups last 24H: <% RecentBackupsAll.Data.size %>
 <table id="bkpreport"border="0" style="border-width:1px; border-style:solid; padding:4px">
     <thead>
         <tr>
-            <th width="60">Jobstatus</th>
-            <th width="50">Host</th>
-            <th width="50">Group</th>
-            <th width="50">Status</th>
-            <th width="100">Starttime</th>
-            <th width="100">Endtime</th>
-            <th width="60">Runtime</th>
+            <th width="30">Job</th>
+            <th>Host</th>
+            <th>Group</th>
+            <th width="40">Status</th>
+            <th>Starttime</th>
+            <th>Runtime</th>
             <th>FromPath</th>
-            <th width="100">LastBkp</th>
-            <th width="60">Threaded</th>
+            <th>LastBkp</th>
+            <th width="40">Forked</th>
         </tr>
     </thead>
     <tbody>
         <%- FOREACH bkp IN RecentBackupsAll.Data %>
             <tr height="20">
                 <td <%- IF bkp.JobStatus %>class="hook" title="Job done" <% ELSE %>class="jobrun" title="Still running"<%- END -%>></td>
-                <td class="center"><% bkp.BkpHost %></td>
+                <td><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
                 <td class="center"><% bkp.BkpGroup %></td>
                 <td title="Rsync Error Status: <% bkp.ErrStatus %>"
                     <%- IF bkp.ErrStatus == 0 %> class="ok"
@@ -29,7 +28,6 @@ Total Backups last 24H: <% RecentBackupsAll.Data.size %>
                     <% ELSE %> class="bad"<% END %>>
                 </td>
                 <td class="center"><% bkp.Starttime %></td>
-                <td class="center"><% bkp.Stoptime %></td>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.BkpFromPath %></td>
                 <td class="center"><% bkp.LastBkp %></td>
