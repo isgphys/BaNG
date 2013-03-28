@@ -89,12 +89,14 @@ sub bangstat_recentbackups {
     my %RecentBackupTimes;
     while (my $dbrow=$sth->fetchrow_hashref()) {
         my $BkpGroup = $dbrow->{'BkpGroup'} || 'NA';
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/^:$/:\//g;
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
             Runtime     => time2human($dbrow->{'Runtime'}),
-            BkpFromPath => $dbrow->{'BkpFromPath'},
-            BkpToPath   => $dbrow->{'BkpToPath'},
+            BkpFromPath => $BkpFromPath,
+            BkpToPath   => $dbrow->{'BkpToPath'} ,
             isThread    => $dbrow->{'isThread'},
             LastBkp     => $dbrow->{'LastBkp'},
             ErrStatus   => $dbrow->{'ErrStatus'},
@@ -185,11 +187,13 @@ sub bangstat_recentbackups_all {
 
     my %RecentBackupsAll;
     while (my $dbrow=$sth->fetchrow_hashref()) {
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
             Runtime     => time2human($dbrow->{'Runtime'}),
-            BkpFromPath => $dbrow->{'BkpFromPath'},
+            BkpFromPath => $BkpFromPath ,
             BkpToPath   => $dbrow->{'BkpToPath'},
             isThread    => $dbrow->{'isThread'},
             LastBkp     => $dbrow->{'LastBkp'},
