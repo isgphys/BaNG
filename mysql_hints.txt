@@ -39,3 +39,13 @@ BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, ErrStatus, JobStatus
 FROM statistic
 WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
 GROUP BY LastBkp, bkptopath order by LastBkp;
+
+
+
+CREATE OR REPLACE VIEW lastday_transfer AS
+SELECT SUM(NumOfFilesTrans) AS TotalNumFilesTrans, SUM(TotFileSizeTrans) AS TotalFileSizeTrans
+FROM statistic_all
+WHERE Start > date_sub(concat(curdate(),' 18:00:00'), interval 1 day)
+AND isThread is NULL
+AND BkpToHost like 'phd-bkp-gw'
+ORDER BY Start;
