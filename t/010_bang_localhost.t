@@ -47,6 +47,10 @@ unlike( $output,    qr|Error|i                                                  
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 like(   $output,    qr|eval subfolders command|                                  , "Eval subfolders for localhost $group"               );
 
+$group = 'differentserver';
+$output = `$bangcmd -h localhost -g $group`;
+like(   $output,    qr|Skipping backup .* for server doesnotexist instead of|    , "Skip backup to different server of localhost $group");
+
 $group = 'missingexclude';
 $output = `$bangcmd -h localhost -g $group`;
 like(   $output,    qr|Warning: could not find excludefile|                      , "Warn about missing excludefile for localhost $group");

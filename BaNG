@@ -68,6 +68,13 @@ sub queue_backup {
 
     logit( $host, $group, "Queueing backup for host $host group $group" );
 
+    # make sure backup's target host matches local hostname
+    my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
+    if ( $bkp_target_host ne $servername ) {
+        logit( $host, $group, "Skipping backup of host $host group $group for server $bkp_target_host instead of $servername" );
+        return;
+    }
+
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{BKP_ENABLED};
 
