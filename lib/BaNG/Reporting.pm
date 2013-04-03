@@ -79,7 +79,6 @@ sub bangstat_recentbackups {
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost like '$host'
-        AND BkpToHost LIKE 'phd-bkp-gw'
         AND JobStatus = '1'
         ORDER BY BkpGroup, Start DESC;
     ");
@@ -180,7 +179,6 @@ sub bangstat_recentbackups_all {
         FROM recent_backups
         WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
-        AND BkpToHost LIKE 'phd-bkp-gw'
         ORDER BY JobStatus, Start DESC;
     ");
     $sth->execute();
