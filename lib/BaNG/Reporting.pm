@@ -269,7 +269,7 @@ sub db_report {
     $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
-    $sql .= "'$host', '$group', '$path', 'phd-bkp-gw', '$targetpath', '$lastbkp', ";
+    $sql .= "'$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
     $sql .= " $isSubfolderThread , '$errcode', 0, FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
