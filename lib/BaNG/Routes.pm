@@ -19,6 +19,7 @@ get '/' => sub {
     template 'dashboard' => {
              'section' => 'dashboard',
              'remotehost' => request->remote_host,
+             'remoteuser' => request->user,
              'webDancerEnv' => config->{run_env},
              'msg' => get_flash(),
              'fsinfo' => get_fsinfo(),
@@ -35,39 +36,39 @@ get '/bkpreport-overview' => sub {
     };
 };
 
-hook 'before' => sub {
-    if (! session('logged_in') && request->path_info !~ m{^/$}) {
-        if (request->path_info !~ m{^/login}){
-            session 'requested_path' => request->path_info;
-            debug "before:".  request->path_info;
-        }
-    request->path_info('/login');
-    }
-};
+#hook 'before' => sub {
+#    if (! session('logged_in') && request->path_info !~ m{^/$}) {
+#        if (request->path_info !~ m{^/login}){
+#            session 'requested_path' => request->path_info;
+#            debug "before:".  request->path_info;
+#        }
+#    request->path_info('/login');
+#    }
+#};
 
-get '/login' => sub {
-    template 'login', {
-        #   'err' => $err,
-             'remotehost' => request->remote_host,
-    };
-};
+#get '/login' => sub {
+#    template 'login', {
+#        #   'err' => $err,
+#             'remotehost' => request->remote_host,
+#    };
+#};
 
-post '/login' => sub {
-    if (checkuser(params->{user}, params->{pass})) {
-        session user => params->{user};
-        session 'logged_in' => true;
-        debug("Logged in successfully: " . params->{user});
-        set_flash('You are logged in.');
-        return redirect session 'requested_path' || '/';
-        redirect '/';
-    } else {
-        redirect '/login?failed=1';
-    }
-};
+#post '/login' => sub {
+#    if (checkuser(params->{user}, params->{pass})) {
+#        session user => params->{user};
+#        session 'logged_in' => true;
+#        debug("Logged in successfully: " . params->{user});
+#        set_flash('You are logged in.');
+#        return redirect session 'requested_path' || '/';
+#        redirect '/';
+#    } else {
+#        redirect '/login?failed=1';
+#    }
+#};
 
-get '/logout' => sub {
-    session->destroy;
-    debug("Logged out successfully");
-    set_flash('You are logged out.');
-    return redirect '/';
-};
+#get '/logout' => sub {
+#    session->destroy;
+#    debug("Logged out successfully");
+#    set_flash('You are logged out.');
+#    return redirect '/';
+#};

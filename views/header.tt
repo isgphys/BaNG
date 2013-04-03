@@ -10,12 +10,7 @@
         Remotehost: <% remotehost %>
     </div>
     <div class="topright">
-        <%- IF not session.logged_in %>
-            <a class="button-login" href="/login"></a>
-        <%- ELSE %>
-        <span class="username">Hallo <% session.user %> --</span>
-            <a class="button-logout" href="/logout"></a>
-        <%- END %>
+        <% IF remoteuser %><span class="username">Hallo <% remoteuser %></span><% END %>
     </div>
 </div>
 
