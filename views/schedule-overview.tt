@@ -29,7 +29,7 @@
                             <tr class="<% jobtype %>">
                             <td><% cronjobs.$jobtype.$cronjob.hostname %></td>
                             <td class="center"><% cronjobs.$jobtype.$cronjob.group %></td>
-                            <td class="center"><% jobtype %></td>
+                            <td class="center"><% jobtype FILTER ucfirst %></td>
                             <td class="center"><% cronjobs.$jobtype.$cronjob.cron.HOUR %></td>
                             <td class="center"><% cronjobs.$jobtype.$cronjob.cron.MIN %></td>
                             <td class="center"><% cronjobs.$jobtype.$cronjob.cron.MONTH %></td>
