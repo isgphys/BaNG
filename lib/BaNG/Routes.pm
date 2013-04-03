@@ -9,7 +9,7 @@ use BaNG::Common;
 use BaNG::Hosts;
 use BaNG::Config;
 use BaNG::Reporting;
-use Auth::LDAP;
+#use Auth::LDAP;
 
 prefix undef;
 
