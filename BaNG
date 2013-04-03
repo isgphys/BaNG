@@ -44,7 +44,10 @@ foreach my $config ( keys %hosts ) {
     if ( $wipe ) {
         wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     } elsif ( $hobbitonly  ) {
-        hobbit_report( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+        my $host  = $hosts{$config}->{hostname};
+        my $group = $hosts{$config}->{group};
+        my %RecentBackups = bangstat_recentbackups($host);
+        hobbit_report( $host, $group, %RecentBackups );
     } else {
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
@@ -496,8 +499,10 @@ sub finish_backupjob {
     create_btrfs_snapshot( $host, $group, $bkptimestamp );
     createLastBkpFile( $host, $group, $bkptimestamp );
     bangstat_set_jobstatus( $host, $group, $lastbkp, '1' );
-    hobbit_report( $host, $group );
-    mail_report( $host, $group );
+
+    my %RecentBackups = bangstat_recentbackups($host);
+    hobbit_report( $host, $group, %RecentBackups );
+    mail_report( $host, $group, %RecentBackups );
     logit( $host, $group, "Backup successful for host $host group $group!" );
 
     return 1;

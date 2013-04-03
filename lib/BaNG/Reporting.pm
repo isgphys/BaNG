@@ -288,7 +288,7 @@ sub db_report {
 }
 
 sub mail_report {
-    my ($host, $group) = @_;
+    my ($host, $group, %RecentBackups) = @_;
 
     my %mail = (
         To      => $globalconfig{report_to},
@@ -306,9 +306,8 @@ sub mail_report {
 }
 
 sub hobbit_report {
-    my ($host, $group)  = @_;
+    my ($host, $group, %RecentBackups)  = @_;
 
-    my %RecentBackups = bangstat_recentbackups($host);
     my $RecentBackups = { RecentBackups => \%RecentBackups };
 
     my $topcolor = 'green';
