@@ -74,7 +74,7 @@ sub queue_backup {
     # make sure backup's target host matches local hostname
     my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
     if ( $bkp_target_host ne $servername ) {
-        logit( $host, $group, "Skipping backup of host $host group $group for server $bkp_target_host instead of $servername" );
+        logit( $host, $group, "Skipping backup of host $host group $group for server $bkp_target_host instead of $servername" ) if $globalconfig{debug};
         return;
     }
 
@@ -385,6 +385,13 @@ sub create_btrfs_snapshot {
 #
 sub wipe {
     my ($host, $group) = @_;
+
+    # make sure backup's target host matches local hostname
+    my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
+    if ( $bkp_target_host ne $servername ) {
+        logit( $host, $group, "Skipping wipe of host $host group $group for server $bkp_target_host instead of $servername" ) if $globalconfig{debug};
+        return;
+    }
 
     # make sure wipe is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{WIPE_ENABLED};
