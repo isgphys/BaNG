@@ -257,7 +257,6 @@ sub statistics_schedule {
         SELECT *
         FROM statistic_all
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
-        AND BkpToHost LIKE 'phd-bkp-gw'
         AND isThread is Null
         ORDER BY Start;
     ");
