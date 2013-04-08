@@ -511,6 +511,10 @@ function DrawSwimlanes() {
                 + "    <th>Group:</th>"
                 + "    <td>" + d.info.BkpGroup + "</td>"
                 + "  </tr>"
+                + "  <tr>"
+                + "    <th>Server:</th>"
+                + "    <td>" + d.info.BkpToHost + "</td>"
+                + "  </tr>"
                 + "</table>"
             );
     }
