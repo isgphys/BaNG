@@ -199,6 +199,7 @@ sub bangstat_recentbackups_all {
             JobStatus   => $dbrow->{'JobStatus'},
             BkpGroup    => $dbrow->{'BkpGroup'} || 'NA',
             BkpHost     => $dbrow->{'BkpFromHost'},
+            BkpToHost   => $dbrow->{'BkpToHost'},
         });
     }
     $sth->finish();
