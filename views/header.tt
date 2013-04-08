@@ -17,6 +17,7 @@
 <nav>
     <ul>
         <li><a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a></li>
+        <li><a href="/restore" <% IF section == 'restore' %>class="active"<% END %>>Restore</a></li>
         <li><a href="#" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a>
             <ul>
                 <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Overview (cronjobs)</a>

@@ -14,6 +14,7 @@
                 $("#flash").delay(2500).hide("slow");
 
                 $('#configslist').tablesorter();
+                $('#restorelist').tablesorter();
                 $('#config').tablesorter();
                 $('#config_default').tablesorter();
 
@@ -29,7 +30,7 @@
                 });
             });
             $(function() {
-                var theTable = $('#configslist')
+                var theTable = $('#configslist, #restorelist')
 
                 $("#filter").keyup(function() {
                     $.uiTableFilter( theTable, this.value );

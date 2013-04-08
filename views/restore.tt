@@ -1,0 +1,28 @@
+<h2>Backup restore paths</h2>
+<div id="restore_filter">
+    <form id="filter-form">Filter:
+        <input name="filter" id="filter" value="" maxlength="30" size="30" type="text" autofocus >
+    </form>
+</div>
+<table id="restorelist" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Hostname</th>
+            <th>Group</th>
+            <th>Path</th>
+            <th>BackupServer</th>
+            <th>BackupPath</th>
+        </tr>
+    </thead>
+    <tbody>
+      <% FOREACH hostname IN hosts.keys.sort %>
+        <tr>
+            <td> <a href="/host/<%hosts.$hostname.hostname %>"><img class="look" src="/images/zoom-3.png"> <% hosts.$hostname.hostname %></a> </td>
+            <td> <% hosts.$hostname.group %> </td>
+            <td> <% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %> </td>
+            <td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td>
+            <td> <% hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX _ '/' _ hosts.$hostname.hostname %> </td>
+        </tr>
+      <% END %>
+    </tbody>
+</table>
