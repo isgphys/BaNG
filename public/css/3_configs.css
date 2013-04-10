@@ -1,5 +1,5 @@
 #config {
-    width: 700px;
+    width: 450px;
 }
 
 #config th {
@@ -24,7 +24,7 @@
 }
 
 #config_default {
-    width: 700px;
+    width: 450px;
 }
 
 #config_default th {
@@ -49,7 +49,7 @@
 }
 
 #configslist {
-    width: 700px;
+    width: 800px;
 }
 
 #configslist a {

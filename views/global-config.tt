@@ -1,83 +1,68 @@
 <h2>Global Settings</h2>
 <h3>Static Vars</h3>
 <table>
-  <tr>
-    <td>
-      Servername:
-    </td>
-    <td>
-      <% servername %>
-    </td>
-  </tr>
-  <tr>
-  <tr>
-    <td>
-      Environment:
-    </td>
-    <td>
-      <% webDancerEnv %>
-    </td>
-  </tr>
-    <td>
-      App-Dir:
-    </td>
-    <td>
-      <% prefix_path %>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      Config-Dir:
-    </td>
-    <td>
-      <% config_path %>
-    </td>
-  </tr>
+    <tr>
+        <td>Servername:</td>
+        <td><% servername %></td>
+    </tr>
+    <tr>
+        <td>Environment:</td>
+        <td><% webDancerEnv %></td>
+    </tr>
+    <tr>
+        <td>App-Dir:</td>
+        <td><% prefix_path %></td>
+    </tr>
+    <tr>
+        <td>Config-Dir:</td>
+        <td><% config_path %></td>
+    </tr>
 </table>
 
-<h3>Global Configfile:<% config_global %></h3>
-<table id="config" class="tablesorter">
-    <thead>
-        <tr>
-            <th>Parameter</th>
-            <th>Value</th>
-        </tr>
-    </thead>
-    <tbody>
-      <% FOREACH globalconf IN globalconfig.keys.sort %>
-        <tr>
-           <td>
-              <% globalconf %>
-            </td>
-            <td>
-              <% globalconfig.$globalconf %>
-            </td>
-            </td>
-        </tr>
-      <% END %>
-    </tbody>
-</table>
+<div style="float:left;">
+    <h3>Global Configfile:<% config_global %></h3>
+    <table id="config" class="tablesorter">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+          <% FOREACH globalconf IN globalconfig.keys.sort %>
+            <tr>
+                <td>
+                    <% globalconf %>
+                </td>
+                <td>
+                    <% globalconfig.$globalconf %>
+                </td>
+            </tr>
+          <% END %>
+        </tbody>
+    </table>
+</div>
 
-<h3>Default Configfile:<% globalconfig.config_default %></h3>
-<table id="config_default" class="tablesorter">
-    <thead>
-        <tr>
-            <th>Parameter</th>
-            <th>Value</th>
-        </tr>
-    </thead>
-    <tbody>
-      <% FOREACH defaultconf IN defaultsconfig.keys.sort %>
-        <tr>
-           <td>
-              <% defaultconf %>
-            </td>
-            <td>
-              <% defaultsconfig.$defaultconf %>
-            </td>
-            </td>
-        </tr>
-      <% END %>
-    </tbody>
-</table>
-
+<div style="float:left;">
+    <h3>Default Configfile:<% globalconfig.config_default %></h3>
+    <table id="config_default" class="tablesorter">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+          <% FOREACH defaultconf IN defaultsconfig.keys.sort %>
+            <tr>
+                <td>
+                    <% defaultconf %>
+                </td>
+                <td>
+                    <% defaultsconfig.$defaultconf %>
+                </td>
+            </tr>
+          <% END %>
+        </tbody>
+    </table>
+</div>

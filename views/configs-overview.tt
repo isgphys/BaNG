@@ -10,8 +10,9 @@
         <tr>
             <th>Hostname</th>
             <th>Group</th>
+            <th>Server</th>
             <th>Config-Files</th>
-            <th>Status</th>
+            <th width="55">Status</th>
         </tr>
     </thead>
     <tbody>
@@ -22,6 +23,9 @@
             </td>
             <td class="center">
               <% hosts.$hostname.group %>
+            </td>
+            <td class="center">
+              <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
             </td>
             <td class="expander more">
               <% hosts.$hostname.configfile %>
