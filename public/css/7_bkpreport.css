@@ -1,5 +1,5 @@
 #bkpreport {
-    width: 800px;
+    width: 700px;
 }
 
 #bkpreport td {
@@ -32,4 +32,10 @@
     background: url("/images/hook.png") no-repeat transparent;
     background-position: center center;
     background-size: 15px 15px;
+}
+
+#bkpreport .hook3 {
+    background: url("/images/hook3.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 30px 15px;
 }

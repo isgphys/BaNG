@@ -3,22 +3,22 @@ Total Backups last 24H: <% RecentBackupsAll.Data.size %>
 <table id="bkpreport"border="0" style="border-width:1px; border-style:solid; padding:4px">
     <thead>
         <tr>
-            <th width="30">Job</th>
+            <th width="40">Job</th>
             <th>Host</th>
             <th>Group</th>
             <th>Target</th>
-            <th width="40">Status</th>
+            <th width="50">Status</th>
             <th>Starttime</th>
             <th>Runtime</th>
             <th>FromPath</th>
-            <th>LastBkp</th>
-            <th width="40">Forked</th>
         </tr>
     </thead>
     <tbody>
         <%- FOREACH bkp IN RecentBackupsAll.Data %>
             <tr height="20">
-                <td <%- IF bkp.JobStatus %>class="hook" title="Job done" <% ELSE %>class="jobrun" title="Still running"<%- END -%>></td>
+                <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done"
+                    <% ELSIF bkp.JobStatus %>class="hook" title="Job done"
+                    <% ELSE %>class="jobrun" title="Still running"<%- END -%>></td>
                 <td><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
                 <td class="center"><% bkp.BkpGroup %></td>
                 <td class="center"><% bkp.BkpToHost %></td>
@@ -32,8 +32,6 @@ Total Backups last 24H: <% RecentBackupsAll.Data.size %>
                 <td class="center"><% bkp.Starttime %></td>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.BkpFromPath %></td>
-                <td class="center"><% bkp.LastBkp %></td>
-                <td <%- IF bkp.isThread %>class="hook"<%- END -%>></td>
             </tr>
         <%- END %>
     </tbody>
