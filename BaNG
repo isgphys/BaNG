@@ -40,7 +40,7 @@ get_global_config($prefix_arg);
 cli_args_override_global_config();
 get_host_config($host_arg, $group_arg);
 
-foreach my $config ( keys %hosts ) {
+foreach my $config ( sort keys %hosts ) {
     if ( $wipe ) {
         wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     } elsif ( $hobbitonly  ) {
