@@ -325,9 +325,9 @@ sub mail_report {
         $mail_msg->attach($mail_att);
     }
 
-    #unless ($globalconfig{dryrun}) {
+    unless ($globalconfig{dryrun}) {
         $mail_msg->send or logit( $host, $group, "mail_report error" );
-        #}
+    }
 
     logit( $host, $group, "Mail report sent.");
 
