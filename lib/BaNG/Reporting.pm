@@ -6,7 +6,8 @@ use BaNG::Common;
 use Date::Parse;
 use DBI;
 use IO::Socket;
-use Mail::Sendmail;
+#use Mail::Sendmail;
+use MIME::Lite;
 use POSIX qw( strftime );
 use Template;
 use YAML::Tiny;
@@ -100,6 +101,7 @@ sub bangstat_recentbackups {
             LastBkp     => $dbrow->{'LastBkp'},
             ErrStatus   => $dbrow->{'ErrStatus'},
             BkpGroup    => $BkpGroup,
+            BkpHost     => $dbrow->{'BkpFromHost'},
         });
         push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
             Starttime   => $dbrow->{'Start'},
@@ -291,15 +293,41 @@ sub db_report {
 sub mail_report {
     my ($host, $group, %RecentBackups) = @_;
 
-    my %mail = (
-        To      => $globalconfig{report_to},
-        From    => 'root@phys.ethz.ch',
-        Subject => "Backup report of ($host-$group): success",
-        Message => "* * * Backup report * * *\n\nBacking up: $host-$group\n\n* * * Backup successfull * * *\n",
+    my $RecentBackups = {
+        RecentBackups => \%RecentBackups,
+        Group         => "$host-$group",
+    };
+
+    my $tt = Template->new(
+        START_TAG  => '<%',
+        END_TAG    => '%>',
+        INCLUDE_PATH => "$prefix/views",
     );
-    unless ($globalconfig{dryrun}) {
-        sendmail(%mail) or logit( $host, $group, "mail_report error: $Mail::Sendmail::error" );
+
+    my $mail_msg = MIME::Lite->new(
+        From    => 'root@phys.ethz.ch',
+        To      => $globalconfig{report_to},
+        Type    => 'multipart/alternative',
+        Subject => "Backup report of ($host-$group): success",
+    );
+
+    foreach my $mailtype ( qw(plain html) ) {
+        my $report;
+        $tt->process("mail_$mailtype-report.tt", $RecentBackups, \$report)
+            or logit( $host, $group, "Error generating mail report template: " . $tt->error() );
+
+        my $mail_att = MIME::Lite->new(
+            Type    => 'text',
+            Data    => $report,
+            Encoding=> 'quoted-printable',
+        );
+        $mail_att->attr('content-type' => "text/$mailtype; charset=UTF-8");
+        $mail_msg->attach($mail_att);
     }
+
+    #unless ($globalconfig{dryrun}) {
+        $mail_msg->send or logit( $host, $group, "mail_report error" );
+        #}
 
     logit( $host, $group, "Mail report sent.");
 
@@ -309,7 +337,10 @@ sub mail_report {
 sub hobbit_report {
     my ($host, $group, %RecentBackups)  = @_;
 
-    my $RecentBackups = { RecentBackups => \%RecentBackups };
+    my $RecentBackups = {
+        RecentBackups => \%RecentBackups,
+        Group         => "$host-$group",
+    };
 
     my $topcolor = 'green';
     my $errcode;

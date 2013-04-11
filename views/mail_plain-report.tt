@@ -1,0 +1,11 @@
+Backup Report
+*************
+Group <% RecentBackups.$Group.0.BkpGroup %> -- (<% RecentBackups.${Group}.0.BkpToPath %>)
+
+Starttime <% RecentBackups.${Group}.0.Starttime %>
+Stoptime <% RecentBackups.${Group}.0.Stoptime %>
+FromPath <% RecentBackups.${Group}.0.BkpFromPath %>
+LastBkp  <% RecentBackups.${Group}.0.LastBkp %>
+Err-Status: <% RecentBackups.${Group}.0.ErrStatus %>
+
+https://backup.phys.ethz.ch/host/<% RecentBackups.${Group}.0.BkpHost %>
