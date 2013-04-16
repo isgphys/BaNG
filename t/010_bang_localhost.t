@@ -49,7 +49,7 @@ like(   $output,    qr|eval subfolders command|                                 
 
 $group = 'differentserver';
 $output = `$bangcmd -h localhost -g $group`;
-like(   $output,    qr|Skipping backup .* for server doesnotexist instead of|    , "Skip backup to different server of localhost $group");
+like(   $output,    qr|Skipping .* for server doesnotexist instead of|           , "Skip backup to different server of localhost $group");
 
 $group = 'missingexclude';
 $output = `$bangcmd -h localhost -g $group`;

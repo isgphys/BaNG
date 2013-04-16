@@ -71,12 +71,8 @@ sub queue_backup {
 
     logit( $host, $group, "Queueing backup for host $host group $group" );
 
-    # make sure backup's target host matches local hostname
-    my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
-    if ( $bkp_target_host ne $servername ) {
-        logit( $host, $group, "Skipping backup of host $host group $group for server $bkp_target_host instead of $servername" ) if $globalconfig{debug};
-        return;
-    }
+    # make sure we are on the correct backup server
+    return unless bkp_to_current_server($host, $group);
 
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{BKP_ENABLED};
@@ -386,12 +382,8 @@ sub create_btrfs_snapshot {
 sub wipe {
     my ($host, $group) = @_;
 
-    # make sure backup's target host matches local hostname
-    my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
-    if ( $bkp_target_host ne $servername ) {
-        logit( $host, $group, "Skipping wipe of host $host group $group for server $bkp_target_host instead of $servername" ) if $globalconfig{debug};
-        return;
-    }
+    # make sure we are on the correct backup server
+    return unless bkp_to_current_server($host, $group);
 
     # make sure wipe is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{WIPE_ENABLED};
@@ -511,6 +503,19 @@ sub finish_backupjob {
     hobbit_report( $host, $group, %RecentBackups );
     mail_report( $host, $group, %RecentBackups );
     logit( $host, $group, "Backup successful for host $host group $group!" );
+
+    return 1;
+}
+
+sub bkp_to_current_server {
+    my ($host, $group) = @_;
+
+    # make sure backup's target host matches local hostname
+    my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
+    if ( $bkp_target_host ne $servername && $bkp_target_host ne '*' ) {
+        logit( $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $globalconfig{debug};
+        return 0;
+    }
 
     return 1;
 }
