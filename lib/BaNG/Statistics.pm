@@ -99,6 +99,8 @@ sub statistics_cumulated_json {
 
     # gather information into hash
     my %CumulateByDate = ();
+    my %realtime_start = ();
+    my %realtime_stop  = ();
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my ($date, $time) = split( /\s+/, $dbrow->{'Start'} );
 
@@ -118,11 +120,33 @@ sub statistics_cumulated_json {
         }
 
         # compute wall-clock runtime of backup in minutes with 2 digits
-        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+        if( !$realtime_start{$epoch} && !$realtime_stop{$epoch} ) {
+            # initialize reference time interval
+            $realtime_start{$epoch} = str2time($time_start);
+            $realtime_stop{$epoch}  = str2time($time_stop);
+            $CumulateByDate{$epoch}{RealRuntime} += sprintf("%.2f",
+                ( $realtime_stop{$epoch} - $realtime_start{$epoch} ) / 60.
+            );
+        }
+        if( str2time($time_stop) > $realtime_stop{$epoch} ) {
+            if ( str2time($time_start) <= $realtime_stop{$epoch} ) {
+                # bkp started during reference interval, but finished afterwards
+                $CumulateByDate{$epoch}{RealRuntime} += sprintf("%.2f",
+                    ( str2time($time_stop) - $realtime_stop{$epoch} ) / 60.
+                );
+                $realtime_stop{$epoch}  = str2time($time_stop);
+            } else {
+                # bkp started after end of reference interval, ie there was a gap without running bkps
+                $realtime_start{$epoch} = str2time($time_start);
+                $realtime_stop{$epoch}  = str2time($time_stop);
+                $CumulateByDate{$epoch}{RealRuntime} += sprintf("%.2f",
+                    ( $realtime_stop{$epoch} - $realtime_start{$epoch} ) / 60.
+                );
+            }
+        }
 
         # store cumulated statistics for each day
         $CumulateByDate{$epoch}{time_coord}        = $epoch;
-        $CumulateByDate{$epoch}{RealRuntime}      += $RealRuntime;
         $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'} / 60.;
         $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
         $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
