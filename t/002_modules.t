@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 # Install missing perl module
-# aptitude install libclone-perl libdancer-perl libdatetime-perl libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl libmodule-refresh-perl libtemplate-perl libthread-queue-perl libyaml-tiny-perl libmime-lite-perl
+# aptitude install libclone-perl libdancer-perl libdatetime-perl libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl libmodule-refresh-perl libtemplate-perl libthread-queue-perl libyaml-tiny-perl libmime-lite-perl libnet-ldap-perl
 
 require_ok 'Dancer';
 require_ok 'YAML::Tiny';
