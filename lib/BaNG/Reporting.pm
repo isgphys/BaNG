@@ -337,17 +337,26 @@ sub mail_report {
 sub hobbit_report {
     my ($host, $group, %RecentBackups)  = @_;
 
-    my $RecentBackups = {
-        RecentBackups => \%RecentBackups,
-        Group         => "$host-$group",
-    };
-
     my $topcolor = 'green';
     my $errcode;
     foreach my $key (keys %RecentBackups) {
         $errcode  = $RecentBackups{$key}[0]{ErrStatus};
-        $topcolor = 'red' if ( $errcode gt 0 && !( $errcode eq 23 || $errcode eq 24 || $errcode eq 99 ));
+        my @errorcodes = split( ',', $errcode );
+        foreach my $code (@errorcodes) {
+            next if $code eq '0';   # no errors
+            next if $code eq '24';  # vanished source files
+            next if $code eq '99';  # no last_bkp
+            $topcolor = 'yellow' if $code eq '23';  # partial transfer
+            $topcolor = 'red';
+        }
+        #$topcolor = 'red' if ( $errcode ne '0' && !( $errcode =~ /23|24|99/ ));
     }
+
+    my $RecentBackups = {
+        RecentBackups  => \%RecentBackups,
+        Group          => "$host-$group",
+        HobbitTopColor => $topcolor,
+    };
 
     my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
     my $DATE      = `date`;

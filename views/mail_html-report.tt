@@ -19,20 +19,7 @@
                 <tbody>
                     <%- FOREACH bkp IN RecentBackups.$hostgroup %>
                     <tr>
-                        <%- FILTER collapse %>
-                        <td>
-                            <% IF bkp.ErrStatus == 0 %>
-                                <% hobbitcolor = 'green' %>
-                            <% ELSIF ( bkp.ErrStatus == 23 || bkp.ErrStatus == 24 ) %>
-                                <% hobbitcolor = 'yellow' %>
-                            <% ELSIF bkp.ErrStatus == 99 %>
-                                <% hobbitcolor = 'purple' %>
-                            <% ELSE %>
-                                <% hobbitcolor = 'red' %>
-                            <% END %>
-                            <%- '<IMG SRC=http://hobbit.phys.ethz.ch/hobbit/gifs/daduke/' _ hobbitcolor _'.gif ALT='_ hobbitcolor _' HEIGHT=16 WIDTH=16 TITLE="Rsync Error Status: '_ bkp.ErrStatus _'">' %>
-                        </td>
-                        <% END -%>
+                        <td align="center"><% bkp.ErrStatus %></td>
                         <td align="center"><% bkp.Starttime %></td>
                         <td align="center"><% bkp.Stoptime  %></td>
                         <td align="center"><% bkp.BkpFromPath %></td>
