@@ -33,9 +33,11 @@ AND isThread = 1;
 CREATE OR REPLACE VIEW statistic_all AS SELECT * FROM statistic_job_sum UNION SELECT * FROM statistic_job_thread;
 
 
-CREATE OR REPLACE VIEW recent_backups AS SELECT MIN(Start) as Start, MAX(Stop) as Stop, BkpFromHost,
+CREATE OR REPLACE VIEW recent_backups AS
+SELECT MIN(Start) as Start, MAX(Stop) as Stop, BkpFromHost,
 IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),BkpFromPath) as BkpFromPath,
-BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, ErrStatus, JobStatus
+BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup,
+GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, JobStatus
 FROM statistic
 WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
 GROUP BY LastBkp, bkptopath order by LastBkp;
