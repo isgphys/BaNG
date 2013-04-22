@@ -22,6 +22,7 @@ use BaNG::Reporting;
 my $version = '3.1';
 my $wipe;
 my $hobbitonly;
+my $crontabonly;
 my $group_arg;
 my $host_arg;
 my $prefix_arg;
@@ -43,11 +44,14 @@ get_host_config($host_arg, $group_arg);
 foreach my $config ( sort keys %hosts ) {
     if ( $wipe ) {
         wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
-    } elsif ( $hobbitonly  ) {
+    } elsif ( $hobbitonly ) {
         my $host  = $hosts{$config}->{hostname};
         my $group = $hosts{$config}->{group};
         my %RecentBackups = bangstat_recentbackups($host);
         hobbit_report( $host, $group, %RecentBackups );
+    } elsif ( $crontabonly ) {
+        print generated_crontab();
+        exit 0;
     } else {
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
@@ -536,8 +540,9 @@ sub parse_command_options {
         "t|threads=i" => \$nthreads_arg,
         "w|wipe"      => \$wipe,
         "hobbit"      => \$hobbitonly,
+        "crontab"     => \$crontabonly,
     ) or usage("Invalid commmand line options.");
-    usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
+    usage("You must provide some arguments")    unless ( $host_arg || $group_arg || $crontabonly );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 
     $debug_arg = 1 if $dryrun_arg;
@@ -573,6 +578,7 @@ sub usage {
         $command -h <hostname>              # back up all groups of given host
         $command -g <group>                 # back up all hosts of given group
         $command -v                         # show version number
+        $command --crontab                  # show generated crontab
         $command --help                     # show this help message
 
         Optional Arguments:
