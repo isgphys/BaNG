@@ -346,7 +346,10 @@ sub hobbit_report {
             next if $code eq '0';   # no errors
             next if $code eq '24';  # vanished source files
             next if $code eq '99';  # no last_bkp
-            $topcolor = 'yellow' if $code eq '23';  # partial transfer
+            if ( $code eq '23' ) {
+                $topcolor = 'yellow'; # partial transfer
+                next;
+           }
             $topcolor = 'red';
         }
         #$topcolor = 'red' if ( $errcode ne '0' && !( $errcode =~ /23|24|99/ ));

@@ -21,7 +21,16 @@
                     <tr>
                         <%- FILTER collapse %>
                         <td>
-                            <%- '<IMG SRC=/hobbit/gifs/daduke/' _ HobbitTopColor _'.gif ALT='_ HobbitTopColor _' HEIGHT=16 WIDTH=16 TITLE="Rsync Error Status: '_ bkp.ErrStatus _'">' %>
+                            <% IF bkp.ErrStatus == 0 %>
+                            <% hobbitcolor = 'green' %>
+                            <% ELSIF ( bkp.ErrStatus.match('23') || bkp.ErrStatus.match('24') ) %>
+                            <% hobbitcolor = 'yellow' %>
+                            <% ELSIF bkp.ErrStatus.match('99') %>
+                            <% hobbitcolor = 'purple' %>
+                            <% ELSE %>
+                            <% hobbitcolor = 'red' %>
+                            <% END %>
+                            <%- '<IMG SRC=/hobbit/gifs/daduke/' _ hobbitcolor _'.gif ALT='_ hobbitcolor _' HEIGHT=16 WIDTH=16 TITLE="Rsync Error Status: '_ bkp.ErrStatus _'">' %>
                         </td>
                         <% END -%>
                         <td align="center"><% bkp.Starttime %></td>
