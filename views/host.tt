@@ -88,8 +88,8 @@
         <table id="croninfo">
           <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
             <%- FOREACH cronjob IN cronjobs.$jobtype.keys.sort %>
-              <%- IF cronjobs.$jobtype.$cronjob.hostname == "BULK" || ( cronjobs.$jobtype.$cronjob.group == "BULK" && cronjobs.$jobtype.$cronjob.hostname == host ) %>
-                <%- IF cronjobs.$jobtype.$cronjob.hostname == "BULK" %>
+              <%- IF cronjobs.$jobtype.$cronjob.host == "BULK" || ( cronjobs.$jobtype.$cronjob.group == "BULK" && cronjobs.$jobtype.$cronjob.host == host ) %>
+                <%- IF cronjobs.$jobtype.$cronjob.host == "BULK" %>
                   <% bulkident = host _ "-"_ cronjobs.$jobtype.$cronjob.group %>
                   <% bulk_act = hosts.$bulkident.css_class %>
                 <%- ELSE %>
@@ -103,7 +103,7 @@
                           <thead>
                               <tr>
                                   <th colspan="8" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
-                                    <% cronjobs.$jobtype.$cronjob.hostname _ "_" _ cronjobs.$jobtype.$cronjob.group %>
+                                    <% cronjobs.$jobtype.$cronjob.host _ "_" _ cronjobs.$jobtype.$cronjob.group %>
                                   </th>
                               </tr>
                               <tr>
