@@ -192,6 +192,8 @@ sub generated_crontab {
             }
             $crontab .= "    root    $prefix/BaNG";
 
+            $crontab .= " --wipe" if ( $jobtype eq 'wipe' );
+
             my $host  = "$cronjobs->{$jobtype}->{$cronjob}->{host}";
             $crontab .= " -h $host" unless $host eq 'BULK';
 
@@ -200,8 +202,6 @@ sub generated_crontab {
 
             my $threads = $cronjobs->{$jobtype}->{$cronjob}->{cron}->{THREADS};
             $crontab .= " -t $threads" if $threads;
-
-            $crontab .= " --wipe" if ( $jobtype eq 'wipe' );
 
             $crontab .= "\n";
         }
