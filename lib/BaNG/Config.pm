@@ -49,9 +49,9 @@ sub get_global_config {
     $globalconfig{report_to}          = "$global_settings->{ReportTo}";
 
     $globalconfig{config_default}     = "$config_path/$global_settings->{DefaultConfig}";
-    $globalconfig{config_default_nis} = "$config_path/$global_settings->{DefaultNisConfig}";
     $globalconfig{config_bangstat}    = "$config_path/$global_settings->{BangstatConfig}";
 
+    $globalconfig{path_serverconfig}  = "$config_path/$global_settings->{ServerConfigFolder}";
     $globalconfig{path_hostconfig}    = "$config_path/$global_settings->{HostConfigFolder}";
     $globalconfig{path_excludes}      = "$config_path/$global_settings->{ExcludesFolder}";
     $globalconfig{path_lockfiles}     = "$config_path/$global_settings->{LocksFolder}";
@@ -147,7 +147,7 @@ sub get_cronjob_config {
     my %sortedcronjobs;
 
     foreach my $jobtype ( qw( backup wipe ) ) {
-        my $cronjobsfile = "$config_path/cronjobs_$jobtype.yaml";
+        my $cronjobsfile = "$globalconfig{path_serverconfig}/${servername}_cronjobs_$jobtype.yaml";
         return unless sanityfilecheck($cronjobsfile);
         my $cronjobslist = LoadFile($cronjobsfile);
 
