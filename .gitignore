@@ -1,6 +1,6 @@
 /logs
 *.swp
-etc/bangstat_db.yaml*
+etc
 sessions/*
 t/etc/bangstat_db.yaml
 TODO
