@@ -1,5 +1,13 @@
+#schedule {
+    float: left;
+    margin-right: 10px;
+}
+
 #croninfo {
     width: 600px;
+    border-width:1px;
+    border-style:solid;
+    padding:4px;
 }
 
 #croninfo td {

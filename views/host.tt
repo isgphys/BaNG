@@ -4,7 +4,7 @@
     <table id="hostinfo" style=" border-width:1px; border-style:solid; padding:4px>"
         <thead>
             <tr>
-                <th colspan="2" align="left">Jobs (<%hosts.size%>)</th>
+                <th colspan="3" align="left">Jobs (<%hosts.size%>)</th>
                 <th colspan="2" align="center">Enabled</th>
                 <th colspan="2" class="center">Bulk allow</th>
                 <th rowspan="2" class="center">SubFolder</th>
@@ -14,6 +14,7 @@
             <tr>
                 <th align="center">Group</th>
                 <th align="left">Configfile</th>
+                <th>Server</th>
                 <th>Bkp</th>
                 <th>Wipe</th>
                 <th>Bkp</th>
@@ -26,6 +27,7 @@
                     <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
                         <td class="center"><% hosts.$hostname.group %></td>
                         <td><% hosts.$hostname.configfile %></td>
+                        <td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
                         <td <%- IF hosts.$hostname.hostconfig.BKP_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td <%- IF hosts.$hostname.hostconfig.WIPE_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
@@ -44,103 +46,103 @@
     </table>
 </div>
 
-<div>
-    <div style="float:left;">
-        <h3>CronJobs (Single-Run)</h3>
-        <table id="croninfo">
-            <tr><td style=" border-width:1px; border-style:solid; padding:4px">
-                <table class="croninfosmall">
-                    <thead>
-                        <tr>
-                            <th>Group</th>
-                            <th width="50">Type</th>
-                            <th>Hour</th>
-                            <th>Min</th>
-                            <th>Month</th>
-                            <th>Day of Week</th>
-                            <th>Day of Month</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+<div id="schedule">
+    <h3>CronJobs (Single-Run)</h3>
+    <table id="croninfo">
+        <tr><td>
+            <table class="croninfosmall">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th width="50">Type</th>
+                        <th>Hour</th>
+                        <th>Min</th>
+                        <th>Month</th>
+                        <th>Day of Week</th>
+                        <th>Day of Month</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% server = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
                     <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
-                        <%- FOREACH cronjob IN cronjobs.$jobtype.keys.sort %>
-                            <%- IF hosts.${cronjobs.$jobtype.$cronjob.ident} %>
+                        <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
+                            <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident} %>
                                 <tr class="<% jobtype %>">
-                                    <td class="center"><% cronjobs.$jobtype.$cronjob.group %></td>
+                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.group %></td>
                                     <td class="center"><% jobtype FILTER ucfirst %></td>
-                                    <td class="center"><% cronjobs.$jobtype.$cronjob.cron.HOUR %></td>
-                                    <td class="center"><% cronjobs.$jobtype.$cronjob.cron.MIN %></td>
-                                    <td class="center"><% cronjobs.$jobtype.$cronjob.cron.MONTH %></td>
-                                    <td class="center"><% cronjobs.$jobtype.$cronjob.cron.DOW %></td>
-                                    <td class="center"><% cronjobs.$jobtype.$cronjob.cron.DOM %></td>
+                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
+                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>
+                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
+                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
+                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
                                 </tr>
                             <%- END %>
                         <%- END %>
-                        <%- END %>
-                    </tbody>
-                </table>
-            </tr>
-        </table>
-    </div>
+                    <%- END %>
+                </tbody>
+            </table>
+        </tr>
+    </table>
+</div>
 
-    <div style="float:left;">
-        <h3>CronJobs (Bulk-Run)</h3>
-        <table id="croninfo">
-          <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
-            <%- FOREACH cronjob IN cronjobs.$jobtype.keys.sort %>
-              <%- IF cronjobs.$jobtype.$cronjob.host == "BULK" || ( cronjobs.$jobtype.$cronjob.group == "BULK" && cronjobs.$jobtype.$cronjob.host == host ) %>
-                <%- IF cronjobs.$jobtype.$cronjob.host == "BULK" %>
-                  <% bulkident = host _ "-"_ cronjobs.$jobtype.$cronjob.group %>
-                  <% bulk_act = hosts.$bulkident.css_class %>
-                <%- ELSE %>
-                  <%- FOREACH curgroup IN hosts.keys.sort %>
-                    <%- IF hosts.$curgroup.status == "enabled" %><% bulk_act = hosts.$curgroup.css_class %><% ELSE %><% NEXT %><% END %>
-                  <%- END %>
-                <%- END %>
-                <%- IF hosts.$bulkident %>
-                  <tr><td style=" border-width:1px; border-style:solid; padding:4px">
-                      <table class="croninfosmall">
-                          <thead>
-                              <tr>
-                                  <th colspan="8" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
-                                    <% cronjobs.$jobtype.$cronjob.host _ "_" _ cronjobs.$jobtype.$cronjob.group %>
-                                  </th>
-                              </tr>
-                              <tr>
-                                  <th width="50">Type</th>
-                                  <th>Hour</th>
-                                  <th>Min</th>
-                                  <th>Month</th>
-                                  <th>Day of Week</th>
-                                  <th>Day of Month</th>
-                                  <th>Bulk</th>
-                                  <th width="40">Forks</th>
-                             </tr>
-                          </thead>
-                          <tbody>
-                              <tr class="<% jobtype %>">
-                                  <td class="center"><% jobtype FILTER ucfirst %></td>
-                                  <td class="center"><% cronjobs.$jobtype.$cronjob.cron.HOUR %></td>
-                                  <td class="center"><% cronjobs.$jobtype.$cronjob.cron.MIN %></td>
-                                  <td class="center"><% cronjobs.$jobtype.$cronjob.cron.MONTH %></td>
-                                  <td class="center"><% cronjobs.$jobtype.$cronjob.cron.DOW %></td>
-                                  <td class="center"><% cronjobs.$jobtype.$cronjob.cron.DOM %></td>
-                                  <%- IF jobtype == "backup" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
-                                  <td width=20
-                                    class = <%- IF hosts.$bulkident.hostconfig.$bulkflag %> "hook" <%- ELSE %> "notallow" <%- END %>>
-                                  </td>
-                                  <td class="center"><% cronjobs.$jobtype.$cronjob.cron.THREADS %></td>
-                              </tr>
-                          </tbody>
-                      </table>
-                  </tr>
-                <%- END %>
+<div id="schedule">
+    <h3>CronJobs (Bulk-Run)</h3>
+    <table id="croninfo">
+      <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
+        <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
+          <%- IF cronjobs.$server.$jobtype.$cronjob.host == "BULK" || ( cronjobs.$server.$jobtype.$cronjob.group == "BULK" && cronjobs.$server.$jobtype.$cronjob.host == host ) %>
+            <%- IF cronjobs.$server.$jobtype.$cronjob.host == "BULK" %>
+              <% bulkident = host _ "-"_ cronjobs.$server.$jobtype.$cronjob.group %>
+              <% bulk_act = hosts.$bulkident.css_class %>
+            <%- ELSE %>
+              <%- FOREACH curgroup IN hosts.keys.sort %>
+                <%- IF hosts.$curgroup.status == "enabled" %><% bulk_act = hosts.$curgroup.css_class %><% ELSE %><% NEXT %><% END %>
               <%- END %>
             <%- END %>
+            <%- IF hosts.$bulkident %>
+              <tr><td>
+                  <table class="croninfosmall">
+                      <thead>
+                          <tr>
+                              <th colspan="8" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
+                                <% cronjobs.$server.$jobtype.$cronjob.host _ "_" _ cronjobs.$server.$jobtype.$cronjob.group %>
+                              </th>
+                          </tr>
+                          <tr>
+                              <th width="50">Type</th>
+                              <th>Hour</th>
+                              <th>Min</th>
+                              <th>Month</th>
+                              <th>Day of Week</th>
+                              <th>Day of Month</th>
+                              <th>Bulk</th>
+                              <th width="40">Forks</th>
+                         </tr>
+                      </thead>
+                      <tbody>
+                          <tr class="<% jobtype %>">
+                              <td class="center"><% jobtype FILTER ucfirst %></td>
+                              <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
+                              <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>
+                              <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
+                              <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
+                              <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
+                              <%- IF jobtype == "backup" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
+                              <td width=20
+                                class = <%- IF hosts.$bulkident.hostconfig.$bulkflag %> "hook" <%- ELSE %> "notallow" <%- END %>>
+                              </td>
+                              <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.THREADS %></td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </tr>
+            <%- END %>
           <%- END %>
-        </table>
-    </div>
+        <%- END %>
+      <%- END %>
+    </table>
 </div>
+
 <div style="clear:both;">
     <br />
     <%- INCLUDE 'host-bkpreport.tt' %>
