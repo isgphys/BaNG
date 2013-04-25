@@ -14,30 +14,6 @@
     height: 20px;
 }
 
-#croninfo .active {
-    background-color: #99FF99 !important;
-}
-
 #croninfo .croninfosmall {
     width: 600px;
-}
-
-#croninfo tr.wipe {
-     background-color: #FFEAEA;
-}
-
-#croninfo tr.backup {
-     background-color: #CCFFFF;
-}
-
-#croninfo .hook {
-    background: url("/images/hook.png") no-repeat transparent;
-    background-position: center center;
-    background-size: 15px 15px;
-}
-
-#croninfo .notallow {
-    background: url("/images/not-allow.png") no-repeat transparent;
-    background-position: center center;
-    background-size: 15px 15px;
 }

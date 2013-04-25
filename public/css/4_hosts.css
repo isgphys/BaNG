@@ -21,25 +21,3 @@
 #hostinfo tr:nth-child(even) {
     background-color: #eee;
 }
-
-tr.wipe {
-     background-color: #FFEAEA;
-}
-
-tr.backup {
-     background-color: #CCFFFF;
-}
-
-.hook {
-    background: url("/images/hook.png") no-repeat  scroll transparent;
-    background-position: center center;
-    background-size: 15px 15px;
-
-}
-
-#hostinfo .notallow {
-    background: url("/images/not-allow.png") no-repeat  transparent;
-    background-position: center;
-    background-size: 15px 15px ;
-}
-

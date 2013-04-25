@@ -6,32 +6,9 @@ body {
     font-size: 10px;
 }
 
-body pre {
-    font-family: monospace;
-}
-
 .center {
     text-align : center;
     padding-right : 0px;
-}
-
-.alert_red {
-    background-color: red;
-    font-weight: bold;
-}
-
-.alert_orange {
-    background-color: orange;
-    font-style: italic;
-}
-
-.alert_yellow {
-    background-color: yellow;
-}
-
-.jobrun {
-    background: url("/images/job-run.png") no-repeat  scroll transparent;
-    background-position: center center;
 }
 
 #header {
@@ -127,15 +104,10 @@ nav {
     padding: 0px 0px 0px 0px;
 }
 
-nav ul ul {
-    display: none;
+nav ul li:hover > ul {
+    display: block;
+    font-color: #000;
 }
-
-    nav ul li:hover > ul {
-        display: block;
-        font-color: #000;
-    }
-
 
 nav ul {
     list-style: none;
@@ -160,9 +132,10 @@ nav ul li a.active {
 nav ul li:hover {
     background: lightgrey;
 }
-    nav ul li:hover a {
-        color: black;
-    }
+
+nav ul li:hover a {
+    color: black;
+}
 
 nav ul li a {
     display: block;
@@ -173,8 +146,8 @@ nav ul li a {
     line-height: 26px;
 }
 
-
 nav ul ul {
+    display: none;
     background: #C1CDE0;
     padding: 0;
     position: absolute;
@@ -221,3 +194,69 @@ nav ul ul ul li a {
     margin-left: 10px;
 }
 
+.alert_red {
+    background-color: red;
+    font-weight: bold;
+}
+
+.alert_orange {
+    background-color: orange;
+    font-style: italic;
+}
+
+.alert_yellow {
+    background-color: yellow;
+}
+
+.active {
+    background-color: #99FF99;
+}
+
+.wipe {
+    background-color: #FFEAEA;
+}
+
+.backup {
+    background-color: #CCFFFF;
+}
+
+.hook {
+    background: url("/images/hook.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 15px 15px;
+}
+
+.hook3 {
+    background: url("/images/hook3.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 30px 15px;
+}
+
+.ok {
+    background: url("/images/face-cool.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+
+.bad {
+    background: url("/images/face-angry.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+
+.notok {
+    background: url("/images/important.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+
+.notallow {
+    background: url("/images/not-allow.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 15px 15px;
+}
+
+.jobrun {
+    background: url("/images/job-run.png") no-repeat  scroll transparent;
+    background-position: center center;
+}
