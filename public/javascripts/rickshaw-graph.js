@@ -1,10 +1,15 @@
 var PlotData;
-d3.json(jsonURL, function(json) {
-    PlotData = json;
-    if (PlotData.error) return alert(PlotData.error);
-    $('.loading_message').html('');
-    $('#chart_container').toggle();
-    drawVisualization();
+d3.json(jsonURL, function(error, json) {
+    if (error) {
+        $('.loading_message').html('Error while loading data.');
+        $('#select-host-share').html('');
+    } else {
+        PlotData = json;
+        if (PlotData.error) return alert(PlotData.error);
+        $('.loading_message').html('');
+        $('#chart_container').toggle();
+        drawVisualization();
+    }
 });
 
 function formatDate(timestamp) {

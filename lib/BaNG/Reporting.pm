@@ -24,6 +24,7 @@ our @EXPORT = qw(
     mail_report
     hobbit_report
     logit
+    error404
 );
 
 our %globalconfig;
@@ -39,9 +40,11 @@ sub bangstat_db_connect {
     my $DBpassword = $yaml->[0]{DBpassword};
 
     $bangstat_dbh = DBI->connect(
-        "DBI:mysql:database=$DBdatabase:host=$DBhostname:port=3306", $DBusername, $DBpassword
+        "DBI:mysql:database=$DBdatabase:host=$DBhostname:port=3306", $DBusername, $DBpassword,
+        { PrintError => 0 }
     );
 
+    return 0 unless $bangstat_dbh;
     return 1;
 }
 
@@ -401,6 +404,18 @@ sub logit {
     }
 
     return 1;
+}
+
+sub error404 {
+    my ($title) = @_;
+    $title = $title || 'An error occured.';
+
+    Dancer::Continuation::Route::ErrorSent->new(
+        return_value => Dancer::Error->new(
+            code     => 404,
+            title    => $title,
+        )->render()
+    )->throw;
 }
 
 1;

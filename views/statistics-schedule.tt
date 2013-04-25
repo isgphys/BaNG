@@ -34,11 +34,15 @@
                                     + ' new Date(now.getFullYear(), now.getMonth(), now.getDate()  , 16, 0, 0, 0)]';
               <% END %>
                 var backups;
-                d3.json('<% json_url %>', function(json) {
-                    backups = json;
-                    $('.loading_message').html('');
-                    ParseData();
-                    DrawSwimlanes();
+                d3.json('<% json_url %>', function(error, json) {
+                    if (error) {
+                        $('.loading_message').html('Error while loading data.');
+                    } else {
+                        backups = json;
+                        $('.loading_message').html('');
+                        ParseData();
+                        DrawSwimlanes();
+                    }
                 });
             </script>
         </div>

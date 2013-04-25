@@ -1,6 +1,7 @@
 package BaNG::Route_Statistics;
 use Dancer ':syntax';
 use BaNG::Statistics;
+use BaNG::Reporting;
 
 prefix '/statistics';
 
@@ -10,19 +11,23 @@ get '/' => sub {
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         title        => 'Cumulated Backup Statistics',
-        json_url     => "/statistics/json",
+        json_url     => "/statistics.json",
         hosts_shares => statistics_hosts_shares(),
     },{ layout       => 0
     };
 };
 
-get '/json' => sub {
-    return statistics_cumulated_json();
+get '.json' => sub {
+    my $json = statistics_cumulated_json();
+    error404('Could not fetch data') unless $json;
+    return $json;
 };
 
-get '/:host/:share/json' => sub {
+get '/:host/:share.json' => sub {
     my $share = statistics_decode_path(param('share'));
-    return statistics_json(param('host'),$share);
+    my $json  = statistics_json(param('host'),$share);
+    error404('Could not fetch data') unless $json;
+    return $json;
 };
 
 get '/:host/:share' => sub {
@@ -37,7 +42,7 @@ get '/:host/:share' => sub {
         title        => "Statistics for $host:$share",
         host         => $host,
         share        => $share,
-        json_url     => "/statistics/$host/$shareurl/json",
+        json_url     => "/statistics/$host/$shareurl.json",
         hosts_shares => statistics_hosts_shares(),
     },{ layout       => 0
     };
@@ -54,12 +59,14 @@ get '/variations' => sub {
 
 get '/schedule.json' => sub {
     my %schedule = statistics_schedule(1,'time');
+    error404('Could not fetch data') unless %schedule;
     my %json_options = ( canonical => 1 );
     return to_json(\%schedule, \%json_options);
 };
 
 get '/schedule-all.json' => sub {
     my %schedule = statistics_schedule(60,'host');
+    error404('Could not fetch data') unless %schedule;
     my %json_options = ( canonical => 1 );
     return to_json(\%schedule, \%json_options);
 };

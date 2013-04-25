@@ -37,7 +37,9 @@ sub statistics_json {
     my $lastXdays = $days || $lastXdays_default;
 
     get_global_config();
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return '' unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
@@ -86,7 +88,9 @@ sub statistics_cumulated_json {
     my $lastXdays = $days || $lastXdays_default;
 
     get_global_config();
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return '' unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
@@ -178,7 +182,9 @@ sub statistics_cumulated_json {
 sub statistics_hosts_shares {
 
     get_global_config();
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return '' unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT
         DISTINCT BkpFromHost, BkpFromPath
@@ -218,7 +224,9 @@ sub statistics_hosts_shares {
 sub statistics_groupshare_variations {
 
     get_global_config();
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return '' unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT BkpFromPath, TotFileSize, NumOfFiles
         FROM statistic_all
@@ -276,7 +284,9 @@ sub statistics_schedule {
     my $lastXdays = $days || $lastXdays_default;
 
     get_global_config();
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return () unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT *
         FROM statistic_all
