@@ -49,39 +49,40 @@
 <div id="schedule">
     <h3>CronJobs (Single-Run)</h3>
     <table id="croninfo">
-        <tr><td>
-            <table class="croninfosmall">
-                <thead>
-                    <tr>
-                        <th>Group</th>
-                        <th width="50">Type</th>
-                        <th>Hour</th>
-                        <th>Min</th>
-                        <th>Month</th>
-                        <th>Day of Week</th>
-                        <th>Day of Month</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <% server = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
-                    <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
-                        <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
-                            <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident} %>
-                                <tr class="<% jobtype %>">
-                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.group %></td>
-                                    <td class="center"><% jobtype FILTER ucfirst %></td>
-                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
-                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>
-                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
-                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
-                                    <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
-                                </tr>
+        <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
+            <tr><td>
+                <table class="croninfosmall">
+                    <thead>
+                        <tr>
+                            <th colspan="6" align="left"><% jobtype FILTER ucfirst %></th>
+                        </tr>
+                        <tr>
+                            <th>Group</th>
+                            <th>Hour</th>
+                            <th>Min</th>
+                            <th>Month</th>
+                            <th>Day of Week</th>
+                            <th>Day of Month</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% server = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
+                            <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
+                                <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident} %>
+                                    <tr class="<% jobtype %>">
+                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.group %></td>
+                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
+                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>
+                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
+                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
+                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
+                                    </tr>
+                                <%- END %>
                             <%- END %>
-                        <%- END %>
-                    <%- END %>
-                </tbody>
-            </table>
-        </tr>
+                    </tbody>
+                </table>
+            </tr>
+        <%- END %>
     </table>
 </div>
 
@@ -105,11 +106,10 @@
                       <thead>
                           <tr>
                               <th colspan="8" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
-                                <% cronjobs.$server.$jobtype.$cronjob.host _ "_" _ cronjobs.$server.$jobtype.$cronjob.group %>
+                                  <% jobtype FILTER ucfirst %> - <% cronjobs.$server.$jobtype.$cronjob.host _ "_" _ cronjobs.$server.$jobtype.$cronjob.group %>
                               </th>
                           </tr>
                           <tr>
-                              <th width="50">Type</th>
                               <th>Hour</th>
                               <th>Min</th>
                               <th>Month</th>
@@ -121,7 +121,6 @@
                       </thead>
                       <tbody>
                           <tr class="<% jobtype %>">
-                              <td class="center"><% jobtype FILTER ucfirst %></td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
