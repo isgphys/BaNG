@@ -6,10 +6,11 @@
                 <table width=700 border="0">
                     <thead>
                         <tr>
-                            <th colspan="7">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                            <th colspan="8">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
                         </tr>
                         <tr>
-                            <th width="50">Status</th>
+                            <th width="50">JobStatus</th>
+                            <th width="50">ErrStatus</th>
                             <th width="100">Starttime</th>
                             <th width="100">Endtime</th>
                             <th width="60">Runtime</th>
@@ -21,11 +22,15 @@
                     <tbody>
                         <%- FOREACH bkp IN RecentBackups.$hostgroup %>
                         <tr height="20">
+                            <td <%- IF bkp.JobStatus == 1 %>class="hook" title="Job done"
+                                <% ELSIF bkp.JobStatus == -1 %>class="offline" title="Host offline"
+                                <%- END -%>>
+                            </td>
                             <td title="Rsync Error Status: <% bkp.ErrStatus %>"
                                 <%- IF bkp.ErrStatus == 0 %> class="ok"
-                                <%- ELSIF bkp.ErrStatus == 99 %> class="notok" 
-                                <%- ELSIF bkp.ErrStatusmatch('23') %> class="notok" 
-                                <%- ELSIF bkp.ErrStatus.match('24') %> class="notok" 
+                                <%- ELSIF bkp.ErrStatus == 99 %> class="notok"
+                                <%- ELSIF bkp.ErrStatusmatch('23') %> class="notok"
+                                <%- ELSIF bkp.ErrStatus.match('24') %> class="notok"
                                 <% ELSE %> class="bad"<% END %>>
                             </td>
                             <td class="center"><% bkp.Starttime %></td>

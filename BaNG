@@ -84,16 +84,20 @@ sub queue_backup {
     # stop if trying to do bulk backup if it's not allowed
     return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
+    # check if last backup exists
+    my $lastbkp = chkLastBkp($host, $group);
+
     # make sure host is online
     my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     logit( $host, $group, "chkClientConn: $conn_status, $conn_msg" );
     if ( !$conn_status ) {
+        my $startstamp = `date +%s`;
+        my $endstamp = $startstamp;
         logit( $host, $group, "Error: host $host is offline" );
+        db_report($host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '');
         return 1;
     }
 
-    # check if last backup exists
-    my $lastbkp = chkLastBkp($host, $group);
     my $bkptimestamp  = eval_bkptimestamp($host, $group);
 
     # get list of partitions to back up
@@ -326,7 +330,7 @@ sub execute_rsync {
     } else {
         logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
-    db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, @outlines);
+    db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '0', @outlines);
 
     return 1;
 }

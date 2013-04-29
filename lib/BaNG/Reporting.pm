@@ -83,7 +83,6 @@ sub bangstat_recentbackups {
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost like '$host'
-        AND JobStatus = '1'
         ORDER BY BkpGroup, Start DESC;
     ");
     $sth->execute();
@@ -103,6 +102,7 @@ sub bangstat_recentbackups {
             isThread    => $dbrow->{'isThread'},
             LastBkp     => $dbrow->{'LastBkp'},
             ErrStatus   => $dbrow->{'ErrStatus'},
+            JobStatus   => $dbrow->{'JobStatus'},
             BkpGroup    => $BkpGroup,
             BkpHost     => $dbrow->{'BkpFromHost'},
         });
@@ -174,7 +174,7 @@ sub bangstat_recentbackups {
 }
 
 sub bangstat_recentbackups_all {
-    my ($host, $lastXhours) = @_;
+    my ($lastXhours) = @_;
 
     $lastXhours = $lastXhours || 24;
 
@@ -230,7 +230,7 @@ sub send_hobbit_report {
 }
 
 sub db_report {
-    my ($host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, @outlines) = @_;
+    my ($host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
 
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
@@ -274,7 +274,7 @@ sub db_report {
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
     $sql .= "'$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
-    $sql .= " $isSubfolderThread , '$errcode', 0, FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
+    $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
     $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}', ";

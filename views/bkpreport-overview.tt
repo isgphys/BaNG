@@ -1,13 +1,13 @@
 <h3>Backup Report</h3>
-Total Backups last 24H: <% RecentBackupsAll.Data.size %>
+Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
 <table id="bkpreport"border="0" style="border-width:1px; border-style:solid; padding:4px">
     <thead>
         <tr>
-            <th width="40">Job</th>
+            <th>JobStatus</th>
             <th>Host</th>
             <th>Group</th>
             <th>Target</th>
-            <th width="50">Status</th>
+            <th>ErrStatus</th>
             <th>Starttime</th>
             <th>Runtime</th>
             <th>FromPath</th>
@@ -15,11 +15,13 @@ Total Backups last 24H: <% RecentBackupsAll.Data.size %>
     </thead>
     <tbody>
         <%- FOREACH bkp IN RecentBackupsAll.Data %>
+            <% NEXT IF bkp.JobStatus == 1 AND bkp.ErrStatus == 0 %>
             <tr height="20">
                 <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done"
-                    <% ELSIF bkp.JobStatus %>class="hook" title="Job done"
+                    <% ELSIF bkp.JobStatus == 1 %>class="hook" title="Job done"
+                    <% ELSIF bkp.JobStatus == -1 %>class="offline" title="Host offline"
                     <% ELSE %>class="jobrun" title="Still running"<%- END -%>></td>
-                <td><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
+                <td class="center"><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
                 <td class="center"><% bkp.BkpGroup %></td>
                 <td class="center"><% bkp.BkpToHost %></td>
                 <td title="Rsync Error Status: <% bkp.ErrStatus %>"

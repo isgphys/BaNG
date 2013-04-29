@@ -260,3 +260,8 @@ nav ul ul ul li a {
     background: url("/images/job-run.png") no-repeat  scroll transparent;
     background-position: center center;
 }
+
+.offline {
+    background: url("/images/network-disconnect-2.png") no-repeat  scroll transparent;
+    background-position: center center;
+}
