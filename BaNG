@@ -91,7 +91,7 @@ sub queue_backup {
     my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     logit( $host, $group, "chkClientConn: $conn_status, $conn_msg" );
     if ( !$conn_status ) {
-        my $startstamp = `date +%s`;
+        my $startstamp = time();
         my $endstamp = $startstamp;
         logit( $host, $group, "Error: host $host is offline" );
         db_report($host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '');
@@ -293,7 +293,7 @@ sub execute_rsync {
     my ($host, $group, $lastbkp, $bkptimestamp, $path) = @_;
 
     $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
-    my $startstamp = `date +%s`;
+    my $startstamp = time();
 
     my $rsync_cmd     = $globalconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
@@ -318,7 +318,7 @@ sub execute_rsync {
     logit( $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
 
     my $errcode = 0;
-    my $endstamp = `date +%s`;
+    my $endstamp = time();
 
     if ( @errlines ){
         foreach my $errline (@errlines) {
