@@ -12,6 +12,7 @@ use Cwd qw( abs_path );
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
 use IPC::Open3;
+use Time::HiRes qw( gettimeofday );
 use Thread::Queue;
 
 use lib dirname( abs_path($0) ) . "/lib";
@@ -86,6 +87,7 @@ sub queue_backup {
 
     # check if last backup exists
     my $lastbkp = chkLastBkp($host, $group);
+    my $jobid = create_jobid($host, $group);
 
     # make sure host is online
     my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
@@ -94,7 +96,7 @@ sub queue_backup {
         my $startstamp = time();
         my $endstamp = $startstamp;
         logit( $host, $group, "Error: host $host is offline" );
-        db_report($host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '');
+        db_report($jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '');
         return 1;
     }
 
@@ -107,10 +109,11 @@ sub queue_backup {
     # optionally queue each subfolder of the partitions
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
         foreach my $part (@src_part) {
-            queue_remote_subfolders( $host, $group, $lastbkp, $bkptimestamp, $part );
+            queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $part );
         }
 
         my $bkpjob = {
+            jobid        => $jobid,
             host         => $host,
             group        => $group,
             lastbkp      => $lastbkp,
@@ -121,6 +124,7 @@ sub queue_backup {
     } else {
         # queue list of partitions as a whole
         my $bkpjob = {
+            jobid        => $jobid,
             host         => $host,
             group        => $group,
             path         => "@src_part",
@@ -136,7 +140,7 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ($host, $group, $lastbkp, $bkptimestamp, $partition) = @_;
+    my ($jobid, $host, $group, $lastbkp, $bkptimestamp, $partition) = @_;
     $partition =~ s/://;
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
@@ -148,6 +152,7 @@ sub queue_remote_subfolders {
         $remotedir =~ s| |\\ |g;
 
         my $bkpjob = {
+            jobid        => $jobid,
             host         => $host,
             group        => $group,
             path         => ":'${remotedir}'",
@@ -193,6 +198,7 @@ sub thread_work {
 
     while ( my $bkpjob = $Q->dequeue ) {
         my $tid          = threads->tid;
+        my $jobid        = $bkpjob->{jobid};
         my $host         = $bkpjob->{host};
         my $group        = $bkpjob->{group};
         my $path         = $bkpjob->{path};
@@ -201,9 +207,10 @@ sub thread_work {
 
         return unless createLockFile( $host, $group, $path );
         logit( $host, $group, "Thread $tid working on $host-$group ($path)" );
-        execute_rsync( $host, $group, $lastbkp, $bkptimestamp, $path );
+        execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
         unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
             my $bkpjob = {
+                jobid        => $jobid,
                 host         => $host,
                 group        => $group,
                 lastbkp      => $lastbkp,
@@ -290,7 +297,7 @@ sub eval_rsync_target {
 }
 
 sub execute_rsync {
-    my ($host, $group, $lastbkp, $bkptimestamp, $path) = @_;
+    my ($jobid, $host, $group, $lastbkp, $bkptimestamp, $path) = @_;
 
     $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
     my $startstamp = time();
@@ -330,7 +337,7 @@ sub execute_rsync {
     } else {
         logit( $host, $group, "Rsync successful for host $host group $group path $path" );
     }
-    db_report($host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '0', @outlines);
+    db_report($jobid, $host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '0', @outlines);
 
     return 1;
 }
@@ -478,6 +485,16 @@ sub createLastBkpFile {
 #################################
 # Helper subroutines
 #
+sub create_jobid {
+    my ($host, $group) = @_;
+    my ($s, $usec) = gettimeofday;
+    my $jobid      = `date +"%Y%m%d%H%M%S"` . $usec;
+    $jobid =~ s/\n//g;
+    logit( $host, $group, "Created JobID: $jobid" );
+
+    return $jobid;
+}
+
 sub eval_bkptimestamp {
     my ($host, $group) = @_;
 
@@ -498,6 +515,7 @@ sub targetpath {
 
 sub finish_backupjob {
     my ($bkpjob) = @_;
+    my $jobid        = $bkpjob->{'jobid'};
     my $host         = $bkpjob->{'host'};
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
@@ -505,7 +523,7 @@ sub finish_backupjob {
 
     create_btrfs_snapshot( $host, $group, $bkptimestamp );
     createLastBkpFile( $host, $group, $bkptimestamp );
-    bangstat_set_jobstatus( $host, $group, $lastbkp, '1' );
+    bangstat_set_jobstatus( $jobid, $host, $group, $lastbkp, '1' );
 
     my %RecentBackups = bangstat_recentbackups($host);
     hobbit_report( $host, $group, %RecentBackups );

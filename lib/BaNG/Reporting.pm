@@ -49,14 +49,14 @@ sub bangstat_db_connect {
 }
 
 sub bangstat_set_jobstatus {
-    my ($host, $group, $lastbkp, $status) = @_;
+    my ($jobid, $host, $group, $lastbkp, $status) = @_;
 
     my $SQL = qq(
         UPDATE statistic
         SET JobStatus = '$status'
         WHERE BkpFromHost = '$host'
         AND BkpGroup = '$group'
-        AND LastBkp = '$lastbkp';
+        AND JobID = '$jobid';
     );
 
     bangstat_db_connect($globalconfig{config_bangstat});
@@ -230,7 +230,7 @@ sub send_hobbit_report {
 }
 
 sub db_report {
-    my ($host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
+    my ($jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
 
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
@@ -269,11 +269,11 @@ sub db_report {
 
     my $sql;
     $sql .= "INSERT INTO statistic (";
-    $sql .= " BkpFromHost, BkpGroup,  BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
+    $sql .= " JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
     $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
-    $sql .= "'$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
+    $sql .= "'$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
     $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
@@ -287,6 +287,7 @@ sub db_report {
     my $sth = $bangstat_dbh->prepare($sql);
     $sth->execute() unless $globalconfig{dryrun};
     $sth->finish();
+    $bangstat_dbh->disconnect;
 
     logit( $host, $group, "Bangstat report sent.");
 
