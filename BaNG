@@ -19,6 +19,7 @@ use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Hosts;
 use BaNG::Config;
 use BaNG::Reporting;
+use BaNG::Wipe;
 
 my $version = '3.1';
 my $wipe;
@@ -408,11 +409,16 @@ sub wipe {
 
     logit( $host, $group, "Wipe host $host group $group" );
 
-    # count existing backups
     my $bkpdir   = targetpath( $host, $group );
-    my $bkpkeep  = $hosts{"$host-$group"}->{hostconfig}->{BKP_KEEP};
-    my $bkpcount = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -not -name "current" | wc -l`;
-    chomp $bkpcount;
+    my @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}[0-9\./_]*'`;
+
+    # count existing backups
+    my $bkpkeep = 0;
+    foreach my $type (qw( DAILY WEEKLY MONTHLY )) {
+        $bkpkeep += $hosts{"$host-$group"}->{hostconfig}->{"WIPE_KEEP_$type"};
+    }
+    my $bkpcount = $#backup_folders + 1;
+
     logit( $host, $group, "Wipe existing: $bkpcount, keeping: $bkpkeep for host $host group $group" );
 
     # don't wipe if there are not enough bkps
@@ -423,8 +429,13 @@ sub wipe {
     }
 
     # get list of folders to wipe
-    my @wipedirs = `find $bkpdir  -mindepth 1 -maxdepth 1 -type d -not -name "current" | sort -n | head -n $wipenum`;
-    chomp ($_) for @wipedirs;
+    my @wipedirs = list_folders_to_wipe( $host, $group, @backup_folders );
+
+    # make sure list contains at least one folder
+    if ( !@wipedirs ) {
+        logit( $host, $group, "Wipe no folder to wipe for host $host group $group" );
+        return 1;
+    }
 
     # remove subvolumes or folders
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {

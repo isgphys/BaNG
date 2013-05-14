@@ -62,6 +62,7 @@ sub get_global_config {
     $globalconfig{debug}              = "$global_settings->{Debug}";
     $globalconfig{debuglevel}         = "$global_settings->{DebugLevel}";
     $globalconfig{dryrun}             = "$global_settings->{Dryrun}";
+    $globalconfig{auto_wipe_limit}    = "$global_settings->{AutoWipeLimit}";
 }
 
 sub get_default_config {
