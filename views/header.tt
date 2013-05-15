@@ -23,9 +23,10 @@
                 <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Overview (cronjobs)</a>
             </ul>
         </li>
-        <li><a href="#" <% IF section == 'global-config' %>class="active"<% END %>>Configs</a>
+        <li><a href="#" <% IF section == 'configs' %>class="active"<% END %>>Configs</a>
             <ul>
-                <li><a href="/config/all" <% IF section == 'configs-overview' %>class="active"<% END %>>Host Configs</a></li>
+                <li><a href="/config/allhosts">Host Configs</a></li>
+                <li><a href="/config/allgroups">Group Configs</a></li>
                 <li><a href="/config/global">Global Settings</a></li>
             </ul>
         </li>

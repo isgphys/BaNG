@@ -8,7 +8,7 @@ get '/global' => sub {
     get_global_config();
 
     template 'global-config' => {
-        section        => 'global-config',
+        section        => 'configs',
         remotehost     => request->remote_host,
         webDancerEnv   => config->{run_env},
         globalconfig   => \%globalconfig,
@@ -20,12 +20,24 @@ get '/global' => sub {
     };
 };
 
-get '/all' => sub {
+get '/allhosts' => sub {
     get_global_config();
     get_host_config("*");
 
-    template 'configs-overview' => {
-        section      => 'configs-overview',
+    template 'host-configs-overview' => {
+        section      => 'configs',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        hosts        => \%hosts ,
+    };
+};
+
+get '/allgroups' => sub {
+    get_global_config();
+    get_host_config("*");
+
+    template 'group-configs-overview' => {
+        section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         hosts        => \%hosts ,
