@@ -1,6 +1,7 @@
 package BaNG::Routes;
 use Dancer ':syntax';
 use BaNG::Route_Config;
+use BaNG::Route_Documentation;
 use BaNG::Route_Host;
 use BaNG::Route_Restore;
 use BaNG::Route_Statistics;

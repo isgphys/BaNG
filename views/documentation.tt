@@ -1,0 +1,2 @@
+<% USE Markdown %>
+<% content | markdown %>
