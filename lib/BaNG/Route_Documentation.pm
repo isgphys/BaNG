@@ -1,12 +1,13 @@
 package BaNG::Route_Documentation;
 use Dancer ':syntax';
+use BaNG::Config;
 use Text::Markdown;
 use Template::Plugin::Markdown;
 
 prefix '/documentation';
 
 get '/' => sub {
-    open my $MARKDOWN, '<', 'Readme.markdown';
+    open my $MARKDOWN, '<', "$prefix/Readme.markdown";
     my $markdown = do { local $/; <$MARKDOWN> };
     template 'documentation' => {
         section      => 'documentation',
