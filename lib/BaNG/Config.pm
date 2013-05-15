@@ -11,6 +11,7 @@ use Exporter 'import';
 our @EXPORT = qw(
     %globalconfig
     %hosts
+    %groups
     $prefix
     $config_path
     $config_global
@@ -18,15 +19,17 @@ our @EXPORT = qw(
     get_global_config
     get_default_config
     get_host_config
+    get_group_config
     get_cronjob_config
     generated_crontab
-    read_configfile
+    read_host_configfile
     split_configname
 );
 
 our %globalconfig;
 our %defaultconfig;
 our %hosts;
+our %groups;
 our $config_path;
 our $config_global;
 our $servername = hostname;
@@ -111,6 +114,14 @@ sub split_configname {
     return ($hostname,$groupname);
 }
 
+sub split_group_configname {
+    my ($configfile) = @_;
+
+    my ($groupname) = $configfile =~ /^([\w\d-]+)\.yaml/;
+
+    return ($groupname);
+}
+
 sub split_cronconfigname {
     my ($cronconfigfile) = @_;
 
@@ -129,7 +140,7 @@ sub get_host_config {
 
     foreach my $hostconfigfile (@hostconfigs) {
         my ($hostname,$group)           = split_configname($hostconfigfile);
-        my ($hostconfig, $confighelper) = read_configfile($hostname, $group);
+        my ($hostconfig, $confighelper) = read_host_configfile($hostname, $group);
         my $isEnabled                   = $hostconfig->{BKP_ENABLED};
         my $isBulkbkp                   = $hostconfig->{BKP_BULK_ALLOW};
         my $isBulkwipe                  = $hostconfig->{WIPE_BULK_ALLOW};
@@ -145,6 +156,36 @@ sub get_host_config {
             'css_class'        => $css_class,
             'nobulk_css_class' => $nobulk_css_class,
             'hostconfig'       => $hostconfig,
+            'confighelper'     => $confighelper,
+        };
+    }
+
+    return 1;
+}
+
+sub get_group_config {
+    my ($group) = @_;
+
+    $group = $group || '*';
+    undef %groups;
+    my @groupconfigs = find_configs("$group\.yaml", "$globalconfig{path_groupconfig}" );
+
+    foreach my $groupconfigfile (@groupconfigs) {
+        my ($groupname)                  = split_group_configname($groupconfigfile);
+        my ($groupconfig, $confighelper) = read_group_configfile($groupname);
+        my $isEnabled                    = $groupconfig->{BKP_ENABLED};
+        my $isBulkbkp                    = $groupconfig->{BKP_BULK_ALLOW};
+        my $isBulkwipe                   = $groupconfig->{WIPE_BULK_ALLOW};
+        my $status                       = $isEnabled ? "enabled" : "disabled";
+        my $css_class                    = $isEnabled ? "active " : "";
+        my $nobulk_css_class             = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? "nobulk " : "";
+
+        $groups{"$groupname"} = {
+            'status'           => $status,
+            'configfile'       => $groupconfigfile,
+            'css_class'        => $css_class,
+            'nobulk_css_class' => $nobulk_css_class,
+            'groupconfig'      => $groupconfig,
             'confighelper'     => $confighelper,
         };
     }
@@ -226,7 +267,7 @@ sub generated_crontab {
     return $crontab;
 }
 
-sub read_configfile {
+sub read_host_configfile {
     my ($host, $group) = @_;
 
     my %configfile;
@@ -239,6 +280,32 @@ sub read_configfile {
     $settings         = LoadFile($globalconfig{config_default});
 
     foreach my $configtmpl (qw( group host ))  {
+        if ( sanityfilecheck($configfile{$configtmpl}) ) {
+
+            my $settings_host = LoadFile($configfile{$configtmpl});
+
+            foreach my $key ( keys %{$settings_host} ) {
+                $settings->{$key}       = $settings_host->{$key};
+                $settingshelper->{$key} = $configtmpl;
+            }
+        }
+    }
+
+    return $settings, $settingshelper;
+}
+
+sub read_group_configfile {
+    my ($group) = @_;
+
+    my %configfile;
+    my $settings;
+    my $settingshelper;
+
+    $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
+
+    $settings         = LoadFile($globalconfig{config_default});
+
+    foreach my $configtmpl (qw( group ))  {
         if ( sanityfilecheck($configfile{$configtmpl}) ) {
 
             my $settings_host = LoadFile($configfile{$configtmpl});
