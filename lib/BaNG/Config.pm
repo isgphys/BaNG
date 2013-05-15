@@ -52,6 +52,7 @@ sub get_global_config {
     $globalconfig{config_bangstat}    = "$config_path/$global_settings->{BangstatConfig}";
 
     $globalconfig{path_serverconfig}  = "$config_path/$global_settings->{ServerConfigFolder}";
+    $globalconfig{path_groupconfig}   = "$config_path/$global_settings->{GroupConfigFolder}";
     $globalconfig{path_hostconfig}    = "$config_path/$global_settings->{HostConfigFolder}";
     $globalconfig{path_excludes}      = "$config_path/$global_settings->{ExcludesFolder}";
     $globalconfig{path_lockfiles}     = "$config_path/$global_settings->{LocksFolder}";
@@ -228,25 +229,24 @@ sub generated_crontab {
 sub read_configfile {
     my ($host, $group) = @_;
 
-    my $configfile_host;
+    my %configfile;
     my $settings;
     my $settingshelper;
 
-    if ( $group eq "NIS" ) {
-        $configfile_host = $globalconfig{config_default_nis};
-    } else {
-        $configfile_host = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
-    }
+    $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
+    $configfile{host}  = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
 
-    if ( sanityfilecheck($configfile_host) ) {
+    $settings         = LoadFile($globalconfig{config_default});
 
-        $settings         = LoadFile($globalconfig{config_default});
-        my $settings_host = LoadFile($configfile_host);
+    foreach my $configtmpl (qw( group host ))  {
+        if ( sanityfilecheck($configfile{$configtmpl}) ) {
 
-        foreach my $key ( keys %{$settings_host} ) {
-            next unless $settings_host->{$key};
-            $settings->{$key} = $settings_host->{$key};
-            $settingshelper->{$key} = 1;
+            my $settings_host = LoadFile($configfile{$configtmpl});
+
+            foreach my $key ( keys %{$settings_host} ) {
+                $settings->{$key}       = $settings_host->{$key};
+                $settingshelper->{$key} = $configtmpl;
+            }
         }
     }
 

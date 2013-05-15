@@ -32,7 +32,7 @@
                 <div id="config_details" class="conf_details">
                   <table class="configfile">
                     <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
-                      <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="noDefault"<% END %>>
+                        <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="<% hosts.$hostname.confighelper.$hostconf %>Config"<% END %>>
                         <td><% hostconf %></td>
                         <td><% hosts.$hostname.hostconfig.$hostconf %></td>
                       </tr>

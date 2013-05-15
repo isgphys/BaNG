@@ -84,8 +84,13 @@
     width: 100px;
 }
 
-#configslist tr.noDefault{
-    background-color: #ff9999 !important;
+#configslist tr.groupConfig{
+    background-color: #33bbdd !important;
+
+}
+
+#configslist tr.hostConfig{
+    background-color: #66ffdd !important;
 
 }
 
