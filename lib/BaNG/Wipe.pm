@@ -10,7 +10,7 @@ our @EXPORT = qw(
 );
 
 sub list_folders_to_wipe {
-    my ($host, $group, @available_backup_folders) = @_;
+    my ($host, $group, $force, @available_backup_folders) = @_;
 
     return () if $#available_backup_folders == 0;
 
@@ -124,9 +124,13 @@ sub list_folders_to_wipe {
     }
 
     # -- don't automatically wipe too many backups
-    if ( $#folders_to_wipe >= $globalconfig{auto_wipe_limit} ) {
-        logit( $host, $group, "Wipe WARNING: too many folders to wipe, namely $#folders_to_wipe. Wipe manually." );
-        return ();
+    if ( $force ) {
+        logit( $host, $group, "Wipe WARNING: forced to wipe, namely " . ( $#folders_to_wipe + 1 ) . "." );
+    } else {
+        if ( $#folders_to_wipe >= $globalconfig{auto_wipe_limit} ) {
+            logit( $host, $group, "Wipe WARNING: too many folders to wipe, namely " . ( $#folders_to_wipe + 1 ) . ". Wipe manually or use --force." );
+            return ();
+        }
     }
 
     return @folders_to_wipe;

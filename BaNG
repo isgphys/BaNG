@@ -22,6 +22,7 @@ use BaNG::Reporting;
 use BaNG::Wipe;
 
 my $version = '3.1';
+my $force;
 my $wipe;
 my $hobbitonly;
 my $crontabonly;
@@ -45,7 +46,7 @@ get_host_config($host_arg, $group_arg);
 
 foreach my $config ( sort keys %hosts ) {
     if ( $wipe ) {
-        wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+        wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group}, $force );
     } elsif ( $hobbitonly ) {
         my $host  = $hosts{$config}->{hostname};
         my $group = $hosts{$config}->{group};
@@ -396,7 +397,7 @@ sub create_btrfs_snapshot {
 # Wipe old backups
 #
 sub wipe {
-    my ($host, $group) = @_;
+    my ($host, $group, $force) = @_;
 
     # make sure we are on the correct backup server
     return unless bkp_to_current_server($host, $group);
@@ -429,7 +430,7 @@ sub wipe {
     }
 
     # get list of folders to wipe
-    my @wipedirs = list_folders_to_wipe( $host, $group, @backup_folders );
+    my @wipedirs = list_folders_to_wipe( $host, $group, $force, @backup_folders );
 
     # make sure list contains at least one folder
     if ( !@wipedirs ) {
@@ -572,6 +573,7 @@ sub parse_command_options {
         "p|prefix=s"  => \$prefix_arg,
         "t|threads=i" => \$nthreads_arg,
         "w|wipe"      => \$wipe,
+        "force"       => \$force,
         "hobbit"      => \$hobbitonly,
         "crontab"     => \$crontabonly,
     ) or usage("Invalid commmand line options.");
@@ -620,6 +622,7 @@ sub usage {
         -t <nr>         # number of threads, default: 1
         -p <path>       # override path to folder containing etc/
         -w              # wipe the backup
+        -w --force      # forcing wipe the backup (override auto_wipe_limit)
         --hobbit        # send only hobbit report
         -d              # show debugging messages
 
