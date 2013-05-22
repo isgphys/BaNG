@@ -1,0 +1,87 @@
+#!/usr/bin/env perl
+#
+# Copyright 2013 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
+# the terms of the GNU General Public License version 2 or later.
+#
+# Authors: Patrick Schmid <schmid@phys.ethz.ch> & Claude Becker <becker@phys.ethz.ch>
+#
+use strict;
+use warnings;
+use Cwd qw( abs_path );
+use File::Basename;
+use Getopt::Long qw( :config no_auto_abbrev );
+
+use lib dirname( abs_path($0) ) . "/lib";
+use BaNG::Config;
+
+my $version = '0.1';
+my $crontabonly;
+my $debug_arg;
+my $debuglevel_arg;
+my $dryrun_arg;
+my $prefix_arg;
+
+#################################
+# Main
+#
+parse_command_options();
+get_global_config($prefix_arg);
+
+
+if ( $crontabonly ) {
+    print generated_crontab();
+    exit 0;
+}
+
+#################################
+# Command line arguments
+#
+sub parse_command_options {
+
+    GetOptions(
+        "help"        => sub { usage('') },
+        "v|version"   => sub { usage("Current version number: $version") },
+        "d|debug"     => \$debug_arg,
+        "crontab"     => \$crontabonly,
+    ) or usage("Invalid commmand line options.");
+
+    $debug_arg = 1 if $dryrun_arg;
+
+    return 1;
+}
+
+sub cli_args_override_global_config {
+
+    $globalconfig{debug}      = $debug_arg      if $debug_arg;
+    $globalconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
+    $globalconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+
+    return 1;
+}
+
+sub usage {
+    my ($message) = @_;
+
+    if ( defined $message && length $message ) {
+        $message .= "\n"
+            unless $message =~ /\n$/;
+    }
+
+    my $command = $0;
+    $command    =~ s#^.*/##;
+
+    print <<"EOF";
+        $message
+        Usage Examples:
+
+        $command --crontab                  # show generated crontab
+        $command --help                     # show this help message
+
+        Optional Arguments:
+
+        -d              # show debugging messages
+
+EOF
+    exit 0;
+}
+
