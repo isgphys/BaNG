@@ -8,4 +8,6 @@ FromPath <% RecentBackups.${Group}.0.BkpFromPath %>
 LastBkp  <% RecentBackups.${Group}.0.LastBkp %>
 Err-Status: <% RecentBackups.${Group}.0.ErrStatus %>
 
+<% Mailmsg %>
+
 https://backup.phys.ethz.ch/host/<% RecentBackups.${Group}.0.BkpHost %>

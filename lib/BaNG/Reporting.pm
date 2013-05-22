@@ -314,6 +314,7 @@ sub mail_report {
     my $RecentBackups = {
         RecentBackups => \%RecentBackups,
         Group         => "$host-$group",
+        Mailmsg       => $hosts{"$host-$group"}->{mailmsg},
     };
 
     my $tt = Template->new(
@@ -416,6 +417,10 @@ sub logit {
         open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
         print {$log} $logmessage;
         close $log;
+    }
+
+    if ( $logmessage =~ /warn|error/i ) {
+        $hosts{"$host-$group"}{mailmsg} .= $logmessage;
     }
 
     return 1;
