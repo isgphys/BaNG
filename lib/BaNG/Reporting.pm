@@ -61,7 +61,7 @@ sub bangstat_set_jobstatus {
 
     my $conn = bangstat_db_connect($globalconfig{config_bangstat});
     if (!$conn) {
-        logit( $host, $group, "Error: Could not connect to DB to set jobstatus to $status for host $host group $group" );
+        logit( $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
         return 1;
     }
 
@@ -332,7 +332,7 @@ sub mail_report {
     foreach my $mailtype ( qw(plain html) ) {
         my $report;
         $tt->process("mail_$mailtype-report.tt", $RecentBackups, \$report)
-            or logit( $host, $group, "Error generating mail report template: " . $tt->error() );
+            or logit( $host, $group, "ERROR generating mail report template: " . $tt->error() );
 
         my $mail_att = MIME::Lite->new(
             Type     => 'text',
@@ -392,7 +392,7 @@ sub hobbit_report {
     );
     my $report;
     $tt->process('hobbitreport.tt', $RecentBackups, \$report)
-        or logit( $host, $group, "Error generating hobbit report template: " . $tt->error() );
+        or logit( $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 
     send_hobbit_report($hobbitreport) unless $globalconfig{dryrun};
@@ -413,7 +413,7 @@ sub logit {
     print $logmessage if $globalconfig{debug};
 
     unless ($globalconfig{dryrun}) {
-        open my $log, ">>", $logfile or print "Error opening logfile $logfile: $!\n";
+        open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
         print {$log} $logmessage;
         close $log;
     }
