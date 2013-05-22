@@ -59,7 +59,12 @@ sub bangstat_set_jobstatus {
         AND JobID = '$jobid';
     );
 
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    if (!$conn) {
+        logit( $host, $group, "Error: Could not connect to DB to set jobstatus to $status for host $host group $group" );
+        return 1;
+    }
+
     my $sth = $bangstat_dbh->prepare($SQL);
     $sth->execute() unless $globalconfig{dryrun};
     $sth->finish();
@@ -77,7 +82,9 @@ sub bangstat_recentbackups {
     $lastXdays = $lastXdays || 5;
     my $BkpStartHour = 18;
 
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return () unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
         FROM recent_backups
@@ -178,7 +185,9 @@ sub bangstat_recentbackups_all {
 
     $lastXhours = $lastXhours || 24;
 
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    return '' unless $conn;
+
     my $sth = $bangstat_dbh->prepare("
         SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
         FROM recent_backups
@@ -283,7 +292,12 @@ sub db_report {
     $sql .= ")";
     logit( $host, $group, "DB Report SQL command: $sql" ) if ( $globalconfig{debuglevel} >=2 );
 
-    bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    if (!$conn) {
+        logit( $host, $group, "ERROR: Could not connect to DB to send bangstat report.");
+        return 1;
+    }
+
     my $sth = $bangstat_dbh->prepare($sql);
     $sth->execute() unless $globalconfig{dryrun};
     $sth->finish();
@@ -303,8 +317,8 @@ sub mail_report {
     };
 
     my $tt = Template->new(
-        START_TAG  => '<%',
-        END_TAG    => '%>',
+        START_TAG    => '<%',
+        END_TAG      => '%>',
         INCLUDE_PATH => "$prefix/views",
     );
 
@@ -321,9 +335,9 @@ sub mail_report {
             or logit( $host, $group, "Error generating mail report template: " . $tt->error() );
 
         my $mail_att = MIME::Lite->new(
-            Type    => 'text',
-            Data    => $report,
-            Encoding=> 'quoted-printable',
+            Type     => 'text',
+            Data     => $report,
+            Encoding => 'quoted-printable',
         );
         $mail_att->attr('content-type' => "text/$mailtype; charset=UTF-8");
         $mail_msg->attach($mail_att);
@@ -372,8 +386,8 @@ sub hobbit_report {
     my $hobbitreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";
 
     my $tt = Template->new(
-        START_TAG  => '<%',
-        END_TAG    => '%>',
+        START_TAG    => '<%',
+        END_TAG      => '%>',
         INCLUDE_PATH => "$prefix/views",
     );
     my $report;
