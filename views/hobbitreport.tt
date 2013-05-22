@@ -46,4 +46,7 @@
     <%- END %>
 </table>
 <br />
+<pre>
+<% Errormsg %>
+</pre>
 <a href="https://backup.phys.ethz.ch/host/<% RecentBackups.${Group}.0.BkpHost %>">backup.phys.ethz.ch </a>

@@ -311,12 +311,12 @@ sub db_report {
 sub mail_report {
     my ($host, $group, %RecentBackups) = @_;
 
-    my $status = $hosts{"$host-$group"}->{mailmsg} ? 'warnings' : 'success';
+    my $status = $hosts{"$host-$group"}->{errormsg} ? 'warnings' : 'success';
 
     my $RecentBackups = {
         RecentBackups => \%RecentBackups,
         Group         => "$host-$group",
-        Mailmsg       => $hosts{"$host-$group"}->{mailmsg},
+        Errormsg      => $hosts{"$host-$group"}->{errormsg},
     };
 
     my $tt = Template->new(
@@ -375,11 +375,13 @@ sub hobbit_report {
         }
         #$topcolor = 'red' if ( $errcode ne '0' && !( $errcode =~ /23|24|99/ ));
     }
+    $topcolor = 'yellow' unless %RecentBackups;
 
     my $RecentBackups = {
         RecentBackups  => \%RecentBackups,
         Group          => "$host-$group",
         HobbitTopColor => $topcolor,
+        Errormsg       => $hosts{"$host-$group"}->{errormsg},
     };
 
     my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
@@ -422,7 +424,7 @@ sub logit {
     }
 
     if ( $logmessage =~ /warn|error/i ) {
-        $hosts{"$host-$group"}{mailmsg} .= $logmessage;
+        $hosts{"$host-$group"}{errormsg} .= $logmessage;
     }
 
     return 1;
