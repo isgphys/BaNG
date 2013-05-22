@@ -311,6 +311,8 @@ sub db_report {
 sub mail_report {
     my ($host, $group, %RecentBackups) = @_;
 
+    my $status = $hosts{"$host-$group"}->{mailmsg} ? 'warnings' : 'success';
+
     my $RecentBackups = {
         RecentBackups => \%RecentBackups,
         Group         => "$host-$group",
@@ -327,7 +329,7 @@ sub mail_report {
         From    => 'root@phys.ethz.ch',
         To      => $globalconfig{report_to},
         Type    => 'multipart/alternative',
-        Subject => "Backup report of ($host-$group): success",
+        Subject => "Backup report of ($host-$group): $status",
     );
 
     foreach my $mailtype ( qw(plain html) ) {
