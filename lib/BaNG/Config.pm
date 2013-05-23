@@ -4,7 +4,6 @@ use Cwd 'abs_path';
 use File::Basename;
 use File::Find::Rule;
 use POSIX qw(strftime);
-use Sys::Hostname;
 use YAML::Tiny qw(LoadFile Dump);
 
 use Exporter 'import';
@@ -32,8 +31,9 @@ our %hosts;
 our %groups;
 our $config_path;
 our $config_global;
-our $servername = hostname;
 our $prefix     = dirname( abs_path($0) );
+our $servername = `hostname -s`;
+chomp $servername;
 
 sub get_global_config {
     my ($prefix_arg) = @_;

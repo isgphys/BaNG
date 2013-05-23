@@ -25,7 +25,6 @@ use_ok 'MIME::Lite';
 use_ok 'Net::LDAP';
 use_ok 'Net::Ping';
 use_ok 'POSIX';
-use_ok 'Sys::Hostname';
 use_ok 'Template';
 use_ok 'Thread::Queue';
 
