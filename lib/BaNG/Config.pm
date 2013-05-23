@@ -60,6 +60,7 @@ sub get_global_config {
     $globalconfig{path_excludes}      = "$config_path/$global_settings->{ExcludesFolder}";
     $globalconfig{path_lockfiles}     = "$config_path/$global_settings->{LocksFolder}";
 
+    $globalconfig{path_date}          = "$global_settings->{DATE}";
     $globalconfig{path_rsync}         = "$global_settings->{RSYNC}";
     $globalconfig{path_btrfs}         = "$global_settings->{BTRFS}";
 
@@ -67,6 +68,16 @@ sub get_global_config {
     $globalconfig{debuglevel}         = "$global_settings->{DebugLevel}";
     $globalconfig{dryrun}             = "$global_settings->{Dryrun}";
     $globalconfig{auto_wipe_limit}    = "$global_settings->{AutoWipeLimit}";
+
+    my $server_globals = "$globalconfig{path_serverconfig}/${servername}_globals.yaml";
+    if ( sanityfilecheck($server_globals) ) {
+        my $server_settings = LoadFile($server_globals);
+        $globalconfig{path_date}          = $server_settings->{DATE};
+        $globalconfig{path_rsync}         = $server_settings->{RSYNC};
+        $globalconfig{report_to}          = $server_settings->{ReportTo};
+    }
+
+    return 1;
 }
 
 sub get_default_config {
