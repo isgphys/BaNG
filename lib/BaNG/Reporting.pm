@@ -123,7 +123,7 @@ sub bangstat_recentbackups {
 
     # scan for missing backups
     my $now     = time;
-    my $today   = `date -d \@$now +"%Y-%m-%d"`;
+    my $today   = `$globalconfig{path_date} -d \@$now +"%Y-%m-%d"`;
     my $tonight = str2time( "$today $BkpStartHour:00:00" );
     foreach my $hostpath ( keys %RecentBackupTimes ) {
         my $thatnight = $tonight;
@@ -151,7 +151,7 @@ sub bangstat_recentbackups {
             if ( $isMissing ) {
                 # add empty entry for missing backups
                 my $missingepoch = $thatnight - 24*3600;
-                my $missingday   = `date -d \@$missingepoch +"%Y-%m-%d"`;
+                my $missingday   = `$globalconfig{path_date} -d \@$missingepoch +"%Y-%m-%d"`;
                 my $nobkp = {
                     Starttime   => $missingday,
                     Stoptime    => '',
@@ -383,7 +383,7 @@ sub hobbit_report {
     };
 
     my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
-    my $DATE      = `date`;
+    my $DATE      = `$globalconfig{path_date}`;
     chomp $DATE;
 
     my $hobbitreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";

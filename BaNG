@@ -496,7 +496,7 @@ sub createLastBkpFile {
 sub create_jobid {
     my ($host, $group) = @_;
     my ($s, $usec) = gettimeofday;
-    my $jobid      = `date +"%Y%m%d%H%M%S"` . $usec;
+    my $jobid      = `$globalconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
     $jobid =~ s/\n//g;
     logit( $host, $group, "Created JobID: $jobid" );
 
