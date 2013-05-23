@@ -1,5 +1,5 @@
 package BaNG::Hosts;
-use Dancer ':syntax';
+
 use 5.010;
 use BaNG::Common;
 use BaNG::Config;

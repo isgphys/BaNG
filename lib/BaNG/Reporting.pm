@@ -1,12 +1,10 @@
 package BaNG::Reporting;
 
-use Dancer ':syntax';
 use BaNG::Config;
 use BaNG::Common;
 use Date::Parse;
 use DBI;
 use IO::Socket;
-#use Mail::Sendmail;
 use MIME::Lite;
 use POSIX qw( strftime );
 use Template;

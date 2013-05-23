@@ -1,7 +1,7 @@
 package BaNG::Config;
 
 use Cwd 'abs_path';
-use Dancer ':syntax';
+use File::Basename;
 use File::Find::Rule;
 use POSIX qw(strftime);
 use Sys::Hostname;

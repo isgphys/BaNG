@@ -1,5 +1,5 @@
 package BaNG::Statistics;
-use Dancer ':syntax';
+
 use BaNG::Reporting;
 use BaNG::Common;
 use BaNG::Config;
