@@ -240,7 +240,7 @@ sub eval_rsync_options {
     $rsync_options .= "--inplace "      if $hostconfig->{BKP_RSYNC_INPLACE};
     $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
     $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
-    $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_OSX};
+    $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_NODEVICES};
     $rsync_options .= "-v "             if ($globalconfig{debug} && ($globalconfig{debuglevel} == 3));
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
