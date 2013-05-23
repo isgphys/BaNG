@@ -409,7 +409,7 @@ sub logit {
 
     my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
     my $logdate    = strftime $globalconfig{global_log_date}, localtime;
-    my $logfile    = "$globalconfig{'log_path'}/${host}-${group}_$logdate.log";
+    my $logfile    = "$globalconfig{path_logs}/${host}-${group}_$logdate.log";
     my $logmessage = "$timestamp $host-$group : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
 

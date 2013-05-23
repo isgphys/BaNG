@@ -42,39 +42,25 @@ sub get_global_config {
     $config_path   = "$prefix/etc";
     $config_global = "$config_path/bang_globals.yaml";
 
-    sanityfilecheck($config_global);
-    my $global_settings = LoadFile($config_global);
-    my $log_date = strftime "$global_settings->{GlobalLogDate}", localtime;
+    # read bang global configs
+    if ( sanityfilecheck($config_global) ) {
+        my $global_settings = LoadFile($config_global);
+        %globalconfig = %{ $global_settings };
+    }
 
-    $globalconfig{log_path}           = "$prefix/$global_settings->{LogFolder}";
-    $globalconfig{global_log_file}    = "$globalconfig{log_path}/$log_date.log";
-    $globalconfig{global_log_date}    = "$global_settings->{GlobalLogDate}";
-    $globalconfig{report_to}          = "$global_settings->{ReportTo}";
-
-    $globalconfig{config_default}     = "$config_path/$global_settings->{DefaultConfig}";
-    $globalconfig{config_bangstat}    = "$config_path/$global_settings->{BangstatConfig}";
-
-    $globalconfig{path_serverconfig}  = "$config_path/$global_settings->{ServerConfigFolder}";
-    $globalconfig{path_groupconfig}   = "$config_path/$global_settings->{GroupConfigFolder}";
-    $globalconfig{path_hostconfig}    = "$config_path/$global_settings->{HostConfigFolder}";
-    $globalconfig{path_excludes}      = "$config_path/$global_settings->{ExcludesFolder}";
-    $globalconfig{path_lockfiles}     = "$config_path/$global_settings->{LocksFolder}";
-
-    $globalconfig{path_date}          = "$global_settings->{DATE}";
-    $globalconfig{path_rsync}         = "$global_settings->{RSYNC}";
-    $globalconfig{path_btrfs}         = "$global_settings->{BTRFS}";
-
-    $globalconfig{debug}              = "$global_settings->{Debug}";
-    $globalconfig{debuglevel}         = "$global_settings->{DebugLevel}";
-    $globalconfig{dryrun}             = "$global_settings->{Dryrun}";
-    $globalconfig{auto_wipe_limit}    = "$global_settings->{AutoWipeLimit}";
-
-    my $server_globals = "$globalconfig{path_serverconfig}/${servername}_globals.yaml";
+    # override with server-specific global configs
+    my $server_globals = "$config_path/$globalconfig{path_serverconfig}/${servername}_globals.yaml";
     if ( sanityfilecheck($server_globals) ) {
         my $server_settings = LoadFile($server_globals);
-        $globalconfig{path_date}          = $server_settings->{DATE};
-        $globalconfig{path_rsync}         = $server_settings->{RSYNC};
-        $globalconfig{report_to}          = $server_settings->{ReportTo};
+        foreach my $key ( keys %{$server_settings} ) {
+            $globalconfig{$key} = $server_settings->{$key};
+        }
+    }
+
+    # preprend full path where needed
+    $globalconfig{path_logs} = "$prefix/$globalconfig{path_logs}";
+    foreach my $key (qw( config_default config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_lockfiles )) {
+         $globalconfig{$key} = "$config_path/$globalconfig{$key}";
     }
 
     return 1;
