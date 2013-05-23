@@ -199,9 +199,9 @@ sub get_cronjob_config {
     foreach my $cronconfigfile (@cronconfigs) {
         my ($server,$jobtype)  = split_cronconfigname($cronconfigfile);
 
-        foreach my $jobtype ( qw( backup wipe ) ) {
+        JOBTYPE: foreach my $jobtype ( qw( backup wipe ) ) {
             my $cronjobsfile = "$globalconfig{path_serverconfig}/${server}_cronjobs_$jobtype.yaml";
-            return unless sanityfilecheck($cronjobsfile);
+            next JOBTYPE unless sanityfilecheck($cronjobsfile);
             my $cronjobslist = LoadFile($cronjobsfile);
 
             foreach my $cronjob ( keys %{$cronjobslist} ) {
