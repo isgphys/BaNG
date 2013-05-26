@@ -26,6 +26,12 @@
 
 
  BaNGadm : admin tasks
-------------------------
+-----------------------
 
     BaNGadm --crontab                     # Show generated crontab entry
+
+
+ BaNG-Web.pl : web frontend
+----------------------------
+
+    BaNG-Web.pl                           # Start Dancer web frontend in development mode on port 3000
