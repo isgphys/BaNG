@@ -12,30 +12,12 @@
     text-align: left;
 }
 
-#restorelist img.look {
-    padding: 0px 5px 0px 2px;
-    width: 15px;
-    height: 15px;
-}
-
 #restorelist td {
-    height: 24px;
-    padding-left: 5px
-}
-
-#restorelist td.sw_logo {
-    height: 24px;
-    width: 20px;
-    vertical-align: top;
-}
-
-#restorelist div.hosts_details {
-    width: 100px;
+    padding: 5px;
 }
 
 #restorelist tr.noDefault{
     background-color: #ff9999 !important;
-
 }
 
 #restorelist tr:nth-child(odd) {

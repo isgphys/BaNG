@@ -269,3 +269,10 @@ nav ul ul ul li a {
     background: url("/images/network-disconnect-2.png") no-repeat  scroll transparent;
     background-position: center center;
 }
+
+img.look {
+    padding: 0px 5px 0px 2px;
+    width: 15px;
+    height: 15px;
+    vertical-align: middle;
+}

@@ -62,36 +62,17 @@
     text-align: left;
 }
 
-#configslist img.look {
-    padding: 0px 5px 0px 2px;
-    width: 15px;
-    height: 15px;
-}
-
 #configslist td {
-    height: 24px;
     vertical-align: top;
-    padding-top: 5px;
-}
-
-#configslist td.sw_logo {
-    height: 24px;
-    width: 20px;
-    vertical-align: top;
-}
-
-#configslist div.hosts_details {
-    width: 100px;
+    padding: 5px;
 }
 
 #configslist tr.groupConfig{
     background-color: #33bbdd !important;
-
 }
 
 #configslist tr.hostConfig{
     background-color: #66ffdd !important;
-
 }
 
 #configslist tr:nth-child(odd) {
@@ -116,6 +97,7 @@
 
 #config_details table {
     width: 380px;
+    padding-top: 5px;
 }
 
 #config_details table tr:nth-child(odd) {
@@ -128,6 +110,6 @@
 
 #config_details td {
     height: 18px;
-    padding-left: 5px;
+    padding: 0px 0px 0px 5px;
+    vertical-align: middle;
 }
-
