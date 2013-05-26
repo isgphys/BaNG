@@ -11,6 +11,10 @@ body {
     padding-right : 0px;
 }
 
+.right {
+    text-align : right;
+}
+
 #header {
     background-image:url('/images/header.png');
     background-color:#254370;
