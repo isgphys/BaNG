@@ -29,6 +29,10 @@
     fill            : #48A8CA;
     stroke          : #48A8CA;
 }
+[class*="mac-"] {
+    fill            : #008A8A;
+    stroke          : #008A8A;
+}
 .dphys-system {
     fill            : #2BC72B;
     stroke          : #29C02A;
