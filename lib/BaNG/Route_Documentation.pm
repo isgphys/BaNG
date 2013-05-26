@@ -7,7 +7,12 @@ use Template::Plugin::Markdown;
 prefix '/documentation';
 
 get '/' => sub {
-    open my $MARKDOWN, '<', "$prefix/Readme.markdown";
+    redirect '/documentation/Index';
+};
+
+get '/:file' => sub {
+    my $file = "$prefix/docs/" . param('file') . ".markdown";
+    open my $MARKDOWN, '<', $file;
     my $markdown = do { local $/; <$MARKDOWN> };
     template 'documentation' => {
         section      => 'documentation',

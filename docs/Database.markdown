@@ -1,5 +1,5 @@
-  Database
-============
+  BaNG Database
+=================
 
  Basics
 --------
