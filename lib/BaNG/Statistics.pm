@@ -19,7 +19,8 @@ our @EXPORT = qw(
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
 my $lastXdays_default    = 90;  # retrieve info of last X days from database
-my $lastXdays_variations = 10;  # find largest variation of the last X days
+my $lastXdays_variations = 30;  # find largest variation of the last X days
+my @variation_intervals  = (2, 5, 10, 30); # largest variations for these intervals of days
 my $topX_variations      = 5;   # return the top X shares with largest variations
 my $BackupStartHour      = 18;  # backups started after X o'clock belong to next day
 
@@ -250,8 +251,7 @@ sub statistics_groupshare_variations {
     $sth->finish();
 
     my %largest_variations;
-    my @intervals = (1, 5, 10); # consider intervals of last N days
-    foreach my $N (@intervals) {
+    foreach my $N (@variation_intervals) {
         foreach my $field (qw(TotFileSize NumOfFiles)) {
             # compute maximal variation for each share
             my %delta;
