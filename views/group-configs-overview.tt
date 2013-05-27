@@ -18,7 +18,7 @@
       <% FOREACH group IN groups.keys.sort %>
         <tr <% IF groups.$group.css_class %> class="<% groups.$group.css_class %>"<% END %>>
             <td class="center">
-              <% group %>
+                <a href="/config/allhosts/<% group %>"><% group %></a>
             </td>
             <td class="center">
               <% groups.$group.groupconfig.BKP_TARGET_HOST %>

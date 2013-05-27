@@ -13,6 +13,9 @@
             $(document).ready(function(){
                 $("#flash").delay(2500).hide("slow");
 
+                var filterTable = $('#configslist, #restorelist')
+                $.uiTableFilter( filterTable, $("#filter").val() );
+
                 $('#configslist').tablesorter();
                 $('#restorelist').tablesorter();
                 $('#config').tablesorter();
@@ -29,11 +32,11 @@
                     $('#loader').show();
                 });
             });
-            $(function() {
-                var theTable = $('#configslist, #restorelist')
 
+            $(function() {
+                var filterTable = $('#configslist, #restorelist')
                 $("#filter").keyup(function() {
-                    $.uiTableFilter( theTable, this.value );
+                    $.uiTableFilter( filterTable, this.value );
                 })
 
                 $('#filter-form').submit(function(){

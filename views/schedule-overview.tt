@@ -35,7 +35,7 @@
                                     <% ELSE %><% cronjobs.$server.$jobtype.$cronjob.host %>
                                     <% END %>
                                 </td>
-                                <td class="center"><a href="/config/allgroups"><% cronjobs.$server.$jobtype.$cronjob.group %></a></td>
+                                <td class="center"><a href="/config/allhosts/<% cronjobs.$server.$jobtype.$cronjob.group %>"><% cronjobs.$server.$jobtype.$cronjob.group %></a></td>
                                 <td class="center"><% jobtype FILTER ucfirst %></td>
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>

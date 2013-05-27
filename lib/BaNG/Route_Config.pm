@@ -21,6 +21,10 @@ get '/global' => sub {
 };
 
 get '/allhosts' => sub {
+    redirect '/config/allhosts/';
+};
+
+get '/allhosts/:filter?' => sub {
     get_global_config();
     get_host_config("*");
 
@@ -28,6 +32,7 @@ get '/allhosts' => sub {
         section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
+        filtervalue  => param('filter'),
         hosts        => \%hosts ,
     };
 };
