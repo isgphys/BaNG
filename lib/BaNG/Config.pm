@@ -61,8 +61,7 @@ sub get_global_config {
     }
 
     # preprend full path where needed
-    $globalconfig{path_logs} = "$prefix/$globalconfig{path_logs}";
-    foreach my $key (qw( config_default config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_lockfiles )) {
+    foreach my $key (qw( config_default config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_logs path_lockfiles )) {
          $globalconfig{$key} = "$config_path/$globalconfig{$key}";
     }
 
