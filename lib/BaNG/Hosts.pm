@@ -18,9 +18,10 @@ our @EXPORT = qw(
 
 sub get_fsinfo {
     my %fsinfo;
-    foreach my $server ( get_server_list() ) {
+    get_server_config();
+    foreach my $server ( keys %servers ) {
 
-        my @mounts = remoteWrapperCommand($server, 'bang_df');
+        my @mounts = remoteWrapperCommand($server, 'BaNG/bang_df', );
 
         foreach my $mount (@mounts){
             #/^([\/\w\d-]+)\s+([\w\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+).\s+([\/\w\d-]+)$/;
@@ -164,9 +165,10 @@ sub getLockFiles {
 # RemoteWrapper
 #
 sub remoteWrapperCommand {
-    my ($remoteHost, $remoteCommand) = @_;
+    my ($remoteHost, $remoteCommand, $remoteArgument) = @_;
+    $remoteArgument = $remoteArgument || "";
 
-    my $results = `ssh -o IdentitiesOnly=yes -i /var/www/.ssh/remotesshwrapper root\@$remoteHost /usr/local/bin/remotesshwrapper $remoteCommand`;
+    my $results = `ssh -o IdentitiesOnly=yes -i /var/www/.ssh/remotesshwrapper root\@$remoteHost /usr/local/bin/remotesshwrapper $remoteCommand $remoteArgument`;
     my @results = split("\n", $results);
 
     return @results;
