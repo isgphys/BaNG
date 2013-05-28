@@ -15,6 +15,7 @@ our @EXPORT = qw(
     $config_path
     $config_global
     $servername
+    get_server_list
     get_global_config
     get_default_config
     get_host_config
@@ -34,6 +35,18 @@ our $config_global;
 our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
+
+sub get_server_list {
+
+    my @serverconfigs = find_configs("*_globals\.yaml", "$globalconfig{path_serverconfig}" );
+
+    foreach my $serverconfig (@serverconfigs){
+        my ($server) = $serverconfig =~ /^([\w\d-]+)_globals\.yaml/;
+        push( @server_list, $server );
+    }
+
+    return @server_list;
+}
 
 sub get_global_config {
     my ($prefix_arg) = @_;

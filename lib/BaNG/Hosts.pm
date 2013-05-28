@@ -17,35 +17,34 @@ our @EXPORT = qw(
 
 
 sub get_fsinfo {
-    my @mounts;
     my %fsinfo;
+    foreach my $server ( get_server_list() ) {
 
-    open(MP, "df -T | grep backup | grep -v nfs |");
-        @mounts = <MP>;
-    close(MP);
+        my @mounts = remoteWrapperCommand($server, 'bang_df');
 
-    foreach my $mount (@mounts){
-        #/^([\/\w\d-]+)\s+([\w\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+).\s+([\/\w\d-]+)$/;
-        $mount =~ qr/
-                    ^(?<filesystem> [\/\w\d-]+)
-                    \s+(?<fstyp> [\w\d]+)
-                    \s+(?<blocks> [\d]+)
-                    \s+(?<used> [\d]+)
-                    \s+(?<available>[\d]+)
-                    \s+(?<usedper> [\d]+)
-                    .\s+(?<mountpt> [\/\w\d-]+)$
-        /x ;
+        foreach my $mount (@mounts){
+            #/^([\/\w\d-]+)\s+([\w\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+)\s+([\d]+).\s+([\/\w\d-]+)$/;
+            $mount =~ qr/
+                        ^(?<filesystem> [\/\w\d-]+)
+                        \s+(?<fstyp> [\w\d]+)
+                        \s+(?<blocks> [\d]+)
+                        \s+(?<used> [\d]+)
+                        \s+(?<available>[\d]+)
+                        \s+(?<usedper> [\d]+)
+                        .\s+(?<mountpt> [\/\w\d-]+)$
+            /x ;
 
-        $fsinfo{$+{mountpt}} = {
-            'filesystem' => $+{filesystem},
-            'mount'      => $+{mountpt},
-            'fstyp'      => $+{fstyp},
-            'blocks'     => num2human($+{blocks}),
-            'used'       => num2human($+{used}*1024,1024),
-            'available'  => num2human($+{available}*1024,1024),
-            'used_per'   => $+{usedper},
-            'css_class'  => check_fill_level($+{usedper}),
-        };
+            $fsinfo{$server}{$+{mountpt}} = {
+                'filesystem' => $+{filesystem},
+                'mount'      => $+{mountpt},
+                'fstyp'      => $+{fstyp},
+                'blocks'     => num2human($+{blocks}),
+                'used'       => num2human($+{used}*1024,1024),
+                'available'  => num2human($+{available}*1024,1024),
+                'used_per'   => $+{usedper},
+                'css_class'  => check_fill_level($+{usedper}),
+            };
+        }
     }
 
     return \%fsinfo;
@@ -159,6 +158,18 @@ sub getLockFiles {
     }
 
     return \@lockfiles;
+}
+
+#################################
+# RemoteWrapper
+#
+sub remoteWrapperCommand {
+    my ($remoteHost, $remoteCommand) = @_;
+
+    my $results = `ssh -o IdentitiesOnly=yes -i /var/www/.ssh/remotesshwrapper root\@$remoteHost /usr/local/bin/remotesshwrapper $remoteCommand`;
+    my @results = split("\n", $results);
+
+    return @results;
 }
 
 1;
