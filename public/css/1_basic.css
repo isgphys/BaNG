@@ -46,17 +46,6 @@ body {
     text-shadow: 0 0 2px black;
 }
 
-#flash {
-    width: 400px;
-    background-color: #ffa6a6;
-    border: 1px #f00 solid;
-    color: #f00;
-    font-weight: bold;
-    padding: 12px;
-    margin-top: 6px;
-    margin-left: 10px;
-}
-
 #topline {
     text-decoration: none;
     background-color: #7997C9;

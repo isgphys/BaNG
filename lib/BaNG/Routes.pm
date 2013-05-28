@@ -21,7 +21,6 @@ get '/' => sub {
              'remotehost' => request->remote_host,
              'remoteuser' => request->user,
              'webDancerEnv' => config->{run_env},
-             'msg' => get_flash(),
              'fsinfo' => get_fsinfo(),
              'lockfiles' => getLockFiles(),
     };

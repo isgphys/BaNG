@@ -52,9 +52,3 @@
         <li><a href="/documentation" <% IF section == 'documentation' %>class="active"<% END %>>Documentation</a></li>
     </ul>
 </nav>
-
-<%- IF msg %>
-<div id="flash">
-    <p><% msg %></p>
-</div>
-<%- END %>

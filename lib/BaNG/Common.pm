@@ -4,28 +4,9 @@ use POSIX qw(floor);
 
 use Exporter 'import';
 our @EXPORT = qw(
-    $flash
-    get_flash
-    set_flash
     num2human
     time2human
 );
-
-our $flash;
-
-sub set_flash {
-       my $message = shift;
-
-       $flash = $message;
-}
-
-sub get_flash {
-
-       my $msg = $flash;
-       $flash = "";
-
-       return $msg;
-}
 
 sub num2human {
     # convert large numbers to K, M, G, T notation
@@ -55,6 +36,5 @@ sub time2human {
         return sprintf("\%dh\%02dmin", floor($minutes/60), $minutes%60);
     }
 }
-
 
 1;

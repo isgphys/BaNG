@@ -16,7 +16,6 @@
             }
 
             $(document).ready(function(){
-                $("#flash").delay(2500).hide("slow");
 
                 updateFilter();
 
