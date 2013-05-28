@@ -11,15 +11,16 @@ our @EXPORT = qw(
     %globalconfig
     %hosts
     %groups
+    %servers
     $prefix
     $config_path
     $config_global
     $servername
-    get_server_list
     get_global_config
     get_default_config
     get_host_config
     get_group_config
+    get_server_config
     get_cronjob_config
     generated_crontab
     read_host_configfile
@@ -30,23 +31,12 @@ our %globalconfig;
 our %defaultconfig;
 our %hosts;
 our %groups;
+our %servers;
 our $config_path;
 our $config_global;
 our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
-
-sub get_server_list {
-
-    my @serverconfigs = find_configs("*_globals\.yaml", "$globalconfig{path_serverconfig}" );
-
-    foreach my $serverconfig (@serverconfigs){
-        my ($server) = $serverconfig =~ /^([\w\d-]+)_globals\.yaml/;
-        push( @server_list, $server );
-    }
-
-    return @server_list;
-}
 
 sub get_global_config {
     my ($prefix_arg) = @_;
@@ -132,6 +122,14 @@ sub split_group_configname {
     return ($groupname);
 }
 
+sub split_server_configname {
+    my ($configfile) = @_;
+
+    my ($server) = $configfile =~ /^([\w\d-]+)_globals\.yaml/;
+
+    return ($server);
+}
+
 sub split_cronconfigname {
     my ($cronconfigfile) = @_;
 
@@ -196,6 +194,28 @@ sub get_group_config {
             'css_class'        => $css_class,
             'nobulk_css_class' => $nobulk_css_class,
             'groupconfig'      => $groupconfig,
+            'confighelper'     => $confighelper,
+        };
+    }
+
+    return 1;
+}
+
+sub get_server_config {
+    my ($server) = @_;
+
+    $server = $server || '*';
+    undef %servers;
+    my @serverconfigs = find_configs("${server}_globals\.yaml", $globalconfig{path_serverconfig} );
+
+    foreach my $serverconfigfile (@serverconfigs) {
+        my ($servername)                  = split_server_configname($serverconfigfile);
+        my ($serverconfig, $confighelper) = read_server_configfile($servername);
+
+        $servers{"$servername"} = {
+            'status'           => $status,
+            'configfile'       => $serverconfigfile,
+            'serverconfig'     => $serverconfig,
             'confighelper'     => $confighelper,
         };
     }
@@ -326,6 +346,29 @@ sub read_group_configfile {
             }
         }
     }
+
+    return $settings, $settingshelper;
+}
+
+sub read_server_configfile {
+    my ($server) = @_;
+
+    my %configfile;
+    my $settings;
+    my $settingshelper;
+
+    $configfile{server} = "$globalconfig{path_serverconfig}/${server}_globals.yaml";
+    $settings           = LoadFile($globalconfig{config_default});
+
+        if ( sanityfilecheck($configfile{server}) ) {
+
+            my $settings_server = LoadFile($configfile{server});
+
+            foreach my $key ( keys %{$settings_server} ) {
+                $settings->{$key}       = $settings_server->{$key};
+                $settingshelper->{$key} = "server";
+            }
+        }
 
     return $settings, $settingshelper;
 }
