@@ -33,7 +33,7 @@ get '/allhosts/:filter?' => sub {
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         filtervalue  => param('filter'),
-        hosts        => \%hosts ,
+        hosts        => \%hosts,
     };
 };
 
@@ -45,7 +45,8 @@ get '/allgroups' => sub {
         section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
-        groups        => \%groups ,
+        groups       => \%groups,
     };
 };
 
+1;

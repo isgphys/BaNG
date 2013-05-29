@@ -1,7 +1,7 @@
 package BaNG::Route_Statistics;
 use Dancer ':syntax';
-use BaNG::Statistics;
 use BaNG::Reporting;
+use BaNG::Statistics;
 
 prefix '/statistics';
 
@@ -13,8 +13,7 @@ get '/' => sub {
         title        => 'Cumulated Backup Statistics',
         json_url     => "/statistics.json",
         hosts_shares => statistics_hosts_shares(),
-    },{ layout       => 0
-    };
+    },{ layout       => 0 };
 };
 
 get '.json' => sub {
@@ -44,8 +43,7 @@ get '/:host/:share' => sub {
         share        => $share,
         json_url     => "/statistics/$host/$shareurl.json",
         hosts_shares => statistics_hosts_shares(),
-    },{ layout       => 0
-    };
+    },{ layout       => 0 };
 };
 
 get '/variations' => sub {
@@ -79,8 +77,7 @@ get '/schedule' => sub {
         title        => "Backup schedule of last night",
         fullplot     => 0,
         json_url     => "/statistics/schedule.json",
-    },{ layout       => 0
-    };
+    },{ layout       => 0 };
 };
 
 get '/schedule-all' => sub {
@@ -91,6 +88,7 @@ get '/schedule-all' => sub {
         title        => "Backup schedule by host",
         fullplot     => 1,
         json_url     => "/statistics/schedule-all.json",
-    },{ layout       => 0
-    };
+    },{ layout       => 0 };
 };
+
+1;

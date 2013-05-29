@@ -1,8 +1,8 @@
 package BaNG::Route_Documentation;
 use Dancer ':syntax';
 use BaNG::Config;
-use Text::Markdown;
 use Template::Plugin::Markdown;
+use Text::Markdown;
 
 prefix '/documentation';
 
@@ -21,3 +21,5 @@ get '/:file' => sub {
         content      => $markdown,
     };
 };
+
+1;
