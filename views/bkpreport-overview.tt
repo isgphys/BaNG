@@ -8,6 +8,7 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
             <th>Group</th>
             <th>Target</th>
             <th colspan="2">ErrStatus</th>
+            <th>Starttime</th>
             <th>Last Backup</th>
             <th>Runtime</th>
             <th>FilesTrans</th>
@@ -34,6 +35,7 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
                     <% ELSE %> class="bad"<% END %>>
                 </td>
                 <td class="center"><% bkp.ErrStatus %></td>
+                <td class="center"><% bkp.Starttime %></td>
                 <td class="center"><% bkp.LastBkp %></td>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.FilesTrans %></td>

@@ -192,6 +192,12 @@ sub bangstat_recentbackups_all {
         FROM recent_backups
         WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
+        AND JobID IN (
+            SELECT MAX(JobID)
+            FROM recent_backups AS G
+            WHERE G.bkpfromhost = recent_backups.bkpfromhost
+            AND Start > DATE_SUB(NOW(), INTERVAL $lastXhours HOUR)
+            GROUP BY G.bkpfromhost, G.bkpgroup)
         ORDER BY JobStatus, Start DESC;
     ");
     $sth->execute();
