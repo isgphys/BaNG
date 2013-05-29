@@ -9,6 +9,7 @@ use strict;
 use warnings;
 use forks;
 use Cwd qw( abs_path );
+use Date::Parse;
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
 use IPC::Open3;
@@ -25,6 +26,7 @@ my $version = '3.1';
 my $force;
 my $wipe;
 my $hobbitonly;
+my $missingonly;
 my $group_arg;
 my $host_arg;
 my $prefix_arg;
@@ -86,6 +88,15 @@ sub queue_backup {
     # check if last backup exists
     my $lastbkp = chkLastBkp($host, $group);
     my $jobid = create_jobid($host, $group);
+
+    # if missingonly, don't queue host if we had a backup within the last 20 hours
+    if ( $missingonly && $lastbkp =~ qr{ (?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d) }x ) {
+        my $lastbkpepoch = str2time( "$+{date} $+{HH}:$+{MM}:$+{SS}" );
+        if ( (time - $lastbkpepoch) < 20 * 3600 ) {
+            logit( $host, $group, "Skipping because recent backup found for host $host group $group" );
+            return 1;
+        }
+    }
 
     # make sure host is online
     my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
@@ -570,6 +581,7 @@ sub parse_command_options {
         "t|threads=i" => \$nthreads_arg,
         "w|wipe"      => \$wipe,
         "force"       => \$force,
+        "missingonly" => \$missingonly,
         "hobbit"      => \$hobbitonly,
     ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
@@ -617,6 +629,7 @@ sub usage {
         -p <path>       # override path to folder containing etc/
         -w              # wipe the backup
         -w --force      # forcing wipe the backup (override auto_wipe_limit)
+        --missingonly   # backup only hosts that were not backed up recently
         --hobbit        # send only hobbit report
         -d              # show debugging messages
 
