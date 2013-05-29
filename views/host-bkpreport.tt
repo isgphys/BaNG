@@ -22,10 +22,12 @@
                     <tbody>
                         <%- FOREACH bkp IN RecentBackups.$hostgroup %>
                         <tr height="20">
-                            <td <%- IF bkp.JobStatus == 1 %>class="hook" title="Job done"
-                                <% ELSIF bkp.JobStatus == -1 %>class="offline" title="Host offline"
-                                <%- END -%>>
-                            </td>
+                            <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done">
+                                <% ELSIF bkp.JobStatus == 1 %>class="hook" title="Job done">
+                                <% ELSIF bkp.JobStatus == -1 %>class="offline">
+                                <a href="https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn">
+                                <img src="/images/network-disconnect-2.png" title="Host offline"></a>
+                                <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
                             <td title="Rsync Error Status: <% bkp.ErrStatus %>"
                                 <%- IF bkp.ErrStatus == 0 %> class="ok"
                                 <%- ELSIF bkp.ErrStatus == 99 %> class="notok"

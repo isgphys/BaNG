@@ -255,9 +255,10 @@ nav ul ul ul li a {
 }
 
 .offline {
-    background: url("/images/network-disconnect-2.png") no-repeat  scroll transparent;
-    background-position: center center;
+    vertical-align: middle;
+    text-align : center;
 }
+
 
 img.look {
     padding: 0px 5px 0px 2px;
