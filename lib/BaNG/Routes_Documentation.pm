@@ -1,4 +1,4 @@
-package BaNG::Route_Documentation;
+package BaNG::Routes_Documentation;
 use Dancer ':syntax';
 use BaNG::Config;
 use Template::Plugin::Markdown;

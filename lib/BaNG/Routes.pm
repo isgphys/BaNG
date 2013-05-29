@@ -4,12 +4,12 @@ use BaNG::Common;
 use BaNG::Config;
 use BaNG::Hosts;
 use BaNG::Reporting;
-use BaNG::Route_Config;
-use BaNG::Route_Documentation;
-use BaNG::Route_Host;
-use BaNG::Route_Restore;
-use BaNG::Route_Schedule;
-use BaNG::Route_Statistics;
+use BaNG::Routes_Config;
+use BaNG::Routes_Documentation;
+use BaNG::Routes_Host;
+use BaNG::Routes_Restore;
+use BaNG::Routes_Schedule;
+use BaNG::Routes_Statistics;
 
 prefix undef;
 
