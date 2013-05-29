@@ -12,11 +12,11 @@
                             <th width="50">JobStatus</th>
                             <th width="50">ErrStatus</th>
                             <th width="100">Starttime</th>
-                            <th width="100">Endtime</th>
-                            <th width="60">Runtime</th>
-                            <th>FromPath</th>
-                            <th width="100">LastBkp</th>
-                            <th width="60">Forked</th>
+                            <th width="50">Runtime</th>
+                            <th width="50">FilesTrans</th>
+                            <th width="50">SizeTrans</th>
+                            <th width="130">FromPath</th>
+                            <th width="90">LastBkp</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,11 +36,11 @@
                                 <% ELSE %> class="bad"<% END %>>
                             </td>
                             <td class="center"><% bkp.Starttime %></td>
-                            <td class="center"><% bkp.Stoptime %></td>
                             <td class="center"><% bkp.Runtime %></td>
+                            <td class="center"><% bkp.FilesTrans %></td>
+                            <td class="center"><% bkp.SizeTrans %></td>
                             <td class="center"><% bkp.BkpFromPath %></td>
                             <td class="center"><% bkp.LastBkp %></td>
-                            <td <%- IF bkp.isThread %>class="hook"<%- END -%>></td>
                         </tr>
                         <%- END %>
                     </tbody>

@@ -110,6 +110,8 @@ sub bangstat_recentbackups {
             JobStatus   => $dbrow->{'JobStatus'},
             BkpGroup    => $BkpGroup,
             BkpHost     => $dbrow->{'BkpFromHost'},
+            FilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans   => num2human($dbrow->{'TotFileSizeTrans'},1024),
         });
         push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
             Starttime   => $dbrow->{'Start'},
@@ -211,6 +213,8 @@ sub bangstat_recentbackups_all {
             BkpGroup    => $dbrow->{'BkpGroup'} || 'NA',
             BkpHost     => $dbrow->{'BkpFromHost'},
             BkpToHost   => $dbrow->{'BkpToHost'},
+            FilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans   => num2human($dbrow->{'TotFileSizeTrans'},1024),
         });
     }
     $sth->finish();
