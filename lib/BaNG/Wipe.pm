@@ -1,8 +1,9 @@
 package BaNG::Wipe;
+
 use 5.010;
-use Date::Parse;
 use BaNG::Config;
 use BaNG::Reporting;
+use Date::Parse;
 
 use Exporter 'import';
 our @EXPORT = qw(

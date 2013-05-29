@@ -1,9 +1,9 @@
 package BaNG::Reporting;
 
-use BaNG::Config;
 use BaNG::Common;
-use Date::Parse;
+use BaNG::Config;
 use DBI;
+use Date::Parse;
 use IO::Socket;
 use MIME::Lite;
 use POSIX qw( strftime );
@@ -57,8 +57,8 @@ sub bangstat_set_jobstatus {
         AND JobID = '$jobid';
     );
 
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
-    if (!$conn) {
+    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
+    if ( !$conn ) {
         logit( $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
         return 1;
     }
@@ -77,10 +77,10 @@ sub bangstat_set_jobstatus {
 sub bangstat_recentbackups {
     my ($host, $lastXdays) = @_;
 
-    $lastXdays = $lastXdays || 5;
+    $lastXdays ||= 5;
     my $BkpStartHour = 18;
 
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -94,7 +94,7 @@ sub bangstat_recentbackups {
 
     my %RecentBackups;
     my %RecentBackupTimes;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $BkpGroup = $dbrow->{'BkpGroup'} || 'NA';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/^:$/:\//g;
@@ -124,7 +124,7 @@ sub bangstat_recentbackups {
     # scan for missing backups
     my $now     = time;
     my $today   = `$globalconfig{path_date} -d \@$now +"%Y-%m-%d"`;
-    my $tonight = str2time( "$today $BkpStartHour:00:00" );
+    my $tonight = str2time("$today $BkpStartHour:00:00");
     foreach my $hostpath ( keys %RecentBackupTimes ) {
         my $thatnight = $tonight;
         my @bkp = @{$RecentBackupTimes{$hostpath}};
@@ -133,7 +133,7 @@ sub bangstat_recentbackups {
         my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
         my $missingHost        = $bkp[0]->{Host}        || 'NA';
 
-        foreach my $Xdays (1..$lastXdays) {
+        foreach my $Xdays ( 1 .. $lastXdays ) {
             my $isMissing = 0;
 
             if ( !@bkp ) {
@@ -150,7 +150,7 @@ sub bangstat_recentbackups {
 
             if ( $isMissing ) {
                 # add empty entry for missing backups
-                my $missingepoch = $thatnight - 24*3600;
+                my $missingepoch = $thatnight - 24 * 3600;
                 my $missingday   = `$globalconfig{path_date} -d \@$missingepoch +"%Y-%m-%d"`;
                 my $nobkp = {
                     Starttime   => $missingday,
@@ -163,15 +163,15 @@ sub bangstat_recentbackups {
                     ErrStatus   => 99,
                     BkpGroup    => $missingBkpGroup,
                 };
-                splice( @{$RecentBackups{"$missingHost-$missingBkpGroup"}}, $Xdays-1, 0, $nobkp);
+                splice( @{$RecentBackups{"$missingHost-$missingBkpGroup"}}, $Xdays - 1, 0, $nobkp );
             } else {
                 # remove successful backups of that day from list
-                while ( @bkp && str2time($bkp[0]->{Starttime}) > $thatnight - 24*3600 ) {
+                while ( @bkp && str2time( $bkp[0]->{Starttime} ) > $thatnight - 24 * 3600 ) {
                     shift @bkp;
                 }
             }
             # then look at previous day
-            $thatnight -= 24*3600;
+            $thatnight -= 24 * 3600;
         }
     }
 
@@ -180,10 +180,9 @@ sub bangstat_recentbackups {
 
 sub bangstat_recentbackups_all {
     my ($lastXhours) = @_;
+    $lastXhours ||= 24;
 
-    $lastXhours = $lastXhours || 24;
-
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -196,7 +195,7 @@ sub bangstat_recentbackups_all {
     $sth->execute();
 
     my %RecentBackupsAll;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
@@ -222,7 +221,7 @@ sub bangstat_recentbackups_all {
 sub send_hobbit_report {
     my ($report) = @_;
 
-    my $socket=IO::Socket::INET->new(
+    my $socket = IO::Socket::INET->new(
         PeerAddr => 'hobbit.phys.ethz.ch',
         PeerPort => '1984',
         Proto    => 'tcp',
@@ -259,10 +258,10 @@ sub db_report {
         $log_values{$parse_log_keys{$logkey}} = 'NULL';
     }
 
-    foreach my $outline ( @outlines ) {
+    foreach my $outline (@outlines) {
         next unless $outline =~ m/:/;
         chomp $outline;
-        my ($key, $value) = split(': ', $outline);
+        my ($key, $value) = split( ': ', $outline );
         foreach my $logkey ( keys %parse_log_keys ) {
             if ( $logkey eq $key ) {
                 $value =~ s/^\D*([\d.]+).*?$/$1/;
@@ -288,11 +287,11 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
-    logit( $host, $group, "DB Report SQL command: $sql" ) if ( $globalconfig{debuglevel} >=2 );
+    logit( $host, $group, "DB Report SQL command: $sql" ) if ( $globalconfig{debuglevel} >= 2 );
 
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
-    if (!$conn) {
-        logit( $host, $group, "ERROR: Could not connect to DB to send bangstat report.");
+    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
+    if ( !$conn ) {
+        logit( $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
         return 1;
     }
 
@@ -301,7 +300,7 @@ sub db_report {
     $sth->finish();
     $bangstat_dbh->disconnect;
 
-    logit( $host, $group, "Bangstat report sent.");
+    logit( $host, $group, "Bangstat report sent." );
 
     return 1;
 }
@@ -330,9 +329,9 @@ sub mail_report {
         Subject => "Backup report of ($host-$group): $status",
     );
 
-    foreach my $mailtype ( qw(plain html) ) {
+    foreach my $mailtype (qw(plain html)) {
         my $report;
-        $tt->process("mail_$mailtype-report.tt", $RecentBackups, \$report)
+        $tt->process( "mail_$mailtype-report.tt", $RecentBackups, \$report )
             or logit( $host, $group, "ERROR generating mail report template: " . $tt->error() );
 
         my $mail_att = MIME::Lite->new(
@@ -340,15 +339,15 @@ sub mail_report {
             Data     => $report,
             Encoding => 'quoted-printable',
         );
-        $mail_att->attr('content-type' => "text/$mailtype; charset=UTF-8");
+        $mail_att->attr( 'content-type' => "text/$mailtype; charset=UTF-8" );
         $mail_msg->attach($mail_att);
     }
 
-    unless ($globalconfig{dryrun}) {
+    unless ( $globalconfig{dryrun} ) {
         $mail_msg->send or logit( $host, $group, "mail_report error" );
     }
 
-    logit( $host, $group, "Mail report sent.");
+    logit( $host, $group, "Mail report sent." );
 
     return 1;
 }
@@ -358,20 +357,19 @@ sub hobbit_report {
 
     my $topcolor = 'green';
     my $errcode;
-    foreach my $key (keys %RecentBackups) {
-        $errcode  = $RecentBackups{$key}[0]{ErrStatus};
+    foreach my $key ( keys %RecentBackups ) {
+        $errcode = $RecentBackups{$key}[0]{ErrStatus};
         my @errorcodes = split( ',', $errcode );
         foreach my $code (@errorcodes) {
-            next if $code eq '0';   # no errors
-            next if $code eq '24';  # vanished source files
-            next if $code eq '99';  # no last_bkp
+            next if $code eq '0';     # no errors
+            next if $code eq '24';    # vanished source files
+            next if $code eq '99';    # no last_bkp
             if ( $code eq '23' ) {
                 $topcolor = 'yellow'; # partial transfer
                 next;
-           }
+            }
             $topcolor = 'red';
         }
-        #$topcolor = 'red' if ( $errcode ne '0' && !( $errcode =~ /23|24|99/ ));
     }
     $topcolor = 'yellow' unless %RecentBackups;
 
@@ -394,12 +392,12 @@ sub hobbit_report {
         INCLUDE_PATH => "$prefix/views",
     );
     my $report;
-    $tt->process('hobbitreport.tt', $RecentBackups, \$report)
+    $tt->process( 'hobbitreport.tt', $RecentBackups, \$report )
         or logit( $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 
     send_hobbit_report($hobbitreport) unless $globalconfig{dryrun};
-    logit( $host, $group, "Hobbit report sent.");
+    logit( $host, $group, "Hobbit report sent." );
 
     return 1;
 }
@@ -415,7 +413,7 @@ sub logit {
 
     print $logmessage if $globalconfig{debug};
 
-    unless ($globalconfig{dryrun}) {
+    unless ( $globalconfig{dryrun} ) {
         open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
         print {$log} $logmessage;
         close $log;
@@ -430,12 +428,12 @@ sub logit {
 
 sub error404 {
     my ($title) = @_;
-    $title = $title || 'An error occured.';
+    $title ||= 'An error occured.';
 
     Dancer::Continuation::Route::ErrorSent->new(
         return_value => Dancer::Error->new(
-            code     => 404,
-            title    => $title,
+            code  => 404,
+            title => $title,
         )->render()
     )->throw;
 }

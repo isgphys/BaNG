@@ -1,4 +1,5 @@
 package BaNG::Routes_Statistics;
+
 use Dancer ':syntax';
 use BaNG::Reporting;
 use BaNG::Statistics;

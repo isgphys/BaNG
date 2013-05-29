@@ -1,4 +1,5 @@
 package BaNG::Routes;
+
 use Dancer ':syntax';
 use BaNG::Common;
 use BaNG::Config;

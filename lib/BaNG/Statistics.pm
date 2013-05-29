@@ -1,11 +1,11 @@
 package BaNG::Statistics;
 
-use BaNG::Reporting;
 use BaNG::Common;
 use BaNG::Config;
+use BaNG::Reporting;
 use Date::Parse;
-use List::Util qw(min max);
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw( uniq );
+use List::Util qw( min max );
 
 use Exporter 'import';
 our @EXPORT = qw(
