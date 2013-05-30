@@ -32,12 +32,18 @@
         </li>
         <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
             <ul>
+                <li><a href="#">Overview</a>
+                    <ul>
+                        <li><a href="/statistics/phd-bkp-gw">phd-bkp-gw</a></li>
+                        <li><a href="/statistics/galleon">galleon</a></li>
+                        <li><a href="/statistics/etscherzapfen">etscherzapfen</a></li>
+                    </ul>
+                </li>
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
               <li><a href="/statistics/schedule-all">Schedule by host</a></li>
-              <li><a href="/statistics">Overview</a></li>
               <li><a href="/statistics/variations">Variations</a></li>
             </ul>
-          </li>
+        </li>
         <li><a href="#" <% IF section == 'tools' %>class="active"<% END %>>Tools</a>
             <ul>
                 <li><a href="#">External Tools</a>
