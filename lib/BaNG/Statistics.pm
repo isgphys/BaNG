@@ -47,7 +47,6 @@ sub statistics_json {
         WHERE Start > date_sub(now(), interval $lastXdays day)
         AND BkpFromHost = '$host'
         AND BkpFromPath LIKE '\%$share'
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
         ORDER BY Start;
     ");
     $sth->execute();
@@ -85,8 +84,9 @@ sub statistics_json {
 }
 
 sub statistics_cumulated_json {
-    my ($days) = @_;
-    my $lastXdays = $days || $lastXdays_default;
+    my ($BkpServer, $lastXdays) = @_;
+    $BkpServer ||= 'phd-bkp-gw';
+    $lastXdays ||= $lastXdays_default;
 
     get_global_config();
     my $conn = bangstat_db_connect($globalconfig{config_bangstat});
@@ -96,7 +96,7 @@ sub statistics_cumulated_json {
         SELECT *
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays day)
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND BkpToHost LIKE '$BkpServer'
         AND isThread is NULL
         ORDER BY Start;
     ");
@@ -160,6 +160,9 @@ sub statistics_cumulated_json {
     }
     $sth->finish();
 
+    # only continue if we found any data
+    return 0 unless keys %CumulateByDate;
+
     # remove first day with incomplete information
     delete $CumulateByDate{( sort keys %CumulateByDate )[0]};
 
@@ -181,6 +184,8 @@ sub statistics_cumulated_json {
 }
 
 sub statistics_hosts_shares {
+    my ($BkpServer) = @_;
+    $BkpServer ||= 'phd-bkp-gw';
 
     get_global_config();
     my $conn = bangstat_db_connect($globalconfig{config_bangstat});
@@ -191,7 +196,7 @@ sub statistics_hosts_shares {
         DISTINCT BkpFromHost, BkpFromPath
         FROM statistic_all
         WHERE Start > date_sub(now(), interval $lastXdays_default day)
-        AND BkpToHost LIKE 'phd-bkp-gw\%'
+        AND BkpToHost LIKE '$BkpServer'
         ORDER BY BkpFromHost;
     ");
     $sth->execute();
@@ -206,7 +211,7 @@ sub statistics_hosts_shares {
         # distinguish data and system shares
         foreach my $share (@shares) {
             my $type = 'datashare';
-            $type = 'systemshare' unless $share =~ /export|imap/;
+            $type = 'systemshare' unless $share =~ /export|imap|Users/;
             push( @{$hosts_shares{$type}{$hostname}}, $share );
         }
     }
@@ -334,7 +339,8 @@ sub statistics_schedule {
 }
 
 sub rickshaw_json {
-    my %datahash = %{shift()};
+    my ($datahash_ref) = @_;
+    my %datahash = %{ $datahash_ref };
 
     my %rickshaw_data;
     foreach my $bkppath ( sort keys %datahash ) {

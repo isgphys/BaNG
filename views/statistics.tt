@@ -39,10 +39,13 @@
             <div id="select-host-share">
                 <p>View statistics of a specific
                   <%- FOREACH sharetype IN hosts_shares.keys.sort %>
-                    <%- IF sharetype=='datashare' %>
+                    <%- IF sharetype=='datashare' AND hosts_shares.datashare.size %>
                       data share
-                    <%- ELSE %>
-                      or system partition
+                    <%- ELSIF sharetype=='systemshare' AND hosts_shares.systemshare.size %>
+                      <%- IF hosts_shares.datashare.size AND hosts_shares.systemshare.size %>
+                      or
+                      <%- END %>
+                      system partition
                     <%- END %>
                     <select id="select-host-<%sharetype%>">
                         <option value="">&lt;host&gt;</option>
