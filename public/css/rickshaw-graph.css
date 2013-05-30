@@ -18,6 +18,9 @@
 #chart_y_axis .y_ticks text {
     visibility  : hidden;
 }
+#chart_y_axis .y_axis {
+    z-index     : -10;
+}
 #chart_legend, #chart_toggler {
     float       : left;
     margin-top  : 10px;
