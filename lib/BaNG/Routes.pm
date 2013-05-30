@@ -23,7 +23,7 @@ get '/' => sub {
         remoteuser   => request->user,
         webDancerEnv => config->{run_env},
         fsinfo       => get_fsinfo(),
-        lockfiles    => getLockFiles(),
+        lockfiles    => get_LockFiles(),
     };
 };
 

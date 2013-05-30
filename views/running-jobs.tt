@@ -1,6 +1,6 @@
 <div id="lockinfo">
 <h3>Currently Running Tasks</h3>
-  Total Running Tasks: <% lockfiles.size %>
+Working servers: <% lockfiles.size %>
   <table style="border-width:1px; border-style:solid; padding:4px; min-width: 300px;">
      <thead>
        <th>Host</th>
@@ -8,13 +8,18 @@
        <th>Work on</th>
      </thead>
      <tbody>
-         <%- FOREACH lockfile IN lockfiles %>
-             <tr>
-                 <td class="center"><% lockfile.host %></td>
-                 <td class="center"><% lockfile.group %></td>
-                 <td class="center"><% lockfile.path %></td>
-             </tr>
+       <%- FOREACH server IN lockfiles.keys %>
+         <tr>
+             <td colspan=3><b><% server %></b> (<% lockfiles.$server.size %>)</td>
+         </tr>
+         <%- FOREACH lockfile IN lockfiles.$server.keys %>
+         <tr>
+             <td class="center"><% lockfiles.$server.$lockfile.host %></td>
+             <td class="center"><% lockfiles.$server.$lockfile.group %></td>
+             <td class="center"><% lockfiles.$server.$lockfile.path %></td>
+         </tr>
          <%- END %>
+       <%- END %>
      </tbody>
    </table>
 </div>

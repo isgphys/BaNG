@@ -9,6 +9,7 @@ use Net::Ping;
 use Exporter 'import';
 our @EXPORT = qw(
     get_fsinfo
+    get_LockFiles
     chkClientConn
     createLockFile
     removeLockFile
@@ -47,6 +48,26 @@ sub get_fsinfo {
     }
 
     return \%fsinfo;
+}
+
+sub get_LockFiles {
+    my %lockfiles;
+    get_server_config();
+    foreach my $server ( keys %servers ) {
+
+        my @lockfiles = remoteWrapperCommand( $server, 'BaNG/bang_getLockFile', $globalconfig{path_lockfiles} );
+
+        foreach my $lockfile ( @lockfiles  ) {
+            my ($host, $group, $path) = splitLockFileName($lockfile);
+            $lockfiles{$server}{"$host-$group-$path"} = {
+                'host'  => $host,
+                'group' => $group,
+                'path'  => $path,
+            };
+        }
+    }
+
+    return \%lockfiles;
 }
 
 sub check_fill_level {
@@ -135,27 +156,6 @@ sub removeLockFile {
     logit( $host, $group, "Removed lockfile $lockfile" );
 
     return 1;
-}
-
-sub getLockFiles {
-    my @lockfiles;
-    my $ffr_obj = File::Find::Rule->file()
-                                  ->name("*.lock")
-                                  ->relative
-                                  ->maxdepth(1)
-                                  ->start($globalconfig{path_lockfiles});
-
-    while ( my $lockfile = $ffr_obj->match() ) {
-        my ($host, $group, $path) = splitLockFileName($lockfile);
-        my $file = {
-            'host'  => $host,
-            'group' => $group,
-            'path'  => $path,
-        };
-        push( @lockfiles, $file );
-    }
-
-    return \@lockfiles;
 }
 
 #################################
