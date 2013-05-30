@@ -32,7 +32,7 @@
         </li>
         <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
             <ul>
-                <li><a href="#">Overview</a>
+                <li><a href="/statistics">Overview</a>
                     <ul>
                         <li><a href="/statistics/phd-bkp-gw">phd-bkp-gw</a></li>
                         <li><a href="/statistics/galleon">galleon</a></li>
