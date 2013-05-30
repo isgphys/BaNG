@@ -1,14 +1,14 @@
-package BaNG::Routes_Documentation;
+package BaNG::Routes_Docs;
 
 use Dancer ':syntax';
 use BaNG::Config;
 use Template::Plugin::Markdown;
 use Text::Markdown;
 
-prefix '/documentation';
+prefix '/docs';
 
 get '/' => sub {
-    redirect '/documentation/Index';
+    redirect '/docs/Index';
 };
 
 get '/:file' => sub {

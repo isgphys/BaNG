@@ -6,7 +6,7 @@ use BaNG::Config;
 use BaNG::Hosts;
 use BaNG::Reporting;
 use BaNG::Routes_Config;
-use BaNG::Routes_Documentation;
+use BaNG::Routes_Docs;
 use BaNG::Routes_Host;
 use BaNG::Routes_Restore;
 use BaNG::Routes_Schedule;
