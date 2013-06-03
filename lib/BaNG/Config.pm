@@ -33,6 +33,7 @@ sub get_serverconfig {
     my ($prefix_arg) = @_;
 
     undef %servers;
+    undef %serverconfig;
     $prefix        = $prefix_arg if $prefix_arg;
     $serverconfig{path_configs}            = "$prefix/etc";
     $serverconfig{config_defaults_servers} = "$serverconfig{path_configs}/defaults_servers.yaml";
@@ -42,10 +43,10 @@ sub get_serverconfig {
     my @serverconfigs = _find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
 
     foreach my $serverconfigfile (@serverconfigs) {
-        my ($servername) = _split_server_configname($serverconfigfile);
-        my ($serverconfig, $confighelper) = _read_server_configfile($servername);
+        my ($server) = _split_server_configname($serverconfigfile);
+        my ($serverconfig, $confighelper) = _read_server_configfile($server);
 
-        $servers{"$servername"} = {
+        $servers{"$server"} = {
             'configfile'   => $serverconfigfile,
             'serverconfig' => $serverconfig,
             'confighelper' => $confighelper,
