@@ -3,7 +3,8 @@
 
 Config files:
 
-  * ```./etc/bang_defaults.yaml```: common default settings
+  * ```./etc/defaults_servers.yaml```: common default settings for servers
+  * ```./etc/defaults_hosts.yaml```: common default settings for hosts
   * ```./etc/groups/<groupname>.yaml```: group-specific settings
   * ```./etc/hosts/<hostname>_<groupname>.yaml```: host-specific settings
 

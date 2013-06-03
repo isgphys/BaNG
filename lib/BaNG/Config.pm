@@ -43,7 +43,7 @@ sub get_global_config {
 
     $prefix        = $prefix_arg if $prefix_arg;
     $config_path   = "$prefix/etc";
-    $config_global = "$config_path/bang_globals.yaml";
+    $config_global = "$config_path/defaults_servers.yaml";
 
     # read bang global configs
     if ( sanityfilecheck($config_global) ) {
@@ -52,16 +52,16 @@ sub get_global_config {
     }
 
     # override with server-specific global configs
-    my $server_globals = "$config_path/$globalconfig{path_serverconfig}/${servername}_globals.yaml";
-    if ( sanityfilecheck($server_globals) ) {
-        my $server_settings = LoadFile($server_globals);
+    my $server_defaults = "$config_path/$globalconfig{path_serverconfig}/${servername}_defaults.yaml";
+    if ( sanityfilecheck($server_defaults) ) {
+        my $server_settings = LoadFile($server_defaults);
         foreach my $key ( keys %{$server_settings} ) {
             $globalconfig{$key} = $server_settings->{$key};
         }
     }
 
     # preprend full path where needed
-    foreach my $key (qw( config_default config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_logs path_lockfiles )) {
+    foreach my $key (qw( config_defaults_hosts config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_logs path_lockfiles )) {
         $globalconfig{$key} = "$config_path/$globalconfig{$key}";
     }
 
@@ -70,8 +70,8 @@ sub get_global_config {
 
 sub get_default_config {
 
-    sanityfilecheck( $globalconfig{config_default} );
-    my $defaultconfig = LoadFile( $globalconfig{config_default} );
+    sanityfilecheck( $globalconfig{config_defaults_hosts} );
+    my $defaultconfig = LoadFile( $globalconfig{config_defaults_hosts} );
 
     return $defaultconfig;
 }
@@ -123,7 +123,7 @@ sub split_group_configname {
 sub split_server_configname {
     my ($configfile) = @_;
 
-    my ($server) = $configfile =~ /^([\w\d-]+)_globals\.yaml/;
+    my ($server) = $configfile =~ /^([\w\d-]+)_defaults\.yaml/;
 
     return ($server);
 }
@@ -204,7 +204,7 @@ sub get_server_config {
 
     $server ||= '*';
     undef %servers;
-    my @serverconfigs = find_configs( "${server}_globals\.yaml", $globalconfig{path_serverconfig} );
+    my @serverconfigs = find_configs( "${server}_defaults\.yaml", $globalconfig{path_serverconfig} );
 
     foreach my $serverconfigfile (@serverconfigs) {
         my ($servername) = split_server_configname($serverconfigfile);
@@ -305,7 +305,7 @@ sub read_host_configfile {
     $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
 
-    $settings = LoadFile( $globalconfig{config_default} );
+    $settings = LoadFile( $globalconfig{config_defaults_hosts} );
 
     foreach my $configtmpl (qw( group host )) {
         if ( sanityfilecheck( $configfile{$configtmpl} ) ) {
@@ -331,7 +331,7 @@ sub read_group_configfile {
 
     $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
 
-    $settings = LoadFile( $globalconfig{config_default} );
+    $settings = LoadFile( $globalconfig{config_defaults_hosts} );
 
     foreach my $configtmpl (qw( group )) {
         if ( sanityfilecheck( $configfile{$configtmpl} ) ) {
@@ -355,8 +355,8 @@ sub read_server_configfile {
     my $settings;
     my $settingshelper;
 
-    $configfile{server} = "$globalconfig{path_serverconfig}/${server}_globals.yaml";
-    $settings = LoadFile( $globalconfig{config_default} );
+    $configfile{server} = "$globalconfig{path_serverconfig}/${server}_defaults.yaml";
+    $settings = LoadFile( $globalconfig{config_defaults_hosts} );
 
     if ( sanityfilecheck( $configfile{server} ) ) {
 

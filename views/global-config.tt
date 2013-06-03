@@ -44,7 +44,7 @@
 </div>
 
 <div style="float:left;">
-    <h3>Default Configfile:<% globalconfig.config_default %></h3>
+    <h3>Default Configfile:<% globalconfig.config_defaults_hosts %></h3>
     <table id="config_default" class="tablesorter">
         <thead>
             <tr>
