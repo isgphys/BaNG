@@ -1,0 +1,36 @@
+<h2>Server configs (<% servers.size  %>) </h2>
+<div id="configs_filter">
+    <form id="filter-form">Filter Configslist:
+        <input name="filter" id="filter" value="" maxlength="30" size="30" type="text" autofocus >
+        <img alt="Clear" src="/images/clear.png" border="0" onClick="$('#filter').val(''); updateFilter();">
+    </form>
+    (Click on a Config-File entry to show details)
+</div>
+<table id="configslist" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Server</th>
+            <th>Config-Files</th>
+        </tr>
+    </thead>
+    <tbody>
+      <% FOREACH server IN servers.keys.sort %>
+      <tr <% IF servers.$server.css_class %> class="<% servers.$server.css_class %>"<% END %>>
+          <td><a href="/config/allhosts/<% server %>"><% server %></a></td>
+          <td class="expander more">
+              <% servers.$server.configfile %>
+              <div id="config_details" class="conf_details">
+                  <table class="configfile">
+                      <% FOREACH serverconf IN servers.$server.serverconfig.keys.sort %>
+                      <tr <% IF servers.$server.confighelper.$serverconf %>class="<% servers.$server.confighelper.$serverconf %>Config"<% END %>>
+                          <td><% serverconf %></td>
+                          <td><% servers.$server.serverconfig.$serverconf %></td>
+                      </tr>
+                      <% END %>
+                  </table>
+              </div>
+          </td>
+        </tr>
+      <% END %>
+    </tbody>
+</table>

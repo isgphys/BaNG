@@ -47,4 +47,15 @@ get '/allgroups' => sub {
     };
 };
 
+get '/allservers' => sub {
+    get_serverconfig();
+
+    template 'server-configs-overview' => {
+        section      => 'configs',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        servers      => \%servers,
+    };
+};
+
 1;
