@@ -8,10 +8,10 @@ use YAML::Tiny qw( LoadFile Dump );
 
 use Exporter 'import';
 our @EXPORT = qw(
-    %serverconfig
     %hosts
     %groups
     %servers
+    %serverconfig
     $prefix
     $servername
     get_serverconfig
@@ -19,8 +19,6 @@ our @EXPORT = qw(
     get_group_config
     get_cronjob_config
     generated_crontab
-    read_host_configfile
-    split_configname
 );
 
 our %hosts;
@@ -41,11 +39,11 @@ sub get_serverconfig {
     $serverconfig{path_serverconfig}       = "$serverconfig{path_configs}/servers";
 
     # get info about all backup servers
-    my @serverconfigs = find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
+    my @serverconfigs = _find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
 
     foreach my $serverconfigfile (@serverconfigs) {
-        my ($servername) = split_server_configname($serverconfigfile);
-        my ($serverconfig, $confighelper) = read_server_configfile($servername);
+        my ($servername) = _split_server_configname($serverconfigfile);
+        my ($serverconfig, $confighelper) = _read_server_configfile($servername);
 
         $servers{"$servername"} = {
             'configfile'   => $serverconfigfile,
@@ -66,7 +64,7 @@ sub get_serverconfig {
 
     # add defaults_hosts config
     my $defaults_hosts_file = $serverconfig{config_defaults_hosts};
-    if ( sanityfilecheck($defaults_hosts_file) ) {
+    if ( _sanityfilecheck($defaults_hosts_file) ) {
         $serverconfig{defaults_hosts} = LoadFile( $defaults_hosts_file );
     }
 
@@ -79,11 +77,11 @@ sub get_host_config {
     $host  ||= '*';
     $group ||= '*';
     undef %hosts;
-    my @hostconfigs = find_configs( "$host\_$group\.yaml", "$serverconfig{path_hostconfig}" );
+    my @hostconfigs = _find_configs( "$host\_$group\.yaml", "$serverconfig{path_hostconfig}" );
 
     foreach my $hostconfigfile (@hostconfigs) {
-        my ($hostname, $group)          = split_configname($hostconfigfile);
-        my ($hostconfig, $confighelper) = read_host_configfile( $hostname, $group );
+        my ($hostname, $group)          = _split_configname($hostconfigfile);
+        my ($hostconfig, $confighelper) = _read_host_configfile( $hostname, $group );
         my $isEnabled        = $hostconfig->{BKP_ENABLED};
         my $isBulkbkp        = $hostconfig->{BKP_BULK_ALLOW};
         my $isBulkwipe       = $hostconfig->{WIPE_BULK_ALLOW};
@@ -111,11 +109,11 @@ sub get_group_config {
 
     $group ||= '*';
     undef %groups;
-    my @groupconfigs = find_configs( "$group\.yaml", "$serverconfig{path_groupconfig}" );
+    my @groupconfigs = _find_configs( "$group\.yaml", "$serverconfig{path_groupconfig}" );
 
     foreach my $groupconfigfile (@groupconfigs) {
-        my ($groupname)                  = split_group_configname($groupconfigfile);
-        my ($groupconfig, $confighelper) = read_group_configfile($groupname);
+        my ($groupname)                  = _split_group_configname($groupconfigfile);
+        my ($groupconfig, $confighelper) = _read_group_configfile($groupname);
         my $isEnabled        = $groupconfig->{BKP_ENABLED};
         my $isBulkbkp        = $groupconfig->{BKP_BULK_ALLOW};
         my $isBulkwipe       = $groupconfig->{WIPE_BULK_ALLOW};
@@ -140,14 +138,14 @@ sub get_cronjob_config {
     my %unsortedcronjobs;
     my %sortedcronjobs;
 
-    my @cronconfigs = find_configs( "*_cronjobs_*.yaml", "$serverconfig{path_serverconfig}" );
+    my @cronconfigs = _find_configs( "*_cronjobs_*.yaml", "$serverconfig{path_serverconfig}" );
 
     foreach my $cronconfigfile (@cronconfigs) {
-        my ($server, $jobtype) = split_cronconfigname($cronconfigfile);
+        my ($server, $jobtype) = _split_cronconfigname($cronconfigfile);
 
         JOBTYPE: foreach my $jobtype (qw( backup wipe )) {
             my $cronjobsfile = "$serverconfig{path_serverconfig}/${server}_cronjobs_$jobtype.yaml";
-            next JOBTYPE unless sanityfilecheck($cronjobsfile);
+            next JOBTYPE unless _sanityfilecheck($cronjobsfile);
             my $cronjobslist = LoadFile($cronjobsfile);
 
             foreach my $cronjob ( keys %{$cronjobslist} ) {
@@ -210,7 +208,7 @@ sub generated_crontab {
     return $crontab;
 }
 
-sub read_host_configfile {
+sub _read_host_configfile {
     my ($host, $group) = @_;
 
     my %configfile;
@@ -221,7 +219,7 @@ sub read_host_configfile {
     $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
 
     foreach my $config_override (qw( group host )) {
-        if ( sanityfilecheck( $configfile{$config_override} ) ) {
+        if ( _sanityfilecheck( $configfile{$config_override} ) ) {
 
             my $settings_override = LoadFile( $configfile{$config_override} );
 
@@ -235,7 +233,7 @@ sub read_host_configfile {
     return ($settings, $settingshelper);
 }
 
-sub read_group_configfile {
+sub _read_group_configfile {
     my ($group) = @_;
 
     my %configfile;
@@ -245,7 +243,7 @@ sub read_group_configfile {
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
 
     foreach my $config_override (qw( group )) {
-        if ( sanityfilecheck( $configfile{$config_override} ) ) {
+        if ( _sanityfilecheck( $configfile{$config_override} ) ) {
 
             my $settings_override = LoadFile( $configfile{$config_override} );
 
@@ -259,7 +257,7 @@ sub read_group_configfile {
     return ($settings, $settingshelper);
 }
 
-sub read_server_configfile {
+sub _read_server_configfile {
     my ($server) = @_;
 
     my %configfile;
@@ -269,7 +267,7 @@ sub read_server_configfile {
     $configfile{server} = "$serverconfig{path_serverconfig}/${server}_defaults.yaml";
 
     foreach my $config_override (qw( server )) {
-        if ( sanityfilecheck( $configfile{$config_override} ) ) {
+        if ( _sanityfilecheck( $configfile{$config_override} ) ) {
 
             my $settings_override = LoadFile( $configfile{$config_override} );
 
@@ -283,7 +281,7 @@ sub read_server_configfile {
     return ($settings, $settingshelper);
 }
 
-sub sanityfilecheck {
+sub _sanityfilecheck {
     my ($file) = @_;
 
     if ( !-f "$file" ) {
@@ -294,7 +292,7 @@ sub sanityfilecheck {
     }
 }
 
-sub find_configs {
+sub _find_configs {
     my ($query, $searchpath) = @_;
 
     my @files;
@@ -311,7 +309,7 @@ sub find_configs {
     return @files;
 }
 
-sub split_configname {
+sub _split_configname {
     my ($configfile) = @_;
 
     my ($hostname, $groupname) = $configfile =~ /^([\w\d-]+)_([\w\d-]+)\.yaml/;
@@ -319,7 +317,7 @@ sub split_configname {
     return ($hostname, $groupname);
 }
 
-sub split_group_configname {
+sub _split_group_configname {
     my ($configfile) = @_;
 
     my ($groupname) = $configfile =~ /^([\w\d-]+)\.yaml/;
@@ -327,7 +325,7 @@ sub split_group_configname {
     return ($groupname);
 }
 
-sub split_server_configname {
+sub _split_server_configname {
     my ($configfile) = @_;
 
     my ($server) = $configfile =~ /^([\w\d-]+)_defaults\.yaml/;
@@ -335,7 +333,7 @@ sub split_server_configname {
     return ($server);
 }
 
-sub split_cronconfigname {
+sub _split_cronconfigname {
     my ($cronconfigfile) = @_;
 
     my ($server, $jobtype) = $cronconfigfile =~ /^([\w\d-]+)_cronjobs_([\w\d-]+)\.yaml/;
