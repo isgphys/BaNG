@@ -13,7 +13,6 @@ our @EXPORT = qw(
     %groups
     %servers
     $prefix
-    $config_path
     $servername
     get_serverconfig
     get_defaults_hosts
@@ -28,8 +27,6 @@ our @EXPORT = qw(
 our %serverconfig;
 our %hosts;
 our %groups;
-our %servers;
-our $config_path;
 our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
@@ -39,9 +36,9 @@ sub get_serverconfig {
 
     undef %servers;
     $prefix        = $prefix_arg if $prefix_arg;
-    $config_path   = "$prefix/etc";
-    $serverconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
-    $serverconfig{path_serverconfig}       = "$config_path/servers";
+    $serverconfig{path_configs}            = "$prefix/etc";
+    $serverconfig{config_defaults_servers} = "$serverconfig{path_configs}/defaults_servers.yaml";
+    $serverconfig{path_serverconfig}       = "$serverconfig{path_configs}/servers";
 
     # get info about all backup servers
     my @serverconfigs = find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
@@ -58,12 +55,13 @@ sub get_serverconfig {
     }
 
     # copy info about localhost to separate hash for easier retrieval
-    %serverconfig = %{ $servers{$servername}{serverconfig} };
-    $serverconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
+    foreach my $key ( keys %{ $servers{$servername}{serverconfig} } ) {
+        $serverconfig{$key} = $servers{$servername}{serverconfig}->{$key};
+    }
 
     # preprend full path where needed
     foreach my $key (qw( config_defaults_hosts config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_logs path_lockfiles )) {
-        $serverconfig{$key} = "$config_path/$serverconfig{$key}";
+        $serverconfig{$key} = "$serverconfig{path_configs}/$serverconfig{$key}";
     }
 
     return 1;

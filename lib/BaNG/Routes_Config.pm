@@ -16,7 +16,7 @@ get '/global' => sub {
         defaults_hosts => get_defaults_hosts(),
         servername     => $servername,
         prefix_path    => $prefix,
-        config_path    => $config_path,
+        path_configs    => $serverconfig{path_configs},
     };
 };
 

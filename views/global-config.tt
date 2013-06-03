@@ -15,7 +15,7 @@
     </tr>
     <tr>
         <td>Config-Dir:</td>
-        <td><% config_path %></td>
+        <td><% path_configs %></td>
     </tr>
 </table>
 
