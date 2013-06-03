@@ -18,7 +18,6 @@ our @EXPORT = qw(
 
 sub get_fsinfo {
     my %fsinfo;
-    get_server_config();
     foreach my $server ( keys %servers ) {
 
         my @mounts = remoteWrapperCommand( $server, 'BaNG/bang_df' );
@@ -52,7 +51,6 @@ sub get_fsinfo {
 
 sub get_LockFiles {
     my %lockfiles;
-    get_server_config();
     foreach my $server ( keys %servers ) {
 
         my @lockfiles = remoteWrapperCommand( $server, 'BaNG/bang_getLockFile', $globalconfig{path_lockfiles} );

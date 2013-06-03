@@ -17,7 +17,6 @@ get '/global' => sub {
         servername     => $servername,
         prefix_path    => $prefix,
         config_path    => $config_path,
-        config_global  => $config_global,
     };
 };
 

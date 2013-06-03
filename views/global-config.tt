@@ -20,7 +20,7 @@
 </table>
 
 <div style="float:left;">
-    <h3>Global Configfile:<% config_global %></h3>
+    <h3>Server Defaults Configfile:<% globalconfig.config_defaults_servers %></h3>
     <table id="config" class="tablesorter">
         <thead>
             <tr>
@@ -44,7 +44,7 @@
 </div>
 
 <div style="float:left;">
-    <h3>Default Configfile:<% globalconfig.config_defaults_hosts %></h3>
+    <h3>Hosts Defaults Configfile:<% globalconfig.config_defaults_hosts %></h3>
     <table id="config_default" class="tablesorter">
         <thead>
             <tr>

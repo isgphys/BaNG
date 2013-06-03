@@ -14,7 +14,6 @@ our @EXPORT = qw(
     %servers
     $prefix
     $config_path
-    $config_global
     $servername
     get_global_config
     get_default_config
@@ -33,7 +32,6 @@ our %hosts;
 our %groups;
 our %servers;
 our $config_path;
-our $config_global;
 our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
@@ -43,29 +41,42 @@ sub get_global_config {
 
     $prefix        = $prefix_arg if $prefix_arg;
     $config_path   = "$prefix/etc";
-    $config_global = "$config_path/defaults_servers.yaml";
+    $globalconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
+    $globalconfig{path_serverconfig}       = "$config_path/servers";
 
-    # read bang global configs
-    if ( sanityfilecheck($config_global) ) {
-        my $global_settings = LoadFile($config_global);
-        %globalconfig = %{ $global_settings };
-    }
+    # get info about all backup servers
+    get_server_config();
 
-    # override with server-specific global configs
-    my $server_defaults = "$config_path/$globalconfig{path_serverconfig}/${servername}_defaults.yaml";
-    if ( sanityfilecheck($server_defaults) ) {
-        my $server_settings = LoadFile($server_defaults);
-        foreach my $key ( keys %{$server_settings} ) {
-            $globalconfig{$key} = $server_settings->{$key};
-        }
-    }
+    # copy info about localhost to separate hash for easier retrieval
+    %globalconfig = %{ $servers{$servername}{serverconfig} };
+    $globalconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
 
     # preprend full path where needed
     foreach my $key (qw( config_defaults_hosts config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_logs path_lockfiles )) {
         $globalconfig{$key} = "$config_path/$globalconfig{$key}";
     }
 
-    $globalconfig{config_defaults_servers} = $config_global;
+    return 1;
+}
+
+sub get_server_config {
+    my ($server) = @_;
+
+    $server ||= '*';
+    undef %servers;
+    my @serverconfigs = find_configs( "${server}_defaults\.yaml", $globalconfig{path_serverconfig} );
+
+    foreach my $serverconfigfile (@serverconfigs) {
+        my ($servername) = split_server_configname($serverconfigfile);
+        my ($serverconfig, $confighelper) = read_server_configfile($servername);
+
+        $servers{"$servername"} = {
+            'status'       => $status,
+            'configfile'   => $serverconfigfile,
+            'serverconfig' => $serverconfig,
+            'confighelper' => $confighelper,
+        };
+    }
 
     return 1;
 }
@@ -195,28 +206,6 @@ sub get_group_config {
             'nobulk_css_class' => $nobulk_css_class,
             'groupconfig'      => $groupconfig,
             'confighelper'     => $confighelper,
-        };
-    }
-
-    return 1;
-}
-
-sub get_server_config {
-    my ($server) = @_;
-
-    $server ||= '*';
-    undef %servers;
-    my @serverconfigs = find_configs( "${server}_defaults\.yaml", $globalconfig{path_serverconfig} );
-
-    foreach my $serverconfigfile (@serverconfigs) {
-        my ($servername) = split_server_configname($serverconfigfile);
-        my ($serverconfig, $confighelper) = read_server_configfile($servername);
-
-        $servers{"$servername"} = {
-            'status'       => $status,
-            'configfile'   => $serverconfigfile,
-            'serverconfig' => $serverconfig,
-            'confighelper' => $confighelper,
         };
     }
 
