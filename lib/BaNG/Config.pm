@@ -16,10 +16,9 @@ our @EXPORT = qw(
     $config_path
     $servername
     get_global_config
-    get_default_config
+    get_defaults_hosts
     get_host_config
     get_group_config
-    get_server_config
     get_cronjob_config
     generated_crontab
     read_host_configfile
@@ -27,7 +26,6 @@ our @EXPORT = qw(
 );
 
 our %serverconfig;
-our %defaultconfig;
 our %hosts;
 our %groups;
 our %servers;
@@ -39,13 +37,25 @@ chomp $servername;
 sub get_global_config {
     my ($prefix_arg) = @_;
 
+    undef %servers;
     $prefix        = $prefix_arg if $prefix_arg;
     $config_path   = "$prefix/etc";
     $serverconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
     $serverconfig{path_serverconfig}       = "$config_path/servers";
 
     # get info about all backup servers
-    get_server_config();
+    my @serverconfigs = find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
+
+    foreach my $serverconfigfile (@serverconfigs) {
+        my ($servername) = split_server_configname($serverconfigfile);
+        my ($serverconfig, $confighelper) = read_server_configfile($servername);
+
+        $servers{"$servername"} = {
+            'configfile'   => $serverconfigfile,
+            'serverconfig' => $serverconfig,
+            'confighelper' => $confighelper,
+        };
+    }
 
     # copy info about localhost to separate hash for easier retrieval
     %serverconfig = %{ $servers{$servername}{serverconfig} };
@@ -59,34 +69,15 @@ sub get_global_config {
     return 1;
 }
 
-sub get_server_config {
-    my ($server) = @_;
+sub get_defaults_hosts {
 
-    $server ||= '*';
-    undef %servers;
-    my @serverconfigs = find_configs( "${server}_defaults\.yaml", $serverconfig{path_serverconfig} );
-
-    foreach my $serverconfigfile (@serverconfigs) {
-        my ($servername) = split_server_configname($serverconfigfile);
-        my ($serverconfig, $confighelper) = read_server_configfile($servername);
-
-        $servers{"$servername"} = {
-            'status'       => $status,
-            'configfile'   => $serverconfigfile,
-            'serverconfig' => $serverconfig,
-            'confighelper' => $confighelper,
-        };
+    my $defaults_hosts = '';
+    my $defaults_hosts_file = $serverconfig{config_defaults_hosts};
+    if ( sanityfilecheck($defaults_hosts_file) ) {
+        $defaults_hosts = LoadFile( $defaults_hosts_file );
     }
 
-    return 1;
-}
-
-sub get_default_config {
-
-    sanityfilecheck( $serverconfig{config_defaults_hosts} );
-    my $defaultconfig = LoadFile( $serverconfig{config_defaults_hosts} );
-
-    return $defaultconfig;
+    return $defaults_hosts;
 }
 
 sub sanityfilecheck {
@@ -292,7 +283,7 @@ sub read_host_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = LoadFile( $serverconfig{config_defaults_hosts} );
+    my $settings = get_defaults_hosts();
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
 
@@ -317,7 +308,7 @@ sub read_group_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = LoadFile( $serverconfig{config_defaults_hosts} );
+    my $settings = get_defaults_hosts();
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
 
     foreach my $config_override (qw( group )) {

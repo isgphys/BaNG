@@ -53,13 +53,13 @@
             </tr>
         </thead>
         <tbody>
-          <% FOREACH defaultconf IN defaultsconfig.keys.sort %>
+          <% FOREACH defaultconf IN defaults_hosts.keys.sort %>
             <tr>
                 <td>
                     <% defaultconf %>
                 </td>
                 <td>
-                    <% defaultsconfig.$defaultconf %>
+                    <% defaults_hosts.$defaultconf %>
                 </td>
             </tr>
           <% END %>
