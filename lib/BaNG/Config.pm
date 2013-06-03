@@ -215,7 +215,7 @@ sub _read_host_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings       = $serverconfig{defaults_hosts};
+    my $settings       = { %{$serverconfig{defaults_hosts}} };
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
 
@@ -240,7 +240,7 @@ sub _read_group_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings       = $serverconfig{defaults_hosts};
+    my $settings       = { %{$serverconfig{defaults_hosts}} };
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
 
     foreach my $config_override (qw( group )) {
