@@ -38,7 +38,7 @@ sub statistics_json {
     my $lastXdays = $days || $lastXdays_default;
 
     get_global_config();
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -89,7 +89,7 @@ sub statistics_cumulated_json {
     $lastXdays ||= $lastXdays_default;
 
     get_global_config();
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -188,7 +188,7 @@ sub statistics_hosts_shares {
     $BkpServer ||= 'phd-bkp-gw';
 
     get_global_config();
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -230,7 +230,7 @@ sub statistics_hosts_shares {
 sub statistics_groupshare_variations {
 
     get_global_config();
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -290,7 +290,7 @@ sub statistics_schedule {
     my $lastXdays = $days || $lastXdays_default;
 
     get_global_config();
-    my $conn = bangstat_db_connect($globalconfig{config_bangstat});
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("

@@ -8,7 +8,7 @@ use YAML::Tiny qw( LoadFile Dump );
 
 use Exporter 'import';
 our @EXPORT = qw(
-    %globalconfig
+    %serverconfig
     %hosts
     %groups
     %servers
@@ -26,7 +26,7 @@ our @EXPORT = qw(
     split_configname
 );
 
-our %globalconfig;
+our %serverconfig;
 our %defaultconfig;
 our %hosts;
 our %groups;
@@ -41,19 +41,19 @@ sub get_global_config {
 
     $prefix        = $prefix_arg if $prefix_arg;
     $config_path   = "$prefix/etc";
-    $globalconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
-    $globalconfig{path_serverconfig}       = "$config_path/servers";
+    $serverconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
+    $serverconfig{path_serverconfig}       = "$config_path/servers";
 
     # get info about all backup servers
     get_server_config();
 
     # copy info about localhost to separate hash for easier retrieval
-    %globalconfig = %{ $servers{$servername}{serverconfig} };
-    $globalconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
+    %serverconfig = %{ $servers{$servername}{serverconfig} };
+    $serverconfig{config_defaults_servers} = "$config_path/defaults_servers.yaml";
 
     # preprend full path where needed
     foreach my $key (qw( config_defaults_hosts config_bangstat path_serverconfig path_groupconfig path_hostconfig path_excludes path_logs path_lockfiles )) {
-        $globalconfig{$key} = "$config_path/$globalconfig{$key}";
+        $serverconfig{$key} = "$config_path/$serverconfig{$key}";
     }
 
     return 1;
@@ -64,7 +64,7 @@ sub get_server_config {
 
     $server ||= '*';
     undef %servers;
-    my @serverconfigs = find_configs( "${server}_defaults\.yaml", $globalconfig{path_serverconfig} );
+    my @serverconfigs = find_configs( "${server}_defaults\.yaml", $serverconfig{path_serverconfig} );
 
     foreach my $serverconfigfile (@serverconfigs) {
         my ($servername) = split_server_configname($serverconfigfile);
@@ -83,8 +83,8 @@ sub get_server_config {
 
 sub get_default_config {
 
-    sanityfilecheck( $globalconfig{config_defaults_hosts} );
-    my $defaultconfig = LoadFile( $globalconfig{config_defaults_hosts} );
+    sanityfilecheck( $serverconfig{config_defaults_hosts} );
+    my $defaultconfig = LoadFile( $serverconfig{config_defaults_hosts} );
 
     return $defaultconfig;
 }
@@ -155,7 +155,7 @@ sub get_host_config {
     $host  ||= '*';
     $group ||= '*';
     undef %hosts;
-    my @hostconfigs = find_configs( "$host\_$group\.yaml", "$globalconfig{path_hostconfig}" );
+    my @hostconfigs = find_configs( "$host\_$group\.yaml", "$serverconfig{path_hostconfig}" );
 
     foreach my $hostconfigfile (@hostconfigs) {
         my ($hostname, $group)          = split_configname($hostconfigfile);
@@ -187,7 +187,7 @@ sub get_group_config {
 
     $group ||= '*';
     undef %groups;
-    my @groupconfigs = find_configs( "$group\.yaml", "$globalconfig{path_groupconfig}" );
+    my @groupconfigs = find_configs( "$group\.yaml", "$serverconfig{path_groupconfig}" );
 
     foreach my $groupconfigfile (@groupconfigs) {
         my ($groupname)                  = split_group_configname($groupconfigfile);
@@ -216,13 +216,13 @@ sub get_cronjob_config {
     my %unsortedcronjobs;
     my %sortedcronjobs;
 
-    my @cronconfigs = find_configs( "*_cronjobs_*.yaml", "$globalconfig{path_serverconfig}" );
+    my @cronconfigs = find_configs( "*_cronjobs_*.yaml", "$serverconfig{path_serverconfig}" );
 
     foreach my $cronconfigfile (@cronconfigs) {
         my ($server, $jobtype) = split_cronconfigname($cronconfigfile);
 
         JOBTYPE: foreach my $jobtype (qw( backup wipe )) {
-            my $cronjobsfile = "$globalconfig{path_serverconfig}/${server}_cronjobs_$jobtype.yaml";
+            my $cronjobsfile = "$serverconfig{path_serverconfig}/${server}_cronjobs_$jobtype.yaml";
             next JOBTYPE unless sanityfilecheck($cronjobsfile);
             my $cronjobslist = LoadFile($cronjobsfile);
 
@@ -292,9 +292,9 @@ sub read_host_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = LoadFile( $globalconfig{config_defaults_hosts} );
-    $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
-    $configfile{host}  = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
+    my $settings = LoadFile( $serverconfig{config_defaults_hosts} );
+    $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
+    $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
 
     foreach my $config_override (qw( group host )) {
         if ( sanityfilecheck( $configfile{$config_override} ) ) {
@@ -317,8 +317,8 @@ sub read_group_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = LoadFile( $globalconfig{config_defaults_hosts} );
-    $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
+    my $settings = LoadFile( $serverconfig{config_defaults_hosts} );
+    $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
 
     foreach my $config_override (qw( group )) {
         if ( sanityfilecheck( $configfile{$config_override} ) ) {
@@ -341,8 +341,8 @@ sub read_server_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = LoadFile( $globalconfig{config_defaults_servers} );
-    $configfile{server} = "$globalconfig{path_serverconfig}/${server}_defaults.yaml";
+    my $settings = LoadFile( $serverconfig{config_defaults_servers} );
+    $configfile{server} = "$serverconfig{path_serverconfig}/${server}_defaults.yaml";
 
     foreach my $config_override (qw( server )) {
         if ( sanityfilecheck( $configfile{$config_override} ) ) {

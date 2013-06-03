@@ -59,7 +59,7 @@ foreach my $config ( sort keys %hosts ) {
 }
 
 if ( !@queue ) {
-    print "Exit because queue is empty.\n" if ( $globalconfig{debug} && !$wipe );
+    print "Exit because queue is empty.\n" if ( $serverconfig{debug} && !$wipe );
     exit 0;
 }
 
@@ -184,11 +184,11 @@ sub start_threads {
     if ( $nthreads_arg ) {
         # If nthreads was defined by cli argument, use it
         $nthreads = $nthreads_arg;
-        print "Using nthreads = $nthreads from command line argument\n" if $globalconfig{debug};
+        print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{debug};
     } elsif ( $host_arg && $group_arg ) {
         # If no nthreads was given, and we back up a single host and group, get nthreads from its config
         $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
-        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $globalconfig{debug};
+        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $serverconfig{debug};
     } else {
         $nthreads = 1;
     }
@@ -252,13 +252,13 @@ sub eval_rsync_options {
     $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
     $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
     $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_NODEVICES};
-    $rsync_options .= "-v "             if ($globalconfig{debug} && ($globalconfig{debuglevel} == 3));
+    $rsync_options .= "-v "             if ($serverconfig{debug} && ($serverconfig{debuglevel} == 3));
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
-        my $excludefile = "$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
         if ( -e $excludefile ) {
-            $rsync_options .= "--exclude-from=$globalconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
         } else {
             logit( $host, $group, "Warning: could not find excludefile $excludefile." );
         }
@@ -289,7 +289,7 @@ sub eval_rsync_target {
     my $rsync_target = targetpath($host, $group);
 
     if ( !-d $rsync_target ) {
-        system("mkdir -p $rsync_target") unless $globalconfig{dryrun};
+        system("mkdir -p $rsync_target") unless $serverconfig{dryrun};
     }
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
@@ -311,7 +311,7 @@ sub execute_rsync {
     $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
     my $startstamp = time();
 
-    my $rsync_cmd     = $globalconfig{path_rsync};
+    my $rsync_cmd     = $serverconfig{path_rsync};
     my $rsync_options = eval_rsync_options($host,$group, $lastbkp);
     my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
 
@@ -319,7 +319,7 @@ sub execute_rsync {
     logit( $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local(*HIS_IN, *HIS_OUT, *HIS_ERR);
-    $rsync_cmd = "echo $rsync_cmd" if $globalconfig{dryrun};
+    $rsync_cmd = "echo $rsync_cmd" if $serverconfig{dryrun};
     my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options$path $rsync_target" );
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
@@ -329,7 +329,7 @@ sub execute_rsync {
 
     waitpid( $rsyncpid, 0 );
 
-    logit( $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $globalconfig{debuglevel} >=2 );
+    logit( $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{debuglevel} >=2 );
     logit( $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
     logit( $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
 
@@ -357,8 +357,8 @@ sub execute_rsync {
 sub create_btrfs_subvolume {
     my ( $host, $group, $path ) = @_;
 
-    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume create $path >/dev/null 2>&1";
-    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $globalconfig{dryrun};
+    my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume create $path >/dev/null 2>&1";
+    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
 
     logit( $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
     system($btrfs_subvolume_cmd) and logit( $host, $group, "ERROR: creating subvolume for $host-$group: $!" );
@@ -369,8 +369,8 @@ sub create_btrfs_subvolume {
 sub delete_btrfs_subvolume {
     my ( $host, $group, $path ) = @_;
 
-    my $btrfs_subvolume_cmd = "$globalconfig{path_btrfs} subvolume delete $path >/dev/null 2>&1";
-    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $globalconfig{dryrun};
+    my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume delete $path >/dev/null 2>&1";
+    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
 
     logit( $host, $group, "Delete btrfs subvolume: $btrfs_subvolume_cmd" );
     system($btrfs_subvolume_cmd) and logit( $host, $group, "ERROR: deleting subvolume for $host-$group: $!" );
@@ -383,17 +383,17 @@ sub create_btrfs_snapshot {
 
     return unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
 
-    my $btrfs_cmd             = $globalconfig{path_btrfs};
+    my $btrfs_cmd             = $serverconfig{path_btrfs};
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
     my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . $bkptimestamp;
 
     my $touch_current_cmd    = "touch $btrfs_snapshot_source >/dev/null 2>&1";
-    $touch_current_cmd       = "echo $touch_current_cmd" if $globalconfig{dryrun};
+    $touch_current_cmd       = "echo $touch_current_cmd" if $serverconfig{dryrun};
     logit( $host, $group, "Touch current folder for host $host group $group" );
     system($touch_current_cmd) and logit( $host, $group, "ERROR: touching current folder for $host-$group: $!" );
 
     my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $globalconfig{dryrun};
+    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
     logit( $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
     system($btrfs_snapshot_cmd) and logit( $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
 
@@ -450,7 +450,7 @@ sub wipe {
         delete_btrfs_subvolume( $host, $group, join(' ', @wipedirs) );
     } else {
         my $rmcmd = 'rm -Rf';
-        $rmcmd = "echo $rmcmd" if $globalconfig{dryrun};
+        $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
         foreach my $dir (@wipedirs) {
             logit( $host, $group, "Wipe $rmcmd $dir for host $host group $group" );
             system("$rmcmd $dir") and logit( $host, $group, "ERROR: removing folder $dir for $host-$group: $!" );
@@ -495,7 +495,7 @@ sub createLastBkpFile {
     my ($host, $group, $bkptimestamp) = @_;
 
     my $lastBkpFile = LastBkpFile($host, $group);
-    system("echo \"$bkptimestamp\" > $lastBkpFile") unless $globalconfig{dryrun};
+    system("echo \"$bkptimestamp\" > $lastBkpFile") unless $serverconfig{dryrun};
     logit( $host, $group, "Write lastBkpFile: $bkptimestamp \-\> $lastBkpFile" );
 
     return 1;
@@ -507,7 +507,7 @@ sub createLastBkpFile {
 sub create_jobid {
     my ($host, $group) = @_;
     my ($s, $usec) = gettimeofday;
-    my $jobid      = `$globalconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
+    my $jobid      = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
     $jobid =~ s/\n//g;
     logit( $host, $group, "Created JobID: $jobid" );
 
@@ -558,7 +558,7 @@ sub bkp_to_current_server {
     # make sure backup's target host matches local hostname
     my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
     if ( $bkp_target_host ne $servername && $bkp_target_host ne '*' ) {
-        logit( $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $globalconfig{debug};
+        logit( $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $serverconfig{debug};
         return 0;
     }
 
@@ -594,9 +594,9 @@ sub parse_command_options {
 
 sub cli_args_override_global_config {
 
-    $globalconfig{debug}      = $debug_arg      if $debug_arg;
-    $globalconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
-    $globalconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+    $serverconfig{debug}      = $debug_arg      if $debug_arg;
+    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
+    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
 
     return 1;
 }

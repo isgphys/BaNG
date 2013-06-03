@@ -53,7 +53,7 @@ sub get_LockFiles {
     my %lockfiles;
     foreach my $server ( keys %servers ) {
 
-        my @lockfiles = remoteWrapperCommand( $server, 'BaNG/bang_getLockFile', $globalconfig{path_lockfiles} );
+        my @lockfiles = remoteWrapperCommand( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
 
         foreach my $lockfile ( @lockfiles  ) {
             my ($host, $group, $path) = splitLockFileName($lockfile);
@@ -112,7 +112,7 @@ sub LockFile {
     $path =~ s/\s:/\+/g;
     $path =~ s/\//%/g;
     my $lockfilename = "${host}_${group}_${path}";
-    my $lockfile     = "$globalconfig{path_lockfiles}/$lockfilename.lock";
+    my $lockfile     = "$serverconfig{path_lockfiles}/$lockfilename.lock";
 
     return $lockfile;
 }
@@ -138,7 +138,7 @@ sub createLockFile {
         logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
         return 0;
     } else {
-        unless ( $globalconfig{dryrun} ) {
+        unless ( $serverconfig{dryrun} ) {
             system("touch \"$lockfile\"") and logit( $host, $group, "ERROR: could not create lockfile $lockfile" );
         }
         logit( $host, $group, "Created lockfile $lockfile" );
@@ -150,7 +150,7 @@ sub removeLockFile {
     my ($host, $group, $path) = @_;
 
     my $lockfile = LockFile( $host, $group, $path );
-    unlink $lockfile unless $globalconfig{dryrun};
+    unlink $lockfile unless $serverconfig{dryrun};
     logit( $host, $group, "Removed lockfile $lockfile" );
 
     return 1;

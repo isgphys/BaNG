@@ -52,9 +52,9 @@ sub parse_command_options {
 
 sub cli_args_override_global_config {
 
-    $globalconfig{debug}      = $debug_arg      if $debug_arg;
-    $globalconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
-    $globalconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+    $serverconfig{debug}      = $debug_arg      if $debug_arg;
+    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
+    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
 
     return 1;
 }

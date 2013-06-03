@@ -25,7 +25,7 @@ our @EXPORT = qw(
     error404
 );
 
-our %globalconfig;
+our %serverconfig;
 our $bangstat_dbh;
 
 sub bangstat_db_connect {
@@ -57,18 +57,18 @@ sub bangstat_set_jobstatus {
         AND JobID = '$jobid';
     );
 
-    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
         logit( $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
         return 1;
     }
 
     my $sth = $bangstat_dbh->prepare($SQL);
-    $sth->execute() unless $globalconfig{dryrun};
+    $sth->execute() unless $serverconfig{dryrun};
     $sth->finish();
 
     $SQL =~ s/;.*/;/sg;
-    logit( $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $globalconfig{debug} && $globalconfig{debuglevel} >= 2 );
+    logit( $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{debug} && $serverconfig{debuglevel} >= 2 );
     logit( $host, $group, "Set jobstatus to $status for host $host group $group" );
 
     return 1;
@@ -80,7 +80,7 @@ sub bangstat_recentbackups {
     $lastXdays ||= 5;
     my $BkpStartHour = 18;
 
-    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -125,7 +125,7 @@ sub bangstat_recentbackups {
 
     # scan for missing backups
     my $now     = time;
-    my $today   = `$globalconfig{path_date} -d \@$now +"%Y-%m-%d"`;
+    my $today   = `$serverconfig{path_date} -d \@$now +"%Y-%m-%d"`;
     my $tonight = str2time("$today $BkpStartHour:00:00");
     foreach my $hostpath ( keys %RecentBackupTimes ) {
         my $thatnight = $tonight;
@@ -153,7 +153,7 @@ sub bangstat_recentbackups {
             if ( $isMissing ) {
                 # add empty entry for missing backups
                 my $missingepoch = $thatnight - 24 * 3600;
-                my $missingday   = `$globalconfig{path_date} -d \@$missingepoch +"%Y-%m-%d"`;
+                my $missingday   = `$serverconfig{path_date} -d \@$missingepoch +"%Y-%m-%d"`;
                 my $nobkp = {
                     Starttime   => $missingday,
                     Stoptime    => '',
@@ -184,7 +184,7 @@ sub bangstat_recentbackups_all {
     my ($lastXhours) = @_;
     $lastXhours ||= 24;
 
-    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -297,16 +297,16 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
-    logit( $host, $group, "DB Report SQL command: $sql" ) if ( $globalconfig{debuglevel} >= 2 );
+    logit( $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{debuglevel} >= 2 );
 
-    my $conn = bangstat_db_connect( $globalconfig{config_bangstat} );
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
         logit( $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
         return 1;
     }
 
     my $sth = $bangstat_dbh->prepare($sql);
-    $sth->execute() unless $globalconfig{dryrun};
+    $sth->execute() unless $serverconfig{dryrun};
     $sth->finish();
     $bangstat_dbh->disconnect;
 
@@ -334,7 +334,7 @@ sub mail_report {
 
     my $mail_msg = MIME::Lite->new(
         From    => 'root@phys.ethz.ch',
-        To      => $globalconfig{report_to},
+        To      => $serverconfig{report_to},
         Type    => 'multipart/alternative',
         Subject => "Backup report of ($host-$group): $status",
     );
@@ -353,7 +353,7 @@ sub mail_report {
         $mail_msg->attach($mail_att);
     }
 
-    unless ( $globalconfig{dryrun} ) {
+    unless ( $serverconfig{dryrun} ) {
         $mail_msg->send or logit( $host, $group, "mail_report error" );
     }
 
@@ -391,7 +391,7 @@ sub hobbit_report {
     };
 
     my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
-    my $DATE      = `$globalconfig{path_date}`;
+    my $DATE      = `$serverconfig{path_date}`;
     chomp $DATE;
 
     my $hobbitreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";
@@ -406,7 +406,7 @@ sub hobbit_report {
         or logit( $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 
-    send_hobbit_report($hobbitreport) unless $globalconfig{dryrun};
+    send_hobbit_report($hobbitreport) unless $serverconfig{dryrun};
     logit( $host, $group, "Hobbit report sent." );
 
     return 1;
@@ -416,14 +416,14 @@ sub logit {
     my ($host, $group, $msg) = @_;
 
     my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
-    my $logdate    = strftime $globalconfig{global_log_date}, localtime;
-    my $logfile    = "$globalconfig{path_logs}/${host}-${group}_$logdate.log";
+    my $logdate    = strftime $serverconfig{global_log_date}, localtime;
+    my $logfile    = "$serverconfig{path_logs}/${host}-${group}_$logdate.log";
     my $logmessage = "$timestamp $host-$group : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
 
-    print $logmessage if $globalconfig{debug};
+    print $logmessage if $serverconfig{debug};
 
-    unless ( $globalconfig{dryrun} ) {
+    unless ( $serverconfig{dryrun} ) {
         open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
         print {$log} $logmessage;
         close $log;

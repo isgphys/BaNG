@@ -107,7 +107,7 @@ sub list_folders_to_wipe {
     }
 
     # -- wipe report with content of stacks
-    if ( $globalconfig{debuglevel} >= 2 ) {
+    if ( $serverconfig{debuglevel} >= 2 ) {
         my $wipe_report = "Wipe report\n";
         foreach my $type (qw( monthly weekly daily )) {
             $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
@@ -128,7 +128,7 @@ sub list_folders_to_wipe {
     if ( $force ) {
         logit( $host, $group, "Wipe WARNING: forced to wipe, namely " . ( $#folders_to_wipe + 1 ) . "." );
     } else {
-        if ( $#folders_to_wipe >= $globalconfig{auto_wipe_limit} ) {
+        if ( $#folders_to_wipe >= $serverconfig{auto_wipe_limit} ) {
             logit( $host, $group, "Wipe WARNING: too many folders to wipe, namely " . ( $#folders_to_wipe + 1 ) . ". Wipe manually or use --force." );
             return ();
         }
