@@ -8,4 +8,4 @@ BKP_THREADS_DEFAULT:    1
 BKP_THREAD_SUBFOLDERS:  1
 BKP_STORE_MODUS:        'snapshots'
 BKP_EXCLUDE_FILE:       'excludelist_system'
-BKP_TARGET_HOST:        '*'
+BKP_TARGET_HOST:        'phd-bkp-gw'
