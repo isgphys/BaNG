@@ -13,10 +13,8 @@ get '/global' => sub {
         remotehost     => request->remote_host,
         webDancerEnv   => config->{run_env},
         serverconfig   => \%serverconfig,
-        defaults_hosts => get_defaults_hosts(),
         servername     => $servername,
         prefix_path    => $prefix,
-        path_configs    => $serverconfig{path_configs},
     };
 };
 

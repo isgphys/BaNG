@@ -15,7 +15,7 @@
     </tr>
     <tr>
         <td>Config-Dir:</td>
-        <td><% path_configs %></td>
+        <td><% serverconfig.path_configs %></td>
     </tr>
 </table>
 
@@ -29,13 +29,13 @@
             </tr>
         </thead>
         <tbody>
-          <% FOREACH globalconf IN serverconfig.keys.sort %>
+          <% FOREACH config IN serverconfig.keys.sort %>
             <tr>
                 <td>
-                    <% globalconf %>
+                    <% config %>
                 </td>
                 <td>
-                    <% serverconfig.$globalconf %>
+                    <% serverconfig.$config %>
                 </td>
             </tr>
           <% END %>
@@ -53,13 +53,13 @@
             </tr>
         </thead>
         <tbody>
-          <% FOREACH defaultconf IN defaults_hosts.keys.sort %>
+          <% FOREACH config IN serverconfig.defaults_hosts.keys.sort %>
             <tr>
                 <td>
-                    <% defaultconf %>
+                    <% config %>
                 </td>
                 <td>
-                    <% defaults_hosts.$defaultconf %>
+                    <% serverconfig.defaults_hosts.$config %>
                 </td>
             </tr>
           <% END %>

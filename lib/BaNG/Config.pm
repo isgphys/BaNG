@@ -15,7 +15,6 @@ our @EXPORT = qw(
     $prefix
     $servername
     get_serverconfig
-    get_defaults_hosts
     get_host_config
     get_group_config
     get_cronjob_config
@@ -24,9 +23,10 @@ our @EXPORT = qw(
     split_configname
 );
 
-our %serverconfig;
 our %hosts;
 our %groups;
+our %servers;
+our %serverconfig;
 our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
@@ -64,78 +64,13 @@ sub get_serverconfig {
         $serverconfig{$key} = "$serverconfig{path_configs}/$serverconfig{$key}";
     }
 
-    return 1;
-}
-
-sub get_defaults_hosts {
-
-    my $defaults_hosts = '';
+    # add defaults_hosts config
     my $defaults_hosts_file = $serverconfig{config_defaults_hosts};
     if ( sanityfilecheck($defaults_hosts_file) ) {
-        $defaults_hosts = LoadFile( $defaults_hosts_file );
+        $serverconfig{defaults_hosts} = LoadFile( $defaults_hosts_file );
     }
 
-    return $defaults_hosts;
-}
-
-sub sanityfilecheck {
-    my ($file) = @_;
-
-    if ( !-f "$file" ) {
-        # logit("localhost","INTERNAL", "$file NOT available");
-        return 0;    # FIXME CLI should check return value
-    } else {
-        return 1;
-    }
-}
-
-sub find_configs {
-    my ($query, $searchpath) = @_;
-
-    my @files;
-    my $ffr_obj = File::Find::Rule->file()
-                                  ->name($query)
-                                  ->relative
-                                  ->maxdepth(1)
-                                  ->start($searchpath);
-
-    while ( my $file = $ffr_obj->match() ) {
-        push( @files, $file );
-    }
-
-    return @files;
-}
-
-sub split_configname {
-    my ($configfile) = @_;
-
-    my ($hostname, $groupname) = $configfile =~ /^([\w\d-]+)_([\w\d-]+)\.yaml/;
-
-    return ($hostname, $groupname);
-}
-
-sub split_group_configname {
-    my ($configfile) = @_;
-
-    my ($groupname) = $configfile =~ /^([\w\d-]+)\.yaml/;
-
-    return ($groupname);
-}
-
-sub split_server_configname {
-    my ($configfile) = @_;
-
-    my ($server) = $configfile =~ /^([\w\d-]+)_defaults\.yaml/;
-
-    return ($server);
-}
-
-sub split_cronconfigname {
-    my ($cronconfigfile) = @_;
-
-    my ($server, $jobtype) = $cronconfigfile =~ /^([\w\d-]+)_cronjobs_([\w\d-]+)\.yaml/;
-
-    return ($server, $jobtype);
+    return 1;
 }
 
 sub get_host_config {
@@ -281,7 +216,7 @@ sub read_host_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = get_defaults_hosts();
+    my $settings       = $serverconfig{defaults_hosts};
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
 
@@ -306,7 +241,7 @@ sub read_group_configfile {
     my %configfile;
     my $settingshelper;
 
-    my $settings = get_defaults_hosts();
+    my $settings       = $serverconfig{defaults_hosts};
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
 
     foreach my $config_override (qw( group )) {
@@ -346,6 +281,66 @@ sub read_server_configfile {
     }
 
     return ($settings, $settingshelper);
+}
+
+sub sanityfilecheck {
+    my ($file) = @_;
+
+    if ( !-f "$file" ) {
+        # logit("localhost","INTERNAL", "$file NOT available");
+        return 0;    # FIXME CLI should check return value
+    } else {
+        return 1;
+    }
+}
+
+sub find_configs {
+    my ($query, $searchpath) = @_;
+
+    my @files;
+    my $ffr_obj = File::Find::Rule->file()
+                                  ->name($query)
+                                  ->relative
+                                  ->maxdepth(1)
+                                  ->start($searchpath);
+
+    while ( my $file = $ffr_obj->match() ) {
+        push( @files, $file );
+    }
+
+    return @files;
+}
+
+sub split_configname {
+    my ($configfile) = @_;
+
+    my ($hostname, $groupname) = $configfile =~ /^([\w\d-]+)_([\w\d-]+)\.yaml/;
+
+    return ($hostname, $groupname);
+}
+
+sub split_group_configname {
+    my ($configfile) = @_;
+
+    my ($groupname) = $configfile =~ /^([\w\d-]+)\.yaml/;
+
+    return ($groupname);
+}
+
+sub split_server_configname {
+    my ($configfile) = @_;
+
+    my ($server) = $configfile =~ /^([\w\d-]+)_defaults\.yaml/;
+
+    return ($server);
+}
+
+sub split_cronconfigname {
+    my ($cronconfigfile) = @_;
+
+    my ($server, $jobtype) = $cronconfigfile =~ /^([\w\d-]+)_cronjobs_([\w\d-]+)\.yaml/;
+
+    return ($server, $jobtype);
 }
 
 1;
