@@ -13,6 +13,8 @@
             function updateFilter() {
                 var filterTable = $('#configslist, #restorelist')
                 $.uiTableFilter( filterTable, $("#filter").val() );
+                var countVisible = $('#configslist > tbody > tr:visible').length;
+                $('#countVisible').html(countVisible);
             }
 
             $(document).ready(function(){
@@ -42,9 +44,8 @@
                 })
 
                 $('#filter-form').submit(function(){
-                    theTable.find("tbody > tr:visible > td:eq(1)").mousedown();
                     return false;
-                }).focus();
+                });
             });
         </script>
     </head>

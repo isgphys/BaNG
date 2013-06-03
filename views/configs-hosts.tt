@@ -1,4 +1,4 @@
-<h2>Host configs (<% hosts.size  %>) </h2>
+<h2>Host configs (<span id="countVisible"><% hosts.size %></span> of <% hosts.size %>) </h2>
 <div id="configs_filter">
     <form id="filter-form">Filter Configslist:
         <input name="filter" id="filter" value="<% filtervalue %>" maxlength="30" size="30" type="text" autofocus >
