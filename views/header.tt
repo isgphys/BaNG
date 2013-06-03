@@ -18,16 +18,14 @@
     <ul>
         <li><a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a></li>
         <li><a href="/restore" <% IF section == 'restore' %>class="active"<% END %>>Restore</a></li>
-        <li><a href="#" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a>
-            <ul>
-                <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Overview (cronjobs)</a>
-            </ul>
+         <li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a>
         </li>
         <li><a href="#" <% IF section == 'configs' %>class="active"<% END %>>Configs</a>
             <ul>
                 <li><a href="/config/allhosts">Host Configs</a></li>
                 <li><a href="/config/allgroups">Group Configs</a></li>
-                <li><a href="/config/global">Global Settings</a></li>
+                <li><a href="/config/allservers">Server Configs</a></li>
+                <li><a href="/config/defaults">Default Configs</a></li>
             </ul>
         </li>
         <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>

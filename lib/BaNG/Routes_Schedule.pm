@@ -9,7 +9,7 @@ get '/' => sub {
     get_serverconfig();
     get_host_config('*');
 
-    template 'schedule-overview', {
+    template 'schedule', {
         section      => 'schedule',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},

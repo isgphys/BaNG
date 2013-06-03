@@ -47,7 +47,7 @@ get '/schedule-all' => sub {
 };
 
 get '/variations' => sub {
-    template 'largest_variations', {
+    template 'statistics-variations', {
         section            => 'statistics',
         remotehost         => request->remote_host,
         webDancerEnv       => config->{run_env},

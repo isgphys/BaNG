@@ -341,7 +341,7 @@ sub mail_report {
 
     foreach my $mailtype (qw(plain html)) {
         my $report;
-        $tt->process( "mail_$mailtype-report.tt", $RecentBackups, \$report )
+        $tt->process( "report-mail_$mailtype.tt", $RecentBackups, \$report )
             or logit( $host, $group, "ERROR generating mail report template: " . $tt->error() );
 
         my $mail_att = MIME::Lite->new(
@@ -402,7 +402,7 @@ sub hobbit_report {
         INCLUDE_PATH => "$prefix/views",
     );
     my $report;
-    $tt->process( 'hobbitreport.tt', $RecentBackups, \$report )
+    $tt->process( 'report-hobbit.tt', $RecentBackups, \$report )
         or logit( $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 

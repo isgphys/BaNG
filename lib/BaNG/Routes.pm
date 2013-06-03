@@ -27,10 +27,10 @@ get '/' => sub {
     };
 };
 
-get '/bkpreport-overview' => sub {
+get '/error_report' => sub {
     get_serverconfig();
 
-    template 'bkpreport-overview' => {
+    template 'dashboard-error_report' => {
         RecentBackupsAll => bangstat_recentbackups_all(),
     },{ layout => 0 };
 };

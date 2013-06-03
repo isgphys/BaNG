@@ -5,10 +5,10 @@ use BaNG::Config;
 
 prefix '/config';
 
-get '/global' => sub {
+get '/defaults' => sub {
     get_serverconfig();
 
-    template 'global-config' => {
+    template 'configs-defaults' => {
         section        => 'configs',
         remotehost     => request->remote_host,
         webDancerEnv   => config->{run_env},
@@ -26,7 +26,7 @@ get '/allhosts/:filter?' => sub {
     get_serverconfig();
     get_host_config("*");
 
-    template 'host-configs-overview' => {
+    template 'configs-hosts' => {
         section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
@@ -39,7 +39,7 @@ get '/allgroups' => sub {
     get_serverconfig();
     get_group_config("*");
 
-    template 'group-configs-overview' => {
+    template 'configs-groups' => {
         section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
@@ -50,7 +50,7 @@ get '/allgroups' => sub {
 get '/allservers' => sub {
     get_serverconfig();
 
-    template 'server-configs-overview' => {
+    template 'configs-servers' => {
         section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
