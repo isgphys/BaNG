@@ -15,7 +15,7 @@ our @EXPORT = qw(
     $prefix
     $config_path
     $servername
-    get_global_config
+    get_serverconfig
     get_defaults_hosts
     get_host_config
     get_group_config
@@ -34,7 +34,7 @@ our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
 
-sub get_global_config {
+sub get_serverconfig {
     my ($prefix_arg) = @_;
 
     undef %servers;

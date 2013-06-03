@@ -6,7 +6,7 @@ use BaNG::Config;
 prefix '/config';
 
 get '/global' => sub {
-    get_global_config();
+    get_serverconfig();
 
     template 'global-config' => {
         section        => 'configs',
@@ -25,7 +25,7 @@ get '/allhosts' => sub {
 };
 
 get '/allhosts/:filter?' => sub {
-    get_global_config();
+    get_serverconfig();
     get_host_config("*");
 
     template 'host-configs-overview' => {
@@ -38,7 +38,7 @@ get '/allhosts/:filter?' => sub {
 };
 
 get '/allgroups' => sub {
-    get_global_config();
+    get_serverconfig();
     get_group_config("*");
 
     template 'group-configs-overview' => {

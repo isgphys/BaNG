@@ -41,7 +41,7 @@ my @subfolder_hosts;
 # Main
 #
 parse_command_options();
-get_global_config($prefix_arg);
+get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 get_host_config($host_arg, $group_arg);
 

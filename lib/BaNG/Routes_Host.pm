@@ -35,7 +35,7 @@ post '/add' => sub {
 };
 
 get '/:host' => sub {
-    get_global_config();
+    get_serverconfig();
     get_host_config(param('host'));
     my %RecentBackups = bangstat_recentbackups( param('host') );
 

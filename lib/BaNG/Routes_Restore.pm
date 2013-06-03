@@ -6,7 +6,7 @@ use BaNG::Config;
 prefix '/restore';
 
 get '/' => sub {
-    get_global_config();
+    get_serverconfig();
     get_host_config('*');
 
     template 'restore' => {

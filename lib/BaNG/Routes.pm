@@ -15,7 +15,7 @@ use BaNG::Routes_Statistics;
 prefix undef;
 
 get '/' => sub {
-    get_global_config();
+    get_serverconfig();
 
     template 'dashboard' => {
         section      => 'dashboard',
@@ -28,7 +28,7 @@ get '/' => sub {
 };
 
 get '/bkpreport-overview' => sub {
-    get_global_config();
+    get_serverconfig();
 
     template 'bkpreport-overview' => {
         RecentBackupsAll => bangstat_recentbackups_all(),
