@@ -65,6 +65,8 @@ sub get_global_config {
         $globalconfig{$key} = "$config_path/$globalconfig{$key}";
     }
 
+    $globalconfig{config_defaults_servers} = $config_global;
+
     return 1;
 }
 
@@ -299,22 +301,20 @@ sub read_host_configfile {
     my ($host, $group) = @_;
 
     my %configfile;
-    my $settings;
     my $settingshelper;
 
+    my $settings = LoadFile( $globalconfig{config_defaults_hosts} );
     $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$globalconfig{path_hostconfig}/$host\_$group.yaml";
 
-    $settings = LoadFile( $globalconfig{config_defaults_hosts} );
+    foreach my $config_override (qw( group host )) {
+        if ( sanityfilecheck( $configfile{$config_override} ) ) {
 
-    foreach my $configtmpl (qw( group host )) {
-        if ( sanityfilecheck( $configfile{$configtmpl} ) ) {
+            my $settings_override = LoadFile( $configfile{$config_override} );
 
-            my $settings_host = LoadFile( $configfile{$configtmpl} );
-
-            foreach my $key ( keys %{$settings_host} ) {
-                $settings->{$key}       = $settings_host->{$key};
-                $settingshelper->{$key} = $configtmpl;
+            foreach my $key ( keys %{$settings_override} ) {
+                $settings->{$key}       = $settings_override->{$key};
+                $settingshelper->{$key} = $config_override;
             }
         }
     }
@@ -326,21 +326,19 @@ sub read_group_configfile {
     my ($group) = @_;
 
     my %configfile;
-    my $settings;
     my $settingshelper;
 
+    my $settings = LoadFile( $globalconfig{config_defaults_hosts} );
     $configfile{group} = "$globalconfig{path_groupconfig}/$group.yaml";
 
-    $settings = LoadFile( $globalconfig{config_defaults_hosts} );
+    foreach my $config_override (qw( group )) {
+        if ( sanityfilecheck( $configfile{$config_override} ) ) {
 
-    foreach my $configtmpl (qw( group )) {
-        if ( sanityfilecheck( $configfile{$configtmpl} ) ) {
+            my $settings_override = LoadFile( $configfile{$config_override} );
 
-            my $settings_host = LoadFile( $configfile{$configtmpl} );
-
-            foreach my $key ( keys %{$settings_host} ) {
-                $settings->{$key}       = $settings_host->{$key};
-                $settingshelper->{$key} = $configtmpl;
+            foreach my $key ( keys %{$settings_override} ) {
+                $settings->{$key}       = $settings_override->{$key};
+                $settingshelper->{$key} = $config_override;
             }
         }
     }
@@ -352,19 +350,20 @@ sub read_server_configfile {
     my ($server) = @_;
 
     my %configfile;
-    my $settings;
     my $settingshelper;
 
+    my $settings = LoadFile( $globalconfig{config_defaults_servers} );
     $configfile{server} = "$globalconfig{path_serverconfig}/${server}_defaults.yaml";
-    $settings = LoadFile( $globalconfig{config_defaults_hosts} );
 
-    if ( sanityfilecheck( $configfile{server} ) ) {
+    foreach my $config_override (qw( server )) {
+        if ( sanityfilecheck( $configfile{$config_override} ) ) {
 
-        my $settings_server = LoadFile( $configfile{server} );
+            my $settings_override = LoadFile( $configfile{$config_override} );
 
-        foreach my $key ( keys %{$settings_server} ) {
-            $settings->{$key}       = $settings_server->{$key};
-            $settingshelper->{$key} = "server";
+            foreach my $key ( keys %{$settings_override} ) {
+                $settings->{$key}       = $settings_override->{$key};
+                $settingshelper->{$key} = $config_override;
+            }
         }
     }
 
