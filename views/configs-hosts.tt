@@ -28,7 +28,7 @@
             <td class="center">
               <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
             </td>
-            <td class="expander more">
+            <td class="expander">
               <% hosts.$hostname.configfile %>
                 <div id="config_details" class="conf_details">
                   <table class="configfile">

@@ -17,7 +17,7 @@
       <% FOREACH server IN servers.keys.sort %>
       <tr <% IF servers.$server.css_class %> class="<% servers.$server.css_class %>"<% END %>>
           <td><a href="/config/allhosts/<% server %>"><% server %></a></td>
-          <td class="expander more">
+          <td class="expander">
               <% servers.$server.configfile %>
               <div id="config_details" class="conf_details">
                   <table class="configfile">

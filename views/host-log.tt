@@ -9,7 +9,7 @@
     <table id="logdateslist">
     <%- FOREACH date IN logdata.keys.sort.reverse %>
         <tr>
-            <td class="expander more" width=50px> <% date %>
+            <td class="expander" width=50px> <% date %>
             <div class="log_details">
                 <table id="loglist">
                   <%- FOREACH logline IN logdata.$date %>

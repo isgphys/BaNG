@@ -24,7 +24,7 @@
             <td class="center">
               <% groups.$group.groupconfig.BKP_TARGET_HOST %>
             </td>
-            <td class="expander more">
+            <td class="expander">
               <% groups.$group.configfile %>
                 <div id="config_details" class="conf_details">
                   <table class="configfile">
