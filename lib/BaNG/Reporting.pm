@@ -17,6 +17,7 @@ our @EXPORT = qw(
     bangstat_set_jobstatus
     bangstat_recentbackups
     bangstat_recentbackups_all
+    bangstat_recentbackups_last
     send_hobbit_report
     db_report
     mail_report
@@ -227,6 +228,48 @@ sub bangstat_recentbackups_all {
     $sth->finish();
 
     return \%RecentBackupsAll;
+}
+
+sub bangstat_recentbackups_last {
+    my ($lastXhours) = @_;
+    $lastXhours ||= 24;
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
+        FROM recent_backups
+        WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
+        AND BkpFromHost like '%'
+        ORDER BY Start DESC;
+    ");
+    $sth->execute();
+
+    my %RecentBackupsLast;
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/^:$/:\//g;
+        push( @{$RecentBackupsLast{'Data'}}, {
+            Starttime   => $dbrow->{'Start'},
+            Stoptime    => $dbrow->{'Stop'},
+            Runtime     => time2human($dbrow->{'Runtime'}),
+            BkpFromPath => $BkpFromPath ,
+            BkpToPath   => $dbrow->{'BkpToPath'},
+            isThread    => $dbrow->{'isThread'},
+            LastBkp     => $dbrow->{'LastBkp'},
+            ErrStatus   => $dbrow->{'ErrStatus'},
+            JobStatus   => $dbrow->{'JobStatus'},
+            BkpGroup    => $dbrow->{'BkpGroup'} || 'NA',
+            BkpHost     => $dbrow->{'BkpFromHost'},
+            BkpToHost   => $dbrow->{'BkpToHost'},
+            FilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans   => num2human($dbrow->{'TotFileSizeTrans'},1024),
+        });
+    }
+    $sth->finish();
+
+    return \%RecentBackupsLast;
 }
 
 sub send_hobbit_report {

@@ -1,0 +1,45 @@
+<h3>Backup Report</h3>
+Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
+<table id="bkpreport"border="0" style="border-width:1px; border-style:solid; padding:4px">
+    <thead>
+        <tr>
+            <th>JobStatus</th>
+            <th>Host</th>
+            <th>Group</th>
+            <th>Target</th>
+            <th colspan="2">ErrStatus</th>
+            <th>Starttime</th>
+            <th>Last Backup</th>
+            <th>Runtime</th>
+            <th>FilesTrans</th>
+            <th>SizeTrans</th>
+        </tr>
+    </thead>
+    <tbody>
+        <%- FOREACH bkp IN RecentBackupsLast.Data %>
+            <tr height="20">
+                <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done">
+                    <% ELSIF bkp.JobStatus == 1 %>class="hook" title="Job done">
+                    <% ELSIF bkp.JobStatus == -1 %>class="offline">
+                    <a href="https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn"><img src="/images/network-disconnect-2.png" title="Host offline"></a>
+                    <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
+                <td class="center"><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
+                <td class="center"><a href="/config/allhosts/<% bkp.BkpGroup %>"><% bkp.BkpGroup %></a></td>
+                <td class="center"><% bkp.BkpToHost %></td>
+                <td width="25" title="Rsync Error Status: <% bkp.ErrStatus %>"
+                    <%- IF bkp.ErrStatus == 0 %> class="ok"
+                    <%- ELSIF bkp.ErrStatus == 99 %> class="notok"
+                    <%- ELSIF bkp.ErrStatus.match('23') %> class="notok"
+                    <%- ELSIF bkp.ErrStatus.match('24') %> class="notok"
+                    <% ELSE %> class="bad"<% END %>>
+                </td>
+                <td class="center"><% bkp.ErrStatus %></td>
+                <td class="center"><% bkp.Starttime %></td>
+                <td class="center"><% bkp.LastBkp %></td>
+                <td class="center"><% bkp.Runtime %></td>
+                <td class="center"><% bkp.FilesTrans %></td>
+                <td class="center"><% bkp.SizeTrans %></td>
+            </tr>
+        <%- END %>
+    </tbody>
+</table>

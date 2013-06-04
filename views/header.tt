@@ -28,6 +28,7 @@
                 <li><a href="/config/defaults">Default Configs</a></li>
             </ul>
         </li>
+        <li><a href="/reporting" <% IF section == 'reporting' %>class="active"<% END %>>Reporting</a></li>
         <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
             <ul>
                 <li><a href="/statistics">Overview</a>

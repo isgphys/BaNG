@@ -8,6 +8,7 @@ use BaNG::Reporting;
 use BaNG::Routes_Config;
 use BaNG::Routes_Docs;
 use BaNG::Routes_Host;
+use BaNG::Routes_Reporting;
 use BaNG::Routes_Restore;
 use BaNG::Routes_Schedule;
 use BaNG::Routes_Statistics;
