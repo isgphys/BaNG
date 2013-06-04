@@ -1,6 +1,7 @@
 package BaNG::Routes_Host;
 
 use Dancer ':syntax';
+use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;
 
@@ -17,6 +18,7 @@ get '/:host' => sub {
         webDancerEnv  => config->{run_env},
         host          => param('host'),
         hosts         => \%hosts,
+        countbackups  => count_backup_folders(param('host')),
         cronjobs      => get_cronjob_config(),
         RecentBackups => \%RecentBackups,
     };

@@ -18,6 +18,7 @@ use Thread::Queue;
 
 use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Hosts;
+use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::Wipe;
@@ -419,8 +420,7 @@ sub wipe {
 
     logit( $host, $group, "Wipe host $host group $group" );
 
-    my $bkpdir   = targetpath( $host, $group );
-    my @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}[0-9\./_]*'`;
+    my @backup_folders = get_backup_folders( $host, $group );
 
     # count existing backups
     my $bkpkeep = 0;
@@ -523,15 +523,6 @@ sub eval_bkptimestamp {
     chomp($bkptimestamp);
 
     return $bkptimestamp;
-}
-
-sub targetpath {
-    my ($host, $group) = @_;
-
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
-
-    return $target_path;
 }
 
 sub finish_backupjob {
