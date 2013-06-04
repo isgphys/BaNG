@@ -213,23 +213,10 @@ sub _read_host_configfile {
     my ($host, $group) = @_;
 
     my %configfile;
-    my $settingshelper;
-
     my $settings       = { %{$serverconfig{defaults_hosts}} };
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
-
-    foreach my $config_override (qw( group host )) {
-        if ( _sanityfilecheck( $configfile{$config_override} ) ) {
-
-            my $settings_override = LoadFile( $configfile{$config_override} );
-
-            foreach my $key ( keys %{$settings_override} ) {
-                $settings->{$key}       = $settings_override->{$key};
-                $settingshelper->{$key} = $config_override;
-            }
-        }
-    }
+    my $settingshelper = _override_config( $settings, \%configfile, qw( group host ) );
 
     return ($settings, $settingshelper);
 }
@@ -238,22 +225,9 @@ sub _read_group_configfile {
     my ($group) = @_;
 
     my %configfile;
-    my $settingshelper;
-
     my $settings       = { %{$serverconfig{defaults_hosts}} };
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
-
-    foreach my $config_override (qw( group )) {
-        if ( _sanityfilecheck( $configfile{$config_override} ) ) {
-
-            my $settings_override = LoadFile( $configfile{$config_override} );
-
-            foreach my $key ( keys %{$settings_override} ) {
-                $settings->{$key}       = $settings_override->{$key};
-                $settingshelper->{$key} = $config_override;
-            }
-        }
-    }
+    my $settingshelper = _override_config( $settings, \%configfile, qw( group ) );
 
     return ($settings, $settingshelper);
 }
@@ -262,15 +236,21 @@ sub _read_server_configfile {
     my ($server) = @_;
 
     my %configfile;
-    my $settingshelper;
-
-    my $settings = LoadFile( $serverconfig{config_defaults_servers} );
+    my $settings        = LoadFile( $serverconfig{config_defaults_servers} );
     $configfile{server} = "$serverconfig{path_serverconfig}/${server}_defaults.yaml";
+    my $settingshelper  = _override_config( $settings, \%configfile, qw( server ) );
 
-    foreach my $config_override (qw( server )) {
-        if ( _sanityfilecheck( $configfile{$config_override} ) ) {
+    return ($settings, $settingshelper);
+}
 
-            my $settings_override = LoadFile( $configfile{$config_override} );
+sub _override_config {
+    my ($settings, $configfile, @overrides) = @_;
+
+    my $settingshelper;
+    foreach my $config_override (@overrides) {
+        if ( _sanityfilecheck( $configfile->{$config_override} ) ) {
+
+            my $settings_override = LoadFile( $configfile->{$config_override} );
 
             foreach my $key ( keys %{$settings_override} ) {
                 $settings->{$key}       = $settings_override->{$key};
@@ -279,7 +259,7 @@ sub _read_server_configfile {
         }
     }
 
-    return ($settings, $settingshelper);
+    return ($settingshelper);
 }
 
 sub _sanityfilecheck {
