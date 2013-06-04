@@ -159,6 +159,8 @@ sub queue_remote_subfolders {
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
         $remotedir =~ s| |\\ |g;
+        $remotedir =~ s|\(|\\\(|g;
+        $remotedir =~ s|\)|\\\)|g;
 
         my $bkpjob = {
             jobid        => $jobid,
