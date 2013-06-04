@@ -1,0 +1,29 @@
+<div>
+    <h3>Backup Logfile Report of <% host %>_<% group %></h3>
+    <div id="log_filter">
+        <form id="filter-form">Filter Log Entries:
+            <input name="filter" id="filter" value="<% filtervalue %>" maxlength="30" size="30" type="text" autofocus >
+            <img alt="Clear" src="/images/clear.png" border="0" onClick="$('#filter').val(''); updateFilter();">
+        </form>
+    </div>
+    <table id="logdateslist">
+    <%- FOREACH date IN logdata.keys.sort.reverse %>
+        <tr>
+            <td class="expander more" width=50px> <% date %>
+            <div class="log_details">
+                <table id="loglist">
+                  <%- FOREACH logline IN logdata.$date %>
+                  <tr <% IF logline.message.match('ERR')%>class="logError"<% END %>
+                      <% IF logline.message.match('Rsync success')%>class="logSuccess"<% END %>
+                      >
+                        <td width=50px><% logline.time %></td>
+                        <td><% logline.message %></td>
+                    </tr>
+                  <%- END %>
+               </table>
+           </td>
+            </div>
+        </tr>
+    <%- END %>
+    </table>
+</div>

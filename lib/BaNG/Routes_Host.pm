@@ -22,4 +22,17 @@ get '/:host' => sub {
     };
 };
 
+get '/:host/log/:group' => sub {
+    get_serverconfig();
+
+    template 'host-log', {
+        section       => 'host',
+        remotehost    => request->remote_host,
+        webDancerEnv  => config->{run_env},
+        host          => param('host'),
+        group         => param('group'),
+        logdata       => read_log(param('host'), param('group')),
+    };
+};
+
 1;

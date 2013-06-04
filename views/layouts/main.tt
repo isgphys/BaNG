@@ -11,7 +11,7 @@
         <script src="/javascripts/jquery.tablesorter.js"></script>
         <script>
             function updateFilter() {
-                var filterTable = $('#configslist, #restorelist')
+                var filterTable = $('#configslist, #restorelist, #loglist')
                 $.uiTableFilter( filterTable, $("#filter").val() );
                 var countVisible = $('#configslist > tbody > tr:visible').length;
                 $('#countVisible').html(countVisible);
@@ -21,20 +21,21 @@
 
                 updateFilter();
 
+                $('#config').tablesorter();
                 $('#configslist').tablesorter();
                 $('#restorelist').tablesorter();
-                $('#config').tablesorter();
                 $('#config_default').tablesorter();
 
                 $("#configslist div.conf_details").hide();
-
                 $("#configslist td").click(function(){
                     $(this).find("div.conf_details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });
 
-                $('.show_loader').click(function(){
-                    $('#loader').show();
+                $("#logdateslist div.log_details").hide();
+                $("#logdateslist td").click(function(){
+                    $(this).find("div.log_details").toggle();
+                    $(this).find(".arrow").toggleClass("up");
                 });
             });
 

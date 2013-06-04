@@ -10,6 +10,7 @@
                 <th rowspan="2" class="center">SubFolder</th>
                 <th rowspan="2" class="center">Forks</th>
                 <th rowspan="2" class="center">Mode</th>
+                <th rowspan="2" class="center">Log</th>
             </tr>
             <tr>
                 <th align="center">Group</th>
@@ -35,6 +36,7 @@
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
+                        <td width=20 class="center"><a href="/host/<% host %>/log/<% hosts.$hostname.group %>"><img class="look" src="/images/zoom-3.png"></a></td>
                     </tr>
                 <%- END %>
             <%- ELSE %>
