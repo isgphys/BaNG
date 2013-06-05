@@ -1,18 +1,20 @@
 <h3>Backup Report</h3>
 Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
-<table id="bkpreport"border="0" style="border-width:1px; border-style:solid; padding:4px">
+<table id="reporting"border="0" style="border-width:1px; border-style:solid; padding:4px">
     <thead>
         <tr>
             <th>JobStatus</th>
             <th>Host</th>
             <th>Group</th>
             <th>Target</th>
+            <th>Path</th>
             <th colspan="2">ErrStatus</th>
             <th>Starttime</th>
             <th>Last Backup</th>
             <th>Runtime</th>
             <th>FilesTrans</th>
             <th>SizeTrans</th>
+            <th>Log</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +28,7 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
                 <td class="center"><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
                 <td class="center"><a href="/config/allhosts/<% bkp.BkpGroup %>"><% bkp.BkpGroup %></a></td>
                 <td class="center"><% bkp.BkpToHost %></td>
+                <td class="center"><% bkp.BkpFromPath %></td>
                 <td width="25" title="Rsync Error Status: <% bkp.ErrStatus %>"
                     <%- IF bkp.ErrStatus == 0 %> class="ok"
                     <%- ELSIF bkp.ErrStatus == 99 %> class="notok"
@@ -39,6 +42,7 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.FilesTrans %></td>
                 <td class="center"><% bkp.SizeTrans %></td>
+                <td width=20 class="center"><a href="/host/<% bkp.BkpHost %>/log/<% bkp.BkpGroup %>"><img class="look" src="/images/zoom-3.png"></a></td>
             </tr>
         <%- END %>
     </tbody>
