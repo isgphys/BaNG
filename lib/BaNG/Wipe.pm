@@ -137,4 +137,52 @@ sub list_folders_to_wipe {
     return @folders_to_wipe;
 }
 
+sub _fill_stacks {
+    my ($available_ref, $maxcount_ref) = @_;
+    my @available = @{$available_ref};
+    my %maxcount  = %{$maxcount_ref};
+
+    my %stack;
+    my %seconds = (
+        daily   =>  1*24*3600,
+        weekly  =>  7*24*3600,
+        monthly => 28*24*3600,
+    );
+
+    # sort stack to contain most recent backup as first element
+    @available = reverse sort( @available );
+
+    # start at midnight of most recent backup FIXME we might need an offset to 18:00
+    my $start = $available[0];
+
+    foreach my $type ( qw( daily weekly monthly )) {
+        my $end;
+        foreach my $interval (1..$maxcount{$type}) {
+            $end = $start - $seconds{$type};
+
+            # list backups inside a given interval
+            my @inside = grep{ $start >= $_ && $_ > $end } @available;
+
+            # sort to keep oldest backup, except in daily we keep most recent
+            @inside = sort @inside unless $type eq 'daily';
+
+            # keep one backup for that interval, wipe the other
+            if ( @inside ) {
+                push( @{$stack{$type}}, shift(@inside) );
+                push( @{$stack{wipe}}, @inside );
+            }
+
+            $start = $end;
+        }
+
+        # wipe if a backup is even older than last interval
+        if ( $type eq 'monthly' ) {
+            my @outside = grep{ $_ <= $end } @available;
+            push( @{$stack{wipe}}, @outside );
+        }
+    }
+
+    return %stack;
+}
+
 1;
