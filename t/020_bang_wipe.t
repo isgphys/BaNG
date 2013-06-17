@@ -15,6 +15,9 @@ my %maxcount = (
 );
 
 my @patterns = qw(
+    Pass_without_backups
+        -
+        -
     Keep_single_backup
         X
         d
@@ -80,8 +83,6 @@ my @patterns = qw(
 #       newest-----------------------------------------------oldest
 
 test_all(@patterns);
-
-# TODO write tests with multiple backups per day
 
 done_testing();
 
