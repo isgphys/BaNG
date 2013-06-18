@@ -106,9 +106,9 @@ sub _fill_stacks {
 
     # start intervals at time of most recent backup
     my $start = $available[0];
+    my $end;
 
     foreach my $type ( qw( daily weekly monthly )) {
-        my $end;
         foreach my $interval (1..$maxcount{$type}) {
             $end = $start - $seconds{$type};
 
