@@ -65,7 +65,7 @@ sub list_folders_to_wipe {
     # generate wipe report with content of stacks
     if ( $serverconfig{debuglevel} >= 2 ) {
         my $wipe_report = "Wipe report\n";
-        foreach my $type (qw( monthly weekly daily wipe )) {
+        foreach my $type (qw( daily weekly monthly wipe )) {
             $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
             foreach my $epoch ( @{$stack{$type}} ) {
                 foreach my $date ( keys %available_backups ) {
