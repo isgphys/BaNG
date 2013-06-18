@@ -431,15 +431,15 @@ sub wipe {
 
     logit( $host, $group, "Wipe existing: $bkpcount, keeping: $bkpkeep for host $host group $group" );
 
+    # get list of folders to wipe
+    my @wipedirs = list_folders_to_wipe( $host, $group, $force, @backup_folders );
+
     # don't wipe if there are not enough bkps
     my $wipenum  = $bkpcount - $bkpkeep;
     if ( $wipenum <= 0 ) {
         logit( $host, $group, "Wipe nothing to do for host $host group $group" );
         return 1;
     }
-
-    # get list of folders to wipe
-    my @wipedirs = list_folders_to_wipe( $host, $group, $force, @backup_folders );
 
     # make sure list contains at least one folder
     if ( !@wipedirs ) {
