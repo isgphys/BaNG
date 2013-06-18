@@ -53,7 +53,7 @@ sub list_folders_to_wipe {
         weekly  => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_WEEKLY},
         monthly => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_MONTHLY},
     );
-    my %stacks = _fill_stacks( @available, \%maxcount );
+    my %stack = _fill_stacks( \@available, \%maxcount );
 
     # $stack{wipe} contains the epochs of the folders to be wiped
     foreach my $date ( keys %available_backups ) {
