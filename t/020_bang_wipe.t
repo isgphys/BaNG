@@ -105,7 +105,7 @@ sub test_pattern {
     my ($input, $answer) = @_;
 
     my @available = dates_from_pattern($input);
-    my %stack     = &BaNG::Wipe::_fill_stacks(\@available, \%maxcount);
+    my %stack     = fill_stacks(\@available, \%maxcount);
 
     # show input and output
     my ($output, $report);

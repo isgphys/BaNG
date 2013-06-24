@@ -9,6 +9,7 @@ use Exporter 'import';
 our @EXPORT = qw(
     list_folders_to_wipe
     wipe_maxcount
+    fill_stacks
 );
 
 sub list_folders_to_wipe {
@@ -49,7 +50,7 @@ sub list_folders_to_wipe {
     }
 
     # determine daily, weekly, monthly and wipe stacks
-    my %stack = _fill_stacks( \@available, wipe_maxcount($host, $group) );
+    my %stack = fill_stacks( \@available, wipe_maxcount($host, $group) );
 
     # $stack{wipe} contains the epochs of the folders to be wiped
     foreach my $date ( keys %available_backups ) {
@@ -85,7 +86,7 @@ sub list_folders_to_wipe {
     return @folders_to_wipe;
 }
 
-sub _fill_stacks {
+sub fill_stacks {
     my ($available_ref, $maxcount_ref) = @_;
     my @available = @{$available_ref};
     my %maxcount  = %{$maxcount_ref};
