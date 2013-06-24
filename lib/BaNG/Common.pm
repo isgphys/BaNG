@@ -1,8 +1,8 @@
 package BaNG::Common;
 
-use POSIX qw( floor );
-
 use BaNG::Config;
+use POSIX qw( floor );
+use Date::Parse;
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -50,8 +50,36 @@ sub count_backup_folders {
 
     my %count_backup_folders;
     foreach my $group ( list_groups($host) ) {
-        my @backup_folders = get_backup_folders($host, $group);
-        $count_backup_folders{$group} = $#backup_folders + 1;
+        my @available_backup_folders = get_backup_folders($host, $group);
+        my %available_backups;
+        foreach my $folder (@available_backup_folders) {
+            chomp $folder;
+            if ( $folder =~ qr{ .*/(?<date>[^_]*) _ (?<time>\d*) }x ) {
+
+                if ( ( !exists $available_backups{$+{date}} )
+                    || ( $available_backups{$+{date}} < $+{time} ) ) {
+                    # store by date to force same time (midnight) for all
+                    $available_backups{$+{date}} = {
+                        folder => $folder,
+                        epoch  => str2time($+{date}),
+                    };
+                }
+            }
+        }
+
+        # remaining, single backups per day, define list of available epochs
+        my @available;
+        foreach my $date ( keys %available_backups ) {
+            push( @available, $available_backups{$date}{epoch} );
+        }
+
+        my %maxcount = %{ &BaNG::Wipe::wipe_maxcount($host, $group) };
+        my %stack = &BaNG::Wipe::fill_stacks( \@available, \%maxcount );
+        $count_backup_folders{$group} = {
+            daily   => ($#{$stack{daily}}   + 1) . '/' . $maxcount{daily},
+            weekly  => ($#{$stack{weekly}}  + 1) . '/' . $maxcount{weekly},
+            monthly => ($#{$stack{monthly}} + 1) . '/' . $maxcount{monthly},
+        };
     }
 
     return \%count_backup_folders;

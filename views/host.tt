@@ -10,7 +10,7 @@
                 <th rowspan="2" class="center">SubFolder</th>
                 <th rowspan="2" class="center">Forks</th>
                 <th rowspan="2" class="center">Mode</th>
-                <th rowspan="2" class="center">BkpCount</th>
+                <th colspan="3" class="center">BkpCount</th>
                 <th rowspan="2" class="center">Log</th>
             </tr>
             <tr>
@@ -21,6 +21,9 @@
                 <th>Wipe</th>
                 <th>Bkp</th>
                 <th>Wipe</th>
+                <th>Daily</th>
+                <th>Weekly</th>
+                <th>Monthly</th>
             </tr>
         </thead>
         <tbody>
@@ -37,7 +40,9 @@
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
-                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}  %></td>
+                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}.daily %></td>
+                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}.weekly %></td>
+                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}.monthly %></td>
                         <td width=20 class="center"><a href="/host/<% host %>/log/<% hosts.$hostname.group %>"><img class="look" src="/images/zoom-3.png"></a></td>
                     </tr>
                 <%- END %>
