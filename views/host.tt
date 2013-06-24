@@ -40,9 +40,9 @@
                         <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
                         <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
-                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}.daily %></td>
-                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}.weekly %></td>
-                        <td width=20 class="center"><%- countbackups.${hosts.$hostname.group}.monthly %></td>
+                        <td width=20 class="center"><%- backupstack.${hosts.$hostname.group}.daily.size   || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %>  </td>
+                        <td width=20 class="center"><%- backupstack.${hosts.$hostname.group}.weekly.size  || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %> </td>
+                        <td width=20 class="center"><%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></td>
                         <td width=20 class="center"><a href="/host/<% host %>/log/<% hosts.$hostname.group %>"><img class="look" src="/images/zoom-3.png"></a></td>
                     </tr>
                 <%- END %>

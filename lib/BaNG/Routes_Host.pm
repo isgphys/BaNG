@@ -18,7 +18,7 @@ get '/:host' => sub {
         webDancerEnv  => config->{run_env},
         host          => param('host'),
         hosts         => \%hosts,
-        countbackups  => count_backup_folders(param('host')),
+        backupstack   => backup_folders_stack(param('host')),
         cronjobs      => get_cronjob_config(),
         RecentBackups => \%RecentBackups,
     };

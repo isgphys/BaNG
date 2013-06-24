@@ -432,7 +432,28 @@ sub wipe {
     logit( $host, $group, "Wipe existing: $bkpcount, keeping: $bkpkeep for host $host group $group" );
 
     # get list of folders to wipe
-    my @wipedirs = list_folders_to_wipe( $host, $group, $force, @backup_folders );
+    my %stack    = list_folders_to_wipe( $host, $group, @backup_folders );
+    my @wipedirs = @{ $stack{wipe} };
+
+    # generate wipe report with content of stacks
+    if ( $serverconfig{debuglevel} >= 2 ) {
+        my $wipe_report = "Wipe report\n";
+        foreach my $type ( keys %stack ) {
+            $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
+            foreach my $folder ( @{$stack{$type}} ) {
+                $wipe_report .= "\t$folder\n";
+            }
+        }
+        logit( $host, $group, $wipe_report );
+    }
+
+    # don't automatically wipe too many backups
+    if ( $force ) {
+        logit( $host, $group, "Wipe WARNING: forced to wipe, namely " . ( $#{$stack{wipe}} + 1 ) . "." );
+    } elsif ( $#{$stack{wipe}} >= $serverconfig{auto_wipe_limit} ) {
+        logit( $host, $group, "Wipe WARNING: too many folders to wipe, namely " . ( $#{$stack{wipe}} + 1 ) . ". Wipe manually or use --force." );
+        return ();
+    }
 
     # make sure list contains at least one folder
     if ( !@wipedirs ) {

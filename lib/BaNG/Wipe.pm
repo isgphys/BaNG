@@ -13,7 +13,7 @@ our @EXPORT = qw(
 );
 
 sub list_folders_to_wipe {
-    my ($host, $group, $force, @available_backup_folders) = @_;
+    my ($host, $group, @available_backup_folders) = @_;
     my @folders_to_wipe;
 
     return () if $#available_backup_folders == 0;
@@ -52,38 +52,23 @@ sub list_folders_to_wipe {
     # determine daily, weekly, monthly and wipe stacks
     my %stack = fill_stacks( \@available, wipe_maxcount($host, $group) );
 
-    # $stack{wipe} contains the epochs of the folders to be wiped
-    foreach my $date ( keys %available_backups ) {
-        if ( $available_backups{$date}{epoch} ~~ @{$stack{wipe}} ) {
-            push( @folders_to_wipe, $available_backups{$date}{folder} );
-        }
-    }
-
-    # generate wipe report with content of stacks
-    if ( $serverconfig{debuglevel} >= 2 ) {
-        my $wipe_report = "Wipe report\n";
-        foreach my $type (qw( daily weekly monthly wipe )) {
-            $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
-            foreach my $epoch ( @{$stack{$type}} ) {
-                foreach my $date ( keys %available_backups ) {
-                    if ( $epoch eq $available_backups{$date}{epoch} ) {
-                        $wipe_report .= "\t$available_backups{$date}{folder}\n";
-                    }
+    # map dates inside stack to corresponding folders
+    foreach my $type ( keys %stack ) {
+        my @folders;
+        foreach my $epoch ( @{ $stack{$type} } ) {
+            foreach my $date ( keys %available_backups ) {
+                if ( $epoch == $available_backups{$date}{epoch} ) {
+                    push( @folders, $available_backups{$date}{folder} );
                 }
             }
         }
-        logit( $host, $group, $wipe_report );
+        @{ $stack{$type} } = @folders;
     }
 
-    # don't automatically wipe too many backups
-    if ( $force ) {
-        logit( $host, $group, "Wipe WARNING: forced to wipe, namely " . ( $#folders_to_wipe + 1 ) . "." );
-    } elsif ( $#folders_to_wipe >= $serverconfig{auto_wipe_limit} ) {
-        logit( $host, $group, "Wipe WARNING: too many folders to wipe, namely " . ( $#folders_to_wipe + 1 ) . ". Wipe manually or use --force." );
-        return ();
-    }
+    # add folders we already marked to be wiped
+    push( @{ $stack{wipe} }, @folders_to_wipe );
 
-    return @folders_to_wipe;
+    return %stack;
 }
 
 sub fill_stacks {
