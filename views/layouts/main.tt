@@ -32,6 +32,12 @@
                     $(this).find(".arrow").toggleClass("up");
                 });
 
+                $("#restorelist div.restore_details").hide();
+                $("#restorelist td").click(function(){
+                    $(this).find("div.restore_details").toggle();
+                    $(this).find(".arrow").toggleClass("up");
+                });
+
                 $("#logdateslist div.log_details").hide();
                 $("#logdateslist td").click(function(){
                     $(this).find("div.log_details").toggle();

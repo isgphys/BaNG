@@ -7,11 +7,14 @@
 <table id="restorelist" class="tablesorter">
     <thead>
         <tr>
-            <th>Hostname</th>
-            <th>Group</th>
+            <th width="120">Hostname</th>
+            <th width="120">Group</th>
             <th>Path</th>
-            <th>BackupServer</th>
+            <th width="100">BackupServer</th>
             <th>BackupPath</th>
+            <th width="60">Daily</th>
+            <th width="60">Weekly</th>
+            <th width="60">Monthly</th>
         </tr>
     </thead>
     <tbody>
@@ -21,7 +24,26 @@
             <td> <% hosts.$hostname.group %> </td>
             <td> <% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %> </td>
             <td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td>
-            <td> <% hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX _ '/' _ hosts.$hostname.hostname %> </td>
+            <td class="expander">
+              <% hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX _ '/' _ hosts.$hostname.hostname %>
+                <div id="restore_details" class="restore_details">
+                    <table class="backup_stack">
+                      <% FOREACH stack_type IN [ 'daily' 'weekly' 'monthly' ] %>
+                        <% NEXT UNLESS backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.$stack_type.size %>
+                        <tr><td><b><% stack_type %></b></td></tr>
+                          <% FOREACH folder IN backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.$stack_type %>
+                            <tr><td><% folder.replace(hosts.$hostname.hostconfig.BKP_TARGET_PATH _
+                                        '/' _ hosts.$hostname.hostconfig.BKP_PREFIX _
+                                        '/' _ hosts.$hostname.hostname _ '/', '')  %></td></tr>
+                          <% END %>
+                        </tr>
+                      <% END %>
+                    </table>
+                </div>
+            </td>
+            <td class=center><% backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.daily.size   || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></td>
+            <td class=center><% backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.weekly.size  || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></td>
+            <td class=center><% backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.monthly.size || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></td>
         </tr>
       <% END %>
     </tbody>

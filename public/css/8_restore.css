@@ -1,5 +1,5 @@
 #restorelist {
-    width: 900px;
+    width: 1200px;
 }
 
 #restorelist a {
@@ -10,9 +10,11 @@
 
 #restorelist th {
     text-align: left;
+    padding-left: 5px;
 }
 
 #restorelist td {
+    vertical-align: top;
     padding: 5px;
 }
 
