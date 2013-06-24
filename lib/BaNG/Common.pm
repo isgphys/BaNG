@@ -76,9 +76,9 @@ sub count_backup_folders {
         my %maxcount = %{ &BaNG::Wipe::wipe_maxcount($host, $group) };
         my %stack = &BaNG::Wipe::fill_stacks( \@available, \%maxcount );
         $count_backup_folders{$group} = {
-            daily   => ($#{$stack{daily}}   + 1) . '/' . $maxcount{daily},
-            weekly  => ($#{$stack{weekly}}  + 1) . '/' . $maxcount{weekly},
-            monthly => ($#{$stack{monthly}} + 1) . '/' . $maxcount{monthly},
+            daily   => ($#{$stack{daily}}   + 1) . ' / ' . $maxcount{daily},
+            weekly  => ($#{$stack{weekly}}  + 1) . ' / ' . $maxcount{weekly},
+            monthly => ($#{$stack{monthly}} + 1) . ' / ' . $maxcount{monthly},
         };
     }
 

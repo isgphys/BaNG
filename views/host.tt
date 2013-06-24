@@ -10,7 +10,7 @@
                 <th rowspan="2" class="center">SubFolder</th>
                 <th rowspan="2" class="center">Forks</th>
                 <th rowspan="2" class="center">Mode</th>
-                <th colspan="3" class="center">BkpCount</th>
+                <th colspan="3" class="center">Backup Count</th>
                 <th rowspan="2" class="center">Log</th>
             </tr>
             <tr>
@@ -21,9 +21,9 @@
                 <th>Wipe</th>
                 <th>Bkp</th>
                 <th>Wipe</th>
-                <th>Daily</th>
-                <th>Weekly</th>
-                <th>Monthly</th>
+                <th width="50">Daily</th>
+                <th width="50">Weekly</th>
+                <th width="50">Monthly</th>
             </tr>
         </thead>
         <tbody>
