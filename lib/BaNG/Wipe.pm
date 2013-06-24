@@ -8,6 +8,7 @@ use Date::Parse;
 use Exporter 'import';
 our @EXPORT = qw(
     list_folders_to_wipe
+    wipe_maxcount
 );
 
 sub list_folders_to_wipe {
@@ -48,12 +49,7 @@ sub list_folders_to_wipe {
     }
 
     # determine daily, weekly, monthly and wipe stacks
-    my %maxcount = (
-        daily   => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_DAILY},
-        weekly  => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_WEEKLY},
-        monthly => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_MONTHLY},
-    );
-    my %stack = _fill_stacks( \@available, \%maxcount );
+    my %stack = _fill_stacks( \@available, wipe_maxcount($host, $group) );
 
     # $stack{wipe} contains the epochs of the folders to be wiped
     foreach my $date ( keys %available_backups ) {
@@ -135,6 +131,18 @@ sub _fill_stacks {
     }
 
     return %stack;
+}
+
+sub wipe_maxcount {
+    my ($host, $group) = @_;
+
+    my %maxcount = (
+        daily   => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_DAILY},
+        weekly  => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_WEEKLY},
+        monthly => $hosts{"$host-$group"}->{hostconfig}->{WIPE_KEEP_MONTHLY},
+    );
+
+    return \%maxcount;
 }
 
 1;
