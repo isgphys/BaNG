@@ -10,6 +10,7 @@
             <th width="120">Hostname</th>
             <th width="120">Group</th>
             <th>Path</th>
+            <th width="60">Automount</th>
             <th width="100">BackupServer</th>
             <th>BackupPath</th>
             <th width="60">Daily</th>
@@ -23,9 +24,15 @@
             <td> <a href="/host/<%hosts.$hostname.hostname %>"><img class="look" src="/images/zoom-3.png"> <% hosts.$hostname.hostname %></a> </td>
             <td> <% hosts.$hostname.group %> </td>
             <td> <% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %> </td>
+            <td>
+                <% IF automount.$BackupPath.path AND hosts.$hostname.hostconfig.BKP_TARGET_HOST == 'phd-bkp-gw' %>
+                    /backup/<% automount.$BackupPath.path _ '/' _ hosts.$hostname.hostname %>
+                <% END %>
+            </td>
             <td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td>
             <td class="expander">
-              <% hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX _ '/' _ hosts.$hostname.hostname %>
+                <% BackupPath = hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX %>
+              <% BackupPath _ '/' _ hosts.$hostname.hostname %>
                 <div id="restore_details" class="restore_details">
                     <table class="backup_stack">
                       <% FOREACH stack_type IN [ 'daily' 'weekly' 'monthly' ] %>

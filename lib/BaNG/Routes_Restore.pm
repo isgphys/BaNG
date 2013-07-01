@@ -22,6 +22,7 @@ get '/' => sub {
         webDancerEnv => config->{run_env},
         hosts        => \%hosts,
         backupstack  => \%hosts_stack,
+        automount    => get_automount_paths(),
     };
 };
 

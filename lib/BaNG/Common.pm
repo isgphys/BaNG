@@ -3,12 +3,14 @@ package BaNG::Common;
 use BaNG::Config;
 use POSIX qw( floor );
 use Date::Parse;
+use Data::Dumper;
 
 use Exporter 'import';
 our @EXPORT = qw(
     backup_folders_stack
     get_backup_folders
     list_groups
+    get_automount_paths
     num2human
     targetpath
     time2human
@@ -30,7 +32,7 @@ sub get_backup_folders {
     my @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}[0-9\./_]*' 2>/dev/null`;
 
     return @backup_folders;
-}
+} 
 
 sub list_groups {
     my ($host) = @_;
@@ -56,6 +58,45 @@ sub backup_folders_stack {
     }
 
     return \%backup_folders_stack;
+}
+
+sub get_automount_paths {
+    my ($ypfile) = @_;
+    $ypfile ||= 'auto.backup';
+
+    my %automnt;
+    my @autfstbl = `ypcat -k $ypfile`;
+
+    foreach my $line ( @autfstbl ) {
+        if ( $line =~ qr{
+            (?<parentfolder>[^\s]*) \s*
+            \-fstype\=autofs \s*
+            yp\:(?<ypfile>.*)
+            }x )
+        {
+            # recursively read included yp files
+            my $parentfolder = $+{parentfolder};
+            my $submounts = get_automount_paths( $+{ypfile} );
+            foreach my $mountpt ( keys %{ $submounts } ) {
+                $automnt{ $mountpt } = {
+                    server => $submounts->{$mountpt}->{server},
+                    path   => "$parentfolder/$submounts->{$mountpt}->{path}",
+                };
+            }
+        } elsif ( $line =~ qr{
+            (?<mountpt>[^\s]*) \s
+            (?<server>[^\:]*) :
+            (?<mountpath>.*)
+            }x )
+        {
+            $automnt{$+{mountpath}} = {
+                server => $+{server},
+                path   => $+{mountpt},
+            };
+        }
+    }
+
+    return \%automnt;
 }
 
 sub num2human {
