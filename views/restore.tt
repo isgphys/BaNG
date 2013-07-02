@@ -20,37 +20,47 @@
     </thead>
     <tbody>
       <% FOREACH hostname IN hosts.keys.sort %>
+        <% BackupPath  = hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX %>
+        <% BackupStack = backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group} %>
+        <% TargetHost  = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
         <tr>
             <td> <a href="/host/<%hosts.$hostname.hostname %>"><img class="look" src="/images/zoom-3.png"> <% hosts.$hostname.hostname %></a> </td>
             <td> <% hosts.$hostname.group %> </td>
             <td> <% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %> </td>
             <td>
-                <% IF automount.$BackupPath.path AND hosts.$hostname.hostconfig.BKP_TARGET_HOST == 'phd-bkp-gw' %>
-                    /backup/<% automount.$BackupPath.path _ '/' _ hosts.$hostname.hostname %>
-                <% END %>
+              <% IF automount.$BackupPath.path AND TargetHost == 'phd-bkp-gw' %>
+                /backup/<% automount.$BackupPath.path _ '/' _ hosts.$hostname.hostname %>
+              <% END %>
             </td>
             <td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td>
-            <td class="expander">
-                <% BackupPath = hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX %>
+            <td class="pointer expander">
               <% BackupPath _ '/' _ hosts.$hostname.hostname %>
                 <div id="restore_details" class="restore_details">
                     <table class="backup_stack">
                       <% FOREACH stack_type IN [ 'daily' 'weekly' 'monthly' ] %>
-                        <% NEXT UNLESS backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.$stack_type.size %>
+                        <% NEXT UNLESS BackupStack.$stack_type.size %>
                         <tr><td><b><% stack_type %></b></td></tr>
-                          <% FOREACH folder IN backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.$stack_type %>
-                            <tr><td><% folder.replace(hosts.$hostname.hostconfig.BKP_TARGET_PATH _
+                          <% FOREACH folder IN BackupStack.$stack_type %>
+                            <tr>
+                                <td><% folder.replace(hosts.$hostname.hostconfig.BKP_TARGET_PATH _
                                         '/' _ hosts.$hostname.hostconfig.BKP_PREFIX _
-                                        '/' _ hosts.$hostname.hostname _ '/', '')  %></td></tr>
+                                        '/' _ hosts.$hostname.hostname _ '/', '')  %>
+                                </td>
+                            </tr>
                           <% END %>
                         </tr>
                       <% END %>
                     </table>
                 </div>
             </td>
-            <td class=center><% backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.daily.size   || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></td>
-            <td class=center><% backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.weekly.size  || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></td>
-            <td class=center><% backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.monthly.size || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></td>
+              <% IF TargetHost == 'phd-bkp-gw' %>
+                <% PlaceHolder = '0' %>
+              <% ELSE %>
+                <% PlaceHolder = '?' %>
+              <% END %>
+            <td class=center><% BackupStack.daily.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></td>
+            <td class=center><% BackupStack.weekly.size  || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></td>
+            <td class=center><% BackupStack.monthly.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></td>
         </tr>
       <% END %>
     </tbody>

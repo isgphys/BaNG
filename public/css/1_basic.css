@@ -15,6 +15,10 @@ body {
     text-align : right;
 }
 
+.pointer {
+   cursor: pointer;
+}
+
 #header {
     background-image:url('/images/header.png');
     background-color:#254370;
