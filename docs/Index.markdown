@@ -5,3 +5,4 @@
   * [Configuration](Configuration) : BaNG config files
   * [Commands](Commands) : BaNG command line tools
   * [Database](./Database) : BaNG database configuration
+  * [Wipe](./Wipe) : BaNG wipe strategy and long-time backups
