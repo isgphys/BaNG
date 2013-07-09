@@ -9,6 +9,7 @@
         <script src="/javascripts/jquery.js"></script>
         <script src="/javascripts/jquery.uitablefilter.js" type="text/javascript"></script>
         <script src="/javascripts/jquery.tablesorter.js"></script>
+        <script src="/javascripts/jquery.tablesorter.widgets.js"></script>
         <script>
             function updateFilter() {
                 var filterTable = $('#configslist, #restorelist, #loglist')
@@ -21,9 +22,27 @@
 
                 updateFilter();
 
-                $('#config').tablesorter();
-                $('#configslist').tablesorter();
-                $('#restorelist').tablesorter();
+                $('#config').tablesorter({
+                    sortList: [[0,0]],
+                    widgets: [ 'stickyHeaders' ],
+                    widgetOptions: {
+                        stickyHeaders : 'tablesorter-stickyHeader',
+                    }
+                });
+                $('#configslist').tablesorter({
+                    sortList: [[0,0]],
+                    widgets: [ 'stickyHeaders' ],
+                    widgetOptions: {
+                        stickyHeaders : 'tablesorter-stickyHeader',
+                    }
+                });
+                $('#restorelist').tablesorter({
+                    sortList: [[0,0],[1,0]],
+                    widgets: [ 'stickyHeaders' ],
+                    widgetOptions: {
+                        stickyHeaders : 'tablesorter-stickyHeader',
+                    }
+                });
                 $('#config_default').tablesorter();
 
                 $("#configslist div.conf_details").hide();

@@ -31,10 +31,6 @@
     margin: 6px 0;
 }
 
-#content table th {
-    background-color: #eee;
-}
-
 #content table tr.even {
     background-color: #eee;
 }
