@@ -483,32 +483,35 @@ sub logit {
 }
 
 sub read_log {
-    my ($host, $group) = @_;
-
-    my $logdate = strftime $serverconfig{global_log_date}, localtime;
-    my $logfile = "$serverconfig{path_logs}/${host}-${group}_$logdate.log";
-
-    open(LOGDATA, $logfile) or print "ERROR opening logfile $logfile: $!\n";
-    my @logdata = <LOGDATA>;
-    close LOGDATA;
+    my ($host, $group, $show_logs_number) = @_;
 
     my %parsed_logdata;
-    foreach my $logline (@logdata) {
-        if ( $logline =~ qr{
-                (?<logdate> \w{3}\s\d{2} ) \s
-                (?<logtime> \d{2}:\d{2}:\d{2} ) \s
-                (?<hostgroup> [^:]* )\s:\s
-                (?<message> .* )
-            }x )
-        {
-            push( @{ $parsed_logdata{$+{logdate}} }, {
-                date      => $+{logdate},
-                time      => $+{logtime},
-                hostgroup => $+{hostgroup},
-                message   => $+{message},
-            });
-        } else {
-            $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
+    my $logfolder = "$serverconfig{path_logs}/${host}_${group}";
+    my @logfiles  = glob("$logfolder/*.log");
+    $show_logs_number = $#logfiles + 1 if ( $#logfiles < $show_logs_number );
+
+    foreach my $logfile (@logfiles[-$show_logs_number..-1]) {
+        open(LOGDATA, $logfile) or print "ERROR opening logfile $logfile: $!\n";
+        my @logdata = <LOGDATA>;
+        close LOGDATA;
+
+        foreach my $logline (@logdata) {
+            if ( $logline =~ qr{
+                    (?<logdate> \w{3}\s\d{2} ) \s
+                    (?<logtime> \d{2}:\d{2}:\d{2} ) \s
+                    (?<hostgroup> [^:]* )\s:\s
+                    (?<message> .* )
+                }x )
+            {
+                push( @{ $parsed_logdata{$+{logdate}} }, {
+                    date      => $+{logdate},
+                    time      => $+{logtime},
+                    hostgroup => $+{hostgroup},
+                    message   => $+{message},
+                });
+            } else {
+                $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
+            }
         }
     }
 
