@@ -29,10 +29,12 @@ sub get_backup_folders {
     my ($host, $group) = @_;
 
     my $bkpdir = targetpath( $host, $group );
-    my @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}[0-9\./_]*' 2>/dev/null`;
+    my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
+
+    my @backup_folders = &BaNG::Hosts::remoteWrapperCommand( $server, 'BaNG/bang_getBackupFolders', $bkpdir );
 
     return @backup_folders;
-} 
+}
 
 sub list_groups {
     my ($host) = @_;
