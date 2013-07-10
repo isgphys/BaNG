@@ -460,8 +460,10 @@ sub logit {
     my ($host, $group, $msg) = @_;
 
     my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
+    my $logmonth   = strftime "%Y-%m", localtime;
     my $logdate    = strftime $serverconfig{global_log_date}, localtime;
     my $logfolder  = "$serverconfig{path_logs}/${host}_${group}";
+    my $globallogfile = "$serverconfig{path_logs}/global_$logmonth.log";
     my $logfile    = "$logfolder/$logdate.log";
     my $logmessage = "$timestamp $host-$group : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
@@ -469,10 +471,23 @@ sub logit {
     print $logmessage if $serverconfig{debug};
 
     unless ( $serverconfig{dryrun} ) {
+        # write into daily logfile per host_group
         mkdir($logfolder) unless -d $logfolder;
         open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
         print {$log} $logmessage;
         close $log;
+
+        # write selection of messages to global logfile
+        my $selection = qr{
+            Queueing \s backup \s for |
+            Backup \s successful |
+            ERROR
+        }x;
+        if ( $logmessage =~ /$selection/ ) {
+            open my $log, ">>", $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
+            print {$log} $logmessage;
+            close $log;
+        }
     }
 
     if ( $logmessage =~ /warn|error/i ) {
