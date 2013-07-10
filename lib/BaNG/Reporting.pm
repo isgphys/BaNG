@@ -461,13 +461,15 @@ sub logit {
 
     my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
     my $logdate    = strftime $serverconfig{global_log_date}, localtime;
-    my $logfile    = "$serverconfig{path_logs}/${host}-${group}_$logdate.log";
+    my $logfolder  = "$serverconfig{path_logs}/${host}_${group}";
+    my $logfile    = "$logfolder/$logdate.log";
     my $logmessage = "$timestamp $host-$group : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
 
     print $logmessage if $serverconfig{debug};
 
     unless ( $serverconfig{dryrun} ) {
+        mkdir($logfolder) unless -d $logfolder;
         open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
         print {$log} $logmessage;
         close $log;
