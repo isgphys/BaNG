@@ -18,10 +18,7 @@
                 $('#countVisible').html(countVisible);
             }
 
-            $(document).ready(function(){
-
-                updateFilter();
-
+            function initializeTablesorter() {
                 $('#config').tablesorter({
                     sortList: [[0,0]],
                     widgets: [ 'stickyHeaders' ],
@@ -44,7 +41,9 @@
                     }
                 });
                 $('#config_default').tablesorter();
+            }
 
+            function collapseDetails() {
                 $("#configslist div.conf_details").hide();
                 $("#configslist td").click(function(){
                     $(this).find("div.conf_details").toggle();
@@ -62,9 +61,9 @@
                     $(this).find("div.log_details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });
-            });
+            }
 
-            $(function() {
+            function initializeEvents() {
                 $("#filter").keyup(function() {
                     updateFilter();
                 })
@@ -72,7 +71,19 @@
                 $('#filter-form').submit(function(){
                     return false;
                 });
+            }
+
+            function initializeAll() {
+                updateFilter();
+                initializeEvents();
+                initializeTablesorter();
+                collapseDetails();
+            }
+
+            $(document).ready(function(){
+                initializeAll();
             });
+
         </script>
     </head>
     <body>

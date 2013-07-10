@@ -7,6 +7,12 @@ use BaNG::Common;
 prefix '/restore';
 
 get '/' => sub {
+    template 'restore' => {
+        section      => 'restore',
+    };
+};
+
+get '/restore_content' => sub {
     get_serverconfig();
     get_host_config('*');
 
@@ -16,14 +22,14 @@ get '/' => sub {
         $hosts_stack{$host} = backup_folders_stack($host);
     }
 
-    template 'restore' => {
+    template 'restore-content' => {
         section      => 'restore',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         hosts        => \%hosts,
         backupstack  => \%hosts_stack,
         automount    => get_automount_paths(),
+        },{ layout => 0 };
     };
-};
 
 1;
