@@ -25,7 +25,7 @@
             </td>
             <td class="expander">
               <% hosts.$hostname.configfile %>
-                <div class="config_details">
+                <div class="details">
                   <table class="configfile">
                     <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
                         <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="<% hosts.$hostname.confighelper.$hostconf %>Config"<% END %>>

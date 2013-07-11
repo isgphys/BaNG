@@ -21,7 +21,7 @@
             </td>
             <td class="expander">
               <% groups.$group.configfile %>
-                <div class="config_details">
+                <div class="details">
                   <table class="configfile">
                     <% FOREACH groupconf IN groups.$group.groupconfig.keys.sort %>
                         <tr <% IF groups.$group.confighelper.$groupconf %>class="<% groups.$group.confighelper.$groupconf %>Config"<% END %>>

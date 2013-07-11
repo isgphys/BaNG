@@ -53,21 +53,9 @@
             }
 
             function collapseDetails() {
-                $(".configslist div.config_details").hide();
-                $(".configslist td").click(function(){
-                    $(this).find("div.config_details").toggle();
-                    $(this).find(".arrow").toggleClass("up");
-                });
-
-                $(".restorelist div.restore_details").hide();
-                $(".restorelist td").click(function(){
-                    $(this).find("div.restore_details").toggle();
-                    $(this).find(".arrow").toggleClass("up");
-                });
-
-                $(".logdateslist div.log_details").hide();
-                $(".logdateslist td").click(function(){
-                    $(this).find("div.log_details").toggle();
+                $("div.details").hide();
+                $("div.details").parent().click(function(){
+                    $(this).find("div.details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });
             }

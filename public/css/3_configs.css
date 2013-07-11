@@ -99,20 +99,20 @@
     background-position: 99% 7px;
 }
 
-.config_details table {
+.details table {
     width: 380px;
     padding-top: 5px;
 }
 
-.config_details table tr:nth-child(odd) {
+.details table tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-.config_details tr:nth-child(even) {
+.details tr:nth-child(even) {
     background-color: #eee;
 }
 
-.config_details td {
+.details td {
     height: 18px;
     padding: 0px 0px 0px 5px;
     vertical-align: middle;
