@@ -15,6 +15,8 @@
                 $.uiTableFilter( $('.tablefilter'), $("#filter").val() );
                 var countVisible = $('.tablefilter > tbody > tr:visible').length;
                 $('#countVisible').html(countVisible);
+                var countAll = $('.tablefilter > tbody > tr').length;
+                $('#countAll').html(countAll);
             }
 
             function initializeTablesorter() {

@@ -1,12 +1,7 @@
-<h2>Group configs (<span id="countVisible"><% groups.size %></span> of <% groups.size %>) </h2>
-<div id="configs_filter">
-    <form id="filter-form">Filter Configslist:
-        <input name="filter" id="filter" value="" maxlength="30" size="30" type="text" autofocus >
-        <img alt="Clear" src="/images/clear.png" border="0" onClick="$('#filter').val(''); updateFilter();">
-    </form>
-    (Click on a Config-File entry to show details)
-</div>
+<h2>Group configs</h2>
+<% INCLUDE 'doFilter.tt' %>
 <table class="configslist tablesorter tablefilter">
+    <caption>(Click on a Config-File entry to show details)</caption>
     <thead>
         <tr>
             <th>Group</th>

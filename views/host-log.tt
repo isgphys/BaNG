@@ -1,11 +1,6 @@
 <div>
     <h3>Backup Logfile Report of <% host %>_<% group %></h3>
-    <div id="log_filter">
-        <form id="filter-form">Filter Log Entries:
-            <input name="filter" id="filter" value="<% filtervalue %>" maxlength="30" size="30" type="text" autofocus >
-            <img alt="Clear" src="/images/clear.png" border="0" onClick="$('#filter').val(''); updateFilter();">
-        </form>
-    </div>
+    <% INCLUDE 'doFilter.tt' %>
     <table class="logdateslist">
     <%- FOREACH date IN logdata.keys.sort.reverse %>
         <tr>
