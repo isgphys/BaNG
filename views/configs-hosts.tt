@@ -6,7 +6,7 @@
     </form>
     (Click on a Config-File entry to show details)
 </div>
-<table id="configslist" class="tablesorter">
+<table class="configslist tablesorter tablefilter">
     <thead>
         <tr>
             <th>Hostname</th>
@@ -30,7 +30,7 @@
             </td>
             <td class="expander">
               <% hosts.$hostname.configfile %>
-                <div id="config_details" class="conf_details">
+                <div class="config_details">
                   <table class="configfile">
                     <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
                         <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="<% hosts.$hostname.confighelper.$hostconf %>Config"<% END %>>

@@ -12,52 +12,59 @@
         <script src="/javascripts/jquery.tablesorter.widgets.js"></script>
         <script>
             function updateFilter() {
-                var filterTable = $('#configslist, #restorelist, #loglist')
-                $.uiTableFilter( filterTable, $("#filter").val() );
-                var countVisible = $('#configslist > tbody > tr:visible').length;
+                $.uiTableFilter( $('.tablefilter'), $("#filter").val() );
+                var countVisible = $('.tablefilter > tbody > tr:visible').length;
                 $('#countVisible').html(countVisible);
             }
 
             function initializeTablesorter() {
-                $('#config').tablesorter({
+                $('.config').tablesorter({
                     sortList: [[0,0]],
                     widgets: [ 'stickyHeaders' ],
                     widgetOptions: {
                         stickyHeaders : 'tablesorter-stickyHeader',
                     }
                 });
-                $('#configslist').tablesorter({
+                $('.configslist').tablesorter({
                     sortList: [[0,0]],
                     widgets: [ 'stickyHeaders' ],
                     widgetOptions: {
                         stickyHeaders : 'tablesorter-stickyHeader',
                     }
                 });
-                $('#restorelist').tablesorter({
+                $('.restorelist').tablesorter({
                     sortList: [[0,0],[1,0]],
                     widgets: [ 'stickyHeaders' ],
                     widgetOptions: {
                         stickyHeaders : 'tablesorter-stickyHeader',
                     }
                 });
-                $('#config_default').tablesorter();
+                $('.reporting').tablesorter({
+                    widgets: [ 'stickyHeaders' ],
+                    widgetOptions: {
+                        stickyHeaders : 'tablesorter-stickyHeader',
+                    }
+                });
+
+                $('.config_default').tablesorter();
+
             }
 
             function collapseDetails() {
-                $("#configslist div.conf_details").hide();
-                $("#configslist td").click(function(){
-                    $(this).find("div.conf_details").toggle();
+                $(".configslist div.config_details").hide();
+                $(".configslist td").click(function(){
+                    $(this).find("div.config_details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });
 
-                $("#restorelist div.restore_details").hide();
-                $("#restorelist td").click(function(){
+                $(".restorelist div.restore_details").hide();
+                $(".restorelist td").click(function(){
                     $(this).find("div.restore_details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });
 
-                $("#logdateslist div.log_details").hide();
-                $("#logdateslist td").click(function(){
+                $(".logdateslist div.log_details").hide();
+                $(".logdateslist td").click(function(){
                     $(this).find("div.log_details").toggle();
                     $(this).find(".arrow").toggleClass("up");
                 });

@@ -1,35 +1,35 @@
-#restorelist {
+.restorelist {
     width: 1200px;
 }
 
-#restorelist a {
+.restorelist a {
     color: #6081BB;
     text-decoration: none;
     font-weight:bold;
 }
 
-#restorelist th {
+.restorelist th {
     text-align: left;
     padding-left: 5px;
 }
 
-#restorelist td {
+.restorelist td {
     vertical-align: top;
     padding: 5px;
 }
 
-#restorelist tr.noDefault{
+.restorelist tr.noDefault{
     background-color: #ff9999 !important;
 }
 
-#restorelist tr:nth-child(odd) {
+.restorelist tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-#restorelist tr:nth-child(even) {
+.restorelist tr:nth-child(even) {
     background-color: #eee;
 }
 
-#restorelist tr.active {
+.restorelist tr.active {
     background-color: #99FF99;
 }

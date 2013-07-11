@@ -1,97 +1,97 @@
-#config {
+.config {
     width: 450px;
 }
 
-#config th {
+.config th {
     text-align: left;
     padding-left: 5px;
 }
 
-#config td {
+.config td {
     padding-left: 5px;
 }
 
-#config tr {
+.config tr {
     height: 24px;
 }
 
-#config tr:nth-child(odd) {
+.config tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-#config tr:nth-child(even) {
+.config tr:nth-child(even) {
     background-color: #eee;
 }
 
-#config_default {
+.config_default {
     width: 450px;
 }
 
-#config_default th {
+.config_default th {
     text-align: left;
     padding-left: 5px;
 }
 
-#config_default td {
+.config_default td {
     padding-left: 5px;
 }
 
-#config_default tr {
+.config_default tr {
     height: 24px;
 }
 
-#config_default tr:nth-child(odd) {
+.config_default tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-#config_default tr:nth-child(even) {
+.config_default tr:nth-child(even) {
     background-color: #eee;
 }
 
-#configslist {
+.configslist {
     width: 800px;
 }
 
-#configslist a {
+.configslist a {
     color: #6081BB;
     text-decoration: none;
     font-weight:bold;
 }
 
-#configslist th {
+.configslist th {
     text-align: left;
 }
 
-#configslist td {
+.configslist td {
     vertical-align: top;
     padding: 5px;
 }
 
-#configslist tr.groupConfig{
+.configslist tr.groupConfig{
     background-color: #33bbdd !important;
 }
 
-#configslist tr.hostConfig{
+.configslist tr.hostConfig{
     background-color: #66ffdd !important;
 }
 
-#configslist tr.serverConfig{
+.configslist tr.serverConfig{
     background-color: #66aadd !important;
 }
 
-#configslist tr:nth-child(odd) {
+.configslist tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-#configslist tr:nth-child(even) {
+.configslist tr:nth-child(even) {
     background-color: #eee;
 }
 
-#configslist tr.active {
+.configslist tr.active {
     background-color: #99FF99;
 }
 
-#configslist .expander {
+.configslist .expander {
     width: 400px;
     cursor: pointer;
     background: url("/images/go-bottom-3.png") no-repeat transparent;
@@ -99,20 +99,20 @@
     background-position: 99% 7px;
 }
 
-#config_details table {
+.config_details table {
     width: 380px;
     padding-top: 5px;
 }
 
-#config_details table tr:nth-child(odd) {
+.config_details table tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-#config_details tr:nth-child(even) {
+.config_details tr:nth-child(even) {
     background-color: #eee;
 }
 
-#config_details td {
+.config_details td {
     height: 18px;
     padding: 0px 0px 0px 5px;
     vertical-align: middle;
