@@ -1,7 +1,6 @@
 <h2>Server configs</h2>
 <% INCLUDE 'doFilter.tt' %>
 <table class="configslist tablesorter tablefilter">
-    <caption>(Click on a Config-File entry to show details)</caption>
     <thead>
         <tr>
             <th>Server</th>
