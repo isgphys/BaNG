@@ -30,7 +30,7 @@
             <td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td>
             <td class="pointer expander">
               <% BackupPath _ '/' _ hosts.$hostname.hostname %>
-                <div id="restore_details" class="restore_details">
+                <div class="details">
                     <table class="backup_stack">
                       <% FOREACH stack_type IN [ 'daily' 'weekly' 'monthly' ] %>
                         <% NEXT UNLESS BackupStack.$stack_type.size %>
