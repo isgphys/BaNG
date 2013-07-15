@@ -481,7 +481,11 @@ sub logit {
         my $selection = qr{
             Queueing \s backup \s for |
             Backup \s successful |
-            ERROR
+            ERROR |
+            Wipe \s host |
+            Wipe \s existing |
+            Wipe \s successful |
+            Delete \s btrfs \s subvolume
         }x;
         if ( $logmessage =~ /$selection/ ) {
             open my $log, ">>", $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
