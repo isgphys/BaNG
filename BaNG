@@ -429,11 +429,11 @@ sub wipe {
     }
     my $bkpcount = $#backup_folders + 1;
 
-    logit( $host, $group, "Wipe existing: $bkpcount, keeping: $bkpkeep for host $host group $group" );
-
     # get list of folders to wipe
     my %stack    = list_folders_to_wipe( $host, $group, @backup_folders );
     my @wipedirs = @{ $stack{wipe} };
+
+    logit( $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} +1 ) .", keeping: $bkpkeep for host $host group $group" );
 
     # generate wipe report with content of stacks
     if ( $serverconfig{debuglevel} >= 2 ) {
