@@ -2,15 +2,15 @@
 <table class="restorelist tablesorter tablefilter">
     <thead>
         <tr>
-            <th width="120">Hostname</th>
-            <th width="120">Group</th>
-            <th>Path</th>
-            <th width="60">Automount</th>
-            <th width="100">BackupServer</th>
+            <th width="100">Hostname</th>
+            <th width="90">Group</th>
+            <th width="100">Path</th>
+            <th>Automount</th>
+            <th width="80">BackupServer</th>
             <th>BackupPath</th>
-            <th width="60">Daily</th>
-            <th width="60">Weekly</th>
-            <th width="60">Monthly</th>
+            <th width="40">Daily</th>
+            <th width="40">Weekly</th>
+            <th width="40">Monthly</th>
         </tr>
     </thead>
     <tbody>
