@@ -48,12 +48,8 @@
                     </table>
                 </div>
             </td>
-              <% IF TargetHost == 'phd-bkp-gw' %>
-                <% PlaceHolder = '0' %>
-              <% ELSE %>
-                <% PlaceHolder = '?' %>
-              <% END %>
-              <td class=center><% BackupStack.daily.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></td>
+            <% PlaceHolder = '0' %>
+            <td class=center><% BackupStack.daily.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></td>
             <td class=center><% BackupStack.weekly.size  || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></td>
             <td class=center><% BackupStack.monthly.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></td>
         </tr>
