@@ -205,6 +205,14 @@ nav ul ul ul li a {
     background-color: yellow;
 }
 
+.check_green {
+    background-color: #BCF5A9;
+}
+
+.check_yellow {
+    background-color: #F2F5A9;
+}
+
 .active {
     background-color: #99FF99;
 }

@@ -28,7 +28,7 @@
               <% END %>
             </td>
             <td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td>
-            <td class="pointer expander">
+            <td class="expander">
               <% BackupPath _ '/' _ hosts.$hostname.hostname %>
                 <div class="details collapse">
                     <table class="backup_stack">
@@ -49,10 +49,18 @@
                 </div>
             </td>
             <% PlaceHolder = '0' %>
-            <td class=center><% BackupStack.daily.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></td>
-            <td class=center><% BackupStack.weekly.size  || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></td>
-            <td class=center><% BackupStack.monthly.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></td>
-        </tr>
+            <% FOREACH wipe_keep IN  [ {'daily' => 'WIPE_KEEP_DAILY'}, {'weekly' => 'WIPE_KEEP_WEEKLY'}, {'monthly' => 'WIPE_KEEP_MONTHLY'} ] %>
+                <td class=
+                    <% IF ( BackupStack.${wipe_keep.keys.first}.size == hosts.$hostname.hostconfig.${wipe_keep.values.first} )
+                        || hosts.$hostname.hostconfig.${wipe_keep.values.first} =='0' %>
+                        "center check_green"
+                    <% ELSE %>
+                        "center check_yellow"
+                    <% END %>
+                >
+                <% BackupStack.${wipe_keep.keys.first}.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.${wipe_keep.values.first} %></b>
+                </td>
+            <% END %>
       <% END %>
     </tbody>
 </table>
