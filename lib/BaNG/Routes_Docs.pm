@@ -1,5 +1,8 @@
 package BaNG::Routes_Docs;
 
+use 5.010;
+use strict;
+use warnings;
 use Dancer ':syntax';
 use BaNG::Config;
 use Template::Plugin::Markdown;

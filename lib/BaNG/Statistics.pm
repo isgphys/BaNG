@@ -1,5 +1,8 @@
 package BaNG::Statistics;
 
+use 5.010;
+use strict;
+use warnings;
 use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;

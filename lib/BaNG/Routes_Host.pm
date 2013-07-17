@@ -1,5 +1,8 @@
 package BaNG::Routes_Host;
 
+use 5.010;
+use strict;
+use warnings;
 use Dancer ':syntax';
 use BaNG::Common;
 use BaNG::Config;

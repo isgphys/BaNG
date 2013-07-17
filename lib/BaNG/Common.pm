@@ -1,5 +1,8 @@
 package BaNG::Common;
 
+use 5.010;
+use strict;
+use warnings;
 use BaNG::Config;
 use POSIX qw( floor );
 use Date::Parse;

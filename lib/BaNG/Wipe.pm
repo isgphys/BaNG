@@ -1,6 +1,8 @@
 package BaNG::Wipe;
 
 use 5.010;
+use strict;
+use warnings;
 use BaNG::Config;
 use BaNG::Reporting;
 use Date::Parse;
@@ -85,6 +87,8 @@ sub fill_stacks {
 
     # sort stack to contain most recent backup as first element
     @available = reverse sort( @available );
+
+    return %stack unless @available;
 
     # start intervals at time of most recent backup
     my $start = $available[0];

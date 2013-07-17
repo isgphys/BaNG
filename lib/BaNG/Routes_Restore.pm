@@ -1,5 +1,8 @@
 package BaNG::Routes_Restore;
 
+use 5.010;
+use strict;
+use warnings;
 use Dancer ':syntax';
 use BaNG::Config;
 use BaNG::Common;
