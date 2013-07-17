@@ -13,7 +13,7 @@
           <td><a href="/config/allhosts/<% server %>"><% server %></a></td>
           <td class="expander">
               <% servers.$server.configfile %>
-              <div class="details">
+              <div class="details collapse">
                   <table class="configfile">
                       <% FOREACH serverconf IN servers.$server.serverconfig.keys.sort %>
                       <tr <% IF servers.$server.confighelper.$serverconf %>class="<% servers.$server.confighelper.$serverconf %>Config"<% END %>>
