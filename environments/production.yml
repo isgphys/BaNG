@@ -1,6 +1,6 @@
 run_env:            'production'
 port:               3000
-log:                'core'
+log:                'debug'
 daemon:             1
 behind_proxy:       1
 auto_reload:        0

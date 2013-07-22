@@ -4,11 +4,12 @@ use 5.010;
 use strict;
 use warnings;
 use Dancer ':syntax';
+use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
 
 prefix '/config';
 
-get '/defaults' => sub {
+get '/defaults' => require_role isg => sub {
     get_serverconfig();
 
     template 'configs-defaults' => {
@@ -21,11 +22,11 @@ get '/defaults' => sub {
     };
 };
 
-get '/allhosts' => sub {
+get '/allhosts' => require_role isg => sub {
     redirect '/config/allhosts/';
 };
 
-get '/allhosts/:filter?' => sub {
+get '/allhosts/:filter?' => require_role isg => sub {
     get_serverconfig();
     get_host_config("*");
 
@@ -38,7 +39,7 @@ get '/allhosts/:filter?' => sub {
     };
 };
 
-get '/allgroups' => sub {
+get '/allgroups' => require_role isg => sub {
     get_serverconfig();
     get_group_config("*");
 
@@ -50,7 +51,7 @@ get '/allgroups' => sub {
     };
 };
 
-get '/allservers' => sub {
+get '/allservers' => require_role isg => sub {
     get_serverconfig();
 
     template 'configs-servers' => {

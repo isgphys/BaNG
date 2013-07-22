@@ -24,7 +24,7 @@ hook 'before' => sub {
     session request_path => request->path_info;
 };
 
-get '/' => sub {
+get '/' => require_role isg => sub {
     get_serverconfig();
 
     template 'dashboard' => {
@@ -37,7 +37,7 @@ get '/' => sub {
     };
 };
 
-get '/error_report' => sub {
+get '/error_report' => require_role isg => sub {
     get_serverconfig();
 
     template 'dashboard-error_report' => {
@@ -59,7 +59,6 @@ post '/login' => sub {
         session logged_in_roles      => Dancer::Plugin::Auth::Extensible::Provider::LDAPphys::get_user_roles('',param('username'));
         session logged_in_admin      => 'isg' ~~ session('logged_in_roles') || '0';
         session logged_in_user_realm => 'ldap';
-        debug("RETURN URL " . session('return_url'));
         redirect session('return_url');
     } else {
         debug("Login failed - password incorrect for " . param('username'));

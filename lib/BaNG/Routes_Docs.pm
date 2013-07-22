@@ -4,6 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 use Dancer ':syntax';
+use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
 use Template::Plugin::Markdown;
 use Text::Markdown;

@@ -4,18 +4,19 @@ use 5.010;
 use strict;
 use warnings;
 use Dancer ':syntax';
+use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
 use BaNG::Common;
 
 prefix '/restore';
 
-get '/' => sub {
+get '/' => require_login sub {
     template 'restore' => {
         section      => 'restore',
     };
 };
 
-get '/restore_content' => sub {
+get '/restore_content' => require_login sub {
     get_serverconfig();
     get_host_config('*');
 

@@ -4,6 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 use Dancer ':syntax';
+use Dancer::Plugin::Auth::Extensible;
 use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;
