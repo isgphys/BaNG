@@ -1,0 +1,19 @@
+<div id="login">
+    <form action="/login" method=post>
+        <fieldset>
+            <Legend> Please log in with your D-PHYS account</legend>
+            <div>
+                <label>Username:</label>
+                <input type="text" name="username" autofocus>
+            </div>
+            <div>
+                <label>Password:</label>
+                <input type="password" name="password">
+            </div>
+            <div>
+                <input class="submit" type=submit value="Login">
+            </div>
+        </fieldset>
+    </form>
+</div>
+

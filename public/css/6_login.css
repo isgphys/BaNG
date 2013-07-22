@@ -1,3 +1,16 @@
+nav ul.username {
+    float: right;
+    padding: 0px 10px 0px 10px;
+    color: black;
+    text-decoration: none;
+    font-size: 10px;
+    line-height: 26px;
+}
+
+nav ul.username li:hover {
+    background: #C1CDE0;
+}
+
 #login {
     width: 300px;
 }

@@ -56,4 +56,13 @@
         </li>
         <li><a href="/docs" <% IF section == 'documentation' %>class="active"<% END %>>Documentation</a></li>
     </ul>
+    <ul class="username">
+        <li class="username">
+          <%- IF session.logged_in_user %>
+            <a href="/logout" title="Click to logout!">Logged in as <% session.logged_in_fullname %></a>
+          <% ELSE %>
+            <a href="/login?return_url=<% session.request_path | uri %>" title="Click to login!">Login</a>
+          <%- END %>
+        </li>
+    </ul>
 </nav>

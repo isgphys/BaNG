@@ -4,11 +4,12 @@ use 5.010;
 use strict;
 use warnings;
 use Dancer ':syntax';
+use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
 
 prefix '/schedule';
 
-get '/' => sub {
+get '/' => require_role isg => sub {
     get_serverconfig();
     get_host_config('*');
 
