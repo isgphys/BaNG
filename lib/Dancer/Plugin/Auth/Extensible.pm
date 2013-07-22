@@ -2,11 +2,10 @@ package Dancer::Plugin::Auth::Extensible;
 
 use warnings;
 use strict;
-use attributes;
+
 use Carp;
 use Dancer::Plugin;
 use Dancer qw(:syntax);
-use Scalar::Util qw(refaddr);
 
 our $VERSION = '0.20';
 
@@ -153,6 +152,30 @@ C<denied_page> option.
 Again, by default a route is added to respond to that URL with a default page;
 again, you can disable this by setting C<no_default_pages> and creating your
 own.
+
+This would still leave the routes C<post '/login'> and C<any '/logout'>
+routes in place. To disable them too, set the option C<no_login_handler> 
+to a true value. In this case, these routes should be defined by the user,
+and should do at least the following:
+
+    post '/login' => sub {
+        my ($success, $realm) = authenticate_user(
+            params->{username}, params->{password}
+        );
+        if ($success) {
+            session logged_in_user => params->{username};
+            session logged_in_user_realm => $realm;
+            # other code here
+        } else {
+            # authentication failed
+        }
+    };
+    
+    any '/logout' => sub {
+        session->destroy;
+    };
+    
+
 
 =head2 Keywords
 
@@ -509,6 +532,10 @@ if (!$settings->{no_default_pages}) {
     };
 }
 
+
+# If no_login_handler is set, let the user do the login/logout herself
+if (!$settings->{no_login_handler}) {
+
 # Handle logging in...
 post $loginpage => sub {
     my ($success, $realm) = authenticate_user(
@@ -535,6 +562,9 @@ any ['get','post'] => $logoutpage => sub {
         return "OK, logged out successfully.";
     }
 };
+
+}
+
 
 sub _default_permission_denied_page {
     return <<PAGE
