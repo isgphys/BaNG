@@ -85,6 +85,7 @@
     </head>
     <body>
         <% INCLUDE header.tt %>
+        <% IF session.logged_in_user %><% INCLUDE navbar.tt %><% END %>
         <div id="content">
             <% content %>
         </div>

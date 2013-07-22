@@ -11,7 +11,7 @@ use BaNG::Reporting;
 
 prefix '/host';
 
-get '/:host' => sub {
+get '/:host' => require_role isg => sub {
     get_serverconfig();
     get_host_config(param('host'));
     my %RecentBackups = bangstat_recentbackups( param('host') );
@@ -28,7 +28,7 @@ get '/:host' => sub {
     };
 };
 
-get '/:host/log/:group/?:showlogsnumber?' => sub {
+get '/:host/log/:group/?:showlogsnumber?' => require_role isg => sub {
     get_serverconfig();
 
     my $show_logs_number = param('showlogsnumber') || $serverconfig{show_logs_number};

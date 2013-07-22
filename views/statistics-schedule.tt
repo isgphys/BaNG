@@ -13,6 +13,7 @@
     </head>
     <body>
         <% INCLUDE header.tt %>
+        <% INCLUDE navbar.tt %>
         <div id="content">
             <h2><% title %></h2>
             <div class="loading_message">

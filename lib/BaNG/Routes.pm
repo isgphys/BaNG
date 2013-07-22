@@ -46,7 +46,7 @@ get '/error_report' => require_role isg => sub {
 };
 
 get '/login' => sub {
-    session 'return_url' => params->{return_url} || '/foo';
+    session 'return_url' => params->{return_url} || '/';
 
     template 'login' => {
     };
@@ -59,7 +59,13 @@ post '/login' => sub {
         session logged_in_roles      => Dancer::Plugin::Auth::Extensible::Provider::LDAPphys::get_user_roles('',param('username'));
         session logged_in_admin      => 'isg' ~~ session('logged_in_roles') || '0';
         session logged_in_user_realm => 'ldap';
-        redirect session('return_url');
+
+        if ( !session('logged_in_admin') && session('return_url') eq '/' ) {
+            redirect '/restore';
+        } else {
+            redirect session('return_url');
+        }
+
     } else {
         debug("Login failed - password incorrect for " . param('username'));
         redirect '/';
