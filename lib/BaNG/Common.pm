@@ -4,6 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 use BaNG::Config;
+use BaNG::Wipe;
 use POSIX qw( floor );
 use Date::Parse;
 use Data::Dumper;

@@ -106,7 +106,7 @@ sub bangstat_recentbackups {
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
-            Runtime     => time2human($dbrow->{'Runtime'}),
+            Runtime     => &BaNG::Common::time2human($dbrow->{'Runtime'}),
             BkpFromPath => $BkpFromPath,
             BkpToPath   => $dbrow->{'BkpToPath'} ,
             isThread    => $dbrow->{'isThread'},
@@ -115,8 +115,8 @@ sub bangstat_recentbackups {
             JobStatus   => $dbrow->{'JobStatus'},
             BkpGroup    => $BkpGroup,
             BkpHost     => $dbrow->{'BkpFromHost'},
-            FilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
-            SizeTrans   => num2human($dbrow->{'TotFileSizeTrans'},1024),
+            FilesTrans  => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans   => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
         });
         push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
             Starttime   => $dbrow->{'Start'},
@@ -214,7 +214,7 @@ sub bangstat_recentbackups_all {
         push( @{$RecentBackupsAll{'Data'}}, {
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
-            Runtime     => time2human($dbrow->{'Runtime'}),
+            Runtime     => &BaNG::Common::time2human($dbrow->{'Runtime'}),
             BkpFromPath => $BkpFromPath ,
             BkpToPath   => $dbrow->{'BkpToPath'},
             isThread    => $dbrow->{'isThread'},
@@ -224,8 +224,8 @@ sub bangstat_recentbackups_all {
             BkpGroup    => $dbrow->{'BkpGroup'} || 'NA',
             BkpHost     => $dbrow->{'BkpFromHost'},
             BkpToHost   => $dbrow->{'BkpToHost'},
-            FilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
-            SizeTrans   => num2human($dbrow->{'TotFileSizeTrans'},1024),
+            FilesTrans  => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans   => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
         });
     }
     $sth->finish();
@@ -256,7 +256,7 @@ sub bangstat_recentbackups_last {
         push( @{$RecentBackupsLast{'Data'}}, {
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
-            Runtime     => time2human($dbrow->{'Runtime'}),
+            Runtime     => &BaNG::Common::time2human($dbrow->{'Runtime'}),
             BkpFromPath => $BkpFromPath ,
             BkpToPath   => $dbrow->{'BkpToPath'},
             isThread    => $dbrow->{'isThread'},
@@ -266,8 +266,8 @@ sub bangstat_recentbackups_last {
             BkpGroup    => $dbrow->{'BkpGroup'} || 'NA',
             BkpHost     => $dbrow->{'BkpFromHost'},
             BkpToHost   => $dbrow->{'BkpToHost'},
-            FilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
-            SizeTrans   => num2human($dbrow->{'TotFileSizeTrans'},1024),
+            FilesTrans  => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans   => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
         });
     }
     $sth->finish();
