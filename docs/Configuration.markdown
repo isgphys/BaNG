@@ -1,13 +1,22 @@
   BaNG Configuration
 ======================
 
-Config files:
+ Config files
+--------------
 
-  * ```./etc/defaults_servers.yaml```: common default settings for servers
-  * ```./etc/defaults_hosts.yaml```: common default settings for hosts
-  * ```./etc/groups/<groupname>.yaml```: group-specific settings
-  * ```./etc/hosts/<hostname>_<groupname>.yaml```: host-specific settings
+All configuration files are stored in the `./etc` folder.
 
-The default settings apply to all, but can be overriden by group or/and host-specific settings.
+  * ```defaults_servers.yaml```              : common default settings for servers
+  * ```defaults_hosts.yaml```                : common default settings for hosts
+  * ```servers/<servername>_defaults.yaml``` : server-specific settings
+  * ```groups/<groupname>.yaml```            : group-specific settings
+  * ```hosts/<hostname>_<groupname>.yaml```  : host-specific settings
+  * ```excludes/excludelist_<name>```        : rsync exclude list for given group or host
 
-To add a new host to an existing group, it's enough to copy and adapt another member's config file.
+The default settings apply to all, but can be overriden by server-, group- and host-specific settings.
+
+
+ Add a new host
+----------------
+
+To add a new host to an existing group, it's enough to copy and adapt another member's config file in the `hosts/` folder.
