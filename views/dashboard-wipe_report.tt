@@ -1,0 +1,50 @@
+<div id="wipeinfo">
+<h3>Wipe Report</h3>
+<table class="wipelist" style="border-width:1px; border-style:solid; padding:4px">
+    <thead>
+        <tr>
+            <th>Hostname</th>
+            <th class="center">Group</th>
+            <th class="center">BackupServer</th>
+            <th width="40" class="center">Daily</th>
+            <th width="40" class="center">Weekly</th>
+            <th width="40" class="center">Monthly</th>
+            <th width="40" class="center">to Wipe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% FOREACH hostname IN hosts.keys.sort %>
+            <% NEXT UNLESS backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.wipe.size %>
+            <% BackupPath  = hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX %>
+            <% BackupStack = backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group} %>
+            <% TargetHost  = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
+            <tr>
+                <td><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
+                <td class="center"><a href="/config/allhosts/<% hosts.$hostname.group %>"><% hosts.$hostname.group %></a></td>
+                <td class="center"><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
+                <% PlaceHolder = '0' %>
+                <% FOREACH wipe_keep IN  [ {'daily' => 'WIPE_KEEP_DAILY'}, {'weekly' => 'WIPE_KEEP_WEEKLY'}, {'monthly' => 'WIPE_KEEP_MONTHLY'} ] %>
+                    <td class=
+                        <% IF ( BackupStack.${wipe_keep.keys.first}.size == hosts.$hostname.hostconfig.${wipe_keep.values.first} )
+                        || hosts.$hostname.hostconfig.${wipe_keep.values.first} =='0' %>
+                        "center check_green"
+                        <% ELSE %>
+                        "center check_yellow"
+                        <% END %>
+                        >
+                    <% BackupStack.${wipe_keep.keys.first}.size || PlaceHolder %> / <b><% hosts.$hostname.hostconfig.${wipe_keep.values.first} %></b>
+                </td>
+              <% END %>
+              <td class=
+                  <% IF ( BackupStack.wipe.size <= servers.${hosts.$hostname.hostconfig.BKP_TARGET_HOST}.serverconfig.auto_wipe_limit ) %>
+                    "center check_green"
+                  <% ELSE %>
+                    "center check_red"
+                  <% END %>
+              >
+                  <% BackupStack.wipe.size %>
+              </td>
+          <% END %>
+    </tbody>
+</table>
+</div>

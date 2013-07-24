@@ -45,6 +45,23 @@ get '/error_report' => require_role isg => sub {
     },{ layout => 0 };
 };
 
+get '/wipe_report' => require_login sub {
+    get_serverconfig();
+    get_host_config('*');
+
+    my %hosts_stack;
+    foreach my $hostgroup ( sort keys %hosts ) {
+        my $host = $hosts{$hostgroup}{hostname};
+        $hosts_stack{$host} = backup_folders_stack($host);
+    }
+
+    template 'dashboard-wipe_report' => {
+        hosts        => \%hosts,
+        servers      => \%servers,
+        backupstack  => \%hosts_stack,
+        },{ layout => 0 };
+};
+
 get '/login' => sub {
     session 'return_url' => params->{return_url} || '/';
 
