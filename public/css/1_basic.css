@@ -50,48 +50,6 @@ body {
     text-shadow: 0 0 2px black;
 }
 
-#topline {
-    text-decoration: none;
-    background-color: #7997C9;
-    height: 20px;
-    padding: 2px 10px 2px 10px;
-}
-
-#topline a.button-login {
-    background: url("/images/login.png") no-repeat  scroll transparent;
-    color: #FFFFFF;
-    padding: 2px 5px 5px 10px;
-}
-
-#topline a.button-logout {
-    background: url("/images/logout.png") no-repeat transparent;
-    color: #FFFFFF;
-    background-size: 20px 20px;
-    padding: 2px 5px 2px 10px;
-}
-
-#topline span.username {
-     padding-right: 5px;
-}
-
-.devel {
-    background-color:  #FF6633 !important;
-}
-
-.topleft {
-    float: left;
-    padding-top: 2px;
-    text-align: left;
-    font-size: 10px;
-}
-
-.topright {
-    float: right;
-    padding-top: 2px;
-    width: 150px;
-    text-align: right;
-}
-
 nav {
     width: 100%;
     padding: 0px;
