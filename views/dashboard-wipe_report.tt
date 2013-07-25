@@ -1,4 +1,3 @@
-<div id="wipeinfo">
 <h3>Wipe Report</h3>
 <table class="wipelist" style="border-width:1px; border-style:solid; padding:4px">
     <thead>
@@ -47,4 +46,3 @@
           <% END %>
     </tbody>
 </table>
-</div>

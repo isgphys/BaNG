@@ -1,21 +1,48 @@
 <h2>Dashboard</h2>
-<div id="error_report">
+<div id="fsinfo">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Backup Report Overview
+        Loading Filesystem Usage Report
     </div>
 </div>
-<%- INCLUDE 'dashboard-running_jobs.tt' -%>
-<%- INCLUDE 'dashboard-fsinfo.tt' -%>
-<div id="wipe_report" style="float:left;">
+<div id="wipeinfo">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
         Loading Wipe Report Overview
     </div>
 </div>
-
+<div id="lockinfo">
+    <div class="loading_message">
+        <img src="/images/spinner.gif" width=25 alt="Loading animation">
+        Loading Running Jobs Report
+    </div>
+</div>
+<div id="error_report" style="clear: both;">
+    <div class="loading_message">
+        <img src="/images/spinner.gif" width=25 alt="Loading animation">
+        Loading Backup Report Overview
+    </div>
+</div>
 <script>
     $(window).load(function() {
+        $.ajax({
+            url: '/lockfile_report',
+            success: function(content) {
+                $('#lockinfo').html(content);
+            },
+            error: function() {
+                $('#lockinfo').html('An error occured while loading the Running Jobs Report.');
+            }
+        });
+        $.ajax({
+            url: '/fsinfo_report',
+            success: function(content) {
+                $('#fsinfo').html(content);
+            },
+            error: function() {
+                $('#fsinfo').html('An error occured while loading the Filesystem Usage Report.');
+            }
+        });
         $.ajax({
             url: '/error_report',
             success: function(content) {
@@ -28,10 +55,10 @@
         $.ajax({
             url: '/wipe_report',
             success: function(content) {
-                $('#wipe_report').html(content);
+                $('#wipeinfo').html(content);
             },
             error: function() {
-                $('#wipe_report').html('An error occured while loading the Wipe Report.');
+                $('#wipeinfo').html('An error occured while loading the Wipe Report.');
             }
         });
     });

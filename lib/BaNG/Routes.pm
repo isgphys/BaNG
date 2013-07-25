@@ -25,16 +25,25 @@ hook 'before' => sub {
 };
 
 get '/' => require_role isg => sub {
-    get_serverconfig();
 
     template 'dashboard' => {
-        section      => 'dashboard',
-        remotehost   => request->remote_host,
-        remoteuser   => request->user,
-        webDancerEnv => config->{run_env},
-        fsinfo       => get_fsinfo(),
-        lockfiles    => get_LockFiles(),
     };
+};
+
+get '/fsinfo_report' => require_role isg => sub {
+    get_serverconfig();
+
+    template 'dashboard-fsinfo' => {
+        fsinfo       => get_fsinfo(),
+    },{ layout => 0 };
+};
+
+get '/lockfile_report' => require_role isg => sub {
+    get_serverconfig();
+
+    template 'dashboard-running_jobs' => {
+        lockfiles    => get_LockFiles(),
+    },{ layout => 0 };
 };
 
 get '/error_report' => require_role isg => sub {
