@@ -20,10 +20,6 @@ use BaNG::Routes_Statistics;
 
 prefix undef;
 
-hook 'before' => sub {
-    session request_path => request->path_info;
-};
-
 get '/' => require_role isg => sub {
 
     template 'dashboard' => {
