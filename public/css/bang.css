@@ -1,0 +1,318 @@
+img.look {
+    padding: 0px 5px 0px 2px;
+    width: 15px;
+    height: 15px;
+    vertical-align: middle;
+}
+
+#content > div {
+    padding-bottom: 12px;
+}
+#content p.abstract {
+    font-size: 12px;
+    font-style: italic;
+}
+#content h1 {
+    font-size: 14px;
+}
+#content h2 {
+    font-size: 12px;
+}
+#content h3 {
+    font-size: 10px;
+    margin-top: 0px;
+}
+#content ul li {
+    margin: 6px 0;
+}
+#content table tr.even {
+    background-color: #eee;
+}
+#content div.centered {
+    margin: 0px auto;
+}
+#content img {
+    border: none;
+}
+
+#error_report {
+    float: left;
+    padding-right: 10px;
+}
+#fsinfo {
+    float: left;
+    padding-right: 10px;
+}
+#lockinfo {
+    float: left;
+    padding-right: 10px;
+}
+#wipeinfo {
+    float: left;
+    padding-right: 10px;
+}
+
+.alert_red {
+    background-color: red;
+    font-weight: bold;
+}
+.alert_orange {
+    background-color: orange;
+    font-style: italic;
+}
+.alert_yellow {
+    background-color: yellow;
+}
+.check_green {
+    background-color: #BCF5A9;
+}
+.check_yellow {
+    background-color: #F2F5A9;
+}
+.check_red {
+    background-color: #FA5858;
+}
+.active {
+    background-color: #99FF99;
+}
+.wipe {
+    background-color: #FFEAEA;
+}
+.backup {
+    background-color: #CCFFFF;
+}
+.hook {
+    background: url("/images/hook.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 15px 15px;
+}
+.hook3 {
+    background: url("/images/hook3.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 30px 15px;
+}
+.ok {
+    background: url("/images/face-cool.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+.bad {
+    background: url("/images/face-angry.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+.notok {
+    background: url("/images/important.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 20px 20px;
+}
+.notallow {
+    background: url("/images/not-allow.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 15px 15px;
+}
+.jobrun {
+    background: url("/images/job-run.png") no-repeat  scroll transparent;
+    background-position: center center;
+}
+.offline {
+    vertical-align: middle;
+    text-align : center;
+}
+
+.config {
+    width: 450px;
+}
+.config th {
+    text-align: left;
+    padding-left: 5px;
+}
+.config td {
+    padding-left: 5px;
+}
+.config tr {
+    height: 24px;
+}
+.config tr:nth-child(odd) {
+    background-color: #ddd;
+}
+.config tr:nth-child(even) {
+    background-color: #eee;
+}
+
+.config_default {
+    width: 450px;
+}
+.config_default th {
+    text-align: left;
+    padding-left: 5px;
+}
+.config_default td {
+    padding-left: 5px;
+}
+.config_default tr {
+    height: 24px;
+}
+.config_default tr:nth-child(odd) {
+    background-color: #ddd;
+}
+.config_default tr:nth-child(even) {
+    background-color: #eee;
+}
+
+.configslist {
+    width: 800px;
+}
+.configslist a {
+    color: #6081BB;
+    text-decoration: none;
+    font-weight:bold;
+}
+.configslist th {
+    text-align: left;
+}
+.configslist td {
+    vertical-align: top;
+    padding: 5px;
+}
+.configslist tr.groupConfig{
+    background-color: #33bbdd !important;
+}
+.configslist tr.hostConfig{
+    background-color: #66ffdd !important;
+}
+.configslist tr.serverConfig{
+    background-color: #66aadd !important;
+}
+.configslist tr:nth-child(odd) {
+    background-color: #ddd;
+}
+.configslist tr:nth-child(even) {
+    background-color: #eee;
+}
+.configslist tr.active {
+    background-color: #99FF99;
+}
+.configslist .expander {
+    width: 400px;
+    cursor: pointer;
+    background: url("/images/go-bottom-3.png") no-repeat transparent;
+    background-size: 15px 15px;
+    background-position: 98% 4px;
+}
+
+.details table {
+    padding-top: 5px;
+}
+.details table tr:nth-child(odd) {
+    background-color: #ddd;
+}
+.details tr:nth-child(even) {
+    background-color: #eee;
+}
+.details td {
+    vertical-align: middle;
+}
+
+#hostinfo {
+    width: 870px;
+    margin-right: 20px;
+}
+#hostinfo tr.active {
+    background-color: #99FF99 !important;
+}
+#hostinfo td {
+    height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+#hostinfo tr:nth-child(odd) {
+    background-color: #ddd;
+}
+#hostinfo tr:nth-child(even) {
+    background-color: #eee;
+}
+
+.logdateslist {
+    width: 100%;
+}
+.logdateslist td {
+    vertical-align: top;
+}
+.loglist .logError {
+    color: red;
+}
+.loglist .logSuccess {
+    color: green;
+}
+.logdateslist .expander {
+    cursor: pointer;
+    width:80%;
+    background: url("/images/go-bottom-3.png") no-repeat transparent;
+    background-size: 15px 15px;
+    background-position: 60px 0px;
+}
+
+#schedule {
+    float: left;
+    margin-right: 10px;
+}
+
+#croninfo {
+    border-width:1px;
+    border-style:solid;
+    padding: 5px;
+}
+
+#croninfo td {
+    height: 20px;
+    padding: 2px 5px 2px 5px;
+}
+
+#croninfo .croninfosmall {
+    width: 600px;
+}
+
+#reporting {
+    width: 900px;
+}
+
+#bkpreport {
+    width: 700px;
+}
+
+#bkpreport td {
+    height: 20px;
+}
+
+.restorelist a {
+    color: #6081BB;
+    text-decoration: none;
+    font-weight:bold;
+}
+.restorelist th {
+    text-align: left;
+    padding-left: 5px;
+}
+.restorelist td {
+    vertical-align: top;
+    padding: 5px;
+}
+.restorelist tr.noDefault{
+    background-color: #ff9999 !important;
+}
+.restorelist tr:nth-child(odd) {
+    background-color: #ddd;
+}
+.restorelist tr:nth-child(even) {
+    background-color: #eee;
+}
+.restorelist tr.active {
+    background-color: #99FF99;
+}
+.restorelist .expander {
+    cursor: pointer;
+    background: url("/images/go-bottom-3.png") no-repeat transparent;
+    background-size: 15px 15px;
+    background-position: 98% 4px;
+}

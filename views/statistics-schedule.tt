@@ -4,7 +4,8 @@
         <title>BaNG - 2013</title>
         <meta charset="utf-8">
         <link rel="icon" type="image/ico" href="/favicon">
-        <link rel="stylesheet" href="/css/standard.css">
+        <link rel="stylesheet" href="/css/isg-dancer-common.css">
+        <link rel="stylesheet" href="/css/bang.css">
         <link rel="stylesheet" href="/css/swimlanes.css">
         <link rel="stylesheet" href="/css/statistics_schedule.css">
         <script src="/javascripts/d3.js"></script>
