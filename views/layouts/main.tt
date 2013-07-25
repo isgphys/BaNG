@@ -69,6 +69,10 @@
                 $('#filter-form').submit(function(){
                     return false;
                 });
+
+                $('[data-href]').click(function(){
+                    window.location = $(this).data('href');
+                });
             }
 
             function initializeAll() {

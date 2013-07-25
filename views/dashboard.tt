@@ -29,6 +29,7 @@
             url: '/lockfile_report',
             success: function(content) {
                 $('#lockinfo').html(content);
+                initializeAll();
             },
             error: function() {
                 $('#lockinfo').html('An error occured while loading the Running Jobs Report.');
@@ -38,6 +39,7 @@
             url: '/fsinfo_report',
             success: function(content) {
                 $('#fsinfo').html(content);
+                initializeAll();
             },
             error: function() {
                 $('#fsinfo').html('An error occured while loading the Filesystem Usage Report.');
@@ -47,6 +49,7 @@
             url: '/error_report',
             success: function(content) {
                 $('#error_report').html(content);
+                initializeAll();
             },
             error: function() {
                 $('#error_report').html('An error occured while loading the Error Report.');
@@ -56,6 +59,7 @@
             url: '/wipe_report',
             success: function(content) {
                 $('#wipeinfo').html(content);
+                initializeAll();
             },
             error: function() {
                 $('#wipeinfo').html('An error occured while loading the Wipe Report.');

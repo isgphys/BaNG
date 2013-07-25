@@ -43,7 +43,7 @@
                         <td width=20 class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.daily.size   || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></a></td>
                         <td width=20 class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.weekly.size  || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></a></td>
                         <td width=20 class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></a></td>
-                        <td width=20 class="center"><a href="/host/<% host %>/log/<% hosts.$hostname.group %>"><img class="look" src="/images/zoom-3.png"></a></td>
+                        <td width=20 class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
                     </tr>
                 <%- END %>
             <%- ELSE %>
