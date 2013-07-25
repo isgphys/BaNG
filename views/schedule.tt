@@ -13,15 +13,15 @@
                     <th>Host</th>
                     <th class="center">Group</th>
                     <th class="center">Type</th>
-                    <th class="center">Hour</th>
-                    <th class="center">Min</th>
-                    <th class="center">Month</th>
-                    <th class="center">Day of Week</th>
-                    <th class="center">Day of Month</th>
-                    <th class="center">Bkp</th>
-                    <th class="center">Wipe</th>
-                    <th class="center">Bkp</th>
-                    <th class="center">Wipe</th>
+                    <th width=30 class="center">Hour</th>
+                    <th width=30 class="center">Min</th>
+                    <th width=30 class="center">Month</th>
+                    <th width=30 class="center">DoW</th>
+                    <th width=30 class="center">DoM</th>
+                    <th width=30 class="center">Bkp</th>
+                    <th width=30 class="center">Wipe</th>
+                    <th width=30 class="center">Bkp</th>
+                    <th width=30 class="center">Wipe</th>
                 </tr>
             </thead>
 
@@ -42,10 +42,14 @@
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
-                                <td width=20 <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %><%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.BKP_BULK_ALLOW %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
-                                <td width=20 <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %><%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.WIPE_BULK_ALLOW %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
-                                <td width=20 <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %><%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.BKP_ENABLED %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
-                                <td width=20 <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %><%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.WIPE_ENABLED %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
+                                <td <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
+                                    <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.BKP_BULK_ALLOW %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
+                                <td <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
+                                    <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.WIPE_BULK_ALLOW %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
+                                <td  <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
+                                    <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.BKP_ENABLED %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
+                                <td <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
+                                    <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.WIPE_ENABLED %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
                             </tr>
                         <% END %>
                     <% END %>

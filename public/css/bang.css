@@ -315,4 +315,5 @@ img.look {
     background: url("/images/go-bottom-3.png") no-repeat transparent;
     background-size: 15px 15px;
     background-position: 98% 4px;
+    padding-right: 25px;
 }

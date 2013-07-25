@@ -2,11 +2,11 @@
 <table class="restorelist tablesorter tablefilter">
     <thead>
         <tr>
-            <th width="100">Hostname</th>
-            <th width="90">Group</th>
-            <% IF session.logged_in_admin %><th width="100">Path</th><% END %>
+            <th>Hostname</th>
+            <th>Group</th>
+            <% IF session.logged_in_admin %><th>Path</th><% END %>
             <th>Automount</th>
-            <% IF session.logged_in_admin %><th width="80">BackupServer</th><% END %>
+            <% IF session.logged_in_admin %><th>BkpServer</th><% END %>
             <% IF session.logged_in_admin %><th>BackupPath</th><% ELSE %><th>Backups Available</th><% END %>
             <th width="40">Daily</th>
             <th width="40">Weekly</th>
@@ -20,18 +20,18 @@
         <% TargetHost  = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
         <tr>
           <% IF session.logged_in_admin %>
-            <td> <a href="/host/<%hosts.$hostname.hostname %>"><img class="look" src="/images/zoom-3.png"> <% hosts.$hostname.hostname %></a> </td>
+            <td><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
           <% ELSE %>
-            <td> <% hosts.$hostname.hostname %> </td>
+            <td><% hosts.$hostname.hostname %></td>
           <% END %>
-            <td> <% hosts.$hostname.group %> </td>
-            <% IF session.logged_in_admin %><td> <% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %> </td><% END %>
-            <td>
+            <td style="white-space: nowrap;"><% hosts.$hostname.group %></td>
+            <% IF session.logged_in_admin %><td><% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %></td><% END %>
+            <td style="white-space: nowrap;">
               <% IF automount.$BackupPath.path AND TargetHost == 'phd-bkp-gw' %>
                 /backup/<% automount.$BackupPath.path _ '/' _ hosts.$hostname.hostname %>
               <% END %>
             </td>
-            <% IF session.logged_in_admin %><td> <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %> </td><% END %>
+            <% IF session.logged_in_admin %><td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td><% END %>
             <td class="expander">
                 <% IF session.logged_in_admin %><% BackupPath _ '/' _ hosts.$hostname.hostname %><% END %>
                 <div class="details collapse">
