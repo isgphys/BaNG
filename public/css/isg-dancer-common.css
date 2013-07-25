@@ -1,0 +1,176 @@
+body {
+    cursor: default;
+    padding: 0px;
+    margin: 0px;
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+#header {
+    background-image:url('/images/header.png');
+    background-color:#254370;
+    height: 65px;
+    width: 100%;
+}
+#ethz_logo {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+}
+#ethz_logo_background {
+    height: 100%;
+    width: 250px;
+    background-image:url('/images/header_gradient.png');
+}
+#site_title {
+    position: absolute;
+    top: 20px;
+    left: 220px;
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+    color: white;
+    text-shadow: 0 0 2px black;
+}
+#content {
+    margin: 12px;
+}
+
+nav {
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    background-color: #C1CDE0;
+    height: 26px;
+    padding: 0px 0px 0px 0px;
+}
+nav ul li:hover > ul {
+    display: block;
+    font-color: #000;
+}
+nav ul {
+    list-style: none;
+    position: relative;
+    display: inline-table;
+    margin: 0 ;
+    padding: 0;
+}
+nav ul:after {
+    content: ""; clear: both; display: block;
+}
+nav ul li {
+    float: left;
+}
+nav ul li a.active {
+   background-color: #fff;
+   color: #000;
+}
+nav ul li:hover {
+    background: lightgrey;
+}
+nav ul li:hover a {
+    color: black;
+}
+nav ul li a {
+    display: block;
+    padding: 0px 10px 0px 10px;
+    color: black;
+    text-decoration: none;
+    font-size: 10px;
+    line-height: 26px;
+}
+nav ul.username {
+    float: right;
+    padding: 0px 10px 0px 10px;
+    color: black;
+    text-decoration: none;
+    font-size: 10px;
+    line-height: 26px;
+}
+nav ul.username li:hover {
+    background: #C1CDE0;
+}
+nav ul ul {
+    display: none;
+    background: #C1CDE0;
+    padding: 0;
+    position: absolute;
+    top: 100%;
+    z-index: 10000;
+}
+nav ul ul li {
+    float: none;
+    border-top: 2px solid #fff;
+    position: relative;
+}
+nav ul ul li a {
+    padding: 2px 10px;
+    color: #fff;
+    white-space: nowrap;
+}
+nav ul ul li a:hover {
+    background: lightgray;
+}
+nav ul ul ul {
+    position: absolute; left: 100%; top:0;
+}
+nav ul ul ul li {
+    border-left: 0px solid #fff;
+}
+nav ul ul ul li a {
+    padding-top: 0px;
+    border-left: 2px solid #fff;
+}
+
+#login {
+    width: 300px;
+}
+#login fieldset {
+    background: #efe;
+}
+#login legend {
+    color: black;
+    background: #C1CDE0;
+    padding: 2px 10px;
+}
+#login label {
+    width: 60px;
+    float: left;
+    text-align: left;
+    padding-top: 5px;
+    margin-right: 2px;
+    display: block;
+}
+#login input {
+    margin-left: 10px;
+}
+#login .submit {
+    margin-left: 0px;
+}
+#login div {
+    margin: 5px 0;
+}
+
+a {
+    color: #6081bb;
+    text-decoration: none;
+}
+img {
+    border: 0;
+}
+h1, h2, h3 {
+    clear: both;
+}
+
+.center {
+    text-align : center;
+    padding-right : 0px;
+}
+.right {
+    text-align : right;
+}
+.pointer {
+   cursor: pointer;
+}
+
