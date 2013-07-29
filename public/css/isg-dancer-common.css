@@ -26,7 +26,7 @@ body {
     position: absolute;
     top: 20px;
     left: 220px;
-    font-size: 16pt;
+    font-size: 2em;
     font-weight: bold;
     margin: 0px;
     padding: 0px;
@@ -34,7 +34,7 @@ body {
     text-shadow: 0 0 2px black;
 }
 #content {
-    margin: 12px;
+    margin: 0 12px 12px 12px;
 }
 
 nav {
@@ -152,6 +152,14 @@ nav ul ul ul li a {
     margin: 5px 0;
 }
 
+#filter-form {
+    padding-bottom: 5px;
+}
+#filter-form > img,
+#filter-form > input {
+    vertical-align: middle;
+}
+
 a {
     color: #6081bb;
     text-decoration: none;
@@ -162,15 +170,64 @@ img {
 h1, h2, h3 {
     clear: both;
 }
+th {
+    background: #c1cde0;
+    padding: 5px
+}
+td a {
+    font-weight:bold;
+}
 
+.activetab {
+    background-color: #E0F8F7;
+}
+
+.float-left {
+    float: left;
+    margin-right: 10px;
+}
+.float-clear {
+    clear: both;
+}
+.left {
+    text-align : left;
+}
 .center {
     text-align : center;
-    padding-right : 0px;
 }
 .right {
     text-align : right;
 }
 .pointer {
    cursor: pointer;
+}
+.loading_message {
+    padding: 5px;
+}
+.expander {
+    cursor: pointer;
+    background: url("/images/go-bottom-3.png") no-repeat transparent;
+    background-size: 15px 15px;
+    background-position: 98% 4px;
+    padding-right: 25px !important;
+}
+
+.default-table {
+    min-width: 320px;
+}
+.default-table td {
+    padding: 5px;
+    vertical-align: top;
+}
+.border {
+    border: 1px solid #cdcdcd;
+    padding: 4px;
+}
+
+.tablesorter tbody tr.even {
+    background: #f2f2f2;
+}
+.tablesorter tbody tr.odd {
+    background: #e6e6e6;
 }
 
