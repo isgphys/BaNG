@@ -1,13 +1,13 @@
 <h2>Host configs</h2>
 <% INCLUDE 'doFilter.tt' %>
-<table class="configslist tablesorter tablefilter">
+<table class="configslist default-table border tablesorter tablefilter">
     <thead>
         <tr>
             <th>Hostname</th>
             <th>Group</th>
             <th>Server</th>
             <th>Config-Files</th>
-            <th width="55">Status</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
@@ -24,8 +24,8 @@
             </td>
             <td class="expander">
               <% hosts.$hostname.configfile %>
-                <div class="details collapse">
-                  <table class="configfile">
+                <div class="collapse">
+                  <table class="default-table">
                     <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
                         <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="<% hosts.$hostname.confighelper.$hostconf %>Config"<% END %>>
                         <td><% hostconf %></td>

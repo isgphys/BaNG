@@ -1,9 +1,9 @@
 <div>
     <h3>Backup Report</h3>
-    <table id="bkpreport"border="0">
+    <table class="default-table border">
         <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
-            <tr><td style="border-width:1px; border-style:solid; padding:4px">
-                <table width=700 border="0">
+            <tr><td>
+                <table class="default-table border">
                     <thead>
                         <tr>
                             <th colspan="8">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
@@ -21,7 +21,7 @@
                     </thead>
                     <tbody>
                         <%- FOREACH bkp IN RecentBackups.$hostgroup %>
-                        <tr height="20">
+                        <tr>
                             <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done">
                                 <% ELSIF bkp.JobStatus == 1 %>class="hook" title="Job done">
                                 <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">

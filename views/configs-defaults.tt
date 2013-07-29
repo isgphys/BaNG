@@ -19,9 +19,9 @@
     </tr>
 </table>
 
-<div style="float:left;">
+<div class="float-left">
     <h3>Server Defaults Configfile:<% serverconfig.config_defaults_servers %></h3>
-    <table class="config tablesorter">
+    <table class="config default-table tablesorter">
         <thead>
             <tr>
                 <th>Parameter</th>
@@ -43,9 +43,9 @@
     </table>
 </div>
 
-<div style="float:left;">
+<div class="float-left">
     <h3>Hosts Defaults Configfile:<% serverconfig.config_defaults_hosts %></h3>
-    <table class="config_default tablesorter">
+    <table class="config_default default-table tablesorter">
         <thead>
             <tr>
                 <th>Parameter</th>

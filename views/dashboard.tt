@@ -1,23 +1,23 @@
 <h2>Dashboard</h2>
-<div id="fsinfo">
+<div id="fsinfo" class="float-left">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
         Loading Filesystem Usage Report
     </div>
 </div>
-<div id="wipeinfo">
+<div id="wipeinfo" class="float-left">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
         Loading Wipe Report Overview
     </div>
 </div>
-<div id="lockinfo">
+<div id="lockinfo" class="float-left">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
         Loading Running Jobs Report
     </div>
 </div>
-<div id="error_report" style="clear: both;">
+<div id="error_report" class="float-clear">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
         Loading Backup Report Overview

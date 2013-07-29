@@ -1,10 +1,10 @@
 <nav>
     <ul>
-        <% IF session.logged_in_admin %><li><a href="/" <% IF section == 'dashboard' %>class="active"<% END %>>Dashboard</a></li><% END %>
-        <li><a href="/restore" <% IF section == 'restore' %>class="active"<% END %>>Restore</a></li>
-        <% IF session.logged_in_admin %><li><a href="/schedule" <% IF section == 'schedule' %>class="active"<% END %>>Schedule</a><% END %>
+        <% IF session.logged_in_admin %><li><a href="/" <% IF section == 'dashboard' %>class="activetab"<% END %>>Dashboard</a></li><% END %>
+        <li><a href="/restore" <% IF section == 'restore' %>class="activetab"<% END %>>Restore</a></li>
+        <% IF session.logged_in_admin %><li><a href="/schedule" <% IF section == 'schedule' %>class="activetab"<% END %>>Schedule</a><% END %>
         </li>
-        <% IF session.logged_in_admin %><li><a href="#" <% IF section == 'configs' %>class="active"<% END %>>Configs</a>
+        <% IF session.logged_in_admin %><li><a href="#" <% IF section == 'configs' %>class="activetab"<% END %>>Configs</a>
             <ul>
                 <li><a href="/config/allhosts">Host Configs</a></li>
                 <li><a href="/config/allgroups">Group Configs</a></li>
@@ -13,8 +13,8 @@
             </ul>
         </li>
         <% END %>
-        <% IF session.logged_in_admin %><li><a href="/reporting" <% IF section == 'reporting' %>class="active"<% END %>>Reporting</a></li><% END %>
-        <li><a href="#"<% IF section == 'statistics' %>class="active"<% END %>>Statistics</a>
+        <% IF session.logged_in_admin %><li><a href="/reporting" <% IF section == 'reporting' %>class="activetab"<% END %>>Reporting</a></li><% END %>
+        <li><a href="#"<% IF section == 'statistics' %>class="activetab"<% END %>>Statistics</a>
             <ul>
                 <li><a href="/statistics">Overview</a>
                     <ul>
@@ -28,7 +28,7 @@
               <li><a href="/statistics/variations">Variations</a></li>
             </ul>
         </li>
-        <li><a href="#" <% IF section == 'tools' %>class="active"<% END %>>Tools</a>
+        <li><a href="#" <% IF section == 'tools' %>class="activetab"<% END %>>Tools</a>
             <ul>
                 <li><a href="#">External Tools</a>
                     <ul>
@@ -39,7 +39,7 @@
                 </li>
             </ul>
         </li>
-        <li><a href="/docs" <% IF section == 'documentation' %>class="active"<% END %>>Documentation</a></li>
+        <li><a href="/docs" <% IF section == 'documentation' %>class="activetab"<% END %>>Documentation</a></li>
     </ul>
     <ul class="username">
         <li class="username">

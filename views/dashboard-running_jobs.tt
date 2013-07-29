@@ -1,5 +1,5 @@
 <h3>Currently Running Tasks</h3>
-<table style="border-width:1px; border-style:solid; padding:4px; min-width: 300px;">
+<table class="border">
     <thead>
         <th>Host</th>
         <th>Group</th>

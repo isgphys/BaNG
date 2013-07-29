@@ -1,17 +1,17 @@
 <div>
     <h3>Backup Logfile Report of <% host %>_<% group %></h3>
     <% INCLUDE 'doFilter.tt' %>
-    <table class="logdateslist">
+    <table class="default-table border">
     <%- FOREACH date IN logdata.keys.sort.reverse %>
         <tr>
-            <td class="expander" width=50px> <% date %>
-            <div class="log_details collapse">
-                <table class="loglist tablefilter">
+            <td class="expander"> <% date %>
+            <div class="collapse">
+                <table class="tablefilter">
                   <%- FOREACH logline IN logdata.$date %>
                   <tr <% IF logline.message.match('ERR')%>class="logError"<% END %>
                       <% IF logline.message.match('Rsync success')%>class="logSuccess"<% END %>
                       >
-                        <td width=50px><% logline.time %></td>
+                        <td class="center"><% logline.time %></td>
                         <td><% logline.message %></td>
                     </tr>
                   <%- END %>

@@ -1,6 +1,6 @@
 <h2>Server configs</h2>
 <% INCLUDE 'doFilter.tt' %>
-<table class="configslist tablesorter tablefilter">
+<table class="configslist default-table border tablesorter tablefilter">
     <thead>
         <tr>
             <th>Server</th>
@@ -13,8 +13,8 @@
           <td><a href="/config/allhosts/<% server %>"><% server %></a></td>
           <td class="expander">
               <% servers.$server.configfile %>
-              <div class="details collapse">
-                  <table class="configfile">
+              <div class="collapse">
+                  <table class="default-table">
                       <% FOREACH serverconf IN servers.$server.serverconfig.keys.sort %>
                       <tr <% IF servers.$server.confighelper.$serverconf %>class="<% servers.$server.confighelper.$serverconf %>Config"<% END %>>
                           <td><% serverconf %></td>

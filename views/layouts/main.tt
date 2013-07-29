@@ -4,9 +4,9 @@
         <title>BaNG - 2013</title>
         <meta charset="utf-8">
         <link rel="icon" type="image/ico" href="/favicon">
+        <link rel="stylesheet" href="/css/tablesorter.css">
         <link rel="stylesheet" href="/css/isg-dancer-common.css">
         <link rel="stylesheet" href="/css/bang.css">
-        <link rel="stylesheet" href="/css/tablesorter.css">
         <script src="/javascripts/jquery.js"></script>
         <script src="/javascripts/jquery.uitablefilter.js" type="text/javascript"></script>
         <script src="/javascripts/jquery.tablesorter.js"></script>
@@ -23,34 +23,41 @@
             function initializeTablesorter() {
                 $('.config').tablesorter({
                     sortList: [[0,0]],
-                    widgets: [ 'stickyHeaders' ],
+                    widgets: [ 'zebra' ],
                     widgetOptions: {
-                        stickyHeaders : 'tablesorter-stickyHeader',
+                        zebra : ['even','odd'],
+                    }
+                });
+                $('.config_default').tablesorter({
+                    sortList: [[0,0]],
+                    widgets: [ 'zebra' ],
+                    widgetOptions: {
+                        zebra : ['even','odd'],
                     }
                 });
                 $('.configslist').tablesorter({
                     sortList: [[0,0]],
-                    widgets: [ 'stickyHeaders' ],
+                    widgets: [ 'zebra', 'stickyHeaders' ],
                     widgetOptions: {
+                        zebra : ['even','odd'],
                         stickyHeaders : 'tablesorter-stickyHeader',
                     }
                 });
                 $('.restorelist').tablesorter({
                     sortList: [[0,0],[1,0]],
-                    widgets: [ 'stickyHeaders' ],
+                    widgets: [ 'zebra', 'stickyHeaders' ],
                     widgetOptions: {
+                        zebra : ['even','odd'],
                         stickyHeaders : 'tablesorter-stickyHeader',
                     }
                 });
                 $('.reporting').tablesorter({
-                    widgets: [ 'stickyHeaders' ],
+                    widgets: [ 'zebra', 'stickyHeaders' ],
                     widgetOptions: {
+                        zebra : ['even','odd'],
                         stickyHeaders : 'tablesorter-stickyHeader',
                     }
                 });
-
-                $('.config_default').tablesorter();
-
             }
 
             function collapseDetails() {
@@ -93,6 +100,7 @@
         <% IF session.logged_in_user %><% INCLUDE navbar.tt %><% END %>
         <div id="content">
             <% content %>
+            <div style="clear: both;"></div>
         </div>
     </body>
 </html>

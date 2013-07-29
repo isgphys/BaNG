@@ -1,6 +1,6 @@
 <h3>Backup Report</h3>
 Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
-<table id="bkpreport"border="0" style="border-width:1px; border-style:solid; padding:4px">
+<table class="border">
     <thead>
         <tr>
             <th>JobStatus</th>

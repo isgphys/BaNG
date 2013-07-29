@@ -1,5 +1,5 @@
 <% INCLUDE 'doFilter.tt' %>
-<table class="restorelist tablesorter tablefilter">
+<table class="restorelist default-table border tablesorter tablefilter">
     <thead>
         <tr>
             <th>Hostname</th>
@@ -8,9 +8,9 @@
             <th>Automount</th>
             <% IF session.logged_in_admin %><th>BkpServer</th><% END %>
             <% IF session.logged_in_admin %><th>BackupPath</th><% ELSE %><th>Backups Available</th><% END %>
-            <th width="40">Daily</th>
-            <th width="40">Weekly</th>
-            <th width="40">Monthly</th>
+            <th class="center">Daily</th>
+            <th class="center">Weekly</th>
+            <th class="center">Monthly</th>
         </tr>
     </thead>
     <tbody>
@@ -20,7 +20,7 @@
         <% TargetHost  = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
         <tr>
           <% IF session.logged_in_admin %>
-            <td><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
+            <td style="white-space: nowrap;"><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
           <% ELSE %>
             <td><% hosts.$hostname.hostname %></td>
           <% END %>
@@ -34,8 +34,8 @@
             <% IF session.logged_in_admin %><td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td><% END %>
             <td class="expander">
                 <% IF session.logged_in_admin %><% BackupPath _ '/' _ hosts.$hostname.hostname %><% END %>
-                <div class="details collapse">
-                    <table class="backup_stack">
+                <div class="collapse">
+                    <table class="default-table">
                       <% FOREACH stack_type IN [ 'daily' 'weekly' 'monthly' ] %>
                         <% NEXT UNLESS BackupStack.$stack_type.size %>
                         <tr><td><b><% stack_type %></b></td></tr>

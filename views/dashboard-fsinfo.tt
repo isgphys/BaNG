@@ -1,5 +1,5 @@
 <h3>Backup-Server Disk Usage</h3>
-<table style="border-width:1px; border-style:solid; padding:4px">
+<table class="border">
     <thead>
         <th>Mount</th>
         <th>FS-Type</th>

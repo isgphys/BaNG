@@ -1,26 +1,26 @@
 <h2>Host Info</h2>
 <h3><% host %></h3>
 <div>
-    <table id="hostinfo" style=" border-width:1px; border-style:solid; padding:4px>"
+    <table class="default-table border">
         <thead>
             <tr>
                 <th colspan="3" align="left">Jobs (<%hosts.size%>)</th>
                 <th colspan="2" align="center">Enabled</th>
                 <th colspan="2" class="center">Bulk allow</th>
-                <th rowspan="2" class="center">SubFolder</th>
-                <th rowspan="2" class="center">Forks</th>
-                <th rowspan="2" class="center">Mode</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">SubFolder</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">Forks</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">Mode</th>
                 <th colspan="3" class="center">Backup Count</th>
                 <th rowspan="2" class="center">Log</th>
             </tr>
             <tr>
-                <th align="center">Group</th>
-                <th align="left">Configfile</th>
+                <th class="left">Group</th>
+                <th class="left">Configfile</th>
                 <th>Server</th>
-                <th>Bkp</th>
-                <th>Wipe</th>
-                <th>Bkp</th>
-                <th>Wipe</th>
+                <th width="30">Bkp</th>
+                <th width="30">Wipe</th>
+                <th width="30">Bkp</th>
+                <th width="30">Wipe</th>
                 <th width="50">Daily</th>
                 <th width="50">Weekly</th>
                 <th width="50">Monthly</th>
@@ -35,15 +35,15 @@
                         <td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
                         <td <%- IF hosts.$hostname.hostconfig.BKP_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
                         <td <%- IF hosts.$hostname.hostconfig.WIPE_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td width=30 <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td width=30 <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
-                        <td width=30 class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
-                        <td width=20 class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.daily.size   || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></b></a></td>
-                        <td width=20 class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.weekly.size  || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></b></a></td>
-                        <td width=20 class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <b><% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></b></a></td>
-                        <td width=20 class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
+                        <td <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
+                        <td class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
+                        <td class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
+                        <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.daily.size   || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></a></td>
+                        <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.weekly.size  || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></a></td>
+                        <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></a></td>
+                        <td class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
                     </tr>
                 <%- END %>
             <%- ELSE %>
@@ -55,23 +55,23 @@
     </table>
 </div>
 
-<div id="schedule">
+<div class="float-left">
     <h3>CronJobs (Single-Run)</h3>
-    <table id="croninfo">
+    <table class="default-table border" >
         <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
             <tr><td>
-                <table class="croninfosmall">
+                <table class="default-table border">
                     <thead>
                         <tr>
                             <th colspan="6" align="left"><% jobtype FILTER ucfirst %></th>
                         </tr>
                         <tr>
-                            <th>Group</th>
+                            <th class="left">Group</th>
                             <th>Hour</th>
                             <th>Min</th>
                             <th>Month</th>
-                            <th>Day of Week</th>
-                            <th>Day of Month</th>
+                            <th>DoW</th>
+                            <th>DoM</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,7 +79,7 @@
                             <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
                                 <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident} %>
                                     <tr class="<% jobtype %>">
-                                        <td class="center"><% cronjobs.$server.$jobtype.$cronjob.group %></td>
+                                        <td class="left"><% cronjobs.$server.$jobtype.$cronjob.group %></td>
                                         <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
                                         <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>
                                         <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MONTH %></td>
@@ -95,9 +95,9 @@
     </table>
 </div>
 
-<div id="schedule">
+<div class="float-left">
     <h3>CronJobs (Bulk-Run)</h3>
-    <table id="croninfo">
+    <table class="default-table border">
       <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
         <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
           <%- IF cronjobs.$server.$jobtype.$cronjob.host == "BULK" || ( cronjobs.$server.$jobtype.$cronjob.group == "BULK" && cronjobs.$server.$jobtype.$cronjob.host == host ) %>
@@ -111,7 +111,7 @@
             <%- END %>
             <%- IF hosts.$bulkident %>
               <tr><td>
-                  <table class="croninfosmall">
+                  <table class="default-table border">
                       <thead>
                           <tr>
                               <th colspan="8" align="left" <% IF bulk_act %>class="<% bulk_act %>"<% END %>>
@@ -122,10 +122,10 @@
                               <th>Hour</th>
                               <th>Min</th>
                               <th>Month</th>
-                              <th>Day of Week</th>
-                              <th>Day of Month</th>
+                              <th>DoW</th>
+                              <th>DoM</th>
                               <th>Bulk</th>
-                              <th width="40">Forks</th>
+                              <th>Forks</th>
                          </tr>
                       </thead>
                       <tbody>
@@ -136,7 +136,7 @@
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
                               <%- IF jobtype == "backup" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
-                              <td width=20
+                              <td 
                                 class = <%- IF hosts.$bulkident.hostconfig.$bulkflag %> "hook" <%- ELSE %> "notallow" <%- END %>>
                               </td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.THREADS %></td>

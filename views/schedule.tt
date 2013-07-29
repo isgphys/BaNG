@@ -1,8 +1,8 @@
 <h2>Schedule Overview</h2>
 <% FOREACH server IN cronjobs.keys.sort %>
-    <div id="schedule">
+    <div class="float-left">
         <h3><% server %></h3>
-        <table id="croninfo">
+        <table class="default-table border">
             <thead>
                 <tr>
                     <th colspan="8"></th>
@@ -10,18 +10,18 @@
                     <th colspan="2">Enabled</th>
                 </tr>
                 <tr>
-                    <th>Host</th>
-                    <th class="center">Group</th>
+                    <th class="left">Host</th>
+                    <th class="left">Group</th>
                     <th class="center">Type</th>
-                    <th width=30 class="center">Hour</th>
-                    <th width=30 class="center">Min</th>
-                    <th width=30 class="center">Month</th>
-                    <th width=30 class="center">DoW</th>
-                    <th width=30 class="center">DoM</th>
-                    <th width=30 class="center">Bkp</th>
-                    <th width=30 class="center">Wipe</th>
-                    <th width=30 class="center">Bkp</th>
-                    <th width=30 class="center">Wipe</th>
+                    <th width=30>Hour</th>
+                    <th width=30>Min</th>
+                    <th width=30>Month</th>
+                    <th width=30>DoW</th>
+                    <th width=30>DoM</th>
+                    <th width=30>Bkp</th>
+                    <th width=30>Wipe</th>
+                    <th width=30>Bkp</th>
+                    <th width=30>Wipe</th>
                 </tr>
             </thead>
 
@@ -30,12 +30,12 @@
                     <% FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
                         <% IF cronjobs.$server.$jobtype.$cronjob.cron.HOUR != '' %>
                             <tr class="<% jobtype %>">
-                                <td><% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
+                                <td class="left"><% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
                                     <a href="/host/<% cronjobs.$server.$jobtype.$cronjob.host %>"><% cronjobs.$server.$jobtype.$cronjob.host %></a>
                                     <% ELSE %><% cronjobs.$server.$jobtype.$cronjob.host %>
                                     <% END %>
                                 </td>
-                                <td class="center"><a href="/config/allhosts/<% cronjobs.$server.$jobtype.$cronjob.group %>"><% cronjobs.$server.$jobtype.$cronjob.group %></a></td>
+                                <td class="left"><a href="/config/allhosts/<% cronjobs.$server.$jobtype.$cronjob.group %>"><% cronjobs.$server.$jobtype.$cronjob.group %></a></td>
                                 <td class="center"><% jobtype FILTER ucfirst %></td>
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.HOUR %></td>
                                 <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.MIN %></td>

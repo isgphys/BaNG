@@ -1,12 +1,12 @@
 <h2>Group configs</h2>
 <% INCLUDE 'doFilter.tt' %>
-<table class="configslist tablesorter tablefilter">
+<table class="configslist default-table border tablesorter tablefilter">
     <thead>
         <tr>
             <th>Group</th>
             <th>Server</th>
             <th>Config-Files</th>
-            <th width="55">Status</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
@@ -20,8 +20,8 @@
             </td>
             <td class="expander">
               <% groups.$group.configfile %>
-                <div class="details collapse">
-                  <table class="configfile">
+                <div class="collapse">
+                  <table class="default-config">
                     <% FOREACH groupconf IN groups.$group.groupconfig.keys.sort %>
                         <tr <% IF groups.$group.confighelper.$groupconf %>class="<% groups.$group.confighelper.$groupconf %>Config"<% END %>>
                         <td><% groupconf %></td>

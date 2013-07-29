@@ -1,5 +1,5 @@
 <h2>Backup restore paths</h2>
-<div id="restore_content" style="float:left;">
+<div id="restore_content">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
         Loading Backup Restore Paths

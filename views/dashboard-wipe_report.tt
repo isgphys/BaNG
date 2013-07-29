@@ -1,14 +1,14 @@
 <h3>Wipe Report</h3>
-<table class="wipelist" style="border-width:1px; border-style:solid; padding:4px">
+<table class="border">
     <thead>
         <tr>
             <th>Hostname</th>
             <th class="center">Group</th>
-            <th class="center">BackupServer</th>
-            <th width="40" class="center">Daily</th>
-            <th width="40" class="center">Weekly</th>
-            <th width="40" class="center">Monthly</th>
-            <th width="40" class="center">to Wipe</th>
+            <th class="center">BkpServer</th>
+            <th width="45" class="center">Daily</th>
+            <th width="45" class="center">Weekly</th>
+            <th width="45" class="center">Monthly</th>
+            <th width="45" class="center">to Wipe</th>
         </tr>
     </thead>
     <tbody>
@@ -18,8 +18,8 @@
             <% BackupStack = backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group} %>
             <% TargetHost  = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
             <tr>
-                <td><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
-                <td class="center"><a href="/config/allhosts/<% hosts.$hostname.group %>"><% hosts.$hostname.group %></a></td>
+                <td style="white-space: nowrap;"><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
+                <td class="center" style="white-space: nowrap;"><a href="/config/allhosts/<% hosts.$hostname.group %>"><% hosts.$hostname.group %></a></td>
                 <td class="center"><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
                 <% PlaceHolder = '0' %>
                 <% FOREACH wipe_keep IN  [ {'daily' => 'WIPE_KEEP_DAILY'}, {'weekly' => 'WIPE_KEEP_WEEKLY'}, {'monthly' => 'WIPE_KEEP_MONTHLY'} ] %>
