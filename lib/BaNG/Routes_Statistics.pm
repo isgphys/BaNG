@@ -59,6 +59,23 @@ get '/variations' => require_login sub {
     };
 };
 
+get '/barchart/:name.json' => require_login sub {
+    my $chartname = param('name');
+    my $json = qq% [ {"name": "bar1", "value": "20", "url": "/"}, {"name": "bar2", "value": "15", "url": "/"} ] %;
+    error404('Could not fetch data') unless $json;
+    return $json;
+};
+
+get '/barchart/:name' => require_login sub {
+    template 'statistics-barchart', {
+        section      => 'statistics',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        chartname    => param('name'),
+        sorted       => 0,
+    },{ layout       => 0 };
+};
+
 get '/:bkpserver.json' => require_login sub {
     my $json = statistics_cumulated_json(param('bkpserver'));
     error404('Could not fetch data') unless $json;
