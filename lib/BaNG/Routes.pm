@@ -50,7 +50,7 @@ get '/error_report' => require_role isg => sub {
     },{ layout => 0 };
 };
 
-get '/wipe_report' => require_login sub {
+get '/wipe_status' => require_login sub {
     get_serverconfig();
     get_host_config('*');
 
@@ -60,7 +60,7 @@ get '/wipe_report' => require_login sub {
         $hosts_stack{$host} = backup_folders_stack($host);
     }
 
-    template 'dashboard-wipe_report' => {
+    template 'dashboard-wipe_status' => {
         hosts        => \%hosts,
         servers      => \%servers,
         backupstack  => \%hosts_stack,

@@ -8,7 +8,7 @@
 <div id="wipeinfo" class="float-left">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Wipe Report Overview
+        Loading Wipe Status Overview
     </div>
 </div>
 <div id="lockinfo" class="float-left">
@@ -62,7 +62,7 @@
                 initializeAll();
             },
             error: function() {
-                $('#wipeinfo').html('An error occured while loading the Wipe Report.');
+                $('#wipeinfo').html('An error occured while loading the Wipe Status.');
             }
         });
     });
