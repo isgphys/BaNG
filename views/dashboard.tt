@@ -56,7 +56,7 @@
             }
         });
         $.ajax({
-            url: '/wipe_report',
+            url: '/wipe_status',
             success: function(content) {
                 $('#wipeinfo').html(content);
                 initializeAll();
