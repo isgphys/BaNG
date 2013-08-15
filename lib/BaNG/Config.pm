@@ -145,7 +145,7 @@ sub get_cronjob_config {
     my @cronconfigs = _find_configs( "*_cronjobs_*.yaml", "$serverconfig{path_serverconfig}" );
 
     foreach my $cronconfigfile (@cronconfigs) {
-        my ($server, $jobtype) = _split_cronconfigname($cronconfigfile);
+        my ($server, $jobtype) = _split_cron_configname($cronconfigfile);
 
         JOBTYPE: foreach my $jobtype (qw( backup wipe )) {
             my $cronjobsfile = "$serverconfig{path_serverconfig}/${server}_cronjobs_$jobtype.yaml";
@@ -317,7 +317,7 @@ sub _split_server_configname {
     return ($server);
 }
 
-sub _split_cronconfigname {
+sub _split_cron_configname {
     my ($cronconfigfile) = @_;
 
     my ($server, $jobtype) = $cronconfigfile =~ /^([\w\d-]+)_cronjobs_([\w\d-]+)\.yaml/;

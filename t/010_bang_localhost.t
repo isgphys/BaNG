@@ -17,7 +17,7 @@ like(   $output,    qr|Exit because queue is empty|                             
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group`;
 like(   $output,    qr|Queueing backup for host localhost group $group|          , "Queueing backup for localhost $group"               );
-like(   $output,    qr|chkClientConn|                                            , "Check online status of localhost $group"            );
+like(   $output,    qr|check_client_connection|                                  , "Check online status of localhost $group"            );
 like(   $output,    qr|Number of partitions: 1 \( :/ \)|                         , "Correct partitions for localhost $group"            );
 like(   $output,    qr|End of queueing backup of host localhost group $group|    , "End of queueing backup of localhost $group"         );
 like(   $output,    qr|Thread \d+ working on|                                    , "Thread XX working on localhost $group"              );
