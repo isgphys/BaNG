@@ -18,7 +18,7 @@ sub list_folders_to_wipe {
     my ($host, $group, @available_backup_folders) = @_;
     my @folders_to_wipe;
 
-    return () if $#available_backup_folders == 0;
+    return ( wipe => [] ) if $#available_backup_folders == 0;
 
     # prepare list of available backups
     my %available_backups;
