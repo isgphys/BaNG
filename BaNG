@@ -87,7 +87,7 @@ sub queue_backup {
     return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
     # check if last backup exists
-    my $lastbkp = chkLastBkp($host, $group);
+    my $lastbkp = check_last_bkp($host, $group);
     my $jobid = create_jobid($host, $group);
 
     # if missingonly, don't queue host if we had a backup within the last 20 hours
@@ -100,8 +100,8 @@ sub queue_backup {
     }
 
     # make sure host is online
-    my ($conn_status, $conn_msg) = chkClientConn( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
-    logit( $host, $group, "chkClientConn: $conn_status, $conn_msg" );
+    my ($conn_status, $conn_msg) = check_client_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    logit( $host, $group, "check_client_connection: $conn_status, $conn_msg" );
     if ( !$conn_status ) {
         my $startstamp = time();
         my $endstamp = $startstamp;
@@ -217,7 +217,7 @@ sub thread_work {
         my $lastbkp      = $bkpjob->{lastbkp};
         my $bkptimestamp = $bkpjob->{bkptimestamp};
 
-        return unless createLockFile( $host, $group, $path );
+        return unless create_lockfile( $host, $group, $path );
         logit( $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
         unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
@@ -230,7 +230,7 @@ sub thread_work {
             };
             finish_backupjob($bkpjob);
         }
-        removeLockFile( $host, $group, $path );
+        remove_lockfile( $host, $group, $path );
     }
 
     return 1;
@@ -479,9 +479,9 @@ sub wipe {
 }
 
 #################################
-# LastBkpFile
+# last_bkp_file
 #
-sub LastBkpFile {
+sub last_bkp_file {
     my ($host, $group) = @_;
 
     my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
@@ -491,11 +491,11 @@ sub LastBkpFile {
     return $lastBkpFile;
 }
 
-sub chkLastBkp {
+sub check_last_bkp {
     my ($host, $group) = @_;
 
     my $lastbkp = 'nolastbkp';
-    my $lastBkpFile = LastBkpFile($host, $group);
+    my $lastBkpFile = last_bkp_file($host, $group);
 
     if ( -e $lastBkpFile ) {
         $lastbkp = `cat $lastBkpFile`;
@@ -507,10 +507,10 @@ sub chkLastBkp {
     return $lastbkp;
 }
 
-sub createLastBkpFile {
+sub create_last_bkp_file {
     my ($host, $group, $bkptimestamp) = @_;
 
-    my $lastBkpFile = LastBkpFile($host, $group);
+    my $lastBkpFile = last_bkp_file($host, $group);
     system("echo \"$bkptimestamp\" > $lastBkpFile") unless $serverconfig{dryrun};
     logit( $host, $group, "Write lastBkpFile: $bkptimestamp \-\> $lastBkpFile" );
 
@@ -548,7 +548,7 @@ sub finish_backupjob {
     my $lastbkp      = $bkpjob->{'lastbkp'};
 
     create_btrfs_snapshot( $host, $group, $bkptimestamp );
-    createLastBkpFile( $host, $group, $bkptimestamp );
+    create_last_bkp_file( $host, $group, $bkptimestamp );
     bangstat_set_jobstatus( $jobid, $host, $group, $lastbkp, '1' );
 
     my %RecentBackups = bangstat_recentbackups($host);

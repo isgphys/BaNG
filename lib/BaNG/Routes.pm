@@ -38,7 +38,7 @@ get '/lockfile_report' => require_role isg => sub {
     get_serverconfig();
 
     template 'dashboard-running_jobs' => {
-        lockfiles    => get_LockFiles(),
+        lockfiles    => get_lockfiles(),
     },{ layout => 0 };
 };
 

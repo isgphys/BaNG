@@ -11,18 +11,18 @@ use Net::Ping;
 use Exporter 'import';
 our @EXPORT = qw(
     get_fsinfo
-    get_LockFiles
-    chkClientConn
-    createLockFile
-    removeLockFile
-    getLockFiles
+    get_lockfiles
+    check_client_connection
+    create_lockfile
+    remove_lockfile
+    getlockfiles
 );
 
 sub get_fsinfo {
     my %fsinfo;
     foreach my $server ( keys %servers ) {
 
-        my @mounts = remoteWrapperCommand( $server, 'BaNG/bang_df' );
+        my @mounts = remotewrapper_command( $server, 'BaNG/bang_df' );
 
         foreach my $mount (@mounts) {
             $mount =~ qr{
@@ -51,14 +51,14 @@ sub get_fsinfo {
     return \%fsinfo;
 }
 
-sub get_LockFiles {
+sub get_lockfiles {
     my %lockfiles;
     foreach my $server ( keys %servers ) {
 
-        my @lockfiles = remoteWrapperCommand( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
+        my @lockfiles = remotewrapper_command( $server, 'BaNG/bang_getlockfile', $serverconfig{path_lockfiles} );
 
         foreach my $lockfile ( @lockfiles  ) {
-            my ($host, $group, $path) = splitLockFileName($lockfile);
+            my ($host, $group, $path) = split_lockfile_name($lockfile);
             $lockfiles{$server}{"$host-$group-$path"} = {
                 'host'  => $host,
                 'group' => $group,
@@ -85,7 +85,7 @@ sub check_fill_level {
     return $css_class;
 }
 
-sub chkClientConn {
+sub check_client_connection {
     my ($host, $gwhost) = @_;
 
     my $state = 0;
@@ -107,7 +107,7 @@ sub chkClientConn {
 #################################
 # Lockfile
 #
-sub LockFile {
+sub lockfile {
     my ($host, $group, $path) = @_;
 
     $path =~ s/^://g;
@@ -119,7 +119,7 @@ sub LockFile {
     return $lockfile;
 }
 
-sub splitLockFileName {
+sub split_lockfile_name {
     my ($lockfile) = @_;
     my ($host, $group, $path) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock/;
 
@@ -131,10 +131,10 @@ sub splitLockFileName {
     return $host, $group, $path;
 }
 
-sub createLockFile {
+sub create_lockfile {
     my ($host, $group, $path) = @_;
 
-    my $lockfile = LockFile( $host, $group, $path );
+    my $lockfile = lockfile( $host, $group, $path );
 
     if ( -e $lockfile ) {
         logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
@@ -148,10 +148,10 @@ sub createLockFile {
     }
 }
 
-sub removeLockFile {
+sub remove_lockfile {
     my ($host, $group, $path) = @_;
 
-    my $lockfile = LockFile( $host, $group, $path );
+    my $lockfile = lockfile( $host, $group, $path );
     unlink $lockfile unless $serverconfig{dryrun};
     logit( $host, $group, "Removed lockfile $lockfile" );
 
@@ -161,7 +161,7 @@ sub removeLockFile {
 #################################
 # RemoteWrapper
 #
-sub remoteWrapperCommand {
+sub remotewrapper_command {
     my ($remoteHost, $remoteCommand, $remoteArgument) = @_;
     $remoteArgument ||= '';
 
