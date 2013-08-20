@@ -35,7 +35,11 @@
                     <% config %>
                 </td>
                 <td>
-                    <% serverconfig.$config %>
+                    <% IF config == "defaults_hosts" %>
+                        Look at "Hosts Defaults Configfile"
+                    <% ELSE %>
+                        <% serverconfig.$config %>
+                    <% END %>
                 </td>
             </tr>
           <% END %>
