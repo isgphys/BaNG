@@ -104,3 +104,11 @@ h3 {
     background: url("/images/job-run.png") no-repeat  scroll transparent;
     background-position: center center;
 }
+
+.comment {
+    cursor: pointer;
+    background: url("/images/comment.png") no-repeat transparent;
+    background-position: 20px 4px;
+    padding-left: 45px !important;
+}
+
