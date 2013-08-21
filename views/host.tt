@@ -45,6 +45,13 @@
                         <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></a></td>
                         <td class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
                     </tr>
+                  <%- IF hosts.$hostname.hostconfig.COMMENT %>
+                    <tr>
+                      <% FILTER html_line_break %>
+                        <td colspan="2" class="comment"><% hosts.$hostname.hostconfig.COMMENT %></td>
+                      <% END %>
+                    </tr>
+                  <%- END %>
                 <%- END %>
             <%- ELSE %>
                 <tr>
