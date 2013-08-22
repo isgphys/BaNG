@@ -18,6 +18,7 @@ our @EXPORT = qw(
     $prefix
     $servername
     get_serverconfig
+    get_host_config_defaults
     get_host_config
     get_group_config
     get_cronjob_config
@@ -66,13 +67,16 @@ sub get_serverconfig {
         $serverconfig{$key} = "$serverconfig{path_configs}/$serverconfig{$key}";
     }
 
-    # add defaults_hosts config
-    my $defaults_hosts_file = $serverconfig{config_defaults_hosts};
-    if ( _sanityfilecheck($defaults_hosts_file) ) {
-        $serverconfig{defaults_hosts} = LoadFile( $defaults_hosts_file );
-    }
-
     return 1;
+}
+
+sub get_host_config_defaults {
+    my $defaults_hosts_file = $serverconfig{config_defaults_hosts};
+    my $settings;
+    if ( _sanityfilecheck($defaults_hosts_file) ) {
+        $settings = LoadFile( $defaults_hosts_file );
+    }
+    return $settings;
 }
 
 sub get_host_config {
@@ -216,7 +220,7 @@ sub _read_host_configfile {
     my ($host, $group) = @_;
 
     my %configfile;
-    my $settings       = { %{$serverconfig{defaults_hosts}} };
+    my $settings       = get_host_config_defaults();
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
     $configfile{host}  = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
     my $settingshelper = _override_config( $settings, \%configfile, qw( group host ) );
@@ -228,7 +232,7 @@ sub _read_group_configfile {
     my ($group) = @_;
 
     my %configfile;
-    my $settings       = { %{$serverconfig{defaults_hosts}} };
+    my $settings       = get_host_config_defaults();
     $configfile{group} = "$serverconfig{path_groupconfig}/$group.yaml";
     my $settingshelper = _override_config( $settings, \%configfile, qw( group ) );
 
