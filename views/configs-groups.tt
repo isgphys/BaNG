@@ -24,7 +24,7 @@
                   <table class="default-config">
                     <% FOREACH groupconf IN groups.$group.groupconfig.keys.sort %>
                         <tr <% IF groups.$group.confighelper.$groupconf %>class="<% groups.$group.confighelper.$groupconf %>Config"<% END %>>
-                        <td><% groupconf %></td>
+                        <td title="<% groups.$group.groupconfig.HELP.$groupconf %>"><% groupconf %></td>
                         <td><% FILTER html_line_break %><% groups.$group.groupconfig.$groupconf %><% END %></td>
                       </tr>
                     <% END %>

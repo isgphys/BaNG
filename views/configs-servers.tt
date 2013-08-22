@@ -17,7 +17,7 @@
                   <table class="default-table">
                       <% FOREACH serverconf IN servers.$server.serverconfig.keys.sort %>
                       <tr <% IF servers.$server.confighelper.$serverconf %>class="<% servers.$server.confighelper.$serverconf %>Config"<% END %>>
-                          <td><% serverconf %></td>
+                          <td title="<% servers.$server.serverconfig.HELP.$serverconf %>"><% serverconf %></td>
                           <td><% servers.$server.serverconfig.$serverconf %></td>
                       </tr>
                       <% END %>
