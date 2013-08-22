@@ -26,6 +26,7 @@
             <tr>
                 <th>Parameter</th>
                 <th>Value</th>
+                <th>Help</th>
             </tr>
         </thead>
         <tbody>
@@ -35,11 +36,16 @@
                     <% config %>
                 </td>
                 <td>
+                  <% IF config != "HELP" %>
                     <% IF config == "defaults_hosts" %>
                         Look at "Hosts Defaults Configfile"
                     <% ELSE %>
                         <% serverconfig.$config %>
                     <% END %>
+                  <% END %>
+                </td>
+                <td>
+                  <% FILTER html_line_break %><% serverconfig.HELP.$config %><% END %>
                 </td>
             </tr>
           <% END %>
@@ -54,16 +60,22 @@
             <tr>
                 <th>Parameter</th>
                 <th>Value</th>
+                <th>Help</th>
             </tr>
         </thead>
         <tbody>
-          <% FOREACH config IN serverconfig.defaults_hosts.keys.sort %>
+          <% FOREACH config IN hostdefaults.keys.sort %>
             <tr>
                 <td>
                     <% config %>
                 </td>
                 <td>
-                    <% serverconfig.defaults_hosts.$config %>
+                  <% IF config != "HELP" %>
+                    <% hostdefaults.$config %>
+                  <% END %>
+                </td>
+                <td>
+                  <% FILTER html_line_break %><% hostdefaults.HELP.$config %><% END %>
                 </td>
             </tr>
           <% END %>
