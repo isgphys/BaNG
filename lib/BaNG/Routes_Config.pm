@@ -17,6 +17,7 @@ get '/defaults' => require_role isg => sub {
         remotehost     => request->remote_host,
         webDancerEnv   => config->{run_env},
         serverconfig   => \%serverconfig,
+        hostdefaults   => get_host_config_defaults(),
         servername     => $servername,
         prefix_path    => $prefix,
     };
