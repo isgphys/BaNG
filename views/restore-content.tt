@@ -15,6 +15,7 @@
     </thead>
     <tbody>
       <% FOREACH hostname IN hosts.keys.sort %>
+        <% NEXT IF backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group}.size == 1 %>
         <% BackupPath  = hosts.$hostname.hostconfig.BKP_TARGET_PATH _ '/' _ hosts.$hostname.hostconfig.BKP_PREFIX %>
         <% BackupStack = backupstack.${hosts.$hostname.hostname}.${hosts.$hostname.group} %>
         <% TargetHost  = hosts.$hostname.hostconfig.BKP_TARGET_HOST %>
