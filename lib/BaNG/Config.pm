@@ -273,7 +273,7 @@ sub _sanityfilecheck {
     my ($file) = @_;
 
     if ( !-f "$file" ) {
-        # logit("localhost","INTERNAL", "$file NOT available");
+        # logit("000000","localhost","INTERNAL", "$file NOT available");
         return 0;    # FIXME CLI should check return value
     } else {
         return 1;

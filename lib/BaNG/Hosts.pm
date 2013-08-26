@@ -132,28 +132,28 @@ sub split_lockfile_name {
 }
 
 sub create_lockfile {
-    my ($host, $group, $path) = @_;
+    my ($taskid, $host, $group, $path) = @_;
 
     my $lockfile = lockfile( $host, $group, $path );
 
     if ( -e $lockfile ) {
-        logit( $host, $group, "ERROR: lockfile $lockfile still exists" );
+        logit( $taskid, $host, $group, "ERROR: lockfile $lockfile still exists" );
         return 0;
     } else {
         unless ( $serverconfig{dryrun} ) {
-            system("touch \"$lockfile\"") and logit( $host, $group, "ERROR: could not create lockfile $lockfile" );
+            system("touch \"$lockfile\"") and logit( $taskid, $host, $group, "ERROR: could not create lockfile $lockfile" );
         }
-        logit( $host, $group, "Created lockfile $lockfile" );
+        logit( $taskid, $host, $group, "Created lockfile $lockfile" );
         return 1;
     }
 }
 
 sub remove_lockfile {
-    my ($host, $group, $path) = @_;
+    my ($taskid, $host, $group, $path) = @_;
 
     my $lockfile = lockfile( $host, $group, $path );
     unlink $lockfile unless $serverconfig{dryrun};
-    logit( $host, $group, "Removed lockfile $lockfile" );
+    logit( $taskid, $host, $group, "Removed lockfile $lockfile" );
 
     return 1;
 }

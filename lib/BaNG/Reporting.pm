@@ -52,7 +52,7 @@ sub bangstat_db_connect {
 }
 
 sub bangstat_set_jobstatus {
-    my ($jobid, $host, $group, $lastbkp, $status) = @_;
+    my ($taskid, $jobid, $host, $group, $lastbkp, $status) = @_;
 
     my $SQL = qq(
         UPDATE statistic
@@ -64,7 +64,7 @@ sub bangstat_set_jobstatus {
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
-        logit( $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
+        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
         return 1;
     }
 
@@ -73,8 +73,8 @@ sub bangstat_set_jobstatus {
     $sth->finish();
 
     $SQL =~ s/;.*/;/sg;
-    logit( $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{debug} && $serverconfig{debuglevel} >= 2 );
-    logit( $host, $group, "Set jobstatus to $status for host $host group $group" );
+    logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{debug} && $serverconfig{debuglevel} >= 2 );
+    logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group" );
 
     return 1;
 }
@@ -293,7 +293,7 @@ sub send_hobbit_report {
 }
 
 sub db_report {
-    my ($jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
+    my ($taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
 
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
@@ -332,11 +332,11 @@ sub db_report {
 
     my $sql;
     $sql .= "INSERT INTO statistic (";
-    $sql .= " JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
+    $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
     $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
-    $sql .= "'$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
+    $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
     $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
     $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
@@ -344,11 +344,11 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
     $sql .= ")";
-    logit( $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{debuglevel} >= 2 );
+    logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{debuglevel} >= 2 );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
-        logit( $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
+        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
         return 1;
     }
 
@@ -357,13 +357,13 @@ sub db_report {
     $sth->finish();
     $bangstat_dbh->disconnect;
 
-    logit( $host, $group, "Bangstat report sent." );
+    logit( $taskid, $host, $group, "Bangstat report sent." );
 
     return 1;
 }
 
 sub mail_report {
-    my ($host, $group, %RecentBackups) = @_;
+    my ($taskid, $host, $group, %RecentBackups) = @_;
 
     my $status = $hosts{"$host-$group"}->{errormsg} ? 'warnings' : 'success';
 
@@ -389,7 +389,7 @@ sub mail_report {
     foreach my $mailtype (qw(plain html)) {
         my $report;
         $tt->process( "report-mail_$mailtype.tt", $RecentBackups, \$report )
-            or logit( $host, $group, "ERROR generating mail report template: " . $tt->error() );
+            or logit( $taskid, $host, $group, "ERROR generating mail report template: " . $tt->error() );
 
         my $mail_att = MIME::Lite->new(
             Type     => 'text',
@@ -401,16 +401,16 @@ sub mail_report {
     }
 
     unless ( $serverconfig{dryrun} ) {
-        $mail_msg->send or logit( $host, $group, "mail_report error" );
+        $mail_msg->send or logit( $taskid, $host, $group, "mail_report error" );
     }
 
-    logit( $host, $group, "Mail report sent." );
+    logit( $taskid, $host, $group, "Mail report sent." );
 
     return 1;
 }
 
 sub hobbit_report {
-    my ($host, $group, %RecentBackups)  = @_;
+    my ($taskid, $host, $group, %RecentBackups)  = @_;
 
     my $topcolor = 'green';
     my $errcode;
@@ -450,17 +450,17 @@ sub hobbit_report {
     );
     my $report;
     $tt->process( 'report-hobbit.tt', $RecentBackups, \$report )
-        or logit( $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
+        or logit( $taskid, $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
     $hobbitreport .= $report;
 
     send_hobbit_report($hobbitreport) unless $serverconfig{dryrun};
-    logit( $host, $group, "Hobbit report sent." );
+    logit( $taskid, $host, $group, "Hobbit report sent." );
 
     return 1;
 }
 
 sub logit {
-    my ($host, $group, $msg) = @_;
+    my ($taskid, $host, $group, $msg) = @_;
 
     my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
     my $logmonth   = strftime "%Y-%m", localtime;
@@ -468,7 +468,7 @@ sub logit {
     my $logfolder  = "$serverconfig{path_logs}/${host}_${group}";
     my $globallogfile = "$serverconfig{path_logs}/global_$logmonth.log";
     my $logfile    = "$logfolder/$logdate.log";
-    my $logmessage = "$timestamp $host-$group : $msg";
+    my $logmessage = "$timestamp $host-$group($taskid) : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
 
     print $logmessage if $serverconfig{debug};
