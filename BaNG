@@ -88,7 +88,7 @@ sub queue_backup {
 
     # check if last backup exists
     my $lastbkp = check_last_bkp($host, $group);
-    my $jobid = create_jobid($host, $group);
+    my $jobid = create_timeid($host, $group);
 
     # if missingonly, don't queue host if we had a backup within the last 20 hours
     if ( $missingonly && $lastbkp =~ qr{ (?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d) }x ) {
@@ -520,14 +520,14 @@ sub create_last_bkp_file {
 #################################
 # Helper subroutines
 #
-sub create_jobid {
+sub create_timeid {
     my ($host, $group) = @_;
     my ($s, $usec) = gettimeofday;
-    my $jobid      = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
-    $jobid =~ s/\n//g;
-    logit( $host, $group, "Created JobID: $jobid" );
+    my $timeid      = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
+    $timeid =~ s/\n//g;
+    logit( $host, $group, "Created TimeID: $timeid" );
 
-    return $jobid;
+    return $timeid;
 }
 
 sub eval_bkptimestamp {
