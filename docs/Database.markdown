@@ -59,7 +59,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
 -------
 
     CREATE OR REPLACE VIEW recent_backups AS
-    SELECT JobID, MIN(Start) as Start, MAX(Stop) as Stop, BkpFromHost,
+    SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, BkpFromHost,
     IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),BkpFromPath) as BkpFromPath,
     BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
     GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, JobStatus
@@ -68,7 +68,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     GROUP BY JobID, LastBkp, bkptopath order by LastBkp;
 
     CREATE OR REPLACE VIEW statistic_job_sum AS
-    SELECT JobID, MIN(Start) as Start, MAX(Stop) as Stop, SUM(TIMESTAMPDIFF(Second, Start , Stop)) as Runtime,
+    SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, SUM(TIMESTAMPDIFF(Second, Start , Stop)) as Runtime,
     BkpFromHost, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
     BkpFromPath) as BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
     SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
@@ -79,7 +79,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     ORDER BY LastBkp;
 
     CREATE OR REPLACE VIEW statistic_job_thread AS
-    SELECT JobID, Start, Stop, TIMESTAMPDIFF(Second, Start , Stop) as Runtime,
+    SELECT TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start , Stop) as Runtime,
     BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
     NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
     FROM statistic
