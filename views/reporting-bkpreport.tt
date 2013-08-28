@@ -4,6 +4,8 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
 <table class="reporting default-table border tablesorter tablefilter">
     <thead>
         <tr>
+            <th>TaskID</th>
+            <th>JobID</th>
             <th>JobStatus</th>
             <th>Host</th>
             <th>Group</th>
@@ -21,6 +23,8 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
     <tbody>
         <%- FOREACH bkp IN RecentBackupsLast.Data %>
             <tr>
+                <td class="center" title="<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></td>
+                <td class="center" title="<% bkp.JobID %>"><% bkp.JobID.substr(12) %></td>
                 <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done">
                     <% ELSIF bkp.JobStatus == 1 %>class="hook" title="Job done">
                     <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
