@@ -104,6 +104,8 @@ sub bangstat_recentbackups {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/^:$/:\//g;
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
+            TaskID      => $dbrow->{'TaskID'},
+            JobID       => $dbrow->{'JobID'},
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
             Runtime     => &BaNG::Common::time2human($dbrow->{'Runtime'}),
@@ -119,6 +121,8 @@ sub bangstat_recentbackups {
             SizeTrans   => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
         });
         push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
+            TaskID      => $dbrow->{'TaskID'},
+            JobID       => $dbrow->{'JobID'},
             Starttime   => $dbrow->{'Start'},
             BkpFromPath => $dbrow->{'BkpFromPath'},
             BkpToPath   => $dbrow->{'BkpToPath'},
@@ -212,6 +216,8 @@ sub bangstat_recentbackups_all {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
+            TaskID      => $dbrow->{'TaskID'},
+            JobID       => $dbrow->{'JobID'},
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
             Runtime     => &BaNG::Common::time2human($dbrow->{'Runtime'}),
@@ -254,6 +260,8 @@ sub bangstat_recentbackups_last {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/^:$/:\//g;
         push( @{$RecentBackupsLast{'Data'}}, {
+            TaskID      => $dbrow->{'TaskID'},
+            JobID       => $dbrow->{'JobID'},
             Starttime   => $dbrow->{'Start'},
             Stoptime    => $dbrow->{'Stop'},
             Runtime     => &BaNG::Common::time2human($dbrow->{'Runtime'}),
