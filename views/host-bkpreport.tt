@@ -6,9 +6,11 @@
                 <table class="default-table border">
                     <thead>
                         <tr>
-                            <th colspan="8">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                            <th colspan="10">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
                         </tr>
                         <tr>
+                            <th width="50">TaskID</th>
+                            <th width="50">JobID</th>
                             <th width="50">JobStatus</th>
                             <th width="50">ErrStatus</th>
                             <th width="100">Starttime</th>
@@ -22,6 +24,8 @@
                     <tbody>
                         <%- FOREACH bkp IN RecentBackups.$hostgroup %>
                         <tr>
+                            <td class="center" title="<% bkp.TaskID %>"><% bkp.TaskID.substr(0,12,'...') %></td>
+                            <td class="center" title="<% bkp.JobID %>"><% bkp.JobID.substr(0,12,'...') %></td>
                             <td <%- IF bkp.JobStatus AND bkp.isThread %>class="hook3" title="forked Job done">
                                 <% ELSIF bkp.JobStatus == 1 %>class="hook" title="Job done">
                                 <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
