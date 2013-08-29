@@ -99,7 +99,7 @@
 
                 // y axis
                 var yScale = d3.scale.ordinal()
-                    .domain(data.map(function(d) {return d.name; }))
+                    .domain(data.map(function(d,i) {return (i+1) + '. ' + d.name; }))
                     .rangeBands([0,h]);
                 var yAxis = d3.svg.axis()
                     .scale(yScale)
