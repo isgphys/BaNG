@@ -75,9 +75,9 @@ get '/barchart/:name' => require_login sub {
     my $chartname = param('name');
     my $title = "Bar Chart";
     if ( $chartname eq 'toptranssize'  ) {
-       $title = "Top Transfered Filesize";
+       $title = "Top Transfered Filesize - last 24h";
     }elsif ( $chartname eq 'toptransfiles'  ) {
-       $title = "Top Transfered Number of Files";
+       $title = "Top Transfered Number of Files - last 24h";
     }
     template 'statistics-barchart', {
         section      => 'statistics',
