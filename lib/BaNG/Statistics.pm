@@ -273,7 +273,8 @@ sub statistics_top_trans {
 
 sub statistics_top_trans_details {
     my ($transtype, $taskid) = @_;
-    my $sqltranstype;
+    my (@top_size, $sth, $sqltranstype, $sqlbkpgroup);
+
     if ( $transtype eq 'files' ) {
         $sqltranstype =  'NumOfFilesTrans' ;
     } elsif ($transtype eq 'size') {
@@ -283,7 +284,7 @@ sub statistics_top_trans_details {
     my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return '' unless $conn;
 
-    my $sth = $bangstat_dbh->prepare("
+    $sth = $bangstat_dbh->prepare("
         SELECT bkpfromhost, bkpgroup,
             IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))), BkpFromPath) as BkpFromPath,
             SUM($sqltranstype) AS $sqltranstype
@@ -292,23 +293,46 @@ sub statistics_top_trans_details {
         GROUP BY JobID
         ORDER BY $sqltranstype DESC;
         ");
+    $sth->execute();
+
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
+        next if $size < 2;
+        $sqlbkpgroup = $bkpgroup;
+        $bkppath =~ s/\://g;
+        $bkppath =~ s/\//_/g;
+        push( @top_size, {
+            name  => $bkphost,
+            value => $size,
+            label => num2human($size, 1024),
+            url   => "/statistics/$bkphost/$bkppath",
+        });
+    }
+
+    if ( $#top_size == 0 ) {
+        @top_size = ();
+        $sth = $bangstat_dbh->prepare("
+            SELECT bkpfromhost, bkpgroup, bkpfrompath, $sqltranstype
+            FROM statistic
+            WHERE TaskID = '$taskid' AND bkpgroup LIKE '$sqlbkpgroup'
+            ORDER BY $sqltranstype desc;
+            ");
         $sth->execute();
 
-        my @top_size;
         while ( my ( $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
             next if $size < 2;
             $bkppath =~ s/\://g;
-            $bkppath =~ s/\//_/g;
+            $bkppath =~ s/^.*\/(.*)$/$1/;
             push( @top_size, {
-                    name  => $bkphost,
-                    value => $size,
-                    label => num2human($size, 1024),
-                    url   => "/statistics/$bkphost/$bkppath",
-                });
+                name  => $bkppath,
+                value => $size,
+                label => num2human($size, 1024),
+                url   => "#",
+            });
         }
-        $sth->finish();
+    }
+    $sth->finish();
 
-        return \@top_size;
+    return \@top_size;
 }
 
 sub statistics_groupshare_variations {
