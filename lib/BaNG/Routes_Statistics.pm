@@ -59,31 +59,39 @@ get '/variations' => require_login sub {
     };
 };
 
-get '/barchart/:name.json' => require_login sub {
+get '/barchart/:name/:taskid.json' => require_login sub {
     my $chartname = param('name');
     my $json;
     if ( $chartname eq 'toptranssize'  ) {
-        $json = to_json(statistics_top_trans('size'));
+        if( param('taskid') eq 'all' ) {
+            $json = to_json(statistics_top_trans('size'));
+        } else {
+            $json = to_json(statistics_top_trans_details('size', param('taskid')));
+        }
     } elsif ( $chartname eq 'toptransfiles'  ) {
-        $json = to_json(statistics_top_trans('files'));
+        if( param('taskid') eq 'all' ) {
+            $json = to_json(statistics_top_trans('files'));
+        } else {
+            $json = to_json(statistics_top_trans_details('files', param('taskid')));
+        }
     }
     error404('Could not fetch data') unless $json;
     return $json;
 };
 
-get '/barchart/:name' => require_login sub {
-    my $chartname = param('name');
+get '/barchart/:name/:taskid' => require_login sub {
+    my $chartname = param('name') . '/' . param('taskid');
     my $title = "Bar Chart";
-    if ( $chartname eq 'toptranssize'  ) {
+    if ( $chartname =~ /toptranssize/  ) {
        $title = "Top Transfered Filesize - last 24h";
-    }elsif ( $chartname eq 'toptransfiles'  ) {
+    }elsif ( $chartname =~ /toptransfiles/  ) {
        $title = "Top Transfered Number of Files - last 24h";
     }
     template 'statistics-barchart', {
         section      => 'statistics',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
-        chartname    => param('name'),
+        chartname    => $chartname,
         title        => $title,
         sorted       => 0,
     },{ layout       => 0 };

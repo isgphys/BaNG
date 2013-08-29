@@ -17,6 +17,7 @@ our @EXPORT = qw(
     statistics_decode_path
     statistics_hosts_shares
     statistics_top_trans
+    statistics_top_trans_details
     statistics_groupshare_variations
     statistics_schedule
 );
@@ -233,22 +234,63 @@ sub statistics_hosts_shares {
 
 sub statistics_top_trans {
     my ($transtype) = @_;
+    my $sqltranstype;
     if ( $transtype eq 'files' ) {
-        $transtype =  'NumOfFilesTrans' ;
+        $sqltranstype =  'NumOfFilesTrans' ;
     } elsif ($transtype eq 'size') {
-        $transtype =  'TotFileSizeTrans' ;
+        $sqltranstype =  'TotFileSizeTrans' ;
     }
     get_serverconfig();
     my $conn = bangstat_db_connect($serverconfig{config_bangstat});
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT  BkpFromHost, BkpGroup, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
-                BkpFromPath) as BkpFromPath, SUM($transtype) as $transtype
+        SELECT  TaskID, BkpFromHost, BkpGroup, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
+                BkpFromPath) as BkpFromPath, SUM($sqltranstype) as $sqltranstype
         FROM statistic
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
         GROUP BY TaskID
-        ORDER BY $transtype DESC;
+        ORDER BY $sqltranstype DESC;
+        ");
+        $sth->execute();
+
+        my @top_size;
+        while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
+            next if $size < 2;
+            $bkppath =~ s/\://g;
+            $bkppath =~ s/\//_/g;
+            push( @top_size, {
+                    name  => $bkpgroup,
+                    value => $size,
+                    label => num2human($size, 1024),
+                    url   => "/statistics/barchart/toptrans$transtype/$taskid",
+                });
+        }
+        $sth->finish();
+
+        return \@top_size;
+} 
+
+sub statistics_top_trans_details {
+    my ($transtype, $taskid) = @_;
+    my $sqltranstype;
+    if ( $transtype eq 'files' ) {
+        $sqltranstype =  'NumOfFilesTrans' ;
+    } elsif ($transtype eq 'size') {
+        $sqltranstype =  'TotFileSizeTrans' ;
+    }
+    get_serverconfig();
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT bkpfromhost, bkpgroup,
+            IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))), BkpFromPath) as BkpFromPath,
+            SUM($sqltranstype) AS $sqltranstype
+        FROM statistic
+        WHERE TaskID = '$taskid'
+        GROUP BY JobID
+        ORDER BY $sqltranstype DESC;
         ");
         $sth->execute();
 
@@ -258,16 +300,15 @@ sub statistics_top_trans {
             $bkppath =~ s/\://g;
             $bkppath =~ s/\//_/g;
             push( @top_size, {
-                    name  => $bkpgroup,
+                    name  => $bkphost,
                     value => $size,
                     label => num2human($size, 1024),
-                    url   => "#",
+                    url   => "/statistics/$bkphost/$bkppath",
                 });
         }
         $sth->finish();
 
         return \@top_size;
-
 }
 
 sub statistics_groupshare_variations {

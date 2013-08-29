@@ -42,7 +42,7 @@
         </div>
         <script>
             var data;
-            d3.json('./<% chartname %>.json', function(error, json) {
+            d3.json('/statistics/barchart/<% chartname %>.json', function(error, json) {
                 if (error) {
                     $('.loading_message').html('Error while loading data.');
                 } else {
@@ -57,7 +57,7 @@
                 var w = 800;
                 var h = 30 * data.length;
                 var yaxis_offset = 180;
-                var MaxValue = d3.max(data, function(d){ return d.value; });
+                var MaxValue = d3.max(data, function(d){ return parseFloat(d.value); });
 
                 var x = d3.scale.log()
                         .domain([1, MaxValue])
