@@ -59,8 +59,8 @@
                 var yaxis_offset = 100;
                 var MaxValue = d3.max(data, function(d){ return d.value; });
 
-                var x = d3.scale.linear()
-                        .domain([0, MaxValue])
+                var x = d3.scale.log()
+                        .domain([1, MaxValue])
                         .range([0, w]);
                 var y = d3.scale.ordinal()
                         .domain(d3.keys(data))
