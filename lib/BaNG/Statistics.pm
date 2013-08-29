@@ -16,6 +16,7 @@ our @EXPORT = qw(
     statistics_cumulated_json
     statistics_decode_path
     statistics_hosts_shares
+    statistics_top_trans
     statistics_groupshare_variations
     statistics_schedule
 );
@@ -228,6 +229,45 @@ sub statistics_hosts_shares {
     }
 
     return \%hosts_shares;
+}
+
+sub statistics_top_trans {
+    my ($transtype) = @_;
+    if ( $transtype eq 'files' ) {
+        $transtype =  'NumOfFilesTrans' ;
+    } elsif ($transtype eq 'size') {
+        $transtype =  'TotFileSizeTrans' ;
+    }
+    get_serverconfig();
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT  BkpFromHost, BkpGroup, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
+                BkpFromPath) as BkpFromPath, SUM($transtype) as $transtype
+        FROM statistic
+        WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
+        GROUP BY TaskID
+        ORDER BY $transtype DESC;
+        ");
+        $sth->execute();
+
+        my @top_size;
+        while ( my ( $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
+            next if $size < 2;
+            $bkppath =~ s/\://g;
+            $bkppath =~ s/\//_/g;
+            push( @top_size, {
+                    name  => $bkpgroup,
+                    value => $size,
+                    label => num2human($size, 1024),
+                    url   => "#",
+                });
+        }
+        $sth->finish();
+
+        return \@top_size;
+
 }
 
 sub statistics_groupshare_variations {

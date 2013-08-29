@@ -25,7 +25,13 @@
                 </li>
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
               <li><a href="/statistics/schedule-all">Schedule by host</a></li>
-              <li><a href="/statistics/variations">Variations</a></li>
+                <li><a href="/statistics">Top Changes</a>
+                    <ul>
+                        <li><a href="/statistics/barchart/toptranssize">Transfered File Size</a></li>
+                        <li><a href="/statistics/barchart/toptransfiles">Transfered Files</a></li>
+                        <li><a href="/statistics/variations">Groupdata Variations</a></li>
+                    </ul>
+                </li>
             </ul>
         </li>
         <li><a href="#" <% IF section == 'tools' %>class="activetab"<% END %>>Tools</a>

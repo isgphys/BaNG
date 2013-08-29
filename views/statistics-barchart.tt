@@ -32,7 +32,7 @@
         <% INCLUDE header.tt %>
         <% IF session.logged_in_user %><% INCLUDE navbar.tt %><% END %>
         <div id="content">
-            <h1>Bar Chart: <% chartname %></h1>
+            <h1><% title %> (logscale)</h1>
             <div id="chart_container">
                 <div class="loading_message">
                     <img src="/images/spinner.gif" width=25 alt="Loading animation">Loading data...
@@ -56,7 +56,7 @@
             function drawGraph() {
                 var w = 800;
                 var h = 40 * data.length;
-                var yaxis_offset = 100;
+                var yaxis_offset = 180;
                 var MaxValue = d3.max(data, function(d){ return d.value; });
 
                 var x = d3.scale.log()
@@ -95,7 +95,7 @@
                         .attr("dx", -5)
                         .attr("dy", ".35em")
                         .attr("class", "label")
-                        .text(function(d) {return d.value;});
+                        .text(function(d) {return d.label;});
 
                 // y axis
                 var yScale = d3.scale.ordinal()

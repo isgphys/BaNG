@@ -61,17 +61,30 @@ get '/variations' => require_login sub {
 
 get '/barchart/:name.json' => require_login sub {
     my $chartname = param('name');
-    my $json = qq% [ {"name": "bar1", "value": "20", "url": "/"}, {"name": "bar2", "value": "15", "url": "/"} ] %;
+    my $json;
+    if ( $chartname eq 'toptranssize'  ) {
+        $json = to_json(statistics_top_trans('size'));
+    } elsif ( $chartname eq 'toptransfiles'  ) {
+        $json = to_json(statistics_top_trans('files'));
+    }
     error404('Could not fetch data') unless $json;
     return $json;
 };
 
 get '/barchart/:name' => require_login sub {
+    my $chartname = param('name');
+    my $title = "Bar Chart";
+    if ( $chartname eq 'toptranssize'  ) {
+       $title = "Top Transfered Filesize";
+    }elsif ( $chartname eq 'toptransfiles'  ) {
+       $title = "Top Transfered Number of Files";
+    }
     template 'statistics-barchart', {
         section      => 'statistics',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         chartname    => param('name'),
+        title        => $title,
         sorted       => 0,
     },{ layout       => 0 };
 };
