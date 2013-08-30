@@ -55,7 +55,7 @@ sub get_lockfiles {
     my %lockfiles;
     foreach my $server ( keys %servers ) {
 
-        my @lockfiles = remotewrapper_command( $server, 'BaNG/bang_getlockfile', $serverconfig{path_lockfiles} );
+        my @lockfiles = remotewrapper_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
 
         foreach my $lockfile ( @lockfiles  ) {
             my ($host, $group, $path) = split_lockfile_name($lockfile);
