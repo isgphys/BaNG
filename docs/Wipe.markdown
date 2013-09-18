@@ -16,4 +16,6 @@ Schematically:
     present ---------------------------- past
     |  31 daily  |  8 weekly  |  9 monthly  |
 
+Various wipe scenarios are documented in the test file `t/020_bang_wipe.t`.
+
 The [restore](/restore) view shows the total number of backups, as well as the detailed list of available backups for each type.
