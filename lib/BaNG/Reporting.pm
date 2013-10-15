@@ -491,6 +491,7 @@ sub logit {
         # write selection of messages to global logfile
         my $selection = qr{
             Queueing \s backup \s for |
+            working \s on |
             Backup \s successful |
             ERROR |
             Wipe \s host |
