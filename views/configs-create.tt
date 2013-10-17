@@ -1,4 +1,9 @@
 <H3>Add new Host for Backup</H3>
+<% If errmsg %>
+<div class="msg_error">
+    <% errmsg %>
+</div>
+<% END %>
 <div id="newconfig">
     <form action="/config/new" method=post>
         <fieldset>
@@ -23,3 +28,8 @@
         </fieldset>
     </form>
 </div>
+<script>
+    $(document).ready(function(){
+        $(".msg_error").fadeOut(4000);
+    });
+</script>

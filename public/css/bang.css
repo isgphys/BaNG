@@ -9,6 +9,34 @@ h3 {
     padding: 10px 0 5px 0;
 }
 
+.msg_info, .msg_success, .msg_warning, .msg_error {
+    border: 1px solid;
+    margin: 10px 0px;
+    padding: 5px 5px;
+    width: 400px;
+    background-repeat: no-repeat;
+    background-position: 10px center;-moz-border-radius:.5em;
+    -webkit-border-radius:.5em;
+    border-radius:.5em;
+
+}
+.msg_info {
+    color: #00529B;
+    background-color: #BDE5F8;
+}
+.msg_success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+}
+.msg_warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+.msg_error {
+    color: #D8000C;
+    background-color: #FFBABA;
+}
+
 .alert_red {
     background-color: red;
     font-weight: bold;

@@ -85,11 +85,13 @@ sub write_host_config {
     my ($host, $group, $settings) = @_;
     my $ConfigFile = "$serverconfig{path_hostconfig}/$host" . "_" . $group . ".yaml";
 
-    DumpFile($ConfigFile, $settings);
-
-    return 1;
-
-};
+    if (-f $ConfigFile) {
+        return (0, $ConfigFile);
+    } else {
+        DumpFile($ConfigFile, $settings);
+        return (1, $ConfigFile);
+    }
+}
 
 sub delete_host_config {
     my ($configfile) = @_;
@@ -99,7 +101,7 @@ sub delete_host_config {
 
     return 1;
 
-};
+}
 
 sub get_host_config {
     my ($host, $group) = @_;

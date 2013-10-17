@@ -64,15 +64,18 @@ get '/allservers' => require_role isg => sub {
     };
 };
 
-get '/new' => require_role isg => sub {
+get '/new/?:errmsg?' => require_role isg => sub {
     get_serverconfig();
     get_group_config("*");
+
+    my $errmsg = param('errmsg') ? "You try to create a still existing configfile!" : "";
 
     template 'configs-create' => {
         section      => 'configs',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         groups       => \%groups,
+        errmsg       => $errmsg,
     };
 };
 
@@ -85,16 +88,24 @@ post '/new' => require_role isg => sub {
     my $settings;
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
-    write_host_config("$hostname", "$bkpgroup", $settings);
+    my ($return_code, $return_msg) = write_host_config("$hostname", "$bkpgroup", $settings);
 
-    redirect "/host/$hostname";
+    if ( $return_code ) {
+        info "Configfile $return_msg created by $createdby";
+        redirect "/host/$hostname";
+     } else {
+        warning "You tried to override $return_msg!";
+        redirect "/config/new/-1";
+     }
 
 };
 
 post '/delete/:file' => require_role isg => sub {
     my $file  = param('file');
+    my $deletedby = session('logged_in_user');
 
     delete_host_config("$file");
+    warning "Configfile $file deleted by $deletedby!";
 
     redirect '/config/allhosts';
 };
