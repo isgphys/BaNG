@@ -1,0 +1,25 @@
+<H3>Add new Host for Backup</H3>
+<div id="newconfig">
+    <form action="/config/new" method=post>
+        <fieldset>
+            <Legend>Create Config</legend>
+            <div>
+                <label>Hostname:</label>
+                <input type="text" name="hostname" autofocus>
+            </div>
+            <div>
+                <label>Backup-Group:</label>
+                <input type="text" name="newgroup">
+                or
+                <select name="bkpgroup">
+                  <% FOREACH group IN groups.keys.sort %>
+                  <option value="<% group %>"><% group %></option>
+                  <% END %>
+                </select>
+            </div>
+            <div>
+                <input class="submit" type="submit" value="Create it!">
+            </div>
+        </fieldset>
+    </form>
+</div>

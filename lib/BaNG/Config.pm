@@ -7,7 +7,7 @@ use Cwd qw( abs_path );
 use File::Basename;
 use File::Find::Rule;
 use POSIX qw( strftime );
-use YAML::Tiny qw( LoadFile Dump );
+use YAML::Tiny qw( LoadFile DumpFile );
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -20,6 +20,7 @@ our @EXPORT = qw(
     get_serverconfig
     get_host_config_defaults
     get_host_config
+    write_host_config
     get_group_config
     get_cronjob_config
     generated_crontab
@@ -78,6 +79,16 @@ sub get_host_config_defaults {
     }
     return $settings;
 }
+
+sub write_host_config {
+    my ($host, $group, $settings) = @_;
+    my $ConfigFile = "$serverconfig{path_hostconfig}/$host" . "_" . $group . ".yaml";
+
+    DumpFile($ConfigFile, $settings);
+
+    return 1;
+
+};
 
 sub get_host_config {
     my ($host, $group) = @_;
