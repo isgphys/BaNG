@@ -17,7 +17,7 @@
         <% IF session.logged_in_admin %><li><a href="/reporting" <% IF section == 'reporting' %>class="activetab"<% END %>>Reporting</a></li><% END %>
         <li><a href="#"<% IF section == 'statistics' %>class="activetab"<% END %>>Statistics</a>
             <ul>
-                <li><a href="/statistics">Overview</a>
+                <li class="gosubmenu"><a href="/statistics">Overview</a>
                     <ul>
                         <li><a href="/statistics/phd-bkp-gw">phd-bkp-gw</a></li>
                         <li><a href="/statistics/galleon">galleon</a></li>
@@ -26,7 +26,7 @@
                 </li>
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
               <li><a href="/statistics/schedule-all">Schedule by host</a></li>
-                <li><a href="/statistics">Top Changes</a>
+                <li class="gosubmenu"><a href="/statistics">Top Changes</a>
                     <ul>
                         <li><a href="/statistics/barchart/toptranssize/all">Transfered File Size</a></li>
                         <li><a href="/statistics/barchart/toptransfiles/all">Transfered Files</a></li>
@@ -37,7 +37,7 @@
         </li>
         <li><a href="#" <% IF section == 'tools' %>class="activetab"<% END %>>Tools</a>
             <ul>
-                <li><a href="#">External Tools</a>
+                <li class="gosubmenu"><a href="#">External Tools</a>
                     <ul>
                         <li><a href="https://admin.phys.ethz.ch/lvm2FS/index.pl#phd-bkp-gw" target="_blank">VMchart - LVM and BTRFS Monitoring</a></li>
                         <li><a href="https://admin.phys.ethz.ch/cacti/graph_view.php?action=tree&tree_id=5&leaf_id=233" target="_blank">Cacti Monitoring</a></li>

@@ -141,6 +141,10 @@ h3 {
 #newconfig div {
     margin: 5px 0;
 }
+
+.gosubmenu {
+    border-right: 2px solid blue;
+}
 .cutter {
     float: none;
     border-top: 4px solid red;
