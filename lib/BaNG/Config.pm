@@ -21,6 +21,7 @@ our @EXPORT = qw(
     get_host_config_defaults
     get_host_config
     write_host_config
+    delete_host_config
     get_group_config
     get_cronjob_config
     generated_crontab
@@ -85,6 +86,16 @@ sub write_host_config {
     my $ConfigFile = "$serverconfig{path_hostconfig}/$host" . "_" . $group . ".yaml";
 
     DumpFile($ConfigFile, $settings);
+
+    return 1;
+
+};
+
+sub delete_host_config {
+    my ($configfile) = @_;
+    my $DelConfigFile = "$serverconfig{path_hostconfig}/$configfile";
+
+    unlink("$DelConfigFile");
 
     return 1;
 

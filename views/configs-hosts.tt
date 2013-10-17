@@ -8,6 +8,9 @@
             <th>Server</th>
             <th>Config-Files</th>
             <th>Status</th>
+            <% IF session.logged_in_user == 'schmid' %>
+                <th>Delete</th>
+            <% END %>
         </tr>
     </thead>
     <tbody>
@@ -38,6 +41,18 @@
             <td class="center">
               <% hosts.$hostname.status %>
             </td>
+          <% IF session.logged_in_user == 'schmid' %>
+            <td>
+                <a href="#"
+                  onclick="if (confirm('Do you really want delete <% hosts.$hostname.configfile %>?'))
+                    {$.post('/config/delete/<% hosts.$hostname.configfile %>',
+                        function(data) { alert('<% hosts.$hostname.configfile %> has been deleted!');
+                            window.location.href = '/config/allhosts';})
+                    };">
+                 Delete
+                </a>
+            </td>
+          <% END %>
         </tr>
       <% END %>
     </tbody>

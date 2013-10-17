@@ -91,4 +91,12 @@ post '/new' => require_role isg => sub {
 
 };
 
+post '/delete/:file' => require_role isg => sub {
+    my $file  = param('file');
+
+    delete_host_config("$file");
+
+    redirect '/config/allhosts';
+};
+
 1;
