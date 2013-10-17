@@ -10,11 +10,11 @@
             <Legend>Create Config</legend>
             <div>
                 <label>Hostname:</label>
-                <input type="text" name="hostname" autofocus>
+                <input type="text" name="hostname" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$" autofocus>
             </div>
             <div>
                 <label>Backup-Group:</label>
-                <input type="text" name="newgroup">
+                <input type="text" name="newgroup" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$">
                 or
                 <select name="bkpgroup">
                   <% FOREACH group IN groups.keys.sort %>

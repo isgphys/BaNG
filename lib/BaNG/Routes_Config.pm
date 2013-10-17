@@ -68,7 +68,11 @@ get '/new/?:errmsg?' => require_role isg => sub {
     get_serverconfig();
     get_group_config("*");
 
-    my $errmsg = param('errmsg') ? "You try to create a still existing configfile!" : "";
+    my $errmsg = "";
+    if (param('errmsg')) {
+        $errmsg = "You try to create a still existing configfile!" if (param('errmsg') eq "-1");
+        $errmsg = "No hostname defined!" if (param('errmsg') eq "-2");
+    }
 
     template 'configs-create' => {
         section      => 'configs',
@@ -80,7 +84,7 @@ get '/new/?:errmsg?' => require_role isg => sub {
 };
 
 post '/new' => require_role isg => sub {
-    my $hostname  = param('hostname');
+    my $hostname  = param('hostname') || "";
     my $bkpgroup  = param('newgroup') ? param('newgroup') : param('bkpgroup');
     my $createdby = session('logged_in_user');
     my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
@@ -90,12 +94,12 @@ post '/new' => require_role isg => sub {
 
     my ($return_code, $return_msg) = write_host_config("$hostname", "$bkpgroup", $settings);
 
-    if ( $return_code ) {
+    if ( $return_code eq "1" ) {
         info "Configfile $return_msg created by $createdby";
         redirect "/host/$hostname";
      } else {
-        warning "You tried to override $return_msg!";
-        redirect "/config/new/-1";
+        warning "$return_msg";
+        redirect "/config/new/-$return_code";
      }
 
 };

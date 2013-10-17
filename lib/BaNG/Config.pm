@@ -83,13 +83,17 @@ sub get_host_config_defaults {
 
 sub write_host_config {
     my ($host, $group, $settings) = @_;
-    my $ConfigFile = "$serverconfig{path_hostconfig}/$host" . "_" . $group . ".yaml";
+    if ( ($host =~ /^[a-z\-0-9]+$/) && ($group =~ /^[a-z\-0-9]+$/) ) {
+        my $ConfigFile = "$serverconfig{path_hostconfig}/$host" . "_" . $group . ".yaml";
 
-    if (-f $ConfigFile) {
-        return (0, $ConfigFile);
+        if (-f $ConfigFile) {
+            return (0, "You try to override $ConfigFile!");
+        } else {
+            DumpFile($ConfigFile, $settings);
+            return (1, $ConfigFile);
+        }
     } else {
-        DumpFile($ConfigFile, $settings);
-        return (1, $ConfigFile);
+        return (2, "Hostname or Group uses wrong character!");
     }
 }
 
