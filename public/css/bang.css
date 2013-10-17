@@ -111,4 +111,9 @@ h3 {
     background-position: 20px 4px;
     padding-left: 45px !important;
 }
-
+.cutter {
+    float: none;
+    border-top: 4px solid red;
+    border-left: 2px solid red;
+    position: relative;
+}

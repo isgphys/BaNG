@@ -10,6 +10,7 @@
                 <li><a href="/config/allgroups">Group Configs</a></li>
                 <li><a href="/config/allservers">Server Configs</a></li>
                 <li><a href="/config/defaults">Default Configs</a></li>
+                <li class="cutter"><a href="/config/new">Add New Host</a></li>
             </ul>
         </li>
         <% END %>
