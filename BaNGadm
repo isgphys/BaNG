@@ -16,6 +16,7 @@ use BaNG::Config;
 
 my $version = '0.1';
 my $crontabonly;
+my $showgroups;
 my $debug_arg;
 my $debuglevel_arg;
 my $dryrun_arg;
@@ -33,6 +34,18 @@ if ( $crontabonly ) {
     exit 0;
 }
 
+if ( $showgroups ) {
+    get_group_config();
+
+    print "All available Backup-Groups:\n";
+    print "---------------------------\n";
+    foreach my $group (sort keys %groups) {
+        print "$group \n";
+    }
+
+    exit 0;
+}
+
 #################################
 # Command line arguments
 #
@@ -43,7 +56,9 @@ sub parse_command_options {
         "v|version"   => sub { usage("Current version number: $version") },
         "d|debug"     => \$debug_arg,
         "crontab"     => \$crontabonly,
+        "showgroups"  => \$showgroups,
     ) or usage("Invalid commmand line options.");
+    usage("Do not use together!") if ( $crontabonly && $showgroups );
 
     $debug_arg = 1 if $dryrun_arg;
 
@@ -75,6 +90,7 @@ sub usage {
         Usage Examples:
 
         $command --crontab                  # show generated crontab
+        $command --showgroups               # show available groups
         $command --help                     # show this help message
 
         Optional Arguments:

@@ -42,6 +42,7 @@ Optional argument:
  BaNGadm : admin tasks
 -----------------------
 
+    BaNGadm --showgroups                  # Show all available backup groups
     BaNGadm --crontab                     # Show generated crontab entry
 
 
