@@ -42,6 +42,8 @@ Optional argument:
  BaNGadm : admin tasks
 -----------------------
 
+    BaNGadm --add -h <host> -g <group>    # create a new host config
+
     BaNGadm --showgroups                  # Show all available backup groups
     BaNGadm --crontab                     # Show generated crontab entry
 

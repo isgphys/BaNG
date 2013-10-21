@@ -10,17 +10,21 @@ use warnings;
 use Cwd qw( abs_path );
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
+use POSIX qw( strftime );
 
 use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Config;
 
 my $version = '0.1';
+my $add_arg;
 my $crontabonly;
-my $showgroups;
 my $debug_arg;
 my $debuglevel_arg;
 my $dryrun_arg;
+my $group_arg;
+my $host_arg;
 my $prefix_arg;
+my $showgroups;
 
 #################################
 # Main
@@ -46,6 +50,24 @@ if ( $showgroups ) {
     exit 0;
 }
 
+if ( $add_arg ) {
+    my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
+    my $createdby = "root with CLI";
+
+    my $settings;
+    $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
+
+    my ($return_code, $return_msg) = write_host_config("$host_arg", "$group_arg", $settings);
+
+    if ( $return_code eq "1" ) {
+        print "Configfile $return_msg created\n";
+    } else {
+        print "$return_msg\n";
+    }
+
+    exit 0;
+}
+
 #################################
 # Command line arguments
 #
@@ -55,10 +77,14 @@ sub parse_command_options {
         "help"        => sub { usage('') },
         "v|version"   => sub { usage("Current version number: $version") },
         "d|debug"     => \$debug_arg,
+        "add"         => \$add_arg,
+        "g|group=s"   => \$group_arg,
+        "h|host=s"    => \$host_arg,
         "crontab"     => \$crontabonly,
         "showgroups"  => \$showgroups,
     ) or usage("Invalid commmand line options.");
-    usage("Do not use together!") if ( $crontabonly && $showgroups );
+    usage("Do not use together!")            if ( $crontabonly && $showgroups );
+    usage("You must provide some arguments") if ( $add_arg && ( ! $host_arg || ! $group_arg ) );
 
     $debug_arg = 1 if $dryrun_arg;
 
@@ -89,9 +115,11 @@ sub usage {
         $message
         Usage Examples:
 
-        $command --crontab                  # show generated crontab
-        $command --showgroups               # show available groups
-        $command --help                     # show this help message
+        $command --add -h <hostname> -g <group> # create a new host config
+
+        $command --crontab                      # show generated crontab
+        $command --showgroups                   # show available groups
+        $command --help                         # show this help message
 
         Optional Arguments:
 
