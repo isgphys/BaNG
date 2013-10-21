@@ -16,11 +16,12 @@ use lib dirname( abs_path($0) ) . "/lib";
 use BaNG::Config;
 
 my $version = '0.1';
-my $add_arg;
+my ($add_arg, $delete_arg);
 my $crontabonly;
 my $debug_arg;
 my $debuglevel_arg;
 my $dryrun_arg;
+my $file_arg;
 my $group_arg;
 my $host_arg;
 my $prefix_arg;
@@ -68,6 +69,20 @@ if ( $add_arg ) {
     exit 0;
 }
 
+if ( $delete_arg ) {
+    my $file;
+    if ( $host_arg && $group_arg ) {
+        $file = "$host_arg" . "_" . "$group_arg.yaml";
+    } else {
+        $file = $file_arg;
+    }
+
+    my ($return_code, $return_msg) = delete_host_config("$file");
+    print "$return_msg\n";
+
+    exit 0;
+}
+
 #################################
 # Command line arguments
 #
@@ -78,6 +93,8 @@ sub parse_command_options {
         "v|version"   => sub { usage("Current version number: $version") },
         "d|debug"     => \$debug_arg,
         "add"         => \$add_arg,
+        "delete"      => \$delete_arg,
+        "file=s"      => \$file_arg,
         "g|group=s"   => \$group_arg,
         "h|host=s"    => \$host_arg,
         "crontab"     => \$crontabonly,
@@ -115,7 +132,11 @@ sub usage {
         $message
         Usage Examples:
 
-        $command --add -h <hostname> -g <group> # create a new host config
+        $command --add -h <hostname> -g <group>     # create a new host config
+
+
+        $command --delete -h <hostname> -g <group>  # delete a existing host config
+        $command --delete --file <filename.yaml>
 
         $command --crontab                      # show generated crontab
         $command --showgroups                   # show available groups

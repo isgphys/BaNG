@@ -42,7 +42,10 @@ Optional argument:
  BaNGadm : admin tasks
 -----------------------
 
-    BaNGadm --add -h <host> -g <group>    # create a new host config
+    BaNGadm --add -h <host> -g <group>          # create a new host config
+
+    BaNGadm --delete -h <hostname> -g <group>   # delete a existing host config
+    BaNGadm --delete --file <filename.yaml>
 
     BaNGadm --showgroups                  # Show all available backup groups
     BaNGadm --crontab                     # Show generated crontab entry

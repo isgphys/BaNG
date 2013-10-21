@@ -101,10 +101,12 @@ sub delete_host_config {
     my ($configfile) = @_;
     my $DelConfigFile = "$serverconfig{path_hostconfig}/$configfile";
 
-    unlink("$DelConfigFile");
-
-    return 1;
-
+    if (-f $DelConfigFile) {
+        unlink("$DelConfigFile");
+        return (0, "Configfile $DelConfigFile deleted successfully");
+    } else {
+        return (1, "$DelConfigFile does not exists")
+    }
 }
 
 sub get_host_config {

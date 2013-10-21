@@ -108,8 +108,8 @@ post '/delete/:file' => require_role isg => sub {
     my $file  = param('file');
     my $deletedby = session('logged_in_user');
 
-    delete_host_config("$file");
-    warning "Configfile $file deleted by $deletedby!";
+    my ($return_code, $return_msg) = delete_host_config("$file");
+    warning "$return_msg by $deletedby!";
 
     redirect '/config/allhosts';
 };
