@@ -84,6 +84,7 @@ get '/new/?:errmsg?' => require_role isg => sub {
 };
 
 post '/new' => require_role isg => sub {
+    get_serverconfig();
     my $hostname  = param('hostname') || "";
     my $bkpgroup  = param('newgroup') ? param('newgroup') : param('bkpgroup');
     my $createdby = session('logged_in_user');
@@ -105,13 +106,13 @@ post '/new' => require_role isg => sub {
 };
 
 post '/delete/:file' => require_role isg => sub {
+    get_serverconfig();
     my $file  = param('file');
     my $deletedby = session('logged_in_user');
 
     my ($return_code, $return_msg) = delete_host_config("$file");
     warning "$return_msg by $deletedby!";
 
-    redirect '/config/allhosts';
 };
 
 1;
