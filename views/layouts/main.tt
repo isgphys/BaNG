@@ -80,6 +80,18 @@
                 $('[data-href]').click(function(){
                     window.location = $(this).data('href');
                 });
+
+                $('[data-deleteconfigfile]').click(function(){
+                    var deleteFile = $(this).data('deleteconfigfile');
+                    var configType = $(this).data('configtype');
+                    if ( confirm('Do you really want delete ' + deleteFile +'\n(' + configType + '-config)?') ) {
+                        $.post('/config/delete/' + configType + '/' + deleteFile, function(data) {
+                            alert(deleteFile + ' has been deleted!');
+                        });
+                        $(this).parent().parent('tr').remove();
+                        updateFilter();
+                    };
+                });
             }
 
             function initializeAll() {

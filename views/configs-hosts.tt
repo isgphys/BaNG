@@ -42,28 +42,11 @@
               <% hosts.$hostname.status %>
             </td>
           <% IF session.logged_in_user == 'schmid' %>
-            <td>
-                <img class="delete" src="/images/delete.png" data-configfile="<% hosts.$hostname.configfile %>">
+            <td align="center">
+                <img class="delete" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>">
             </td>
           <% END %>
         </tr>
       <% END %>
     </tbody>
 </table>
-<script>
-    $(document).ready(function() {
-        $('[data-configfile]').click(function(){
-            var deleteFile = $(this).data('configfile');
-            if ( confirm('Do you really want delete ' + deleteFile +' ?') )
-                {
-                    $.post('/config/delete/' + deleteFile,
-                        function(data) { alert(deleteFile + ' has been deleted!');})
-
-                    $(this).parent().parent('tr').hide();
-
-                    var countVisible = $('.tablefilter > tbody > tr:visible').length;
-                    $('#countVisible, #countAll').html(countVisible);
-                };
-        });
-    });
-</script>

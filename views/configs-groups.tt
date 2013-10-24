@@ -7,6 +7,9 @@
             <th>Server</th>
             <th>Config-Files</th>
             <th>Status</th>
+            <% IF session.logged_in_user == 'schmid' %>
+                <th>Delete</th>
+            <% END %>
         </tr>
     </thead>
     <tbody>
@@ -34,6 +37,11 @@
             <td class="center">
               <% groups.$group.status %>
             </td>
+          <% IF session.logged_in_user == 'schmid' %>
+            <td align="center">
+                <img class="delete" src="/images/delete.png" data-configtype="group" data-deleteconfigfile="<% groups.$group.configfile %>">
+            </td>
+          <% END %>
         </tr>
       <% END %>
     </tbody>

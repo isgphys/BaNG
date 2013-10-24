@@ -98,14 +98,15 @@ sub write_host_config {
 }
 
 sub delete_host_config {
-    my ($configfile) = @_;
-    my $DelConfigFile = "$serverconfig{path_hostconfig}/$configfile";
+    my ($configtype, $configfile) = @_;
+    my $path_config = "path_" . $configtype . "config";
+    my $DelConfigFile = "$serverconfig{$path_config}/$configfile";
 
     if (-f $DelConfigFile) {
         unlink("$DelConfigFile");
         return (0, "Configfile $DelConfigFile deleted successfully");
     } else {
-        return (1, "$DelConfigFile does not exists")
+        return (1, "$DelConfigFile does not exists");
     }
 }
 

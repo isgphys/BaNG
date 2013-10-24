@@ -105,14 +105,14 @@ post '/new' => require_role isg => sub {
 
 };
 
-post '/delete/:file' => require_role isg => sub {
+post '/delete/:configtype/:file' => require_role isg => sub {
     get_serverconfig();
+    my $configtype = param('configtype');
     my $file  = param('file');
     my $deletedby = session('logged_in_user');
 
-    my ($return_code, $return_msg) = delete_host_config("$file");
+    my ($return_code, $return_msg) = delete_host_config($configtype,$file);
     warning "$return_msg by $deletedby!";
-
 };
 
 1;
