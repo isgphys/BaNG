@@ -1,22 +1,22 @@
-<H3>Add new Host for Backup</H3>
+<H3>Add new config</H3>
 <% If errmsg %>
 <div class="msg_error">
     <% errmsg %>
 </div>
 <% END %>
 <div id="newconfig">
-    <form action="/config/new" method=post>
+    <form action="/config/new/<% configtype %>" method=post>
         <fieldset>
-            <Legend>Create Config</legend>
-            <div>
+            <legend>Create <% configtype %> Config</legend>
+            <div class="hostview">
                 <label>Hostname:</label>
                 <input type="text" name="hostname" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$" autofocus>
             </div>
             <div>
                 <label>Backup-Group:</label>
                 <input type="text" name="newgroup" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$">
-                or
-                <select name="bkpgroup">
+                <span class="hostview">or</span>
+                <select name="bkpgroup" class="hostview">
                   <% FOREACH group IN groups.keys.sort %>
                   <option value="<% group %>"><% group %></option>
                   <% END %>
@@ -31,5 +31,9 @@
 <script>
     $(document).ready(function(){
         $(".msg_error").fadeOut(4000);
+
+        if ( $("legend:contains('group')").length > 0 ) {
+            $('.hostview').remove();
+        };
     });
 </script>

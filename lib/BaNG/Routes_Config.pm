@@ -64,13 +64,14 @@ get '/allservers' => require_role isg => sub {
     };
 };
 
-get '/new/?:errmsg?' => require_role isg => sub {
+get '/new/:configtype/?:errmsg?' => require_role isg => sub {
     get_serverconfig();
     get_group_config("*");
-
+    my $configtype = param('configtype');
     my $errmsg = "";
+
     if (param('errmsg')) {
-        $errmsg = "You try to create a still existing configfile!" if (param('errmsg') eq "-1");
+        $errmsg = "You try to create a still existing configfile!" if (param('errmsg') eq "-3");
         $errmsg = "No hostname defined!" if (param('errmsg') eq "-2");
     }
 
@@ -79,28 +80,34 @@ get '/new/?:errmsg?' => require_role isg => sub {
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         groups       => \%groups,
+        configtype   => $configtype,
         errmsg       => $errmsg,
     };
 };
 
-post '/new' => require_role isg => sub {
+post '/new/:configtype' => require_role isg => sub {
     get_serverconfig();
-    my $hostname  = param('hostname') || "";
-    my $bkpgroup  = param('newgroup') ? param('newgroup') : param('bkpgroup');
-    my $createdby = session('logged_in_user');
-    my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
+    my $hostname   = param('hostname') || "";
+    my $bkpgroup   = param('newgroup') ? param('newgroup') : param('bkpgroup');
+    my $configtype = param('configtype');
+    my $createdby  = session('logged_in_user');
+    my $timestamp  = strftime("%Y/%m/%d %H:%M:%S", localtime);
 
     my $settings;
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
-    my ($return_code, $return_msg) = write_host_config("$hostname", "$bkpgroup", $settings);
+    my ($return_code, $return_msg) = write_host_config($configtype, "$hostname", "$bkpgroup", $settings);
 
     if ( $return_code eq "1" ) {
         info "Configfile $return_msg created by $createdby";
-        redirect "/host/$hostname";
+        if ( $configtype eq "host" ) {
+            redirect "/host/$hostname";
+        } elsif ( $configtype eq "group") {
+            redirect "/config/allgroups";
+        }
      } else {
         warning "$return_msg";
-        redirect "/config/new/-$return_code";
+        redirect "/config/new/$configtype/-$return_code";
      }
 
 };
