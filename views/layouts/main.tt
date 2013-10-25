@@ -81,27 +81,29 @@
                     window.location = $(this).data('href');
                 });
 
-                $('[data-deleteconfigfile]').click(function(){
+                $('[data-deleteconfigfile]').click(function() {
                     var deleteFile = $(this).data('deleteconfigfile');
                     var configType = $(this).data('configtype');
                     var elementCount = $(this).parents('tbody').children().length;
-                    if ( confirm('Do you really want delete ' + deleteFile +'\n(' + configType + '-config)?') ) {
+                    var that = $(this);
+                    if ( confirm('Do you really want delete ' + deleteFile + '\n(' + configType + '-config)?') ) {
                         $.post('/config/delete/' + configType + '/' + deleteFile, function(data) {
-                            alert(deleteFile + ' has been deleted!');
-                        });
-                        if ( $(this).parent().parent('tr').next('tr').find('.comment').length == 1 ) {
-                            $(this).parent().parent('tr').next('tr').find('.comment').parent().remove();
+                            alert( data + " " + deleteFile + ' has been deleted!');
+
+                            if ( that.parent().parent('tr').next('tr').find('.comment').length == 1 ) {
+                                that.parent().parent('tr').next('tr').find('.comment').parent().remove();
+                                elementCount --;
+                            };
+
+                            that.parent().parent('tr').remove();
                             elementCount --;
-                        };
-                        $(this).parent().parent('tr').remove();
-                        elementCount --;
 
-                        if ( elementCount == 0 ) {
-                            window.location = "/config/allhosts";
-                        }
+                            if ( elementCount == 0 ) {
+                                window.location = "/config/allhosts";
+                            };
 
-
-                        updateFilter();
+                            updateFilter();
+                        });
                     };
                 });
             }
