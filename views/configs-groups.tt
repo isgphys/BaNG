@@ -39,7 +39,7 @@
             </td>
           <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
             <td align="center">
-                <img class="delete" src="/images/delete.png" data-configtype="group" data-deleteconfigfile="<% groups.$group.configfile %>">
+                <img class="delete pointer" src="/images/delete.png" data-configtype="group" data-deleteconfigfile="<% groups.$group.configfile %>">
             </td>
           <% END %>
         </tr>
