@@ -45,7 +45,7 @@
                   <% END %>
                 </td>
                 <td>
-                  <% FILTER html_line_break %><% serverconfig.HELP.$config %><% END %>
+                  <% serverconfig.HELP.$config FILTER html_line_break %>
                 </td>
             </tr>
           <% END %>
@@ -75,7 +75,7 @@
                   <% END %>
                 </td>
                 <td>
-                  <% FILTER html_line_break %><% hostdefaults.HELP.$config %><% END %>
+                  <% hostdefaults.HELP.$config FILTER html_line_break %>
                 </td>
             </tr>
           <% END %>

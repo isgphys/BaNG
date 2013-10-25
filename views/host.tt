@@ -47,9 +47,9 @@
                     </tr>
                   <%- IF hosts.$hostname.hostconfig.COMMENT %>
                     <tr>
-                      <% FILTER html_line_break %>
-                        <td colspan="2" class="comment"><% hosts.$hostname.hostconfig.COMMENT %></td>
-                      <% END %>
+                      <td colspan="2" class="comment">
+                          <% hosts.$hostname.hostconfig.COMMENT FILTER html_line_break %>
+                      </td>
                     </tr>
                   <%- END %>
                 <%- END %>

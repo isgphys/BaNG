@@ -32,7 +32,7 @@
                     <% FOREACH hostconf IN hosts.$hostname.hostconfig.keys.sort %>
                         <tr <% IF hosts.$hostname.confighelper.$hostconf %>class="<% hosts.$hostname.confighelper.$hostconf %>Config"<% END %>>
                         <td title="<% hosts.$hostname.hostconfig.HELP.$hostconf %>"><% hostconf %></td>
-                        <td><% FILTER html_line_break %><% hosts.$hostname.hostconfig.$hostconf %><% END %></td>
+                        <td><% hosts.$hostname.hostconfig.$hostconf FILTER html_line_break %></td>
                       </tr>
                     <% END %>
                   </table>
