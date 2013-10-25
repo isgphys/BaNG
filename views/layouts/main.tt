@@ -88,6 +88,7 @@
                         $.post('/config/delete/' + configType + '/' + deleteFile, function(data) {
                             alert(deleteFile + ' has been deleted!');
                         });
+                        $(this).parent().parent('tr').next('tr').find('.comment').parent().remove();
                         $(this).parent().parent('tr').remove();
                         updateFilter();
                     };

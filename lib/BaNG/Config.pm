@@ -83,6 +83,8 @@ sub get_host_config_defaults {
 
 sub write_host_config {
     my ($configtype, $host, $group, $settings) = @_;
+    chomp($host);
+    chomp($group);
     my $path_config = "path_" . $configtype . "config";
 
     $host = ( $configtype eq "group" ) ? "0" : $host;
