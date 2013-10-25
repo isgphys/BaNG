@@ -30,42 +30,58 @@
             </tr>
         </thead>
         <tbody>
-            <%- IF hosts.size %>
-                <%- FOREACH hostname IN hosts.keys.sort %>
-                    <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-                        <td><a href="/config/allgroups"><% hosts.$hostname.group %></a></td>
-                        <td><% hosts.$hostname.configfile %></td>
-                        <td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
-                        <td <%- IF hosts.$hostname.hostconfig.BKP_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td <%- IF hosts.$hostname.hostconfig.WIPE_ENABLED %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center hook"<%- ELSE %> class="center notallow"<%- END %>></td>
-                        <td class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
-                        <td class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
-                        <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.daily.size   || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></a></td>
-                        <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.weekly.size  || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></a></td>
-                        <td class="center"><a href="/restore"><%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></a></td>
-                        <td class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
-                      <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
-                        <td align="center">
-                            <img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>">
-                        </td>
-                      <% END %>
-                    </tr>
-                  <%- IF hosts.$hostname.hostconfig.COMMENT %>
-                    <tr>
-                      <td colspan="2" class="comment">
-                          <% hosts.$hostname.hostconfig.COMMENT FILTER html_line_break %>
-                      </td>
-                    </tr>
-                  <%- END %>
-                <%- END %>
-            <%- ELSE %>
-                <tr>
-                    <td>N/A</td>
-                </tr>
+        <%- IF hosts.size %>
+          <%- FOREACH hostname IN hosts.keys.sort %>
+            <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
+                <td><a href="/config/allgroups"><% hosts.$hostname.group %></a></td>
+                <td><% hosts.$hostname.configfile %></td>
+                <td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
+                <td data-toggleoption="BKP_ENABLED"
+                    <%- IF hosts.$hostname.hostconfig.BKP_ENABLED %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="WIPE_ENABLED"
+                    <%- IF hosts.$hostname.hostconfig.WIPE_ENABLED %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="BKP_BULK_ALLOW"
+                    <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="WIPE_BULK_ALLOW"
+                    <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="BKP_THREAD_SUBFOLDERS"
+                    <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
+                <td class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
+                <td class="center"><a href="/restore">
+                    <%- backupstack.${hosts.$hostname.group}.daily.size   || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_DAILY %></a>
+                </td>
+                <td class="center"><a href="/restore">
+                    <%- backupstack.${hosts.$hostname.group}.weekly.size  || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_WEEKLY %></a>
+                </td>
+                <td class="center"><a href="/restore">
+                    <%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></a>
+                </td>
+                <td class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
+              <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
+                <td align="center">
+                    <img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>">
+                </td>
+              <% END %>
+            </tr>
+            <%- IF hosts.$hostname.hostconfig.COMMENT %>
+            <tr>
+                <td colspan="2" class="comment">
+                    <% hosts.$hostname.hostconfig.COMMENT FILTER html_line_break %>
+                </td>
+            </tr>
             <%- END %>
+          <%- END %>
+        <%- ELSE %>
+            <tr>
+                <td>N/A</td>
+            </tr>
+        <%- END %>
         </tbody>
     </table>
 </div>

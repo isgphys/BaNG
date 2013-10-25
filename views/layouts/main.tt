@@ -106,6 +106,23 @@
                         });
                     };
                 });
+
+                $('[data-toggleoption]').click(function() {
+                    var toggleOption = $(this).data('toggleoption');
+                    var toggleNewValue;
+
+                    if ( $(this).hasClass("notallow") ) {
+                        $(this).addClass("hook");
+                        $(this).removeClass("notallow");
+                        toggleNewValue = 1;
+                    } else {
+                        $(this).addClass("notallow");
+                        $(this).removeClass("hook");
+                        toggleNewValue = 0;
+                    };
+                    alert(toggleOption + ' ' +toggleNewValue);
+                });
+
             }
 
             function initializeAll() {
