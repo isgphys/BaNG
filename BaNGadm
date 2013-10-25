@@ -54,11 +54,19 @@ if ( $showgroups ) {
 if ( $add_arg ) {
     my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
     my $createdby = "root with CLI";
+    my $configtype;
+
+    if ( $host_arg && $group_arg ) {
+        $configtype = "host";
+    } elsif ( ! $host_arg && $group_arg ) {
+        $host_arg   = "0";
+        $configtype = "group";
+    };
 
     my $settings;
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
-    my ($return_code, $return_msg) = write_host_config("$host_arg", "$group_arg", $settings);
+    my ($return_code, $return_msg) = write_host_config($configtype, "$host_arg", "$group_arg", $settings);
 
     if ( $return_code eq "1" ) {
         print "Configfile $return_msg created\n";
@@ -70,14 +78,18 @@ if ( $add_arg ) {
 }
 
 if ( $delete_arg ) {
+    my $configtype;
     my $file;
-    if ( $host_arg && $group_arg ) {
-        $file = "$host_arg" . "_" . "$group_arg.yaml";
-    } else {
-        $file = $file_arg;
-    }
 
-    my ($return_code, $return_msg) = delete_host_config("$file");
+    if ( $host_arg && $group_arg ) {
+        $configtype = "host";
+        $file = "$host_arg" . "_" . "$group_arg.yaml";
+    } elsif ( ! $host_arg && $group_arg ) {
+        $configtype = "group";
+        $file = "$group_arg.yaml";
+    };
+
+    my ($return_code, $return_msg) = delete_host_config($configtype, "$file");
     print "$return_msg\n";
 
     exit 0;
@@ -94,14 +106,13 @@ sub parse_command_options {
         "d|debug"     => \$debug_arg,
         "add"         => \$add_arg,
         "delete"      => \$delete_arg,
-        "file=s"      => \$file_arg,
         "g|group=s"   => \$group_arg,
         "h|host=s"    => \$host_arg,
         "crontab"     => \$crontabonly,
         "showgroups"  => \$showgroups,
     ) or usage("Invalid commmand line options.");
-    usage("Do not use together!")            if ( $crontabonly && $showgroups );
-    usage("You must provide some arguments") if ( $add_arg && ( ! $host_arg || ! $group_arg ) );
+    usage("Do not use together!") if ( $crontabonly && $showgroups );
+    usage("Check the arguments!") unless ( ($add_arg || $delete_arg ) && (( $host_arg && $group_arg ) || $group_arg  ) || ( $crontabonly || $showgroups ) );
 
     $debug_arg = 1 if $dryrun_arg;
 
@@ -133,14 +144,14 @@ sub usage {
         Usage Examples:
 
         $command --add -h <hostname> -g <group>     # create a new host config
-
+        $command --add -g <group>                   # create a new group config
 
         $command --delete -h <hostname> -g <group>  # delete a existing host config
-        $command --delete --file <filename.yaml>
+        $command --delete -g <group>                # delete a existing group config
 
-        $command --crontab                      # show generated crontab
-        $command --showgroups                   # show available groups
-        $command --help                         # show this help message
+        $command --crontab                          # show generated crontab
+        $command --showgroups                       # show available groups
+        $command --help                             # show this help message
 
         Optional Arguments:
 
