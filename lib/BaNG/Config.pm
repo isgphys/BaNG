@@ -20,9 +20,10 @@ our @EXPORT = qw(
     get_serverconfig
     get_host_config_defaults
     get_host_config
-    write_host_config
-    delete_host_config
     get_group_config
+    write_config
+    update_config
+    delete_config
     get_cronjob_config
     generated_crontab
 );
@@ -81,8 +82,8 @@ sub get_host_config_defaults {
     return $settings;
 }
 
-sub write_host_config {
-    my ($configtype, $host, $group, $settings) = @_;
+sub write_config {
+    my ($configtype, $modtype, $host, $group, $settings) = @_;
     chomp($host);
     chomp($group);
     my $path_config = "path_" . $configtype . "config";
@@ -98,7 +99,7 @@ sub write_host_config {
         };
         my $ConfigFile = "$serverconfig{$path_config}/$configName";
 
-        if (-f $ConfigFile) {
+        if (-f $ConfigFile && $modtype eq "add") {
             return (3, "You try to override $ConfigFile!");
         } else {
             DumpFile($ConfigFile, $settings);
@@ -109,7 +110,22 @@ sub write_host_config {
     }
 }
 
-sub delete_host_config {
+sub update_config {
+    my ($configtype, $host, $group, $key_arg, $val_arg) = @_;
+    my $settings;
+    my $configFile = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
+
+    if ( _sanityfilecheck($configFile) ) {
+        $settings = LoadFile( $configFile );
+        $settings->{$key_arg} = "$val_arg";
+    }
+
+    my ($return_code, $return_msg) = write_config($configtype,"update", $host, $group, $settings);
+
+    return ($return_code, $return_msg);
+}
+
+sub delete_config {
     my ($configtype, $configfile) = @_;
     my $path_config = "path_" . $configtype . "config";
     my $DelConfigFile = "$serverconfig{$path_config}/$configfile";

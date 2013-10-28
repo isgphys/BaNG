@@ -66,7 +66,7 @@ if ( $add_arg ) {
     my $settings;
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
-    my ($return_code, $return_msg) = write_host_config($configtype, "$host_arg", "$group_arg", $settings);
+    my ($return_code, $return_msg) = write_config($configtype, "add", "$host_arg", "$group_arg", $settings);
 
     if ( $return_code eq "1" ) {
         print "Configfile $return_msg created\n";
@@ -89,7 +89,7 @@ if ( $delete_arg ) {
         $file = "$group_arg.yaml";
     };
 
-    my ($return_code, $return_msg) = delete_host_config($configtype, "$file");
+    my ($return_code, $return_msg) = delete_config($configtype, "$file");
     print "$return_msg\n";
 
     exit 0;

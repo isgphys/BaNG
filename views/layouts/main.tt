@@ -110,6 +110,9 @@
                 $('[data-toggleoption]').click(function() {
                     var toggleOption = $(this).data('toggleoption');
                     var toggleNewValue;
+                    var host_arg = $('#hostname').html();
+                    var group_arg = $(this).data('togglegroup');
+                    var configType = "host";
 
                     if ( $(this).hasClass("notallow") ) {
                         $(this).addClass("hook");
@@ -120,7 +123,14 @@
                         $(this).removeClass("hook");
                         toggleNewValue = 0;
                     };
-                    alert(toggleOption + ' ' +toggleNewValue);
+                    if ( toggleOption == "BKP_ENABLED" ) {
+                        $(this).parent('tr').toggleClass( "active" );
+                    };
+                    $.post('/config/modify/' + configType , {
+                        host_arg:  host_arg,
+                        group_arg: group_arg,
+                        key_arg: toggleOption,
+                        val_arg: toggleNewValue });
                 });
 
             }

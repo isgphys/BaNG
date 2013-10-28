@@ -96,7 +96,7 @@ post '/new/:configtype' => require_role isg => sub {
     my $settings;
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
-    my ($return_code, $return_msg) = write_host_config($configtype, "$hostname", "$bkpgroup", $settings);
+    my ($return_code, $return_msg) = write_config($configtype, "add", "$hostname", "$bkpgroup", $settings);
 
     if ( $return_code eq "1" ) {
         info "Configfile $return_msg created by $createdby";
@@ -112,13 +112,26 @@ post '/new/:configtype' => require_role isg => sub {
 
 };
 
+post '/modify/:configtype' => require_role isg => sub {
+    get_serverconfig();
+    my $configtype = param('configtype');
+    my $host_arg  = param('host_arg');
+    my $group_arg  = param('group_arg');
+    my $key_arg  = param('key_arg');
+    my $val_arg  = param('val_arg');
+    my $updatedby = session('logged_in_user');
+
+    my ($return_code, $return_msg) = update_config($configtype, $host_arg, $group_arg, $key_arg, $val_arg);
+    warning "$return_msg updated by $updatedby!";
+};
+
 post '/delete/:configtype/:file' => require_role isg => sub {
     get_serverconfig();
     my $configtype = param('configtype');
     my $file  = param('file');
     my $deletedby = session('logged_in_user');
 
-    my ($return_code, $return_msg) = delete_host_config($configtype,$file);
+    my ($return_code, $return_msg) = delete_config($configtype,$file);
     warning "$return_msg by $deletedby!";
 };
 
