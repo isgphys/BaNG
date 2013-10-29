@@ -20,7 +20,7 @@
               <a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a>
             </td>
             <td class="center">
-              <% hosts.$hostname.group %>
+              <a href="/group/<%hosts.$hostname.group %>"><% hosts.$hostname.group %></a>
             </td>
             <td class="center">
               <% hosts.$hostname.hostconfig.BKP_TARGET_HOST %>

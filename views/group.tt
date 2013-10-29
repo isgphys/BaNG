@@ -1,0 +1,70 @@
+<h2>Group Info</h2>
+<h3 id="groupname"><% group %></h3>
+<div>
+    <table class="default-table border">
+        <thead>
+            <tr>
+                <th colspan="2" align="left"></th>
+                <th colspan="2" align="center">Enabled</th>
+                <th colspan="2" class="center">Bulk allow</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">SubFolder</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">Forks</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">Mode</th>
+              <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
+                <th rowspan="2" class="center">Delete</th>
+              <% END %>
+            </tr>
+            <tr>
+                <th class="left">Configfile</th>
+                <th>Server</th>
+                <th width="30">Bkp</th>
+                <th width="30">Wipe</th>
+                <th width="30">Bkp</th>
+                <th width="30">Wipe</th>
+            </tr>
+        </thead>
+        <tbody>
+        <%- IF groups.size %>
+          <%- FOREACH group IN groups.keys.sort %>
+            <tr <% IF groups.$group.css_class %> class="<% groups.$group.css_class %>"<% END %>>
+                <td><% groups.$group.configfile %></td>
+                <td><% groups.$group.groupconfig.BKP_TARGET_HOST %></td>
+                <td data-toggleoption="BKP_ENABLED" data-togglegroup='<% group %>' data-configtype="group"
+                    <%- IF groups.$group.groupconfig.BKP_ENABLED %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="WIPE_ENABLED" data-togglegroup='<% group %>' data-configtype="group"
+                    <%- IF groups.$group.groupconfig.WIPE_ENABLED %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="BKP_BULK_ALLOW" data-togglegroup='<% group %>' data-configtype="group"
+                    <%- IF groups.$group.groupconfig.BKP_BULK_ALLOW %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="WIPE_BULK_ALLOW" data-togglegroup='<% group %>' data-configtype="group"
+                    <%- IF groups.$group.groupconfig.WIPE_BULK_ALLOW %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td data-toggleoption="BKP_THREAD_SUBFOLDERS" data-togglegroup='<% group %>' data-configtype="group"
+                    <%- IF groups.$group.groupconfig.BKP_THREAD_SUBFOLDERS %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
+                </td>
+                <td class="center"><%- groups.$group.groupconfig.BKP_THREADS_DEFAULT %></td>
+                <td class="center"><%- groups.$group.groupconfig.BKP_STORE_MODUS %></td>
+              <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
+                <td align="center">
+                    <img class="delete pointer" src="/images/delete.png" data-configtype="group" data-deleteconfigfile="<% groups.$group.configfile %>">
+                </td>
+              <% END %>
+            </tr>
+            <%- IF groups.$group.hostconfig.COMMENT %>
+            <tr>
+                <td colspan="2" class="comment">
+                    <% groups.$group.hostconfig.COMMENT FILTER html_line_break %>
+                </td>
+            </tr>
+            <%- END %>
+          <%- END %>
+        <%- ELSE %>
+            <tr>
+                <td>N/A</td>
+            </tr>
+        <%- END %>
+        </tbody>
+    </table>
+</div>
