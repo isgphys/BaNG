@@ -113,7 +113,16 @@ sub write_config {
 sub update_config {
     my ($configtype, $host, $group, $key_arg, $val_arg) = @_;
     my $settings;
-    my $configFile = "$serverconfig{path_hostconfig}/$host\_$group.yaml";
+    my $configName;
+    my $path_config = "path_" . $configtype . "config";
+
+    if ( $configtype eq "host" ) {
+        $configName = "$host" . "_" . $group . ".yaml";
+    } elsif ( $configtype eq 'group' ) {
+        $configName = "$group.yaml";
+    };
+
+    my $configFile = "$serverconfig{$path_config}/$configName";
 
     if ( _sanityfilecheck($configFile) ) {
         $settings = LoadFile( $configFile );

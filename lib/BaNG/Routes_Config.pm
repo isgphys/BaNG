@@ -115,7 +115,7 @@ post '/new/:configtype' => require_role isg => sub {
 post '/modify/:configtype' => require_role isg => sub {
     get_serverconfig();
     my $configtype = param('configtype');
-    my $host_arg  = param('host_arg');
+    my $host_arg  = param('host_arg') || "";
     my $group_arg  = param('group_arg');
     my $key_arg  = param('key_arg');
     my $val_arg  = param('val_arg');

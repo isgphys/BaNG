@@ -36,19 +36,19 @@
                 <td><a href="/config/allgroups"><% hosts.$hostname.group %></a></td>
                 <td><% hosts.$hostname.configfile %></td>
                 <td><% hosts.$hostname.hostconfig.BKP_TARGET_HOST %></td>
-                <td data-toggleoption="BKP_ENABLED" data-togglegroup='<% hosts.$hostname.group %>'
+                <td data-toggleoption="BKP_ENABLED" data-togglegroup='<% hosts.$hostname.group %>' data-configtype="host"
                     <%- IF hosts.$hostname.hostconfig.BKP_ENABLED %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
                 </td>
-                <td data-toggleoption="WIPE_ENABLED" data-togglegroup='<% hosts.$hostname.group %>'
+                <td data-toggleoption="WIPE_ENABLED" data-togglegroup='<% hosts.$hostname.group %>' data-configtype="host"
                     <%- IF hosts.$hostname.hostconfig.WIPE_ENABLED %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
                 </td>
-                <td data-toggleoption="BKP_BULK_ALLOW" data-togglegroup='<% hosts.$hostname.group %>'
+                <td data-toggleoption="BKP_BULK_ALLOW" data-togglegroup='<% hosts.$hostname.group %>' data-configtype="host"
                     <%- IF hosts.$hostname.hostconfig.BKP_BULK_ALLOW %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
                 </td>
-                <td data-toggleoption="WIPE_BULK_ALLOW" data-togglegroup='<% hosts.$hostname.group %>'
+                <td data-toggleoption="WIPE_BULK_ALLOW" data-togglegroup='<% hosts.$hostname.group %>' data-configtype="host"
                     <%- IF hosts.$hostname.hostconfig.WIPE_BULK_ALLOW %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
                 </td>
-                <td data-toggleoption="BKP_THREAD_SUBFOLDERS" data-togglegroup='<% hosts.$hostname.group %>'
+                <td data-toggleoption="BKP_THREAD_SUBFOLDERS" data-togglegroup='<% hosts.$hostname.group %>' data-configtype="host"
                     <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
                 </td>
                 <td class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>

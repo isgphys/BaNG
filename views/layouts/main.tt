@@ -99,7 +99,7 @@
                             elementCount --;
 
                             if ( elementCount == 0 ) {
-                                window.location = "/config/allhosts";
+                                window.location = "/config/all" + configType  + "s";
                             };
 
                             updateFilter();
@@ -112,7 +112,7 @@
                     var toggleNewValue;
                     var host_arg = $('#hostname').html();
                     var group_arg = $(this).data('togglegroup');
-                    var configType = "host";
+                    var configType = $(this).data('configtype');
 
                     if ( $(this).hasClass("notallow") ) {
                         $(this).addClass("hook");
