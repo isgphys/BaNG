@@ -237,6 +237,7 @@ sub thread_work {
             };
             finish_backupjob($bkpjob);
         }
+        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path)" );
         remove_lockfile( $taskid, $host, $group, $path );
     }
 
