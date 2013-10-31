@@ -5,5 +5,6 @@ etc
 sessions/*
 t/etc/bangstat_db.yaml
 TODO
+Flowchart.dia
 debug.pl
 /lib/Dancer*
