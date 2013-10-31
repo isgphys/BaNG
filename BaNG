@@ -32,11 +32,12 @@ my $group_arg;
 my $host_arg;
 my $prefix_arg;
 my $nthreads_arg;
+my $finallysnapshots;
 my $debug_arg;
 my $debuglevel_arg;
 my $dryrun_arg;
 my @queue;
-my @subfolder_hosts;
+my @finally_snapshots;
 
 #################################
 # Main
@@ -68,7 +69,7 @@ if ( !@queue ) {
 }
 
 start_threads();
-finish_backupjob($_) foreach @subfolder_hosts;
+finish_backupjob($_) foreach @finally_snapshots;
 
 exit 0;
 
@@ -124,7 +125,6 @@ sub queue_backup {
         foreach my $part (@src_part) {
             queue_remote_subfolders( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $part );
         }
-
         my $bkpjob = {
             taskid       => $taskid,
             jobid        => $jobid,
@@ -133,7 +133,7 @@ sub queue_backup {
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
         };
-        push( @subfolder_hosts, $bkpjob );
+        push( @finally_snapshots, $bkpjob );
 
     } else {
         # queue list of partitions as a whole
@@ -147,6 +147,7 @@ sub queue_backup {
             bkptimestamp => $bkptimestamp,
         };
         push( @queue, $bkpjob );
+        push( @finally_snapshots, $bkpjob ) if ( $finallysnapshots );
     }
 
     logit( $taskid, $host, $group, "End of queueing backup of host $host group $group" );
@@ -226,7 +227,7 @@ sub thread_work {
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
-        unless( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+        unless( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ( $finallysnapshots ) ) {
             my $bkpjob = {
                 taskid       => $taskid,
                 jobid        => $jobid,
@@ -237,6 +238,7 @@ sub thread_work {
             };
             finish_backupjob($bkpjob);
         }
+        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path)" );
         remove_lockfile( $taskid, $host, $group, $path );
     }
 
@@ -590,18 +592,19 @@ sub bkp_to_current_server {
 sub parse_command_options {
 
     GetOptions(
-        "help"        => sub { usage('') },
-        "v|version"   => sub { usage("Current version number: $version") },
-        "d|debug"     => \$debug_arg,
-        "n|dry-run"   => \$dryrun_arg,
-        "g|group=s"   => \$group_arg,
-        "h|host=s"    => \$host_arg,
-        "p|prefix=s"  => \$prefix_arg,
-        "t|threads=i" => \$nthreads_arg,
-        "w|wipe"      => \$wipe,
-        "force"       => \$force,
-        "missingonly" => \$missingonly,
-        "hobbit"      => \$hobbitonly,
+        "help"             => sub { usage('') },
+        "v|version"        => sub { usage("Current version number: $version") },
+        "d|debug"          => \$debug_arg,
+        "n|dry-run"        => \$dryrun_arg,
+        "g|group=s"        => \$group_arg,
+        "h|host=s"         => \$host_arg,
+        "p|prefix=s"       => \$prefix_arg,
+        "t|threads=i"      => \$nthreads_arg,
+        "w|wipe"           => \$wipe,
+        "finallysnapshots" => \$finallysnapshots,
+        "force"            => \$force,
+        "missingonly"      => \$missingonly,
+        "hobbit"           => \$hobbitonly,
     ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
@@ -643,14 +646,15 @@ sub usage {
 
         Optional Arguments:
 
-        -n              # dry-run without making changes
-        -t <nr>         # number of threads, default: 1
-        -p <path>       # override path to folder containing etc/
-        -w              # wipe the backup
-        -w --force      # forcing wipe the backup (override auto_wipe_limit)
-        --missingonly   # backup only hosts that were not backed up recently
-        --hobbit        # send only hobbit report
-        -d              # show debugging messages
+        -n                 # dry-run without making changes
+        -t <nr>            # number of threads, default: 1
+        -p <path>          # override path to folder containing etc/
+        -w                 # wipe the backup
+        -w --force         # forcing wipe the backup (override auto_wipe_limit)
+        --finallysnapshots # make snapshots after the hole backup stuff
+        --missingonly      # backup only hosts that were not backed up recently
+        --hobbit           # send only hobbit report
+        -d                 # show debugging messages
 
 EOF
     exit 0;
