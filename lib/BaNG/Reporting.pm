@@ -89,7 +89,7 @@ sub bangstat_recentbackups {
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
+        SELECT *
         FROM recent_backups
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
         AND BkpFromHost like '$host'
@@ -197,7 +197,7 @@ sub bangstat_recentbackups_all {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
+        SELECT *
         FROM recent_backups
         WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
@@ -247,7 +247,7 @@ sub bangstat_recentbackups_last {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *, TIMESTAMPDIFF(Minute, Start , Stop) as Runtime
+        SELECT *
         FROM recent_backups
         WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'

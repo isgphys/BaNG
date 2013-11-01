@@ -1,0 +1,29 @@
+<H2> Mööp </H2>
+<div>
+    <table class="default-table border">
+        <thead>
+            <tr>
+                <th>Host</th>
+                <th>Group</th>
+                <th>Starttime</th>
+                <th>Runtime</th>
+                <th>NumOfFiles</th>
+                <th>NumOfFilesTrans</th>
+                <th>DiffPreDay</th>
+            </tr>
+        </thead>
+        <tbody>
+            <%- FOREACH JobID IN diffPreDay.keys.nsort.reverse %>
+            <tr>
+                <td><% diffPreDay.$JobID.BkpFromHost %></td>
+                <td><% diffPreDay.$JobID.BkpGroup %></td>
+                <td><% diffPreDay.$JobID.Start %></td>
+                <td><% diffPreDay.$JobID.Runtime %></td>
+                <td><% diffPreDay.$JobID.NumOfFiles %></td>
+                <td><% diffPreDay.$JobID.NumOfFilesTrans %></td>
+                <td><% diffPreDay.$JobID.DiffPreDay %></td>
+            </tr>
+            <%- END %>
+        </tbody>
+  </table>
+  </div>
