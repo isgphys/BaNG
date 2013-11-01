@@ -59,14 +59,13 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
 -------
 
     CREATE OR REPLACE VIEW recent_backups AS
-    SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, BkpFromHost,
+    SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, Start , Stop) as Runtime, BkpFromHost,
     IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),BkpFromPath) as BkpFromPath,
     BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
     GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, JobStatus
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-    GROUP BY JobID, LastBkp, bkptopath
-    ORDER BY LastBkp;
+    GROUP BY JobID;
 
     CREATE OR REPLACE VIEW statistic_job_sum AS
     SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, SUM(TIMESTAMPDIFF(Second, Start , Stop)) as Runtime,
@@ -76,8 +75,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     SUM(TotFileSizeTrans) as TotFileSizeTrans
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-    GROUP BY JobID, LastBkp, bkptopath
-    ORDER BY LastBkp;
+    GROUP BY JobID;
 
     CREATE OR REPLACE VIEW statistic_job_thread AS
     SELECT TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start , Stop) as Runtime,
