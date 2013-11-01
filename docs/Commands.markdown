@@ -21,6 +21,7 @@
 
 Optional argument:
 
+    --finallysnapshots                    # make snapshots after the hole backup stuff
     --missingonly                         # backup only hosts without recent backup (e.g. machines that were offline during the night)
 
 ### Wipe old backups
@@ -43,12 +44,13 @@ Optional argument:
 -----------------------
 
     BaNGadm --add -h <host> -g <group>          # create a new host config
+    BaNGadm --add -g <group>                    # create a new group config
 
     BaNGadm --delete -h <hostname> -g <group>   # delete a existing host config
-    BaNGadm --delete --file <filename.yaml>
+    BaNGadm --delete -g <group>                 # delete a existing group config
 
-    BaNGadm --showgroups                  # Show all available backup groups
-    BaNGadm --crontab                     # Show generated crontab entry
+    BaNGadm --showgroups                        # Show all available backup groups
+    BaNGadm --crontab                           # Show generated crontab entry
 
 
  BaNG-Web : web frontend
