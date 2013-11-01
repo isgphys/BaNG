@@ -65,7 +65,8 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, JobStatus
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-    GROUP BY JobID, LastBkp, bkptopath order by LastBkp;
+    GROUP BY JobID, LastBkp, bkptopath
+    ORDER BY LastBkp;
 
     CREATE OR REPLACE VIEW statistic_job_sum AS
     SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, SUM(TIMESTAMPDIFF(Second, Start , Stop)) as Runtime,
