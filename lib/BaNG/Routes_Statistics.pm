@@ -59,6 +59,15 @@ get '/variations' => require_login sub {
     };
 };
 
+get '/diffpreday' => require_login sub {
+    template 'statistics-diffpreday', {
+        section      => 'statistics',
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        diffPreDay   => statistics_diffpreday("phd-san-gw2","dphys-groupdata",10),
+    };
+};
+
 get '/barchart/:name/:taskid.json' => require_login sub {
     my $chartname = param('name');
     my $json;

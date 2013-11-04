@@ -18,6 +18,7 @@ our @EXPORT = qw(
     statistics_hosts_shares
     statistics_top_trans
     statistics_top_trans_details
+    statistics_diffpreday
     statistics_groupshare_variations
     statistics_schedule
 );
@@ -25,6 +26,7 @@ our @EXPORT = qw(
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
 my $lastXdays_default    = 90;  # retrieve info of last X days from database
 my $lastXdays_variations = 30;  # find largest variation of the last X days
+my $lastXdays_diffperday = 5;   # show TotOfFiles difference to previous day from the last X days
 my @variation_intervals  = (2, 5, 10, 30); # largest variations for these intervals of days
 my $topX_variations      = 5;   # return the top X shares with largest variations
 my $BackupStartHour      = 18;  # backups started after X o'clock belong to next day
@@ -232,6 +234,43 @@ sub statistics_hosts_shares {
     return \%hosts_shares;
 }
 
+sub statistics_diffpreday {
+    my ($host, $group, $lastXdays) = @_;
+    $host ||= "%";
+    $group ||= "%";
+    $lastXdays ||= $lastXdays_diffperday;
+
+    get_serverconfig();
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT * , a.NumOfFiles - a.NumOfFilesTrans -
+            (SELECT b.NumOfFiles
+            FROM statistic_job_sum b
+            WHERE b.BkpGroup = a.BkpGroup
+                AND b.BkpFromHost = a.BkpFromHost
+                AND b.TaskID < a.TaskID
+                AND b.Runtime > 0
+            ORDER BY b.BkpFromHost, b.TaskID DESC
+            LIMIT 1
+            ) as DiffPreDay
+        FROM statistic_job_sum a
+        WHERE a.bkpgroup like '$group'
+            AND a.BkpFromHost like '$host'
+            AND a.Runtime > 0
+            AND a.Start > date_sub(NOW(), INTERVAL $lastXdays DAY)
+        ORDER BY a.BkpFromHost, a.TaskID DESC;
+        ");
+    $sth->execute();
+
+    my $hash_ref = $sth->fetchall_hashref('JobID');
+
+    $sth->finish();
+
+    return $hash_ref;
+}
+
 sub statistics_top_trans {
     my ($transtype) = @_;
     my $sqltranstype;
@@ -269,7 +308,7 @@ sub statistics_top_trans {
         $sth->finish();
 
         return \@top_size;
-} 
+}
 
 sub statistics_top_trans_details {
     my ($transtype, $taskid) = @_;
