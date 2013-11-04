@@ -227,6 +227,7 @@ sub thread_work {
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
+        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path)" );
         unless( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ( $finallysnapshots ) ) {
             my $bkpjob = {
                 taskid       => $taskid,
@@ -238,7 +239,6 @@ sub thread_work {
             };
             finish_backupjob($bkpjob);
         }
-        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path)" );
         remove_lockfile( $taskid, $host, $group, $path );
     }
 
