@@ -78,6 +78,7 @@ exit 0;
 #
 sub queue_backup {
     my ($taskid, $host, $group) = @_;
+    my $jobid;
 
     logit( $taskid, $host, $group, "Queueing backup for host $host group $group" );
 
@@ -92,7 +93,6 @@ sub queue_backup {
 
     # check if last backup exists
     my $lastbkp = check_last_bkp($taskid, $host, $group);
-    my $jobid = create_timeid($host, $group, $taskid);
 
     # if missingonly, don't queue host if we had a backup within the last 20 hours
     if ( $missingonly && $lastbkp =~ qr{ (?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d) }x ) {
@@ -109,6 +109,7 @@ sub queue_backup {
     if ( !$conn_status ) {
         my $startstamp = time();
         my $endstamp = $startstamp;
+        $jobid = create_timeid($host, $group, $taskid);
         logit( $taskid, $host, $group, "Error: host $host is offline" );
         db_report($taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '');
         return 1;
@@ -123,6 +124,7 @@ sub queue_backup {
     # optionally queue each subfolder of the partitions
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
         foreach my $part (@src_part) {
+            $jobid = create_timeid($host, $group, $taskid);
             queue_remote_subfolders( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $part );
         }
         my $bkpjob = {
@@ -137,6 +139,7 @@ sub queue_backup {
 
     } else {
         # queue list of partitions as a whole
+       $jobid = create_timeid($host, $group, $taskid);
         my $bkpjob = {
             taskid       => $taskid,
             jobid        => $jobid,
