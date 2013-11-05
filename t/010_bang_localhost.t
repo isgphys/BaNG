@@ -34,7 +34,6 @@ like(   $output,    qr|Write lastBkpFile:|                                      
 like(   $output,    qr|Set jobstatus to 1 for host localhost group $group|       , "Set bangstat jobstatus for localhost $group"        );
 like(   $output,    qr|Bangstat report sent|                                     , "Bangstat report sent for localhost $group"          );
 like(   $output,    qr|Hobbit report sent|                                       , "Hobbit report sent for localhost $group"            );
-like(   $output,    qr|Mail report sent|                                         , "Mail report sent for localhost $group"              );
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 like(   $output,    qr|Removed lockfile|                                         , "Removed lockfile for localhost $group"              );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
