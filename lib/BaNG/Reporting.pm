@@ -375,45 +375,46 @@ sub mail_report {
 
     my $status = $hosts{"$host-$group"}->{errormsg} ? 'warnings' : 'success';
 
-    my $RecentBackups = {
-        RecentBackups => \%RecentBackups,
-        Group         => "$host-$group",
-        Errormsg      => $hosts{"$host-$group"}->{errormsg},
-    };
+    unless ( $status eq 'success' ) {
+        my $RecentBackups = {
+            RecentBackups => \%RecentBackups,
+            Group         => "$host-$group",
+            Errormsg      => $hosts{"$host-$group"}->{errormsg},
+        };
 
-    my $tt = Template->new(
-        START_TAG    => '<%',
-        END_TAG      => '%>',
-        INCLUDE_PATH => "$prefix/views",
-    );
-
-    my $mail_msg = MIME::Lite->new(
-        From    => 'root@phys.ethz.ch',
-        To      => $serverconfig{report_to},
-        Type    => 'multipart/alternative',
-        Subject => "Backup report of ($host-$group): $status",
-    );
-
-    foreach my $mailtype (qw(plain html)) {
-        my $report;
-        $tt->process( "report-mail_$mailtype.tt", $RecentBackups, \$report )
-            or logit( $taskid, $host, $group, "ERROR generating mail report template: " . $tt->error() );
-
-        my $mail_att = MIME::Lite->new(
-            Type     => 'text',
-            Data     => $report,
-            Encoding => 'quoted-printable',
+        my $tt = Template->new(
+            START_TAG    => '<%',
+            END_TAG      => '%>',
+            INCLUDE_PATH => "$prefix/views",
         );
-        $mail_att->attr( 'content-type' => "text/$mailtype; charset=UTF-8" );
-        $mail_msg->attach($mail_att);
+
+        my $mail_msg = MIME::Lite->new(
+            From    => 'root@phys.ethz.ch',
+            To      => $serverconfig{report_to},
+            Type    => 'multipart/alternative',
+            Subject => "Backup report of ($host-$group): $status",
+        );
+
+        foreach my $mailtype (qw(plain html)) {
+            my $report;
+            $tt->process( "report-mail_$mailtype.tt", $RecentBackups, \$report )
+                or logit( $taskid, $host, $group, "ERROR generating mail report template: " . $tt->error() );
+
+            my $mail_att = MIME::Lite->new(
+                Type     => 'text',
+                Data     => $report,
+                Encoding => 'quoted-printable',
+            );
+            $mail_att->attr( 'content-type' => "text/$mailtype; charset=UTF-8" );
+            $mail_msg->attach($mail_att);
+        }
+
+        unless ( $serverconfig{dryrun} ) {
+            $mail_msg->send or logit( $taskid, $host, $group, "mail_report error" );
+        }
+
+        logit( $taskid, $host, $group, "Mail report sent." );
     }
-
-    unless ( $serverconfig{dryrun} ) {
-        $mail_msg->send or logit( $taskid, $host, $group, "mail_report error" );
-    }
-
-    logit( $taskid, $host, $group, "Mail report sent." );
-
     return 1;
 }
 
