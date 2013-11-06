@@ -74,7 +74,7 @@ sub bangstat_set_jobstatus {
 
     $SQL =~ s/;.*/;/sg;
     logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{debug} && $serverconfig{debuglevel} >= 2 );
-    logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group" );
+    logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group jobid $jobid" );
 
     return 1;
 }
@@ -493,6 +493,7 @@ sub logit {
         my $selection = qr{
             Queueing \s backup \s for |
             working \s on |
+            finisehd \s with |
             Backup \s successful |
             ERROR |
             Wipe \s host |

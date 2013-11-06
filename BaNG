@@ -127,16 +127,6 @@ sub queue_backup {
             $jobid = create_timeid($host, $group, $taskid);
             queue_remote_subfolders( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $part );
         }
-        my $bkpjob = {
-            taskid       => $taskid,
-            jobid        => $jobid,
-            host         => $host,
-            group        => $group,
-            lastbkp      => $lastbkp,
-            bkptimestamp => $bkptimestamp,
-        };
-        push( @finally_snapshots, $bkpjob );
-
     } else {
         # queue list of partitions as a whole
        $jobid = create_timeid($host, $group, $taskid);
@@ -183,6 +173,15 @@ sub queue_remote_subfolders {
         };
         push( @queue, $bkpjob );
     }
+    my $bkpjob = {
+        taskid       => $taskid,
+        jobid        => $jobid,
+        host         => $host,
+        group        => $group,
+        lastbkp      => $lastbkp,
+        bkptimestamp => $bkptimestamp,
+    };
+    push( @finally_snapshots, $bkpjob );
 
     return 1;
 }
