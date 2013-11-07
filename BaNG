@@ -123,13 +123,23 @@ sub queue_backup {
 
     # optionally queue each subfolder of the partitions
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+
+        my $dosnapshot = 0;
+        my $numPart = @src_part;
+
         foreach my $part (@src_part) {
             $jobid = create_timeid($host, $group, $taskid);
-            queue_remote_subfolders( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $part );
+
+            $numPart --;
+            if ( $numPart == 0 ) {
+                $dosnapshot = 1;
+            }
+
+            queue_remote_subfolders( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $part );
         }
     } else {
         # queue list of partitions as a whole
-       $jobid = create_timeid($host, $group, $taskid);
+        $jobid = create_timeid($host, $group, $taskid);
         my $bkpjob = {
             taskid       => $taskid,
             jobid        => $jobid,
@@ -138,6 +148,7 @@ sub queue_backup {
             path         => "@src_part",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
+            dosnapshot   => "1",
         };
         push( @queue, $bkpjob );
         push( @finally_snapshots, $bkpjob ) if ( $finallysnapshots );
@@ -149,7 +160,7 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ($taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $partition) = @_;
+    my ($taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition) = @_;
     $partition =~ s/://;
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
@@ -170,6 +181,7 @@ sub queue_remote_subfolders {
             path         => ":'${remotedir}'",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
+            dosnapshot   => "0",
         };
         push( @queue, $bkpjob );
     }
@@ -180,6 +192,7 @@ sub queue_remote_subfolders {
         group        => $group,
         lastbkp      => $lastbkp,
         bkptimestamp => $bkptimestamp,
+        dosnapshot   => $dosnapshot,
     };
     push( @finally_snapshots, $bkpjob );
 
@@ -225,6 +238,7 @@ sub thread_work {
         my $path         = $bkpjob->{path};
         my $lastbkp      = $bkpjob->{lastbkp};
         my $bkptimestamp = $bkpjob->{bkptimestamp};
+        my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
@@ -238,6 +252,7 @@ sub thread_work {
                 group        => $group,
                 lastbkp      => $lastbkp,
                 bkptimestamp => $bkptimestamp,
+                dosnapshot   => $dosnapshot,
             };
             finish_backupjob($bkpjob);
         }
@@ -562,15 +577,19 @@ sub finish_backupjob {
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
     my $lastbkp      = $bkpjob->{'lastbkp'};
+    my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
-    create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
-    create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
     bangstat_set_jobstatus( $taskid, $jobid, $host, $group, $lastbkp, '1' );
 
-    my %RecentBackups = bangstat_recentbackups($host);
-    hobbit_report( $taskid, $host, $group, %RecentBackups );
-    mail_report( $taskid, $host, $group, %RecentBackups );
-    logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
+    if ( $dosnapshot ) {
+        create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
+        create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
+
+        my %RecentBackups = bangstat_recentbackups($host);
+        hobbit_report( $taskid, $host, $group, %RecentBackups );
+        mail_report( $taskid, $host, $group, %RecentBackups );
+        logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
+    }
 
     return 1;
 }
