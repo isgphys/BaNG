@@ -493,7 +493,7 @@ sub logit {
         my $selection = qr{
             Queueing \s backup \s for |
             working \s on |
-            finisehd \s with |
+            finished \s with |
             Backup \s successful |
             ERROR |
             Wipe \s host |
