@@ -59,12 +59,14 @@ get '/variations' => require_login sub {
     };
 };
 
-get '/diffpreday' => require_login sub {
+get '/diffpreday/:host/:group' => require_login sub {
+    my $host     = param('host');
+    my $group = param('group');
     template 'statistics-diffpreday', {
         section      => 'statistics',
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
-        diffPreDay   => statistics_diffpreday("phd-san-gw2","dphys-groupdata",10),
+        diffPreDay   => statistics_diffpreday("$host","$group",5),
     };
 };
 

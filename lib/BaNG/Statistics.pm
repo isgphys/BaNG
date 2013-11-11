@@ -250,9 +250,10 @@ sub statistics_diffpreday {
             FROM statistic_job_sum b
             WHERE b.BkpGroup = a.BkpGroup
                 AND b.BkpFromHost = a.BkpFromHost
+                AND b.BkpFromPath = a.BkpFromPath
                 AND b.TaskID < a.TaskID
                 AND b.Runtime > 0
-            ORDER BY b.BkpFromHost, b.TaskID DESC
+            ORDER BY b.BkpFromHost, b.BkpFromPath DESC, b.TaskID DESC
             LIMIT 1
             ) as DiffPreDay
         FROM statistic_job_sum a
@@ -260,7 +261,7 @@ sub statistics_diffpreday {
             AND a.BkpFromHost like '$host'
             AND a.Runtime > 0
             AND a.Start > date_sub(NOW(), INTERVAL $lastXdays DAY)
-        ORDER BY a.BkpFromHost, a.TaskID DESC;
+        ORDER BY a.BkpFromHost, a.BkpFromPath DESC, a.TaskID DESC;
         ");
     $sth->execute();
 
