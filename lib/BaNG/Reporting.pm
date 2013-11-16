@@ -306,6 +306,7 @@ sub db_report {
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
         'Number of files'             => 'NumOfFiles',
+        'Number of regular files transferred' => 'NumOfFilesTrans',
         'Number of files transferred' => 'NumOfFilesTrans',
         'Total file size'             => 'TotFileSize',
         'Total transferred file size' => 'TotFileSizeTrans',
@@ -329,7 +330,8 @@ sub db_report {
         my ($key, $value) = split( ': ', $outline );
         foreach my $logkey ( keys %parse_log_keys ) {
             if ( $logkey eq $key ) {
-                $value =~ s/^\D*([\d.]+).*?$/$1/;
+                $value =~ s/^\D*([\d\.,]+).*?$/$1/;
+                $value =~ s/,//g;
                 $log_values{$parse_log_keys{$logkey}} = $value;
             }
         }
