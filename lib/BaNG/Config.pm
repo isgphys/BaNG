@@ -262,7 +262,7 @@ sub generated_crontab {
             my %cron;
             foreach my $key (qw( MIN HOUR DOM MONTH DOW )) {
                 $cron{$key} = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{$key};
-                $crontab .= sprintf( '%3s', $cron{$key} );
+                $crontab .= sprintf( '%2s ', $cron{$key} );
             }
             $crontab .= "    root    $prefix/BaNG";
 
@@ -276,6 +276,9 @@ sub generated_crontab {
 
             my $threads = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{THREADS};
             $crontab .= " -t $threads" if $threads;
+
+            my $finallysnapshots = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{FINALLYSNAPSHOTS};
+            $crontab .= " --finallysnapshots" if $finallysnapshots;
 
             $crontab .= "\n";
         }
