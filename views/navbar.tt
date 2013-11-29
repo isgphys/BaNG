@@ -41,7 +41,7 @@
             <ul>
                 <li class="gosubmenu"><a href="#">External Tools</a>
                     <ul>
-                        <li><a href="https://backup.phys.ethz.ch:444/munin/localdomain/index.html" target="_blank">Munin - Monitoring</a></li>
+                        <li><a href="https://backup.phys.ethz.ch:444/munin" target="_blank">Munin - Monitoring</a></li>
                         <li><a href="https://admin.phys.ethz.ch/lvm2FS/index.pl#phd-bkp-gw" target="_blank">VMchart - LVM and BTRFS Monitoring</a></li>
                         <li><a href="https://admin.phys.ethz.ch/cacti/graph_view.php?action=tree&tree_id=5&leaf_id=233" target="_blank">Cacti Monitoring</a></li>
                         <li><a href="http://hobbit.phys.ethz.ch/mrtg/fileserver-day.html" target="_blank">Fileserver Storage Monitoring</a></li>
