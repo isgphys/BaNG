@@ -4,7 +4,7 @@
  Rsync command for restore
 ---------------------------
 
-    /opt/local/bin/rsync -axRHXv --no-D --delete --rsync-path=/opt/local/bin/rsync --stats ORIGIN DESTINATION
+    /opt/local/bin/rsync -axHXv --no-D --delete --rsync-path=/opt/local/bin/rsync --stats ORIGIN DESTINATION
 
 Whenever possible restore only specific files or folders. If you restore the full home, all local copies of emails and other caches will have to be regenerated (as they are excluded from the backup).
 
