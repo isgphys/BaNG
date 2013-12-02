@@ -587,7 +587,7 @@ sub finish_backupjob {
 
         my %RecentBackups = bangstat_recentbackups($host);
         hobbit_report( $taskid, $host, $group, %RecentBackups );
-        mail_report( $taskid, $host, $group, %RecentBackups );
+        mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
         logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
     }
 
