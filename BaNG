@@ -26,6 +26,7 @@ use BaNG::Wipe;
 my $version = '3.2';
 my $force;
 my $wipe;
+my $cleanup;
 my $hobbitonly;
 my $missingonly;
 my $group_arg;
@@ -53,6 +54,8 @@ get_host_config($host_arg, $group_arg);
 foreach my $config ( sort keys %hosts ) {
     if ( $wipe ) {
         wipe( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $force );
+    } elsif ( $cleanup ) {
+        print "Let's go!\n";
     } elsif ( $hobbitonly ) {
         my $host  = $hosts{$config}->{hostname};
         my $group = $hosts{$config}->{group};
@@ -622,6 +625,7 @@ sub parse_command_options {
         "p|prefix=s"       => \$prefix_arg,
         "t|threads=i"      => \$nthreads_arg,
         "w|wipe"           => \$wipe,
+        "cleanup"          => \$cleanup,
         "finallysnapshots" => \$finallysnapshots,
         "force"            => \$force,
         "missingonly"      => \$missingonly,
@@ -672,6 +676,7 @@ sub usage {
         -p <path>          # override path to folder containing etc/
         -w                 # wipe the backup
         -w --force         # forcing wipe the backup (override auto_wipe_limit)
+        --cleanup          # cleanup threaded jobs
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
         --hobbit           # send only hobbit report
