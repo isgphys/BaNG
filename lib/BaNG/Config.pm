@@ -103,6 +103,8 @@ sub write_config {
             return (3, "You try to override $ConfigFile!");
         } else {
             DumpFile($ConfigFile, $settings);
+            chmod(0664, $ConfigFile);
+            chown(0, 33, $ConfigFile);
             return (1, $ConfigFile);
         }
     } else {
