@@ -446,6 +446,7 @@ sub statistics_schedule {
         FROM statistic_all
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
         AND isThread is Null
+        AND BkpToHost LIKE 'phd-bkp-gw'
         ORDER BY Start;
     ");
     $sth->execute();
