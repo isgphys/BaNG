@@ -4,7 +4,7 @@
         <th>Mount</th>
         <th>FS-Type</th>
         <th>Available</th>
-        <th>FreeDiff</th>
+        <th title="Need a Balance!">Free >10%</th>
         <th>%Used</th>
     </thead>
     <tbody>

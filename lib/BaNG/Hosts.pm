@@ -62,8 +62,10 @@ sub get_fsinfo {
                 .\s+(?<mountpt>[\/\w\d-]+)
                 }x;
 
-                my $freediff = $+{free} - $+{available};
-                $fsinfo{$server}{$+{mountpt}}{freediff} = num2human($freediff*1024,1024);
+                my $freediff    = $+{free} - $+{available};
+                my $freediffper = 100 / $+{free} * $freediff;
+
+                $fsinfo{$server}{$+{mountpt}}{freediff} = ( $freediffper > 10 ) ? num2human($freediff*1024,1024) : "" ;
             }
         }
 
