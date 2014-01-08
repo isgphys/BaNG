@@ -54,15 +54,15 @@ sub get_fsinfo {
 sub get_lockfiles {
     my %lockfiles;
     foreach my $server ( keys %servers ) {
-
         my @lockfiles = remotewrapper_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
 
         foreach my $lockfile ( @lockfiles  ) {
-            my ($host, $group, $path) = split_lockfile_name($lockfile);
+            my ($host, $group, $path, $timestamp) = split_lockfile_name($lockfile);
             $lockfiles{$server}{"$host-$group-$path"} = {
-                'host'  => $host,
-                'group' => $group,
-                'path'  => $path,
+                'host'      => $host,
+                'group'     => $group,
+                'path'      => $path,
+                'timestamp' => $timestamp,
             };
         }
     }
@@ -119,18 +119,6 @@ sub lockfile {
     return $lockfile;
 }
 
-sub split_lockfile_name {
-    my ($lockfile) = @_;
-    my ($host, $group, $path) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock/;
-
-    $path =~ s/%/\//g;
-    $path =~ s/\'//g;
-    $path =~ s/\+/ :/g;
-    $path =~ s/^\//:\//g;
-
-    return $host, $group, $path;
-}
-
 sub create_lockfile {
     my ($taskid, $host, $group, $path) = @_;
 
@@ -156,6 +144,18 @@ sub remove_lockfile {
     logit( $taskid, $host, $group, "Removed lockfile $lockfile" );
 
     return 1;
+}
+
+sub split_lockfile_name {
+    my ($lockfile) = @_;
+    my ($host, $group, $path, $timestamp) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
+
+    $path =~ s/%/\//g;
+    $path =~ s/\'//g;
+    $path =~ s/\+/ :/g;
+    $path =~ s/^\//:\//g;
+
+    return $host, $group, $path, $timestamp;
 }
 
 #################################
