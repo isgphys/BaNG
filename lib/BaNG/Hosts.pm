@@ -21,8 +21,8 @@ our @EXPORT = qw(
 sub get_fsinfo {
     my %fsinfo;
     foreach my $server ( keys %servers ) {
-
-        my @mounts = remotewrapper_command( $server, 'BaNG/bang_df' );
+        my @mounts;
+        @mounts = remotewrapper_command( $server, 'BaNG/bang_df' );
 
         foreach my $mount (@mounts) {
             $mount =~ qr{
@@ -32,7 +32,7 @@ sub get_fsinfo {
                         \s+(?<used> [\d]+)
                         \s+(?<available>[\d]+)
                         \s+(?<usedper> [\d]+)
-                        .\s+(?<mountpt> [\/\w\d-]+)$
+                        .\s+(?<mountpt> [\/\w\d-]+)
             }x;
 
             $fsinfo{$server}{$+{mountpt}} = {
@@ -42,10 +42,31 @@ sub get_fsinfo {
                 'blocks'     => num2human($+{blocks}),
                 'used'       => num2human($+{used}*1024,1024),
                 'available'  => num2human($+{available}*1024,1024),
+                'freediff'   => "",
                 'used_per'   => $+{usedper},
                 'css_class'  => check_fill_level($+{usedper}),
             };
         }
+
+        if ($server eq "phd-bkp-gw") {
+            @mounts = remotewrapper_command( $server, 'BaNG/bang_di' ) ;
+            foreach my $mount (@mounts) {
+                $mount =~ qr{
+                ^(?<filesystem> [\/\w\d-]+)
+                \s+(?<fstyp>[\w\d]+)
+                \s+(?<blocks>[\d]+)
+                \s+(?<used>[\d]+)
+                \s+(?<available>[\d]+)
+                \s+(?<free>[\d]+)
+                \s+(?<usedper>[\d]+)
+                .\s+(?<mountpt>[\/\w\d-]+)
+                }x;
+
+                my $freediff = $+{free} - $+{available};
+                $fsinfo{$server}{$+{mountpt}}{freediff} = num2human($freediff*1024,1024);
+            }
+        }
+
     }
 
     return \%fsinfo;

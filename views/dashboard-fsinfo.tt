@@ -4,6 +4,7 @@
         <th>Mount</th>
         <th>FS-Type</th>
         <th>Available</th>
+        <th>FreeDiff</th>
         <th>%Used</th>
     </thead>
     <tbody>
@@ -16,6 +17,7 @@
             <td><% mount %></td>
             <td class="center"><% fsinfo.$server.$mount.fstyp %></td>
             <td class="center"><% fsinfo.$server.$mount.available %></td>
+            <td class="center"><% fsinfo.$server.$mount.freediff %></td>
             <td class="center <%- IF fsinfo.$server.$mount.css_class %> <%- fsinfo.$server.$mount.css_class %><%- END %>"><% fsinfo.$server.$mount.used_per %></td>
         </tr>
         <%- END %>
