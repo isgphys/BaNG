@@ -7,6 +7,7 @@
             <th>Server</th>
             <th>Config-Files</th>
             <th>Status</th>
+            <th>Members</th>
             <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
                 <th>Delete</th>
             <% END %>
@@ -36,6 +37,10 @@
             </td>
             <td class="center">
               <% groups.$group.status %>
+            </td>
+            <td>
+              ( <% groups.$group.groupmembers.size %> )
+              <% groups.$group.groupmembers.join(', ') %>
             </td>
           <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
             <td align="center">

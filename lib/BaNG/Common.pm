@@ -14,6 +14,7 @@ our @EXPORT = qw(
     backup_folders_stack
     get_backup_folders
     list_groups
+    list_groupmembers
     get_automount_paths
     num2human
     targetpath
@@ -55,6 +56,19 @@ sub list_groups {
     }
 
     return @groups;
+}
+
+sub list_groupmembers {
+    my ($group) = @_;
+
+    my @groupmembers;
+    foreach my $hostgroup (keys %hosts) {
+        if ( $hosts{$hostgroup}->{group} eq $group ) {
+            push( @groupmembers, $hosts{$hostgroup}->{hostname} );
+        }
+    }
+
+    return \@groupmembers;
 }
 
 sub backup_folders_stack {

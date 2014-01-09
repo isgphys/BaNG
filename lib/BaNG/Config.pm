@@ -192,6 +192,7 @@ sub get_group_config {
     foreach my $groupconfigfile (@groupconfigs) {
         my ($groupname)                  = _split_group_configname($groupconfigfile);
         my ($groupconfig, $confighelper) = _read_group_configfile($groupname);
+        my @groupmembers               = BaNG::Common::list_groupmembers($groupname);
         my $isEnabled        = $groupconfig->{BKP_ENABLED};
         my $isBulkbkp        = $groupconfig->{BKP_BULK_ALLOW};
         my $isBulkwipe       = $groupconfig->{WIPE_BULK_ALLOW};
@@ -206,6 +207,7 @@ sub get_group_config {
             'nobulk_css_class' => $nobulk_css_class,
             'groupconfig'      => $groupconfig,
             'confighelper'     => $confighelper,
+            'groupmembers'     => @groupmembers,
         };
     }
 
