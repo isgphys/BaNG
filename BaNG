@@ -167,7 +167,7 @@ sub queue_remote_subfolders {
     $partition =~ s/://;
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1`;
+    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1 | sort`;
     logit( $taskid, $host, $group, "eval subfolders command:\n @remotedirlist" );
 
     foreach my $remotedir (@remotedirlist) {
