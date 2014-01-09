@@ -43,8 +43,8 @@ get '/allhosts/:filter?' => require_role isg => sub {
 
 get '/allgroups' => require_role isg => sub {
     get_serverconfig();
-    get_group_config("*");
     get_host_config("*");
+    get_group_config("*");
 
     template 'configs-groups' => {
         section      => 'configs',
