@@ -11,7 +11,7 @@
         <tr>
             <td colspan=3><b><% server %></b> (<% lockfiles.$server.size %>)</td>
         </tr>
-        <%- FOREACH lockfile IN lockfiles.$server.keys %>
+        <%- FOREACH lockfile IN lockfiles.$server.keys.sort %>
             <tr>
                 <td class="center"><% lockfiles.$server.$lockfile.host %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
