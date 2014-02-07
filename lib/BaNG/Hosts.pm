@@ -16,6 +16,7 @@ our @EXPORT = qw(
     create_lockfile
     remove_lockfile
     getlockfiles
+    remotewrapper_command
 );
 
 sub get_fsinfo {

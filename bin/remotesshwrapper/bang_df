@@ -1,0 +1,3 @@
+#!/bin/sh
+
+df -T | grep /export/backup

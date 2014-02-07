@@ -1,0 +1,3 @@
+#!/bin/sh
+
+di -f STbuvf1M -I btrfs -dk -w 11 | grep /export/backup
