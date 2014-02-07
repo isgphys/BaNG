@@ -10,6 +10,7 @@ use BaNG::Common;
 use BaNG::Config;
 use BaNG::Hosts;
 use BaNG::Reporting;
+use BaNG::Iscsi;
 use BaNG::Routes_Config;
 use BaNG::Routes_Docs;
 use BaNG::Routes_Host;
@@ -18,6 +19,7 @@ use BaNG::Routes_Reporting;
 use BaNG::Routes_Restore;
 use BaNG::Routes_Schedule;
 use BaNG::Routes_Statistics;
+use BaNG::Routes_Storman;
 
 prefix undef;
 

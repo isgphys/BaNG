@@ -1,0 +1,36 @@
+<h2>Storage Manager - Dashboard</h2>
+<div id="fsinfo" class="float-left">
+    <div class="loading_message">
+        <img src="/images/spinner.gif" width=25 alt="Loading animation">
+        Loading Filesystem Usage Report
+    </div>
+</div>
+<div id="iscsisessioninfo" class="float-left">
+    <div class="loading_message">
+        <img src="/images/spinner.gif" width=25 alt="Loading animation">
+        Loading ISCSI Sessions Report
+    </div>
+</div>
+
+<script>
+    $(window).load(function() {
+        $.ajax({
+            url: 'fsinfo_report',
+            success: function(content) {
+                $('#fsinfo').html(content);
+            },
+            error: function() {
+                $('#fsinfo').html('An error occured while loading the Filesystem Usage Report.');
+            }
+        });
+        $.ajax({
+            url: 'storman/iscsi_session_report',
+            success: function(content) {
+                $('#iscsisessioninfo').html(content);
+            },
+            error: function() {
+                $('#iscsisessioninfo').html('An error occured while loading the ISCSI Sessions Report.');
+            }
+        });
+    });
+</script>
