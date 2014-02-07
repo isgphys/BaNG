@@ -244,6 +244,8 @@ sub thread_work {
         my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
         return unless create_lockfile( $taskid, $host, $group, $path );
+        logit( $taskid, $host, $group, "Thread $tid sleep 1 sec. for $host-$group ($path)" );
+        sleep(1);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         execute_rsync( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path)" );
