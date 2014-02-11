@@ -563,7 +563,7 @@ sub create_timeid {
     $host  ||= '*';
     $group ||= '*';
     $taskid ||= $timeid;
-    logit( $taskid, $host, $group, "Created TimeID: $timeid" );
+    logit( $taskid, $host, $group, "Created TimeID: $timeid" ) unless ($host eq '*' || $group eq '*');
 
     return $timeid;
 }
