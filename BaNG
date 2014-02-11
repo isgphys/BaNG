@@ -499,6 +499,7 @@ sub wipe {
     # remove subvolumes or folders
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         delete_btrfs_subvolume( $taskid, $host, $group, join(' ', @wipedirs) );
+        delete_logfiles( $taskid, $host, $group, @wipedirs );
     } else {
         my $rmcmd = 'rm -Rf';
         $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
@@ -511,6 +512,26 @@ sub wipe {
     logit( $taskid, $host, $group, "Wipe successful of host $host group $group" );
 
     return 1;
+}
+
+sub delete_logfiles {
+    my ($taskid, $host, $group, @wipedirs) = @_;
+
+        foreach my $dir (@wipedirs) {
+            my ($logdate) = $dir =~ /.*\/(\d{4}\.\d{2}\.\d{2})/;
+            $logdate =~ s/\./\-/g;
+            my $today = `$serverconfig{path_date} +"%Y-%m-%d"`;
+            chomp $today;
+            unless ( $logdate eq $today ) {
+                my $logfolder  = "$serverconfig{path_logs}/${host}_${group}";
+                my $logfile    = "$logfolder/$logdate.log";
+                my $rmcmd = 'rm -f';
+                $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
+
+                logit( $taskid, $host, $group, "Delete logfile $logfile" );
+                system("$rmcmd $logfile") and logit( $taskid, $host, $group, "ERROR: deleting logfile $logfile: $!" );
+            }
+        }
 }
 
 #################################
