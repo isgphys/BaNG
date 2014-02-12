@@ -1,8 +1,6 @@
-/logs
 /var
 *.swp
 etc
-sessions/*
 t/etc/bangstat_db.yaml
 TODO
 debug.pl
