@@ -12,7 +12,7 @@ error_template:     'error'
 default_mime_type:  'text/plain'
 logger:             'file'
 logger_format:      '%t [%L] %m'
-log_path:           '/opt/BaNG/etc/logs'
+log_path:           '/opt/BaNG/var/logs'
 session:            'YAML'
 session_dir:        '/opt/BaNG/var/sessions'
 plugins:
