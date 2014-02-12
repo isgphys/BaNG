@@ -502,6 +502,7 @@ sub logit {
             Wipe \s host |
             Wipe \s existing |
             Wipe \s successful |
+            Delete \s logfile |
             Delete \s btrfs \s subvolume
         }x;
         if ( $logmessage =~ /$selection/ ) {
