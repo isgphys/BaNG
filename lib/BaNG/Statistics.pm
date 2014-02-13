@@ -321,6 +321,7 @@ sub statistics_work_duration_details {
         FROM statistic
         WHERE TaskID = '$taskid'
         GROUP BY JobID
+        ORDER BY Runtime
         ");
     $sth->execute();
 
