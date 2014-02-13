@@ -321,7 +321,7 @@ sub statistics_work_duration_details {
         FROM statistic
         WHERE TaskID = '$taskid'
         GROUP BY JobID
-        ORDER BY Runtime
+        ORDER BY Runtime DESC
         ");
     $sth->execute();
 
@@ -344,7 +344,7 @@ sub statistics_work_duration_details {
             SELECT bkpfromhost, bkpgroup, bkpfrompath, TIMESTAMPDIFF(Second, Start , Stop) as Runtime
             FROM statistic
             WHERE TaskID = '$taskid' AND bkpgroup LIKE '$sqlbkpgroup'
-            ORDER BY Runtime desc;
+            ORDER BY Runtime DESC;
             ");
         $sth->execute();
 
