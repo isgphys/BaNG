@@ -28,10 +28,11 @@
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
               <li><a href="/statistics/schedule-all">Schedule by host</a></li>
               <li><a href="/statistics/diffpreday/phd-san-gw2/dphys-groupdata">DiffPreDay (Groupdata)</a></li>
-                <li class="gosubmenu"><a href="/statistics">Top Changes</a>
+                <li class="gosubmenu"><a href="/statistics">Top of</a>
                     <ul>
                         <li><a href="/statistics/barchart/toptranssize/all">Transfered File Size</a></li>
                         <li><a href="/statistics/barchart/toptransfiles/all">Transfered Files</a></li>
+                        <li><a href="/statistics/barchart/worktime/all">Task Duration</a></li>
                         <li><a href="/statistics/variations">Groupdata Variations</a></li>
                     </ul>
                 </li>

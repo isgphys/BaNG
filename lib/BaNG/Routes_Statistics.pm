@@ -85,6 +85,12 @@ get '/barchart/:name/:taskid.json' => require_login sub {
         } else {
             $json = to_json(statistics_top_trans_details('files', param('taskid')));
         }
+    } elsif ( $chartname eq 'worktime'  ) {
+        if( param('taskid') eq 'all' ) {
+            $json = to_json(statistics_work_duration());
+        } else {
+            $json = to_json(statistics_work_duration_details(param('taskid')));
+        }
     }
     error404('Could not fetch data') unless $json;
     return $json;
@@ -97,6 +103,8 @@ get '/barchart/:name/:taskid' => require_login sub {
        $title = "Top Transfered Filesize - last 24h";
     }elsif ( $chartname =~ /toptransfiles/  ) {
        $title = "Top Transfered Number of Files - last 24h";
+    }elsif ( $chartname =~ /worktime/  ) {
+       $title = "Duration of Tasks - last 24h";
     }
     template 'statistics-barchart', {
         section      => 'statistics',

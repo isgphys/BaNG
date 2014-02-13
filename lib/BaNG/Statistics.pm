@@ -18,6 +18,8 @@ our @EXPORT = qw(
     statistics_hosts_shares
     statistics_top_trans
     statistics_top_trans_details
+    statistics_work_duration
+    statistics_work_duration_details
     statistics_diffpreday
     statistics_groupshare_variations
     statistics_schedule
@@ -270,6 +272,96 @@ sub statistics_diffpreday {
     $sth->finish();
 
     return $hash_ref;
+}
+
+sub statistics_work_duration {
+    get_serverconfig();
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT  TaskID, BkpFromHost, BkpGroup, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
+                BkpFromPath) as BkpFromPath, TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
+        FROM statistic
+        WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
+        GROUP BY TaskID
+        ORDER BY Runtime DESC;
+        ");
+        $sth->execute();
+
+        my @top_time;
+        while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $runtime )  = $sth->fetchrow_array() ) {
+            next if $runtime < 2;
+            $bkppath =~ s/\://g;
+            $bkppath =~ s/\//_/g;
+            push( @top_time, {
+                    name  => $bkpgroup,
+                    value => $runtime,
+                    label => time2human($runtime/60),
+                    url   => "/statistics/barchart/worktime/$taskid",
+                });
+        }
+        $sth->finish();
+
+        return \@top_time;
+}
+
+sub statistics_work_duration_details {
+    my ($taskid) = @_;
+    my (@top_size, $sth, $sqltranstype, $sqlbkpgroup);
+
+    get_serverconfig();
+    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    return '' unless $conn;
+
+    $sth = $bangstat_dbh->prepare("
+        SELECT bkpfromhost, bkpgroup,
+            IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))), BkpFromPath) as BkpFromPath,
+            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
+        FROM statistic
+        WHERE TaskID = '$taskid'
+        GROUP BY JobID
+        ");
+    $sth->execute();
+
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime )  = $sth->fetchrow_array() ) {
+        next if $runtime < 2;
+        $sqlbkpgroup = $bkpgroup;
+        $bkppath =~ s/\://g;
+        $bkppath =~ s/\//_/g;
+        push( @top_size, {
+            name  => $bkphost,
+            value => $runtime,
+            label => time2human($runtime/60),
+            url   => "/statistics/$bkphost/$bkppath",
+        });
+    }
+
+    if ( $#top_size == 0 ) {
+        @top_size = ();
+        $sth = $bangstat_dbh->prepare("
+            SELECT bkpfromhost, bkpgroup, bkpfrompath, TIMESTAMPDIFF(Second, Start , Stop) as Runtime
+            FROM statistic
+            WHERE TaskID = '$taskid' AND bkpgroup LIKE '$sqlbkpgroup'
+            ORDER BY Runtime desc;
+            ");
+        $sth->execute();
+
+        while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime )  = $sth->fetchrow_array() ) {
+            next if $runtime < 2;
+            $bkppath =~ s/\://g;
+            $bkppath =~ s/^.*\/(.*)$/$1/;
+            push( @top_size, {
+                name  => $bkppath,
+                value => $runtime,
+                label => time2human($runtime/60),
+                url   => "#",
+            });
+        }
+    }
+    $sth->finish();
+
+    return \@top_size;
 }
 
 sub statistics_top_trans {
