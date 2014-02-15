@@ -42,7 +42,6 @@
                     } else {
                         backups = json;
                         $('.loading_message').html('');
-                        ParseData();
                         DrawSwimlanes();
                     }
                 });
