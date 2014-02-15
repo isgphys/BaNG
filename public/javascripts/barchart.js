@@ -5,11 +5,11 @@ function drawBarchart(data) {
     var MaxValue = d3.max(data, function(d){ return parseFloat(d.value); });
 
     var x = d3.scale.log()
-            .domain([1, MaxValue])
-            .range([0, w]);
+        .domain([1, MaxValue])
+        .range([0, w]);
     var y = d3.scale.ordinal()
-            .domain(d3.keys(data))
-            .rangeBands([0,h]);
+        .domain(d3.keys(data))
+        .rangeBands([0,h]);
 
     var chart = d3.select("#graph")
         .append("svg:svg")
@@ -20,9 +20,8 @@ function drawBarchart(data) {
     // bar chart
     chart.selectAll("rect")
             .data(data)
-            .enter()
-        .append("svg:rect")
-        .attr("y", function(d,i){ return y(i); })
+        .enter().append("svg:rect")
+            .attr("y", function(d,i){ return y(i); })
             .attr("transform", "translate(" + yaxis_offset + ",0)")
             .attr("height", y.rangeBand())
             .attr("class", "rect")
