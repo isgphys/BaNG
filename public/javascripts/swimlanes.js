@@ -101,7 +101,7 @@ function parseBackupData(backups) {
                 var tS = new Date(bkp.time_start);
                 var tE = new Date(bkp.time_stop);
 
-                var workItem = {
+                data.push({
                     lane  : hostname,
                     start : tS,
                     end   : tE,
@@ -121,8 +121,7 @@ function parseBackupData(backups) {
                         TimeStop         : getTime(tE),
                         TimeElapsed      : time2human(tE-tS)
                     }
-                };
-                data.push(workItem);
+                });
             }
         }
     }
