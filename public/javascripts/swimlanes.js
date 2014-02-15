@@ -1,4 +1,4 @@
-function ParseData() {
+function GenerateLanes(data) {
     var addToLane = function (chart, item) {
         var name = item.lane;
 
@@ -31,7 +31,7 @@ function ParseData() {
         return false;
     };
 
-    var parseData = function (data) {
+    var generateLanes = function (data) {
         var i = 0, length = data.length, node;
         chart = { lanes: {} };
 
@@ -88,46 +88,46 @@ function ParseData() {
         return {lanes: lanes, items: items};
     }
 
-    var generateRandomWorkItems = function () {
-        var data = [];
+    return generateLanes(data);
+}
 
-        // read data from 'backups' variable
-        for (var hostname in backups) {
-            if (backups.hasOwnProperty(hostname)) {
-                for (var i=0; i<backups[hostname].length; i++) {
-                    var bkp = backups[hostname][i];
-                    var tS = new Date(bkp.time_start);
-                    var tE = new Date(bkp.time_stop);
+function parseBackupData(backups) {
+    var data = [];
 
-                    var workItem = {
-                        lane  : hostname,
-                        start : tS,
-                        end   : tE,
-                        info  : {
-                            TotFileSizeTrans : bkp.TotFileSizeTrans,
-                            TotFileSize      : bkp.TotFileSize,
-                            NumOfFiles       : bkp.NumOfFiles,
-                            NumOfFilesTrans  : bkp.NumOfFilesTrans,
-                            AvgFileSize      : bkp.AvgFileSize,
-                            BkpFromPath      : bkp.BkpFromPath,
-                            BkpFromHost      : bkp.BkpFromHost,
-                            BkpToPath        : bkp.BkpToPath,
-                            BkpToHost        : bkp.BkpToHost,
-                            SystemBkp        : bkp.SystemBkp,
-                            BkpGroup         : bkp.BkpGroup,
-                            TimeStart        : getTime(tS),
-                            TimeStop         : getTime(tE),
-                            TimeElapsed      : time2human(tE-tS)
-                        }
-                    };
-                    data.push(workItem);
-                }
+    for (var hostname in backups) {
+        if (backups.hasOwnProperty(hostname)) {
+            for (var i=0; i<backups[hostname].length; i++) {
+                var bkp = backups[hostname][i];
+                var tS = new Date(bkp.time_start);
+                var tE = new Date(bkp.time_stop);
+
+                var workItem = {
+                    lane  : hostname,
+                    start : tS,
+                    end   : tE,
+                    info  : {
+                        TotFileSizeTrans : bkp.TotFileSizeTrans,
+                        TotFileSize      : bkp.TotFileSize,
+                        NumOfFiles       : bkp.NumOfFiles,
+                        NumOfFilesTrans  : bkp.NumOfFilesTrans,
+                        AvgFileSize      : bkp.AvgFileSize,
+                        BkpFromPath      : bkp.BkpFromPath,
+                        BkpFromHost      : bkp.BkpFromHost,
+                        BkpToPath        : bkp.BkpToPath,
+                        BkpToHost        : bkp.BkpToHost,
+                        SystemBkp        : bkp.SystemBkp,
+                        BkpGroup         : bkp.BkpGroup,
+                        TimeStart        : getTime(tS),
+                        TimeStop         : getTime(tE),
+                        TimeElapsed      : time2human(tE-tS)
+                    }
+                };
+                data.push(workItem);
             }
         }
-        return data;
-    };
+    }
 
-    return parseData(generateRandomWorkItems());
+    return data;
 }
 
 function time2human(time) {
@@ -155,7 +155,7 @@ function DrawSwimlanes() {
 
     // Based on http://bl.ocks.org/1962173
 
-    var data  = ParseData()
+    var data  = GenerateLanes(parseBackupData(backups))
       , lanes = data.lanes
       , items = data.items
       , now   = new Date();
