@@ -1,139 +1,133 @@
 function ParseData() {
-    var RandomData = function() {
+    var addToLane = function (chart, item) {
+        var name = item.lane;
 
-        var addToLane = function (chart, item) {
-            var name = item.lane;
+        if (!chart.lanes[name])
+            chart.lanes[name] = [];
 
-            if (!chart.lanes[name])
-                chart.lanes[name] = [];
+        var lane = chart.lanes[name];
+        var sublane = 0;
+        while(isOverlapping(item, lane[sublane]))
+            sublane++;
 
-            var lane = chart.lanes[name];
-            var sublane = 0;
-            while(isOverlapping(item, lane[sublane]))
-                sublane++;
-
-            if (!lane[sublane]) {
-                lane[sublane] = [];
-            }
-
-            lane[sublane].push(item);
-        };
-
-        var isOverlapping = function(item, lane) {
-            if (lane) {
-                for (var i = 0; i < lane.length; i++) {
-                    var t = lane[i];
-                    var offset = 0; // time in milliseconds
-                    if ( item.start.getTime() < (Number(t.end.getTime()) + Number(offset))
-                        && t.start.getTime() < (Number(item.end.getTime()) + Number(offset)) ) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        };
-
-        var parseData = function (data) {
-            var i = 0, length = data.length, node;
-            chart = { lanes: {} };
-
-            for (i; i < length; i++) {
-                addToLane(chart, data[i]);
-            }
-            return collapseLanes(chart);
-        };
-
-        var collapseLanes = function (chart) {
-            var lanes = [], items = [], laneId = 0;
-            var now = new Date();
-
-            for (var laneName in chart.lanes) {
-                var lane = chart.lanes[laneName];
-
-                for (var i = 0; i < lane.length; i++) {
-                    var subLane = lane[i];
-
-                    // use custom label if defined, else laneName
-                    if (typeof(CustomLaneLabel) != "undefined") {
-                        var LaneLabel = eval(CustomLaneLabel);
-                    } else {
-                        var LaneLabel = (i === 0 ? laneName : '');
-                    }
-
-                    lanes.push({
-                        id    : laneId,
-                        label : LaneLabel,
-                    });
-
-                    for (var j = 0; j < subLane.length; j++) {
-                        var item = subLane[j];
-
-                        var bkpclass = item.info.BkpGroup;
-                        if ( item.info.SystemBkp ) {
-                            bkpclass += ' systembkp';
-                        } else {
-                            bkpclass += ' databkp';
-                        }
-
-                        items.push({
-                            id    : item.id,
-                            lane  : laneId,
-                            start : item.start,
-                            end   : item.end,
-                            class : bkpclass,
-                            info  : item.info
-                        });
-                    }
-                    laneId++;
-                }
-            }
-            return {lanes: lanes, items: items};
+        if (!lane[sublane]) {
+            lane[sublane] = [];
         }
 
-        var generateRandomWorkItems = function () {
-            var data = [];
-
-            // read data from 'backups' variable
-            for (var hostname in backups) {
-                if (backups.hasOwnProperty(hostname)) {
-                    for (var i=0; i<backups[hostname].length; i++) {
-                        var bkp = backups[hostname][i];
-                        var tS = new Date(bkp.time_start);
-                        var tE = new Date(bkp.time_stop);
-
-                        var workItem = {
-                            lane  : hostname,
-                            start : tS,
-                            end   : tE,
-                            info  : {
-                                TotFileSizeTrans : bkp.TotFileSizeTrans,
-                                TotFileSize      : bkp.TotFileSize,
-                                NumOfFiles       : bkp.NumOfFiles,
-                                NumOfFilesTrans  : bkp.NumOfFilesTrans,
-                                AvgFileSize      : bkp.AvgFileSize,
-                                BkpFromPath      : bkp.BkpFromPath,
-                                BkpFromHost      : bkp.BkpFromHost,
-                                BkpToPath        : bkp.BkpToPath,
-                                BkpToHost        : bkp.BkpToHost,
-                                SystemBkp        : bkp.SystemBkp,
-                                BkpGroup         : bkp.BkpGroup,
-                                TimeStart        : getTime(tS),
-                                TimeStop         : getTime(tE),
-                                TimeElapsed      : time2human(tE-tS)
-                            }
-                        };
-                        data.push(workItem);
-                    }
-                }
-            }
-
-            return data;
-        };
-        return parseData(generateRandomWorkItems());
+        lane[sublane].push(item);
     };
 
-    var root = typeof exports !== "undefined" && exports !== null ? exports : window;
-    root.randomData = RandomData;
+    var isOverlapping = function(item, lane) {
+        if (lane) {
+            for (var i = 0; i < lane.length; i++) {
+                var t = lane[i];
+                var offset = 0; // time in milliseconds
+                if ( item.start.getTime() < (Number(t.end.getTime()) + Number(offset))
+                    && t.start.getTime() < (Number(item.end.getTime()) + Number(offset)) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    var parseData = function (data) {
+        var i = 0, length = data.length, node;
+        chart = { lanes: {} };
+
+        for (i; i < length; i++) {
+            addToLane(chart, data[i]);
+        }
+        return collapseLanes(chart);
+    };
+
+    var collapseLanes = function (chart) {
+        var lanes = [], items = [], laneId = 0;
+        var now = new Date();
+
+        for (var laneName in chart.lanes) {
+            var lane = chart.lanes[laneName];
+
+            for (var i = 0; i < lane.length; i++) {
+                var subLane = lane[i];
+
+                // use custom label if defined, else laneName
+                if (typeof(CustomLaneLabel) != "undefined") {
+                    var LaneLabel = eval(CustomLaneLabel);
+                } else {
+                    var LaneLabel = (i === 0 ? laneName : '');
+                }
+
+                lanes.push({
+                    id    : laneId,
+                    label : LaneLabel,
+                });
+
+                for (var j = 0; j < subLane.length; j++) {
+                    var item = subLane[j];
+
+                    var bkpclass = item.info.BkpGroup;
+                    if ( item.info.SystemBkp ) {
+                        bkpclass += ' systembkp';
+                    } else {
+                        bkpclass += ' databkp';
+                    }
+
+                    items.push({
+                        id    : item.id,
+                        lane  : laneId,
+                        start : item.start,
+                        end   : item.end,
+                        class : bkpclass,
+                        info  : item.info
+                    });
+                }
+                laneId++;
+            }
+        }
+        return {lanes: lanes, items: items};
+    }
+
+    var generateRandomWorkItems = function () {
+        var data = [];
+
+        // read data from 'backups' variable
+        for (var hostname in backups) {
+            if (backups.hasOwnProperty(hostname)) {
+                for (var i=0; i<backups[hostname].length; i++) {
+                    var bkp = backups[hostname][i];
+                    var tS = new Date(bkp.time_start);
+                    var tE = new Date(bkp.time_stop);
+
+                    var workItem = {
+                        lane  : hostname,
+                        start : tS,
+                        end   : tE,
+                        info  : {
+                            TotFileSizeTrans : bkp.TotFileSizeTrans,
+                            TotFileSize      : bkp.TotFileSize,
+                            NumOfFiles       : bkp.NumOfFiles,
+                            NumOfFilesTrans  : bkp.NumOfFilesTrans,
+                            AvgFileSize      : bkp.AvgFileSize,
+                            BkpFromPath      : bkp.BkpFromPath,
+                            BkpFromHost      : bkp.BkpFromHost,
+                            BkpToPath        : bkp.BkpToPath,
+                            BkpToHost        : bkp.BkpToHost,
+                            SystemBkp        : bkp.SystemBkp,
+                            BkpGroup         : bkp.BkpGroup,
+                            TimeStart        : getTime(tS),
+                            TimeStop         : getTime(tE),
+                            TimeElapsed      : time2human(tE-tS)
+                        }
+                    };
+                    data.push(workItem);
+                }
+            }
+        }
+        return data;
+    };
+
+    return parseData(generateRandomWorkItems());
 }
 
 function time2human(time) {
@@ -161,7 +155,7 @@ function DrawSwimlanes() {
 
     // Based on http://bl.ocks.org/1962173
 
-    var data  = randomData()
+    var data  = ParseData()
       , lanes = data.lanes
       , items = data.items
       , now   = new Date();
