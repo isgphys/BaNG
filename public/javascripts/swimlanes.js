@@ -94,8 +94,8 @@ function GenerateLanes(data) {
     return generateLanes(data);
 };
 
-function parseBackupData(backups) {
-    var data = [];
+function parseLaneData(backups) {
+    var LaneData = [];
 
     for (var hostname in backups) {
         if (backups.hasOwnProperty(hostname)) {
@@ -104,7 +104,7 @@ function parseBackupData(backups) {
                 var tS = new Date(bkp.time_start);
                 var tE = new Date(bkp.time_stop);
 
-                data.push({
+                LaneData.push({
                     lane  : hostname,
                     start : tS,
                     end   : tE,
@@ -129,7 +129,7 @@ function parseBackupData(backups) {
         }
     }
 
-    return data;
+    return LaneData;
 };
 
 function time2human(time) {
@@ -158,7 +158,7 @@ function getTime(date) {
 function DrawSwimlanes() {
     // Based on http://bl.ocks.org/1962173
 
-    var data  = GenerateLanes(parseBackupData(backups))
+    var data  = GenerateLanes(parseLaneData(backups))
       , lanes = data.lanes
       , items = data.items
       , now   = new Date();
