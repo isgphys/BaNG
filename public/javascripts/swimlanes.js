@@ -1,5 +1,5 @@
 function GenerateLanes(data) {
-    var addToLane = function (chart, item) {
+    var addToLane = function(chart, item) {
         var name = item.lane;
 
         if (!chart.lanes[name])
@@ -28,20 +28,22 @@ function GenerateLanes(data) {
                 }
             }
         }
+
         return false;
     };
 
-    var generateLanes = function (data) {
+    var generateLanes = function(data) {
         var i = 0, length = data.length, node;
         chart = { lanes: {} };
 
         for (i; i < length; i++) {
             addToLane(chart, data[i]);
         }
+
         return collapseLanes(chart);
     };
 
-    var collapseLanes = function (chart) {
+    var collapseLanes = function(chart) {
         var lanes = [], items = [], laneId = 0;
         var now = new Date();
 
@@ -85,11 +87,12 @@ function GenerateLanes(data) {
                 laneId++;
             }
         }
+
         return {lanes: lanes, items: items};
-    }
+    };
 
     return generateLanes(data);
-}
+};
 
 function parseBackupData(backups) {
     var data = [];
@@ -127,18 +130,20 @@ function parseBackupData(backups) {
     }
 
     return data;
-}
+};
 
 function time2human(time) {
     var time;
     var minutes = Math.round( time/60/1000 );
+
     if (minutes < 60) {
         time = minutes + "min";
     } else {
         time = Math.floor(minutes/60) + "h" + String('00'+minutes%60).slice(-2) + "min";
     }
+
     return time;
-}
+};
 
 function getTime(date) {
     var date;
@@ -148,10 +153,9 @@ function getTime(date) {
     formatted_time += String('00'+date.getMinutes()).slice(-2);
 
     return formatted_time;
-}
+};
 
 function DrawSwimlanes() {
-
     // Based on http://bl.ocks.org/1962173
 
     var data  = GenerateLanes(parseBackupData(backups))
@@ -178,7 +182,7 @@ function DrawSwimlanes() {
     var y2  = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
 
     // allow to customize initial interval displayed
-    if( typeof CustomInterval === 'undefined' ) {
+    if ( typeof CustomInterval === 'undefined' ) {
         // default view shows from current full hour 2 days ago to now plus one hour
         var InitialInterval = '[new Date(now.getFullYear(), now.getMonth(), now.getDate()-2, now.getHours(), 0, 0, 0), new Date().setHours(now.getHours()+1)]';
     } else {
@@ -367,10 +371,10 @@ function DrawSwimlanes() {
 
         mini.selectAll('rect.background').remove();
     }
+
     display();
 
-    function display () {
-
+    function display() {
         var rects, labels
           , minExtent = brush.extent()[0]
           , maxExtent = brush.extent()[1]
@@ -440,9 +444,9 @@ function DrawSwimlanes() {
             .attr('class', 'itemLabel');
 
         labels.exit().remove();
-    }
+    };
 
-    function moveBrush () {
+    function moveBrush() {
         var origin = d3.mouse(this)
           , point = x.invert(origin[0])
           , halfExtent = (brush.extent()[1].getTime() - brush.extent()[0].getTime()) / 2
@@ -451,7 +455,7 @@ function DrawSwimlanes() {
 
         brush.extent([start,end]);
         display();
-    }
+    };
 
     // generate a single path for each item class in the mini display for faster drawing
     function getPaths(items) {
@@ -467,12 +471,12 @@ function DrawSwimlanes() {
         }
 
         return result;
-    }
+    };
 
     // redirect to plotHost when clicking on data backups
     function onclick(d, i) {
         window.location = "/statistics/" + d.info.BkpFromHost + '/' + d.info.BkpFromPath.replace(/\//g,'_');
-    }
+    };
 
     // functions to update tooltip when moving mouse
     function tooltipShow(d, i) {
@@ -510,14 +514,14 @@ function DrawSwimlanes() {
                 + "  </tr>"
                 + "</table>"
             );
-    }
+    };
     function tooltipHide(d, i) {
         tooltip
             .style("visibility", "hidden");
-    }
+    };
     function tooltipMove(d, i) {
         tooltip
             .style("top", (d3.event.pageY-10)+"px")
             .style("left",(d3.event.pageX+30)+"px");
-    }
-}
+    };
+};
