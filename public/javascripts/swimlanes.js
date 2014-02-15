@@ -189,7 +189,7 @@ function DrawSwimlanes() {
         var InitialInterval = CustomInterval;
     }
 
-    // draw the initial selection area
+    // initialize selection area
     var brush = d3.svg.brush()
         .x(x)
         .extent(eval(InitialInterval))
