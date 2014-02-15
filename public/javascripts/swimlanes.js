@@ -105,6 +105,7 @@ function parseLaneData(backups) {
                 var tE = new Date(bkp.time_stop);
 
                 LaneData.push({
+                    id    : backup,
                     lane  : backup,
                     start : tS,
                     end   : tE,
