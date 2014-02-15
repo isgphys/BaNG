@@ -97,15 +97,15 @@ function GenerateLanes(data) {
 function parseLaneData(backups) {
     var LaneData = [];
 
-    for (var hostname in backups) {
-        if (backups.hasOwnProperty(hostname)) {
-            for (var i=0; i<backups[hostname].length; i++) {
-                var bkp = backups[hostname][i];
+    for (var backup in backups) {
+        if (backups.hasOwnProperty(backup)) {
+            for (var i=0; i<backups[backup].length; i++) {
+                var bkp = backups[backup][i];
                 var tS = new Date(bkp.time_start);
                 var tE = new Date(bkp.time_stop);
 
                 LaneData.push({
-                    lane  : hostname,
+                    lane  : backup,
                     start : tS,
                     end   : tE,
                     info  : {
