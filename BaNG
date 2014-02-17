@@ -23,7 +23,7 @@ use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::Wipe;
 
-my $version = '3.2';
+my $version = '3.3';
 my $force;
 my $wipe;
 my $cleanup;
