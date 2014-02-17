@@ -71,6 +71,7 @@ if ( !@queue ) {
     exit 0;
 }
 
+reorder_queue_by_priority($taskid);
 start_threads();
 finish_backupjob($_) foreach @finally_snapshots;
 
@@ -79,6 +80,41 @@ exit 0;
 #################################
 # Queuing
 #
+sub reorder_queue_by_priority {
+    my ($taskid) = @_;
+    my @prio_queue;
+    my @prio_queue_sorted;
+
+    logit( $taskid, "SERVER", "GLOBAL", "reorder queue by priority!" );
+
+    # add priority information to all queued backup jobs
+    foreach my $bkpjob (@queue) {
+        my $host  = $bkpjob->{host};
+        my $group = $bkpjob->{group};
+        my $path  = $bkpjob->{path};
+        $path =~ s/[':]//g;
+
+        my $prio = $hosts{"$host-$group"}->{hostconfig}->{BKP_PRIORITY}->{"$path"} || 0;
+        $bkpjob->{priority} = $prio;
+        print "$path set priority to $prio\n" if $serverconfig{debug};
+        push( @prio_queue, $bkpjob );
+    }
+
+    # reorder queue by priority
+    foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue) {
+        print "$bkpjob->{priority} $bkpjob->{path}\n" if $serverconfig{debug};
+        push( @prio_queue_sorted, $bkpjob );
+    }
+
+    if ($#queue == $#prio_queue_sorted ) {
+        @queue = @prio_queue_sorted;
+    } else {
+        logit( $taskid, "SERVER", "GLOBAL", "ERROR: reorder_queue_by_priority queue lengths don't match!" );
+    }
+
+    return 1;
+}
+
 sub queue_backup {
     my ($taskid, $host, $group) = @_;
     my $jobid;
@@ -160,7 +196,7 @@ sub queue_backup {
     logit( $taskid, $host, $group, "End of queueing backup of host $host group $group" );
 
     return 1;
-}
+} 
 
 sub queue_remote_subfolders {
     my ($taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition) = @_;
