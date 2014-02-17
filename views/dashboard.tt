@@ -57,6 +57,7 @@
         });
         $.ajax({
             url: '/wipe_status',
+            timeout: 15000,
             success: function(content) {
                 $('#wipeinfo').html(content);
                 initializeAll();
