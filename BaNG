@@ -319,7 +319,7 @@ sub eval_rsync_options {
     $rsync_options .= "-R "             if $hostconfig->{BKP_RSYNC_RELATIV};
     $rsync_options .= "-H "             if $hostconfig->{BKP_RSYNC_HLINKS};
     $rsync_options .= "-W "             if $hostconfig->{BKP_RSYNC_WHOLEFILE};
-    $rsync_options .= "--delete-delay " if $hostconfig->{BKP_RSYNC_DELETE};
+    $rsync_options .= "--delete-after " if $hostconfig->{BKP_RSYNC_DELETE};
     $rsync_options .= "--force "        if $hostconfig->{BKP_RSYNC_DELETE_FORCE};
     $rsync_options .= "--numeric-ids "  if $hostconfig->{BKP_RSYNC_NUM_IDS};
     $rsync_options .= "--inplace "      if $hostconfig->{BKP_RSYNC_INPLACE};
