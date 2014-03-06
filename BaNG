@@ -315,7 +315,8 @@ sub eval_rsync_options {
     my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
 
     $rsync_options .= "--stats ";
-    $rsync_options .= "-ax "            if $hostconfig->{BKP_RSYNC_ARCHIV};
+    $rsync_options .= "-a "             if $hostconfig->{BKP_RSYNC_ARCHIV};
+    $rsync_options .= "-x "             if $hostconfig->{BKP_RSYNC_ONE_FS};
     $rsync_options .= "-R "             if $hostconfig->{BKP_RSYNC_RELATIV};
     $rsync_options .= "-H "             if $hostconfig->{BKP_RSYNC_HLINKS};
     $rsync_options .= "-W "             if $hostconfig->{BKP_RSYNC_WHOLEFILE};
