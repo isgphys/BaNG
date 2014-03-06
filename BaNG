@@ -386,7 +386,16 @@ sub execute_rsync {
     $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
     my $startstamp = time();
 
-    my $rsync_cmd     = $serverconfig{path_rsync};
+    my $nocache = "";
+    if ( $hosts{"$host-$group"}->{hostconfig}->{NOCACHE_ENABLED} ) {
+           if (-e $serverconfig{path_nocache} ) {
+                $nocache = $serverconfig{path_nocache} . " ";
+            } else {
+                logit( $taskid, $host, $group, "NOCACHE selected but command $serverconfig{path_nocache} not found!" );
+            }
+    }
+
+    my $rsync_cmd     = $nocache . $serverconfig{path_rsync};
     my $rsync_options = eval_rsync_options($taskid, $host, $group, $lastbkp);
     my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
 

@@ -495,7 +495,8 @@ sub logit {
         my $selection = qr{
             Queueing \s backup \s for |
             reorder \s queue |
-            sleep\s |
+            sleep \s |
+            NOCACHE \s selected |
             working \s on |
             finished \s with |
             Backup \s successful |
