@@ -6,7 +6,7 @@
 
 All configuration files are stored in the `./etc` folder.
 
-  * ```defaults_servers.yaml```              : common default settings for servers
+  * ```defaults_servers.yaml```              : common default settings for server (localhost)
   * ```defaults_hosts.yaml```                : common default settings for hosts
   * ```servers/<servername>_defaults.yaml``` : server-specific settings
   * ```groups/<groupname>.yaml```            : group-specific settings
