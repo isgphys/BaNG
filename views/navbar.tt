@@ -52,12 +52,6 @@
             </ul>
         </li>
         <li><a href="/docs" <% IF section == 'documentation' %>class="activetab"<% END %>>Documentation</a></li>
-        <% IF session.logged_in_admin %><li><a href="#" <% IF section == 'storman' %>class="activetab"<% END %>>StorMan</a>
-            <ul>
-                <li><a href="/storman">Dashboard</a></li>
-            </ul>
-        </li>
-        <% END %>
     </ul>
     <ul class="username">
         <li class="username">
