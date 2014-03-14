@@ -504,6 +504,7 @@ sub logit {
             Wipe \s host |
             Wipe \s existing |
             Wipe \s successful |
+            Wipe \s WARNING |
             Delete \s logfile |
             Delete \s btrfs \s subvolume
         }x;
