@@ -519,7 +519,7 @@ sub wipe {
     # generate wipe report with content of stacks
     if ( $serverconfig{debuglevel} >= 2 ) {
         my $wipe_report = "Wipe report\n";
-        foreach my $type ( keys %stack ) {
+        foreach my $type ( sort keys %stack ) {
             $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
             foreach my $folder ( @{$stack{$type}} ) {
                 $wipe_report .= "\t$folder\n";
