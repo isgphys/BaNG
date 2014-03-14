@@ -57,7 +57,7 @@ sub list_folders_to_wipe {
     # map dates inside stack to corresponding folders
     foreach my $type ( keys %stack ) {
         my @folders;
-        foreach my $epoch ( @{ $stack{$type} } ) {
+        foreach my $epoch ( sort @{ $stack{$type} } ) {
             foreach my $date ( keys %available_backups ) {
                 if ( $epoch == $available_backups{$date}{epoch} ) {
                     push( @folders, $available_backups{$date}{folder} );
