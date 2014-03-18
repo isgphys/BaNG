@@ -203,7 +203,7 @@ sub queue_remote_subfolders {
     $partition =~ s/://;
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotedirlist = `$remoteshell $host find $partition- -xdev -mindepth 1 -maxdepth 1 | sort`;
+    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1 | sort`;
 
     # if @remotedirlist empty (rsh troubles?) then use the $partition
     if ( $#remotedirlist == -1 ){
