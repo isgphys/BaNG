@@ -203,8 +203,15 @@ sub queue_remote_subfolders {
     $partition =~ s/://;
 
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1 | sort`;
-    logit( $taskid, $host, $group, "eval subfolders command:\n @remotedirlist" );
+    my @remotedirlist = `$remoteshell $host find $partition- -xdev -mindepth 1 -maxdepth 1 | sort`;
+
+    # if @remotedirlist empty (rsh troubles?) then use the $partition
+    if ( $#remotedirlist == -1 ){
+        push( @remotedirlist, $partition );
+        logit( $taskid, $host, $group, "ERROR: eval subfolders command failed, use now with:\n @remotedirlist" );
+    } else {
+        logit( $taskid, $host, $group, "eval subfolders command:\n @remotedirlist" );
+    }
 
     foreach my $remotedir (@remotedirlist) {
         chomp $remotedir;
