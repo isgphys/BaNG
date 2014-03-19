@@ -506,6 +506,10 @@ sub wipe {
     # stop if trying to do bulk wipe if it's not allowed
     return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{WIPE_BULK_ALLOW} );
 
+
+    # check for still running backups
+    return unless check_lockfile( $taskid, $host, $group );
+
     logit( $taskid, $host, $group, "Wipe host $host group $group" );
 
     my @backup_folders = get_backup_folders( $host, $group );

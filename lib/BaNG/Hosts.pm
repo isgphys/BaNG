@@ -15,6 +15,7 @@ our @EXPORT = qw(
     check_client_connection
     create_lockfile
     remove_lockfile
+    check_lockfile
     getlockfiles
 );
 
@@ -179,6 +180,30 @@ sub split_lockfile_name {
     $path =~ s/^\//:\//g;
 
     return $host, $group, $path, $timestamp;
+}
+
+sub check_lockfile {
+    my ($taskid, $host, $group) = @_;
+
+    my @lockfiles;
+    my $ffr_obj = File::Find::Rule->file()
+                                  ->name("${host}_${group}_*.lock")
+                                  ->relative
+                                  ->maxdepth(1)
+                                  ->start($serverconfig{path_lockfiles});
+
+    while ( my $lockfile = $ffr_obj->match() ) {
+        push( @lockfiles, $lockfile );
+    }
+
+    logit( $taskid, $host, $group, "Check for running backup tasks" );
+
+    if ( $#lockfiles > -1 ) {
+        logit( $taskid, $host, $group, "ERROR: Wipe canceled, still ". ( $#lockfiles +1 ) ." running backup!" );
+        return 0;
+    }
+
+    return 1;
 }
 
 #################################
