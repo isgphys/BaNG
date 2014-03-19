@@ -552,10 +552,10 @@ sub wipe {
     # remove subvolumes or folders
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         # Limit snapshot wipe to the last x days -> performance issues
-        if ( ( $#{$stack{wipe}} + 1 ) > $serverconfig{auto_wipe_limit} ) {
-           logit( $taskid, $host, $group, "Wipe WARNING: snapshot limit reached, wipe only oldest $serverconfig{auto_wipe_limit} snapshots." );
+        if ( ( $#{$stack{wipe}} + 1 ) > $serverconfig{snapshot_wipe_limit} ) {
+           logit( $taskid, $host, $group, "Wipe WARNING: snapshot limit reached, wipe only oldest $serverconfig{snapshot_wipe_limit} snapshots." );
         }
-        @wipedirs = splice(@wipedirs,0,$serverconfig{auto_wipe_limit});
+        @wipedirs = splice(@wipedirs,0,$serverconfig{snapshot_wipe_limit});
 
         delete_btrfs_subvolume( $taskid, $host, $group, join(' ', @wipedirs) );
         delete_logfiles( $taskid, $host, $group, @wipedirs );
