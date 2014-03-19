@@ -482,33 +482,48 @@ sub logit {
     my $logmessage = "$timestamp $host-$group($taskid) : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
 
-    print $logmessage if $serverconfig{debug};
+    # write selection of messages to global logfile
+    my $selection = qr{
+        Queueing \s backup \s for |
+        reorder \s queue |
+        sleep \s |
+        NOCACHE \s selected |
+        working \s on |
+        finished \s with |
+        Backup \s successful |
+        ERROR |
+        Wipe \s host |
+        Wipe \s existing |
+        Wipe \s successful |
+        Wipe \s WARNING |
+        Delete \s logfile |
+        Delete \s btrfs \s subvolume
+    }x;
+
+    if ( $serverconfig{debug} ) {
+        if ( $serverconfig{dryrun} ) {
+            unless ( $group eq "GLOBAL" || $host eq "SERVER" ) {
+                # write into daily logfile per host_group
+                print "Write to HOST log: $logmessage";
+            }
+            if ( $logmessage =~ /$selection/ || $group eq "GLOBAL" || $host eq "SERVER" ) {
+                print "Write to GLOBAL log: $logmessage";
+            }
+        }else {
+            print $logmessage;
+        }
+    }
 
     unless ( $serverconfig{dryrun} ) {
-        # write into daily logfile per host_group
-        mkdir($logfolder) unless -d $logfolder;
-        open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
-        print {$log} $logmessage;
-        close $log;
+        unless ( $group eq "GLOBAL" || $host eq "SERVER" ) {
+            # write into daily logfile per host_group
+            mkdir($logfolder) unless -d $logfolder;
+            open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
+            print {$log} $logmessage;
+            close $log;
+        }
 
-        # write selection of messages to global logfile
-        my $selection = qr{
-            Queueing \s backup \s for |
-            reorder \s queue |
-            sleep \s |
-            NOCACHE \s selected |
-            working \s on |
-            finished \s with |
-            Backup \s successful |
-            ERROR |
-            Wipe \s host |
-            Wipe \s existing |
-            Wipe \s successful |
-            Wipe \s WARNING |
-            Delete \s logfile |
-            Delete \s btrfs \s subvolume
-        }x;
-        if ( $logmessage =~ /$selection/ ) {
+        if ( $logmessage =~ /$selection/ || $group eq "GLOBAL" || $host eq "SERVER" ) {
             open my $log, ">>", $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
             print {$log} $logmessage;
             close $log;

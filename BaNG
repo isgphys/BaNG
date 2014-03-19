@@ -71,7 +71,7 @@ if ( !@queue ) {
     exit 0;
 }
 
-reorder_queue_by_priority($taskid);
+reorder_queue_by_priority( $taskid, $host_arg, $group_arg );
 start_threads();
 finish_backupjob($_) foreach @finally_snapshots;
 
@@ -81,11 +81,13 @@ exit 0;
 # Queuing
 #
 sub reorder_queue_by_priority {
-    my ($taskid) = @_;
+    my ($taskid, $host, $group) = @_;
     my @prio_queue;
     my @prio_queue_sorted;
+    $host  ||= "SERVER";
+    $group ||= "GLOBAL";
 
-    logit( $taskid, "SERVER", "GLOBAL", "reorder queue by priority!" );
+    logit( $taskid, $host, $group, "reorder queue by priority!" );
 
     # add priority information to all queued backup jobs
     foreach my $bkpjob (@queue) {
@@ -109,7 +111,7 @@ sub reorder_queue_by_priority {
     if ($#queue == $#prio_queue_sorted ) {
         @queue = @prio_queue_sorted;
     } else {
-        logit( $taskid, "SERVER", "GLOBAL", "ERROR: reorder_queue_by_priority queue lengths don't match!" );
+        logit( $taskid, $host, $group, "ERROR: reorder_queue_by_priority queue lengths don't match!" );
     }
 
     return 1;
@@ -644,10 +646,10 @@ sub create_timeid {
     my ($s, $usec) = gettimeofday;
     my $timeid      = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
     $timeid =~ s/\n//g;
-    $host  ||= '*';
-    $group ||= '*';
+    $host  ||= "SERVER";
+    $group ||= "GLOBAL";
     $taskid ||= $timeid;
-    logit( $taskid, $host, $group, "Created TimeID: $timeid" ) unless ($host eq '*' || $group eq '*');
+    logit( $taskid, $host, $group, "Created TimeID: $timeid" );
 
     return $timeid;
 }
