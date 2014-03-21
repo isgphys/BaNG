@@ -83,7 +83,7 @@ sub bangstat_set_jobstatus {
 sub bangstat_recentbackups {
     my ($host, $lastXdays) = @_;
 
-    $lastXdays ||= 5;
+    $lastXdays ||= 14;
     my $BkpStartHour = 18;
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
