@@ -46,7 +46,7 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.FilesTrans %></td>
                 <td class="center"><% bkp.SizeTrans %></td>
-                <td class="zoom pointer" data-href='/host/<% bkp.BkpHost %>/log/<% bkp.BkpGroup %>'></td>
+                <td class="zoom pointer" data-href='/logs/<% bkp.BkpHost %>/<% bkp.BkpGroup %>'></td>
             </tr>
         <%- END %>
     </tbody>

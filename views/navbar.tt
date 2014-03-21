@@ -16,6 +16,12 @@
         </li>
         <% END %>
         <% IF session.logged_in_admin %><li><a href="/reporting" <% IF section == 'reporting' %>class="activetab"<% END %>>Reporting</a></li><% END %>
+        <% IF session.logged_in_admin %><li><a href="#" <% IF section == 'logs' %>class="activetab"<% END %>>Logs</a>
+            <ul>
+                <li><a href="/logs/global">Global Logs (Errors only)</a></li>
+            </ul>
+        </li>
+        <% END %>
         <li><a href="#"<% IF section == 'statistics' %>class="activetab"<% END %>>Statistics</a>
             <ul>
                 <li class="gosubmenu"><a href="/statistics">Overview</a>

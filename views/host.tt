@@ -62,7 +62,7 @@
                 <td class="center"><a href="/restore">
                     <%- backupstack.${hosts.$hostname.group}.monthly.size || '0' %> / <% hosts.$hostname.hostconfig.WIPE_KEEP_MONTHLY %></a>
                 </td>
-                <td class="zoom pointer" data-href='/host/<% host %>/log/<% hosts.$hostname.group %>'></td>
+                <td class="zoom pointer" data-href='/logs/<% host %>/<% hosts.$hostname.group %>'></td>
               <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
                 <td align="center">
                     <img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>">

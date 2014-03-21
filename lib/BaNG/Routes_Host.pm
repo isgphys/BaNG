@@ -28,19 +28,4 @@ get '/:host' => require_role isg => sub {
     };
 };
 
-get '/:host/log/:group/?:showlogsnumber?' => require_role isg => sub {
-    get_serverconfig();
-
-    my $show_logs_number = param('showlogsnumber') || $serverconfig{show_logs_number};
-
-    template 'host-log', {
-        section       => 'host',
-        remotehost    => request->remote_host,
-        webDancerEnv  => config->{run_env},
-        host          => param('host'),
-        group         => param('group'),
-        logdata       => read_log(param('host'), param('group'), $show_logs_number),
-    };
-};
-
 1;

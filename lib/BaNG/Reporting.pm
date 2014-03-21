@@ -27,6 +27,7 @@ our @EXPORT = qw(
     hobbit_report
     logit
     read_log
+    read_global_log
     error404
 );
 
@@ -569,6 +570,45 @@ sub read_log {
             }
         }
     }
+
+    return \%parsed_logdata;
+}
+
+sub read_global_log {
+
+    my %parsed_logdata;
+    my $logmonth   = strftime "%Y-%m", localtime;
+    my $globallogfile = "$serverconfig{path_logs}/global_$logmonth.log";
+
+        open(LOGDATA, $globallogfile) or print "ERROR opening logfile $globallogfile: $!\n";
+        my @logdata = <LOGDATA>;
+        close LOGDATA;
+
+        foreach my $logline (@logdata) {
+            if ( $logline =~ qr{
+                    (?<logdate> \w{3}\s\d{2} ) \s
+                    (?<logtime> \d{2}:\d{2}:\d{2} ) \s
+                    (?<hostgroup> [^:]* )\s:\s
+                    (?<message> .* )
+                }x )
+            {
+                my $msg = $+{message};
+                my $logdate = $+{logdate};
+                my $logtime = $+{logtime};
+                my $hostgroup = $+{hostgroup};
+
+                if ( $msg =~ /ERR/ ) {
+                    push( @{ $parsed_logdata{$logdate} }, {
+                            date      => $logdate,
+                            time      => $logtime,
+                            hostgroup => $hostgroup,
+                            message   => $msg,
+                        });
+                }
+            } else {
+                $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
+            }
+        }
 
     return \%parsed_logdata;
 }
