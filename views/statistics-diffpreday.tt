@@ -1,4 +1,4 @@
-<H2>DiffPreDay (5 Days)</H2>
+<H2>DiffPreDay (<%predays%> Days)</H2>
 <div>
     <table class="default-table border">
         <thead>
