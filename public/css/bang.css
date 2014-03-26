@@ -78,7 +78,7 @@ h3 {
 .serverConfig{
     background-color: #66aadd !important;
 }
-.active {
+tr.active {
     background-color: #99FF99 !important;
 }
 .logError {
