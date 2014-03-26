@@ -30,7 +30,7 @@
                 <div id="chart_legend"></div>
                 <form id="chart_toggler">
                     <input type="radio" name="offset" value="line" checked> <label>line</label>
-                    <input type="radio" name="offset" value="zero"> <label>stack</label>
+                    <input type="radio" name="offset" value="stack"> <label>stack</label>
                 </form>
                 <div id="chart_slider"></div>
             </div>
