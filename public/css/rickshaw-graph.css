@@ -7,6 +7,7 @@
 #chart_container {
     display     : inline-block;
     width       : 1100px;
+    height      : 660px;
 }
 #chart {
     float       : left;
