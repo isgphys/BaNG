@@ -47,6 +47,7 @@
 .rickshaw_graph .detail .item {
     line-height : 1.4;
     padding     : 0.5em;
+    padding-right: 20px;
 }
 /* date series color swatch in hover details */
 .detail_swatch {
