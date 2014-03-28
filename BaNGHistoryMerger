@@ -1,0 +1,75 @@
+#!/usr/bin/env perl
+#
+# Copyright 2014 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
+# the terms of the GNU General Public License version 2 or later.
+#
+# Authors: Patrick Schmid <schmid@phys.ethz.ch>
+#
+use strict;
+use warnings;
+use Cwd qw( abs_path );
+use File::Basename;
+use Getopt::Long qw( :config no_auto_abbrev );
+use POSIX qw( strftime );
+
+my $version = '0.1';
+my ($src_arg, $dest_arg);
+my $debug;
+my $dryrun;
+
+#################################
+# Main
+#
+parse_command_options();
+
+    my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
+    my $createdby = "root with CLI";
+    my $configtype;
+
+
+    exit 0;
+
+#################################
+# Command line arguments
+#
+sub parse_command_options {
+
+    GetOptions(
+        "help"      => sub { usage('') },
+        "v|version" => sub { usage("Current version number: $version") },
+        "d|debug"   => \$debug,
+        "n|dry-run" => \$dryrun,
+        "source=s"  => \$src_arg,
+        "dest=s"    => \$dest_arg,
+    ) or usage("Invalid commmand line options.");
+    usage("Check the arguments!") unless ( $src_arg && $dest_arg );
+
+    return 1;
+}
+
+sub usage {
+    my ($message) = @_;
+
+    if ( defined $message && length $message ) {
+        $message .= "\n"
+            unless $message =~ /\n$/;
+    }
+
+    my $command = $0;
+    $command    =~ s#^.*/##;
+
+    print <<"EOF";
+        $message
+        Usage Examples:
+
+        $command [optional] --source <src-folder> <dest-folder>
+
+        Optional Arguments:
+
+        -d              # show debugging messages
+        -n              # dry-run without making changes
+
+EOF
+    exit 0;
+}
+
