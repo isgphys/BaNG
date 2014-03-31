@@ -12,37 +12,163 @@ use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
 use POSIX qw( strftime );
 
+use lib dirname( abs_path($0) ) . "/lib";
+use BaNG::Config;
+use BaNG::Common;
+use BaNG::Wipe;
+
 my $version = '0.1';
-my ($src_arg, $dest_arg);
-my $debug;
-my $dryrun;
+my $debug_arg;
+my $debuglevel_arg;
+my $dryrun_arg = 1;
+my $group_arg;
+my $host_arg;
+my $old_bkpprefix_arg;
+my $prefix_arg;
 
 #################################
 # Main
 #
 parse_command_options();
+get_serverconfig($prefix_arg);
+cli_args_override_global_config();
 
-    my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
-    my $createdby = "root with CLI";
-    my $configtype;
+get_host_config($host_arg, $group_arg);
+
+my $host = $host_arg;
+my $group = $group_arg;
+my $config = "$host-$group";
+my $current_bkpprefix = $hosts{$config}->{hostconfig}->{BKP_PREFIX};
+my $old_bkpprefix = $old_bkpprefix_arg;
+
+print "Host: $hosts{$config}->{hostname}\n";
+print "Group: $hosts{$config}->{group}\n";
+print "Current BKP-PREFIX: $current_bkpprefix\n";
+print "Old BKP-PREFIX: $old_bkpprefix\n";
+
+my @backup_folders;
+my $count = 0;
+my $oldestCurFolder;
+
+foreach my $bkpprefix ( $current_bkpprefix, $old_bkpprefix  ){
+    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $bkpprefix;
+    foreach my $folder (get_backup_folders( $host, $group )){
+        if ( $count == 0 ) {
+            $oldestCurFolder = $folder if $count == 0;
+            chomp $oldestCurFolder;
+            print "OldestCurrentFolder: $oldestCurFolder\n";
+        }
+        $count++;
+        push ( @backup_folders, $folder);
+    }
+}
+
+# count existing backups
+my $bkpkeep = 0;
+foreach my $type (qw( DAILY WEEKLY MONTHLY )) {
+    $bkpkeep += $hosts{$config}->{hostconfig}->{"WIPE_KEEP_$type"};
+}
+my $bkpcount = $#backup_folders + 1;
+
+# get list of folders to wipe
+my %stack    = list_folders_to_wipe( $host, $group, @backup_folders);
+
+print "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} +1 ) .", keeping: $bkpkeep for host $host group $group\n";
+
+# generate wipe report with content of stacks
+if ( $serverconfig{debuglevel} >= 2 && $serverconfig{debug} ) {
+    my $wipe_report = "Wipe report\n";
+    foreach my $type ( sort keys %stack ) {
+        $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
+        foreach my $folder ( @{$stack{$type}} ) {
+            $wipe_report .= "\t$folder\n";
+        }
+    }
+    print $wipe_report;
+}
+
+my @backup_folders_merge;
+foreach my $type ( qw( daily weekly monthly )) {
+    foreach my $folder ( @{$stack{$type}} ) {
+        next if $folder =~ m/$current_bkpprefix/;
+        push (@backup_folders_merge, $folder);
+    }
+}
+
+my $btrfs_cmd             = $serverconfig{path_btrfs};
+
+print "Migrate following folders:\n";
+foreach my $folder ( reverse sort @backup_folders_merge ) {
+    print "\t$folder\n";
+}
+print "\n";
+
+my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
+
+foreach my $folder ( reverse sort @backup_folders_merge ) {
+    print "Work on: $folder\n";
+    my ($workfolder) = $folder =~ /\/([\d._]*)$/;
+
+    my $rsync_cmd     = $serverconfig{path_rsync};
+    my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
+
+    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $old_bkpprefix;
+    my $rsync_src  = targetpath( $host, $group ) . "/$workfolder/";
+    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $current_bkpprefix;
+    my $rsync_dest  = targetpath( $host, $group ) . "/migrate";
+
+    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
+        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+        } else {
+            print "Warning: could not find excludefile $excludefile.\n";
+        }
+    }
+
+    print "$rsync_cmd $rsync_options $rsync_src $rsync_dest\n";
+    system("$rsync_cmd $rsync_options $rsync_src $rsync_dest") unless $serverconfig{dryrun};
 
 
-    exit 0;
+    ### do Snapshot Work
+
+    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $current_bkpprefix;
+    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/migrate";
+    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/$workfolder";
+
+    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
+    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+    print "Create btrfs snapshot for host $host group $group using\n$btrfs_snapshot_cmd\n";
+    system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
+
+}
+
+exit 0;
 
 #################################
 # Command line arguments
 #
 sub parse_command_options {
-
     GetOptions(
-        "help"      => sub { usage('') },
-        "v|version" => sub { usage("Current version number: $version") },
-        "d|debug"   => \$debug,
-        "n|dry-run" => \$dryrun,
-        "source=s"  => \$src_arg,
-        "dest=s"    => \$dest_arg,
+        "help"          => sub { usage('') },
+        "v|version"     => sub { usage("Current version number: $version") },
+        "d|debug"       => \$debug_arg,
+        "n|dry-run"     => \$dryrun_arg,
+        "g|group=s"     => \$group_arg,
+        "h|host=s"      => \$host_arg,
+        "old-bkpprefix=s" => \$old_bkpprefix_arg,
     ) or usage("Invalid commmand line options.");
-    usage("Check the arguments!") unless ( $src_arg && $dest_arg );
+    usage("Check the arguments!") unless ( $host_arg && $group_arg && $old_bkpprefix_arg );
+
+
+    return 1;
+}
+
+sub cli_args_override_global_config {
+
+    $serverconfig{debug}      = $debug_arg      if $debug_arg;
+    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
+    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
 
     return 1;
 }
@@ -62,7 +188,7 @@ sub usage {
         $message
         Usage Examples:
 
-        $command [optional] --source <src-folder> <dest-folder>
+        $command -h <hostname> -g <group> --old-prefix <BKP_PREFIX>
 
         Optional Arguments:
 
