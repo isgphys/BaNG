@@ -1,4 +1,7 @@
 <h2>Dashboard</h2>
+<form action="">
+    <input id="showwipe" type="checkbox" name="showwipe" value="1" checked>Show Wipe Report
+</form>
 <div id="fsinfo" class="float-left">
     <div class="loading_message">
         <img src="/images/spinner.gif" width=25 alt="Loading animation">
@@ -55,16 +58,21 @@
                 $('#error_report').html('An error occured while loading the Error Report.');
             }
         });
-        $.ajax({
-            url: '/wipe_status',
-            timeout: 15000,
-            success: function(content) {
-                $('#wipeinfo').html(content);
-                initializeAll();
-            },
-            error: function() {
-                $('#wipeinfo').html('An error occured while loading the Wipe Status.');
-            }
-        });
+        if ( $('#showwipe').is(':checked') ) {
+            $.ajax({
+                url: '/wipe_status',
+                timeout: 15000,
+                success: function(content) {
+                    $('#wipeinfo').html(content);
+                    initializeAll();
+                },
+                error: function() {
+                    $('#wipeinfo').html('An error occured while loading the Wipe Status.');
+                    $('#showwipe').prop('checked', false);
+                }
+            });
+        } else {
+            $('#wipeinfo').html('');
+        };
     });
 </script>
