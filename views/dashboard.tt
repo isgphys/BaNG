@@ -1,6 +1,6 @@
 <h2>Dashboard</h2>
 <form action="">
-    <input id="showwipe" type="checkbox" name="showwipe" value="1">Show Wipe Report
+    <input id="showwipe" type="checkbox" value="1">Show Wipe Report
 </form>
 <div id="fsinfo" class="float-left">
     <div class="loading_message">
@@ -75,8 +75,9 @@
                     initializeAll();
                 },
                 error: function() {
-                    $('#wipeinfo').html('An error occured while loading the Wipe Status.');
+                    $('#wipeinfo').html('An error occured while loading the Wipe Status -> Report disabled.');
                     $('#showwipe').prop('checked', false);
+                    localStorage.setItem('showwipe', "false");
                 }
             });
         } else {
