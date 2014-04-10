@@ -1,6 +1,6 @@
 <h2>Dashboard</h2>
 <form action="">
-    <input id="showwipe" type="checkbox" name="showwipe" value="1" checked>Show Wipe Report
+    <input id="showwipe" type="checkbox" name="showwipe" value="1">Show Wipe Report
 </form>
 <div id="fsinfo" class="float-left">
     <div class="loading_message">
@@ -28,6 +28,14 @@
 </div>
 <script>
     $(window).load(function() {
+        var showwipe_state = localStorage.getItem('showwipe') || "true";
+        showwipe_state = (showwipe_state === "true"); // convert to boolean
+        $('#showwipe').prop('checked', showwipe_state);
+
+        $('#showwipe').change(function (e) {
+            localStorage.setItem('showwipe', e.target.checked);
+        });
+
         $.ajax({
             url: '/lockfile_report',
             success: function(content) {
