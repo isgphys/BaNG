@@ -69,7 +69,7 @@
         if ( $('#showwipe').is(':checked') ) {
             $.ajax({
                 url: '/wipe_status',
-                timeout: 15000,
+                timeout: 45000,
                 success: function(content) {
                     $('#wipeinfo').html(content);
                     initializeAll();
