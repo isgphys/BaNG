@@ -1,0 +1,280 @@
+#!/usr/bin/env perl
+#
+# Copyright 2014 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
+# the terms of the GNU General Public License version 2 or later.
+#
+# Authors: Patrick Schmid <schmid@phys.ethz.ch>
+#
+use strict;
+use warnings;
+use Cwd qw( abs_path );
+use File::Basename;
+use Getopt::Long qw( :config no_auto_abbrev );
+use Time::HiRes qw( gettimeofday );
+use POSIX qw( strftime );
+
+use lib dirname( abs_path($0) ) . "/lib";
+use BaNG::Config;
+use BaNG::Common;
+use BaNG::Wipe;
+
+my $version = '0.1';
+my $debug_arg;
+my $debuglevel_arg;
+my $dryrun_arg = 1;
+my $group_arg;
+my $host_arg;
+my $old_bkpprefix_arg;
+my $prefix_arg;
+
+#################################
+# Main
+#
+parse_command_options();
+get_serverconfig($prefix_arg);
+cli_args_override_global_config();
+
+my $taskid = create_timeid($host_arg, $group_arg);
+
+get_host_config($host_arg, $group_arg);
+
+my $host = $host_arg;
+my $group = $group_arg;
+my $config = "$host-$group";
+my $current_bkpprefix = $hosts{$config}->{hostconfig}->{BKP_PREFIX};
+my $old_bkpprefix = $old_bkpprefix_arg;
+
+if ( $serverconfig{debug} ) {
+    print "\tHost: $hosts{$config}->{hostname}\n";
+    print "\tGroup: $hosts{$config}->{group}\n";
+    print "\tBKP-PREFIX current: $current_bkpprefix\n";
+    print "\tBKP-PREFIX old: $old_bkpprefix\n";
+}
+
+# fill up @backup_folders_history -> all folders to migrate, excl. 'to wiped' folders
+queue_history( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+
+
+exit 0;
+
+
+#################################
+# Sub-Functions
+#
+sub queue_history {
+    my ($taskid, $host, $group) = @_;
+
+    logit( $taskid, $host, $group, "Queueing History Merge for host $host group $group" );
+
+    my @backup_folders;
+    my $count = 0;
+    my $oldestCurFolder;
+
+    foreach my $bkpprefix ( $current_bkpprefix, $old_bkpprefix  ){
+        $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $bkpprefix;
+        logit( $taskid, $host, $group, "Collect folders for BKP-PREFIX: $bkpprefix" );
+        foreach my $folder ( get_backup_folders( $host, $group )){
+            if ( $count == 0 ) {
+                $oldestCurFolder = $folder if $count == 0;
+                chomp $oldestCurFolder;
+            }
+            $count++;
+            print "\tCollect folder: $folder" if $serverconfig{debug};
+            push ( @backup_folders, $folder);
+        }
+    }
+    logit( $taskid, $host, $group, "OldestCurrentFolder: $oldestCurFolder" );
+
+    # count existing backups
+    my $bkpkeep = 0;
+    foreach my $type (qw( DAILY WEEKLY MONTHLY )) {
+        $bkpkeep += $hosts{$config}->{hostconfig}->{"WIPE_KEEP_$type"};
+    }
+    my $bkpcount = $#backup_folders + 1;
+
+    # get list of folders to wipe
+    my %stack    = list_folders_to_wipe( $host, $group, @backup_folders);
+
+    logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} +1 ) .", keeping: $bkpkeep for host $host group $group");
+
+    # generate wipe report with content of stacks
+    if ( $serverconfig{debuglevel} >= 2 && $serverconfig{debug} ) {
+        my $wipe_report = "Wipe report\n";
+        foreach my $type ( sort keys %stack ) {
+            $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
+            foreach my $folder ( @{$stack{$type}} ) {
+                $wipe_report .= "\t$folder\n";
+            }
+        }
+        print $wipe_report;
+    }
+
+    my @backup_folders_history;
+    foreach my $type ( qw( daily weekly monthly )) {
+        foreach my $folder ( @{$stack{$type}} ) {
+            next if $folder =~ m/$current_bkpprefix/;
+            push (@backup_folders_history, $folder);
+        }
+    }
+    if ( $serverconfig{debug} ){
+        print "Migrate following folders:\n" if $serverconfig{debug};
+        foreach my $folder ( reverse sort @backup_folders_history ) {
+            print "\t$folder\n";
+        }
+    }
+    logit( $taskid, $host, $group, "End of queueing History Merge of host $host group $group" );
+
+    return 1;
+}
+
+#################################
+# Helper subroutines
+#
+sub logit {
+    my ( $taskid, $host, $group, $msg) = @_;
+
+    my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
+    my $logmonth   = strftime "%Y-%m", localtime;
+    my $logdate    = strftime $serverconfig{global_log_date}, localtime;
+    my $logfile    = "$serverconfig{path_logs}/historymerger_$logdate.log";
+    my $logmessage = "$timestamp $host-$group($taskid) : $msg";
+    $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
+
+    if ( $serverconfig{debug} ) {
+        if ( $serverconfig{dryrun} ) {
+            print $logmessage;
+        }
+    }
+
+    unless ( $serverconfig{dryrun} ) {
+        open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
+        print {$log} $logmessage;
+        close $log;
+    }
+
+    return 1;
+}
+
+sub create_timeid {
+    my ($host, $group, $taskid) = @_;
+    my ($s, $usec) = gettimeofday;
+    my $timeid      = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
+    $timeid =~ s/\n//g;
+    $host  ||= "SERVER";
+    $group ||= "GLOBAL";
+    $taskid ||= $timeid;
+    logit( $taskid, $host, $group, "Created TimeID: $timeid" );
+
+    return $timeid;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#
+#my $btrfs_cmd             = $serverconfig{path_btrfs};
+#
+#
+#my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
+#
+#foreach my $folder ( reverse sort @backup_folders_history ) {
+#    print "Work on: $folder\n";
+#    my ($workfolder) = $folder =~ /\/([\d._]*)$/;
+#
+#    my $rsync_cmd     = $serverconfig{path_rsync};
+#    my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
+#
+#    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $old_bkpprefix;
+#    my $rsync_src  = targetpath( $host, $group ) . "/$workfolder/";
+#    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $current_bkpprefix;
+#    my $rsync_dest  = targetpath( $host, $group ) . "/migrate";
+#
+#    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
+#        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+#        if ( -e $excludefile ) {
+#            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+#        } else {
+#            print "Warning: could not find excludefile $excludefile.\n";
+#        }
+#    }
+#
+#    print "$rsync_cmd $rsync_options $rsync_src $rsync_dest\n";
+#    system("$rsync_cmd $rsync_options $rsync_src $rsync_dest") unless $serverconfig{dryrun};
+#
+#
+#    ### do Snapshot Work
+#
+#    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $current_bkpprefix;
+#    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/migrate";
+#    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/$workfolder";
+#
+#    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
+#    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+#    print "Create btrfs snapshot for host $host group $group using\n$btrfs_snapshot_cmd\n";
+#    system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
+#
+#}
+#
+#################################
+# Command line arguments
+#
+sub parse_command_options {
+    GetOptions(
+        "help"          => sub { usage('') },
+        "v|version"     => sub { usage("Current version number: $version") },
+        "d|debug"       => \$debug_arg,
+        "n|dry-run"     => \$dryrun_arg,
+        "g|group=s"     => \$group_arg,
+        "h|host=s"      => \$host_arg,
+        "old-bkpprefix=s" => \$old_bkpprefix_arg,
+    ) or usage("Invalid commmand line options.");
+    usage("Check the arguments!") unless ( $host_arg && $group_arg && $old_bkpprefix_arg );
+
+    $debug_arg = 1 if $dryrun_arg;
+
+    return 1;
+}
+
+sub cli_args_override_global_config {
+
+    $serverconfig{debug}      = $debug_arg      if $debug_arg;
+    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
+    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+
+    return 1;
+}
+
+sub usage {
+    my ($message) = @_;
+
+    if ( defined $message && length $message ) {
+        $message .= "\n"
+            unless $message =~ /\n$/;
+    }
+
+    my $command = $0;
+    $command    =~ s#^.*/##;
+
+    print <<"EOF";
+        $message
+        Usage Examples:
+
+        $command -h <hostname> -g <group> --old-prefix <BKP_PREFIX>
+
+        Optional Arguments:
+
+        -d              # show debugging messages
+        -n              # dry-run without making changes
+
+EOF
+    exit 0;
+}
+

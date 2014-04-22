@@ -308,6 +308,8 @@ sub db_report {
         'last backup'                 => 'LastBkp',
         'Number of files'             => 'NumOfFiles',
         'Number of regular files transferred' => 'NumOfFilesTrans',
+        'Number of created files'     => 'NumOfFilesCreated',
+        'Number of deleted files'     => 'NumOfFilesDel',
         'Number of files transferred' => 'NumOfFilesTrans',
         'Total file size'             => 'TotFileSize',
         'Total transferred file size' => 'TotFileSizeTrans',
@@ -344,16 +346,17 @@ sub db_report {
     my $sql;
     $sql .= "INSERT INTO statistic (";
     $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
-    $sql .= " NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
+    $sql .= " NumOfFiles, NumOfFilesTrans, NumOfFilesCreated, NumOfFilesDel, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
     $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
     $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
-    $sql .= "'$log_values{NumOfFiles}'  , '$log_values{NumOfFilesTrans}', ";
-    $sql .= "'$log_values{TotFileSize}' , '$log_values{TotFileSizeTrans}', ";
-    $sql .= "'$log_values{LitData}'     , '$log_values{MatchData}', ";
-    $sql .= "'$log_values{FileListSize}', '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
-    $sql .= "'$log_values{TotBytesSent}', '$log_values{TotBytesRcv}' ";
+    $sql .= "'$log_values{NumOfFiles}'        , '$log_values{NumOfFilesTrans}', ";
+    $sql .= "'$log_values{NumOfFilesCreated}' , '$log_values{NumOfFilesDel}', ";
+    $sql .= "'$log_values{TotFileSize}'       , '$log_values{TotFileSizeTrans}', ";
+    $sql .= "'$log_values{LitData}'           , '$log_values{MatchData}', ";
+    $sql .= "'$log_values{FileListSize}'      , '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
+    $sql .= "'$log_values{TotBytesSent}'      , '$log_values{TotBytesRcv}' ";
     $sql .= ")";
     logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{debuglevel} >= 2 );
 
