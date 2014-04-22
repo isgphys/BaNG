@@ -11,6 +11,8 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
             <th>Starttime</th>
             <th>Last Backup</th>
             <th>Runtime</th>
+            <th>FilesCreated</th>
+            <th>FilesDel</th>
             <th>FilesTrans</th>
             <th>SizeTrans</th>
         </tr>
@@ -37,6 +39,8 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
                 <td class="center"><% bkp.Starttime %></td>
                 <td class="center"><% bkp.LastBkp %></td>
                 <td class="center"><% bkp.Runtime %></td>
+                <td class="center"><% bkp.FilesCreated %></td>
+                <td class="center"><% bkp.FilesDel %></td>
                 <td class="center"><% bkp.FilesTrans %></td>
                 <td class="center"><% bkp.SizeTrans %></td>
             </tr>

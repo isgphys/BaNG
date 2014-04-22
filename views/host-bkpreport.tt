@@ -6,7 +6,7 @@
                 <table class="default-table border">
                     <thead>
                         <tr>
-                            <th colspan="10">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                            <th colspan="12">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
                         </tr>
                         <tr>
                             <th width="50">TaskID</th>
@@ -15,6 +15,8 @@
                             <th width="50">ErrStatus</th>
                             <th width="100">Starttime</th>
                             <th width="50">Runtime</th>
+                            <th width="50">FilesCreated</th>
+                            <th width="50">FilesDel</th>
                             <th width="50">FilesTrans</th>
                             <th width="50">SizeTrans</th>
                             <th width="130">FromPath</th>
@@ -40,6 +42,8 @@
                             </td>
                             <td class="center"><% bkp.Starttime %></td>
                             <td class="center"><% bkp.Runtime %></td>
+                            <td class="center"><% bkp.FilesCreated %></td>
+                            <td class="center"><% bkp.FilesDel %></td>
                             <td class="center"><% bkp.FilesTrans %></td>
                             <td class="center"><% bkp.SizeTrans %></td>
                             <td class="center"><% bkp.BkpFromPath %></td>
