@@ -346,14 +346,13 @@ sub db_report {
     my $sql;
     $sql .= "INSERT INTO statistic (";
     $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
-    $sql .= " NumOfFiles, NumOfFilesCreated, NumOfFilesDel, NumOfFilesTrans, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
+    $sql .= " NumOfFiles, NumOfFilesTrans, NumOfFilesCreated, NumOfFilesDel, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
     $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
     $sql .= ") VALUES (";
     $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
     $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
     $sql .= "'$log_values{NumOfFiles}'        , '$log_values{NumOfFilesTrans}', ";
-    $sql .= "'$log_values{NumOfFilesCreated}' , '$log_values{NumOfFilesCreated}', ";
-    $sql .= "'$log_values{NumOfFilesDel}'     , '$log_values{NumOfFilesDel}', ";
+    $sql .= "'$log_values{NumOfFilesCreated}' , '$log_values{NumOfFilesDel}', ";
     $sql .= "'$log_values{TotFileSize}'       , '$log_values{TotFileSizeTrans}', ";
     $sql .= "'$log_values{LitData}'           , '$log_values{MatchData}', ";
     $sql .= "'$log_values{FileListSize}'      , '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
