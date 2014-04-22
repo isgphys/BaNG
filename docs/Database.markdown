@@ -41,6 +41,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
       JobStatus tinyint(1) DEFAULT '0',
       NumOfFiles bigint(20) NOT NULL,
       NumOfFilesTrans bigint(20) NOT NULL,
+      NumOfFilesCreated bigint(20) NOT NULL,
       NumOfFilesDel bigint(20) NOT NULL,
       TotFileSize bigint(20) NOT NULL COMMENT 'in bytes',
       TotFileSizeTrans bigint(20) NOT NULL,
