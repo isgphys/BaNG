@@ -74,14 +74,8 @@ function drawVisualization() {
     var togglerForm = document.getElementById('chart_toggler');
     togglerForm.addEventListener('change', function(e) {
         var choice = e.target.value;
-
-        if (choice == 'line') {
-                graph.setRenderer('line');
-                graph.offset = 'zero';
-        } else {
-                graph.setRenderer('stack');
-                graph.offset = choice;
-        }
+        graph.setRenderer(choice);
+        graph.offset = 'zero';
         graph.render();
     }, false);
 }
