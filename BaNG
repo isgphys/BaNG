@@ -94,7 +94,7 @@ sub reorder_queue_by_priority {
         my $host  = $bkpjob->{host};
         my $group = $bkpjob->{group};
         my $path  = $bkpjob->{path};
-        $path =~ s/[':]//g;
+        $path =~ s/'//g;
 
         my $prio = $hosts{"$host-$group"}->{hostconfig}->{BKP_PRIORITY}->{"$path"} || 0;
         $bkpjob->{priority} = $prio;
