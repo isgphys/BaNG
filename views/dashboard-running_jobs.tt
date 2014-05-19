@@ -5,6 +5,7 @@
         <th>Group</th>
         <th>Work on</th>
         <th>Run since</th>
+        <th>TaskID</th>
     </thead>
     <tbody>
       <%- FOREACH server IN lockfiles.keys %>
@@ -17,6 +18,7 @@
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.path %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.timestamp %></td>
+                <td class="center"><% lockfiles.$server.$lockfile.taskid.substr(0,8) %>...</td>
             </tr>
         <%- END %>
       <%- END %>

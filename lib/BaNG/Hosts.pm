@@ -81,8 +81,10 @@ sub get_lockfiles {
         my @lockfiles = remotewrapper_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
 
         foreach my $lockfile ( @lockfiles  ) {
-            my ($host, $group, $path, $timestamp) = split_lockfile_name($lockfile);
+            my ($host, $group, $path, $timestamp, $file) = split_lockfile_name($lockfile);
+            my $taskid = `cat $serverconfig{path_lockfiles}/$file`;
             $lockfiles{$server}{"$host-$group-$path"} = {
+                'taskid'    => $taskid,
                 'host'      => $host,
                 'group'     => $group,
                 'path'      => $path,
@@ -153,7 +155,7 @@ sub create_lockfile {
         return 0;
     } else {
         unless ( $serverconfig{dryrun} ) {
-            system("touch \"$lockfile\"") and logit( $taskid, $host, $group, "ERROR: could not create lockfile $lockfile" );
+            system("echo $taskid > \"$lockfile\"") and logit( $taskid, $host, $group, "ERROR: could not create lockfile $lockfile" );
         }
         logit( $taskid, $host, $group, "Created lockfile $lockfile" );
         return 1;
@@ -173,13 +175,15 @@ sub remove_lockfile {
 sub split_lockfile_name {
     my ($lockfile) = @_;
     my ($host, $group, $path, $timestamp) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
+    my $file = "${host}_${group}_${path}.lock";
+    $file =~ s/\'/\\'/g;
 
     $path =~ s/%/\//g;
     $path =~ s/\'//g;
     $path =~ s/\+/ :/g;
     $path =~ s/^\//:\//g;
 
-    return $host, $group, $path, $timestamp;
+    return $host, $group, $path, $timestamp, $file;
 }
 
 sub check_lockfile {
