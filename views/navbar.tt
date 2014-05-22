@@ -66,4 +66,9 @@
           <%- END %>
         </li>
     </ul>
+    <ul class="updated">
+        <li>
+            <a href="javascript:location.reload()" title="Last update">Last update: <span id="LastUpdate">00:00:00</span></a>
+        </li>
+    </ul>
 </nav>

@@ -13,6 +13,11 @@
         <script src="/javascripts/jquery.tablesorter.js"></script>
         <script src="/javascripts/jquery.tablesorter.widgets.js"></script>
         <script>
+            function updateTime() {
+                document.getElementById("LastUpdate").firstChild.nodeValue =
+                new Date().toTimeString().substring(0, 8);
+            }
+
             function updateFilter() {
                 $.uiTableFilter( $('.tablefilter'), $("#filter").val() );
                 var countVisible = $('.tablefilter > tbody > tr:visible').length;
@@ -145,6 +150,7 @@
 
             $(document).ready(function(){
                 initializeAll();
+                updateTime();
             });
 
         </script>
