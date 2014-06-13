@@ -398,7 +398,7 @@ sub execute_rsync {
     my $taskset = "";
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
            if (-e $serverconfig{path_taskset} ) {
-                $taskset = $serverconfig{path_taskset} . " -c " . $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} . " ";
+                $taskset = $serverconfig{path_taskset} . " " . $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} . " ";
             } else {
                 logit( $taskid, $host, $group, "TASKSET selected but command $serverconfig{path_taskset} not found!" );
             }
