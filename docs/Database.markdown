@@ -74,6 +74,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start) , Max(Stop)) as Runtime,
     BkpFromHost, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
     BkpFromPath) as BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
+    SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
     SUM(TotFileSizeTrans) as TotFileSizeTrans
     FROM statistic
@@ -83,7 +84,7 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     CREATE OR REPLACE VIEW statistic_job_thread AS
     SELECT TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
     BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
-    NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
+    NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
     AND isThread = 1;
@@ -92,3 +93,4 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     SELECT * FROM statistic_job_sum
     UNION
     SELECT * FROM statistic_job_thread;
+

@@ -114,6 +114,7 @@ function parseLaneData(backups) {
                         TotFileSize      : bkp.TotFileSize,
                         NumOfFiles       : bkp.NumOfFiles,
                         NumOfFilesTrans  : bkp.NumOfFilesTrans,
+                        NumOfFilesDel    : bkp.NumOfFilesDel,
                         AvgFileSize      : bkp.AvgFileSize,
                         BkpFromPath      : bkp.BkpFromPath,
                         BkpFromHost      : bkp.BkpFromHost,
@@ -492,6 +493,10 @@ function DrawSwimlanes() {
                 + "  <tr>"
                 + "    <th>Files:</th>"
                 + "    <td>" + d.info.NumOfFilesTrans + " files transferred of a total of " + d.info.NumOfFiles + "</td>"
+                + "  </tr>"
+                + "  <tr>"
+                + "    <th></th>"
+                + "    <td>" + d.info.NumOfFilesDel + " files deleted </td>"
                 + "  </tr>"
                 + "  <tr>"
                 + "    <th>Ratio: </th>"

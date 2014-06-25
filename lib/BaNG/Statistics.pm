@@ -25,7 +25,7 @@ our @EXPORT = qw(
     statistics_schedule
 );
 
-my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
+my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesDel NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
 my $lastXdays_default    = 90;  # retrieve info of last X days from database
 my $lastXdays_variations = 30;  # find largest variation of the last X days
 my $lastXdays_diffperday = 5;   # show TotOfFiles difference to previous day from the last X days
@@ -85,6 +85,7 @@ sub statistics_json {
             TotFileSizeTrans => $dbrow->{'TotFileSizeTrans'},
             NumOfFiles       => $dbrow->{'NumOfFiles'},
             NumOfFilesTrans  => $dbrow->{'NumOfFilesTrans'},
+            NumOfFilesDel    => $dbrow->{'NumOfFilesDel'},
         });
     }
     $sth->finish();
@@ -166,6 +167,7 @@ sub statistics_cumulated_json {
         $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
         $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
         $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'};
+        $CumulateByDate{$epoch}{NumOfFilesDel}    += $dbrow->{'NumOfFilesDel'};
     }
     $sth->finish();
 
@@ -186,6 +188,7 @@ sub statistics_cumulated_json {
             TotFileSizeTrans => $CumulateByDate{$date}{TotFileSizeTrans},
             NumOfFiles       => $CumulateByDate{$date}{NumOfFiles},
             NumOfFilesTrans  => $CumulateByDate{$date}{NumOfFilesTrans},
+            NumOfFilesDel    => $CumulateByDate{$date}{NumOfFilesDel},
         });
     }
 
@@ -570,6 +573,7 @@ sub statistics_schedule {
             TotFileSizeTrans => num2human($dbrow->{'TotFileSizeTrans'}, 1024.),
             NumOfFiles       => num2human($dbrow->{'NumOfFiles'}),
             NumOfFilesTrans  => num2human($dbrow->{'NumOfFilesTrans'}),
+            NumOfFilesDel    => num2human($dbrow->{'NumOfFilesDel'}),
             AvgFileSize      => $dbrow->{'NumOfFiles'} ? num2human($dbrow->{'TotFileSize'}/$dbrow->{'NumOfFiles'},1024) : 0,
             SystemBkp        => $systemBkp,
             BkpGroup         => $dbrow->{'BkpGroup'} || 'NoBkpGroup',
@@ -630,6 +634,7 @@ sub rickshaw_json {
         "NumOfFilesTrans"  => "#330099",
         "TotFileSize"      => "#FFCC00",
         "TotFileSizeTrans" => "#FF8000",
+        "NumOfFilesDel"    => "#FF3333",
     );
 
     my $json .= "[\n";
