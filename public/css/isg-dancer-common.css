@@ -126,6 +126,7 @@ nav ul ul ul li a {
 
 #login {
     width: 300px;
+    margin-top: 10px;
 }
 #login fieldset {
     background: #efe;
