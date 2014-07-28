@@ -26,6 +26,7 @@ use BaNG::Wipe;
 my $version = '3.3';
 my $force;
 my $wipe;
+my $initial;
 my $cleanup;
 my $hobbitonly;
 my $missingonly;
@@ -132,6 +133,13 @@ sub queue_backup {
     # stop if trying to do bulk backup if it's not allowed
     return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
+    # check for existing target_path folder
+    my ($check_rsync_target_code) = check_rsync_target($host, $group);
+    if ($check_rsync_target_code gt 0 && !$initial) {
+        logit( $taskid, $host, $group, "Skipping because target_path ($check_rsync_target_code) does not exist for host $host group $group" );
+        return 1;
+    }
+
     # check if last backup exists
     my $lastbkp = check_last_bkp($taskid, $host, $group);
 
@@ -198,7 +206,7 @@ sub queue_backup {
     logit( $taskid, $host, $group, "End of queueing backup of host $host group $group" );
 
     return 1;
-} 
+}
 
 sub queue_remote_subfolders {
     my ($taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition) = @_;
@@ -365,6 +373,23 @@ sub eval_rsync_options {
     $rsync_options =~ s/\s+$//; # remove trailing space
 
     return $rsync_options;
+}
+
+sub check_rsync_target {
+    my ($host, $group) = @_;
+    my $return_code = 0;
+
+    my $rsync_target = targetpath($host, $group);
+
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+        $rsync_target .= "/current";
+    }
+
+    if ( !-d $rsync_target ) {
+        $return_code = 1;
+    }
+
+    return $return_code;
 }
 
 sub eval_rsync_target {
@@ -734,6 +759,7 @@ sub parse_command_options {
         "p|prefix=s"       => \$prefix_arg,
         "t|threads=i"      => \$nthreads_arg,
         "w|wipe"           => \$wipe,
+        "initial"          => \$initial,
         "cleanup"          => \$cleanup,
         "finallysnapshots" => \$finallysnapshots,
         "force"            => \$force,
@@ -785,6 +811,7 @@ sub usage {
         -p <path>          # override path to folder containing etc/
         -w                 # wipe the backup
         -w --force         # forcing wipe the backup (override auto_wipe_limit)
+        --initial          # create nonexisting backup targets
         --cleanup          # cleanup threaded jobs
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
