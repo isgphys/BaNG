@@ -1,4 +1,5 @@
 *.swp
+config.yml
 etc
 t/etc/bangstat_db.yaml
 TODO
