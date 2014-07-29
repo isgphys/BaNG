@@ -1,0 +1,5 @@
+---
+DBhostname:     'host.example.com'
+DBusername:     'mysqlusr'
+DBpassword:     'secretpwd'
+DBdatabase:     'bangstat'

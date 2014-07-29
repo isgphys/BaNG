@@ -1,0 +1,71 @@
+# ---------------
+# Global settings
+# ---------------
+config_defaults_hosts:  etc/defaults_hosts.yaml
+config_bangstat:        etc/bangstat_db.yaml
+#
+path_groupconfig:       etc/groups
+path_hostconfig:        etc/hosts
+path_excludes:          etc/excludes
+path_lockfiles:         var/lockfiles
+path_logs:              var/logs
+#
+global_log_date:        "%Y-%m-%d"
+show_logs_number:       5
+#
+path_btrfs:             /usr/local/bin/btrfs
+path_date:              /bin/date
+path_rsh:               /usr/bin/rsh
+path_rsync:             /usr/bin/rsync
+path_nocache:           /scratch/nocache/nocache
+path_ionice:            /usr/bin/ionice
+path_taskset:           /usr/bin/taskset
+#
+report_to:              admin@example.com
+#
+debug:                  0
+debuglevel:             2
+dryrun:                 0
+auto_wipe_limit:        5
+snapshot_wipe_limit:    3
+
+#*************************
+# Description of variables
+#
+HELP:
+  config_defaults_servers:  Hardcoded in lib/BaNG/Config.pm
+  config_defaults_hosts:    The filename of hosts default file, located in $prefix/etc
+  defaults_host:            Hash of config_defaults_hosts
+  config_bangstat:          The filename of database credetial file, located in $prefix/etc
+  HELP:                     This Hash includes this HELP content
+  path_configs:             Hardcoded in lib/BaNG/Config.pm
+  path_serverconfig:
+  path_groupconfig:
+  path_hostconfig:
+  path_excludes:
+  path_lockfiles:
+  path_logs:
+  HELP:                     This Hash includes this HELP content
+  global_log_date:
+  show_logs_number:         the number of logs shown on Backup Logfile Reports
+
+  path_btrfs:
+  path_date:
+  path_rsh:
+  path_rsync:
+
+  report_to:                email-addresses for reporting (comma separated)
+
+  debug:                    |
+                            0 = be quiet
+                            1 = Write debug output to console
+  debuglevel:               |
+                            0 = be quiet
+                            1 = unused ;-)
+                            2 = log sql commands, Rsync STDOUT, Wipe report
+                            3 = 2 + rsync verbose
+  dryrun:                   |
+                            0 = do real work
+                            1 = simulate real work
+  auto_wipe_limit:          maximal number of backups to wipe automatically without warning
+  snapshot_wipe_limit:      maximal number of snapshots to wipe

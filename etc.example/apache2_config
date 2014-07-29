@@ -1,0 +1,25 @@
+<VirtualHost *:80>
+    ServerName bang.example.com
+    DocumentRoot /opt/BaNG
+
+    RedirectMatch (.*) https://bang.example.com$1
+
+    ErrorLog  /var/log/apache2/bang_error_log
+    CustomLog /var/log/apache2/bang_access_log common
+</VirtualHost>
+<VirtualHost *:443>
+    ServerName bang.example.com
+    DocumentRoot /opt/BaNG
+
+    HostnameLookups On
+    ProxyPass / http://localhost:8030/ retry=0
+    ProxyPassReverse / http://localhost:8030/
+
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/cert/bang.crt
+    SSLCertificateKeyFile /etc/apache2/cert/bang.key
+
+    logLevel  warn
+    ErrorLog  /var/log/apache2/bang_ssl_error_log
+    CustomLog /var/log/apache2/bang_ssl_access_log common
+</VirtualHost>

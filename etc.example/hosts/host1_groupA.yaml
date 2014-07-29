@@ -1,0 +1,6 @@
+---
+BKP_ENABLED:            1
+WIPE_ENABLED:           1
+BKP_BULK_ALLOW:         1
+WIPE_BULK_ALLOW:        1
+BKP_EXCLUDE_FILE:       'excludelist_host1'
