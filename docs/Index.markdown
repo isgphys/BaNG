@@ -2,6 +2,7 @@
 ======================
 
   * [Readme](Readme) : General overview
+  * [Installation](Installation) : initial setup of BaNG
   * [Configuration](Configuration) : BaNG config files
   * [Commands](Commands) : BaNG command line tools
   * [Database](./Database) : BaNG database configuration
