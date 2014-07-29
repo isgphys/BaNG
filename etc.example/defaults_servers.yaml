@@ -8,7 +8,7 @@ path_groupconfig:       etc/groups
 path_hostconfig:        etc/hosts
 path_excludes:          etc/excludes
 path_lockfiles:         var/lockfiles
-path_logs:              var/logs
+path_logs:              var/log
 #
 global_log_date:        "%Y-%m-%d"
 show_logs_number:       5
