@@ -4,9 +4,6 @@ use warnings;
 
 use lib '/opt/BaNG/lib';
 
-# Install missing perl module
-# aptitude install libclone-perl libdancer-perl libdatetime-perl libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl libmodule-refresh-perl libtemplate-perl libthread-queue-perl libyaml-tiny-perl libmime-lite-perl
-
 require_ok 'Dancer';
 require_ok 'YAML::Tiny';
 require_ok 'Cwd';
@@ -28,5 +25,7 @@ use_ok 'Net::Ping';
 use_ok 'POSIX';
 use_ok 'Template';
 use_ok 'Thread::Queue';
+use_ok 'Net::LDAP';
+use_ok 'Text::Markdown';
 
 done_testing();
