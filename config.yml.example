@@ -12,7 +12,7 @@ error_template:     'error'
 default_mime_type:  'text/plain'
 logger:             'file'
 logger_format:      '%t [%L] %m'
-log_path:           '/opt/BaNG/var/logs'
+log_path:           '/opt/BaNG/var/log'
 session:            'YAML'
 session_dir:        '/opt/BaNG/var/sessions'
 plugins:
@@ -22,5 +22,5 @@ plugins:
     realms:
       ldap:
         provider:   'LDAPphys'
-        server:     'ldap.phys.ethz.ch'
-        base_dn:    'ou=Physik Departement,o=ethz,c=ch'
+        server:     'ldap.example.com'
+        base_dn:    'ou=Company,o=example,c=com'
