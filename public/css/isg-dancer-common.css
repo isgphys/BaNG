@@ -233,3 +233,6 @@ td a {
     background: #e6e6e6;
 }
 
+svg.chart {
+    width: 100%;
+}
