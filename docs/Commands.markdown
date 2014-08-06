@@ -21,6 +21,7 @@
 
 Optional argument:
 
+    --initial                             # need for initial backup
     --finallysnapshots                    # make snapshots after the hole backup stuff
     --missingonly                         # backup only hosts without recent backup (e.g. machines that were offline during the night)
 
