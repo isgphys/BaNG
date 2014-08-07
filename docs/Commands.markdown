@@ -51,7 +51,7 @@ Optional argument:
     BaNGadm --delete -g <group>                 # delete a existing group config
 
     BaNGadm --showgroups                        # Show all available backup groups
-    BaNGadm --crontab                           # Show generated crontab entry
+    BaNGadm --crontab                           # generate crontab, use -n to show only the generated crontab
 
 
  BaNG-Web : web frontend
