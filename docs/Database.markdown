@@ -1,8 +1,8 @@
-  BaNG Database
-=================
+BaNG Database
+=============
 
- Basics
---------
+Basics
+------
 
 BaNG uses a **MySQL** database to store backup statistics.
 
@@ -21,8 +21,29 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
 
     ALTER TABLE mytable ENGINE = InnoDB;
 
- Tables
--------
+Create database and user
+------------------------
+
+```
+create database bangstat;
+use bangstat;
+
+GRANT USAGE
+    ON *.*
+    TO 'bang'@'localhost'
+    IDENTIFIED BY 'secret-password';
+
+GRANT
+    SELECT,INSERT,UPDATE,DELETE
+    ON `bangstat`.*
+    TO 'bang'@'localhost';
+
+FLUSH PRIVILEGES;
+```
+
+Create table
+------------
+
     CREATE TABLE statistic (
       ID int(11) NOT NULL AUTO_INCREMENT,
       TaskID varchar(24) DEFAULT NULL,
@@ -57,8 +78,8 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
       PRIMARY KEY (ID)
     ) ENGINE=InnoDB AUTO_INCREMENT=194120 DEFAULT CHARSET=utf8;
 
- Views
--------
+Create views
+------------
 
     CREATE OR REPLACE VIEW recent_backups AS
     SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime, BkpFromHost,
@@ -93,4 +114,3 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
     SELECT * FROM statistic_job_sum
     UNION
     SELECT * FROM statistic_job_thread;
-
