@@ -24,22 +24,20 @@ Change MySQL engine from ```MyISAM``` to ```InnoDB```
 Create database and user
 ------------------------
 
-```
-create database bangstat;
-use bangstat;
+    CREATE DATABASE bangstat;
+    USE bangstat;
 
-GRANT USAGE
-    ON *.*
-    TO 'bang'@'localhost'
-    IDENTIFIED BY 'secret-password';
+    GRANT USAGE
+        ON *.*
+        TO 'bang'@'localhost'
+        IDENTIFIED BY 'secret-password';
 
-GRANT
-    SELECT,INSERT,UPDATE,DELETE
-    ON `bangstat`.*
-    TO 'bang'@'localhost';
+    GRANT
+        SELECT,INSERT,UPDATE,DELETE
+        ON `bangstat`.*
+        TO 'bang'@'localhost';
 
-FLUSH PRIVILEGES;
-```
+    FLUSH PRIVILEGES;
 
 Create table
 ------------
