@@ -1,5 +1,5 @@
 ---
-DBhostname:     'host.example.com'
+DBhostname:     'dbserver.example.com'
 DBusername:     'mysqlusr'
 DBpassword:     'secretpwd'
 DBdatabase:     'bangstat'
