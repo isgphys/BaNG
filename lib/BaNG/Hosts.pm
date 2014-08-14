@@ -217,7 +217,7 @@ sub remotewrapper_command {
     my ($remoteHost, $remoteCommand, $remoteArgument) = @_;
     $remoteArgument ||= '';
 
-    my $results = `ssh -o IdentitiesOnly=yes -i /opt/BaNG/etc/remotesshwrapper/.ssh/remotesshwrapper root\@$remoteHost /usr/local/bin/remotesshwrapper $remoteCommand $remoteArgument 2>/dev/null`;
+    my $results = `ssh -o IdentitiesOnly=yes -i /var/www/.ssh/remotesshwrapper root\@$remoteHost /usr/local/bin/remotesshwrapper $remoteCommand $remoteArgument 2>/dev/null`;
     my @results = split( "\n", $results );
 
     return @results;
