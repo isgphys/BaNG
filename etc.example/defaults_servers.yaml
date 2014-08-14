@@ -17,6 +17,7 @@ path_btrfs:             /usr/local/bin/btrfs
 path_date:              /bin/date
 path_rsh:               /usr/bin/rsh
 path_rsync:             /usr/bin/rsync
+path_ypcat:             /usr/bin/ypcat
 path_nocache:           /scratch/nocache/nocache
 path_ionice:            /usr/bin/ionice
 path_taskset:           /usr/bin/taskset

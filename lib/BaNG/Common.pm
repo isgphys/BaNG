@@ -89,34 +89,38 @@ sub get_automount_paths {
     $ypfile ||= 'auto.backup';
 
     my %automnt;
-    my @autfstbl = `ypcat -k $ypfile`;
 
-    foreach my $line ( @autfstbl ) {
-        if ( $line =~ qr{
-            (?<parentfolder>[^\s]*) \s*
-            \-fstype\=autofs \s*
-            yp\:(?<ypfile>.*)
-            }x )
-        {
-            # recursively read included yp files
-            my $parentfolder = $+{parentfolder};
-            my $submounts = get_automount_paths( $+{ypfile} );
-            foreach my $mountpt ( keys %{ $submounts } ) {
-                $automnt{ $mountpt } = {
-                    server => $submounts->{$mountpt}->{server},
-                    path   => "$parentfolder/$submounts->{$mountpt}->{path}",
+    if (-e $serverconfig{path_ypcat} ) {
+
+        my @autfstbl = `$serverconfig{path_ypcat} -k $ypfile`;
+
+        foreach my $line ( @autfstbl ) {
+            if ( $line =~ qr{
+                (?<parentfolder>[^\s]*) \s*
+                \-fstype\=autofs \s*
+                yp\:(?<ypfile>.*)
+                }x )
+            {
+                # recursively read included yp files
+                my $parentfolder = $+{parentfolder};
+                my $submounts = get_automount_paths( $+{ypfile} );
+                foreach my $mountpt ( keys %{ $submounts } ) {
+                    $automnt{ $mountpt } = {
+                        server => $submounts->{$mountpt}->{server},
+                        path   => "$parentfolder/$submounts->{$mountpt}->{path}",
+                    };
+                }
+            } elsif ( $line =~ qr{
+                (?<mountpt>[^\s]*) \s
+                (?<server>[^\:]*) :
+                (?<mountpath>.*)
+                }x )
+            {
+                $automnt{$+{mountpath}} = {
+                    server => $+{server},
+                    path   => $+{mountpt},
                 };
             }
-        } elsif ( $line =~ qr{
-            (?<mountpt>[^\s]*) \s
-            (?<server>[^\:]*) :
-            (?<mountpath>.*)
-            }x )
-        {
-            $automnt{$+{mountpath}} = {
-                server => $+{server},
-                path   => $+{mountpt},
-            };
         }
     }
 
