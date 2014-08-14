@@ -1,6 +1,9 @@
 Installation
 ============
 
+Requirements:
+    perl module `forks` >= 0.35
+
 Install dependencies:
 
 ```sh
