@@ -36,6 +36,8 @@ my $prefix_arg;
 my $nthreads_arg;
 my $finallysnapshots;
 my $verbose_arg;
+my $vv_arg;
+my $vvv_arg;
 my $dryrun_arg;
 my @queue;
 my @finally_snapshots;
@@ -755,6 +757,8 @@ sub parse_command_options {
         "help"             => sub { usage('') },
         "version"          => sub { usage("Current version number: $version") },
         "v|verbose"        => \$verbose_arg,
+        "vv"               => \$vv_arg,
+        "vvv"              => \$vvv_arg,
         "n|dry-run"        => \$dryrun_arg,
         "g|group=s"        => \$group_arg,
         "h|host=s"         => \$host_arg,
@@ -771,15 +775,17 @@ sub parse_command_options {
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 
-    $verbose_arg = 1 if $dryrun_arg;
+    $verbose_arg = 1 if ( $dryrun_arg || $vv_arg || $vvv_arg );
 
     return 1;
 }
 
 sub cli_args_override_global_config {
 
-    $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
-    $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
+    $serverconfig{verbose}      = $verbose_arg  if $verbose_arg;
+    $serverconfig{dryrun}       = $dryrun_arg   if $dryrun_arg;
+    $serverconfig{verboselevel} = 2             if $vv_arg;
+    $serverconfig{verboselevel} = 3             if $vvv_arg;
 
     return 1;
 }
@@ -816,7 +822,7 @@ sub usage {
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
         --hobbit           # send only hobbit report
-        -v                 # verbose mode to include debugging messages
+        -v | -vv | -vvv    # verbose mode to include debugging messages of level 1-3
         -n                 # dry-run without making changes (implies verbose)
 
 EOF

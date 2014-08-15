@@ -8,7 +8,7 @@
 
 ### Optional arguments
 
-    -v                                    # verbose mode to include debugging messages
+    -v | -vv | -vvv                       # verbose mode to include debugging messages of level 1-3
     -n                                    # dry-run mode to simulate a backup (implies verbose)
     -t <integer>                          # number of threads to use (default: 1)
     -p <path>                             # override path to folder containing etc/
