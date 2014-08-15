@@ -754,7 +754,7 @@ sub parse_command_options {
 
     GetOptions(
         "help"             => sub { usage('') },
-        "v|version"        => sub { usage("Current version number: $version") },
+        "version"          => sub { usage("Current version number: $version") },
         "d|debug"          => \$debug_arg,
         "n|dry-run"        => \$dryrun_arg,
         "g|group=s"        => \$group_arg,
@@ -804,8 +804,8 @@ sub usage {
         $command -h <hostname> -g <group>   # back up given host and group
         $command -h <hostname>              # back up all groups of given host
         $command -g <group>                 # back up all hosts of given group
-        $command -v                         # show version number
         $command --help                     # show this help message
+        $command --version                  # show version number and help
 
         Optional Arguments:
 

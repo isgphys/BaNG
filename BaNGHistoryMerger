@@ -229,7 +229,6 @@ sub create_timeid {
 sub parse_command_options {
     GetOptions(
         "help"          => sub { usage('') },
-        "v|version"     => sub { usage("Current version number: $version") },
         "d|debug"       => \$debug_arg,
         "n|dry-run"     => \$dryrun_arg,
         "g|group=s"     => \$group_arg,

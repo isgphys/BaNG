@@ -111,7 +111,7 @@ sub parse_command_options {
 
     GetOptions(
         "help"        => sub { usage('') },
-        "v|version"   => sub { usage("Current version number: $version") },
+        "version"     => sub { usage("Current version number: $version") },
         "d|debug"     => \$debug_arg,
         "n|dry-run"   => \$dryrun_arg,
         "add"         => \$add_arg,
@@ -162,6 +162,7 @@ sub usage {
         $command --crontab                          # generated and write crontab
         $command --showgroups                       # show available groups
         $command --help                             # show this help message
+        $command --version                          # show version number and help
 
         Optional Arguments:
 
