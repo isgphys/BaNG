@@ -15,6 +15,7 @@ get '/:group' => require_role isg => sub {
 
     template 'group', {
         section      => 'group',
+        servername   => $servername,
         webDancerEnv => config->{run_env},
         group        => param('group'),
         groups       => \%groups,

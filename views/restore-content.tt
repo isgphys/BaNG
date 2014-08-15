@@ -28,7 +28,7 @@
             <td style="white-space: nowrap;"><% hosts.$hostname.group %></td>
             <% IF session.logged_in_admin %><td><% hosts.$hostname.hostconfig.BKP_SOURCE_PARTITION %></td><% END %>
             <td style="white-space: nowrap;">
-              <% IF automount.$BackupPath.path AND TargetHost == 'phd-bkp-gw' %>
+              <% IF automount.$BackupPath.path AND TargetHost == servername %>
                 /backup/<% automount.$BackupPath.path _ '/' _ hosts.$hostname.hostname %>
               <% END %>
             </td>

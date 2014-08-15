@@ -5,13 +5,14 @@ use strict;
 use warnings;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
+use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::Statistics;
 
 prefix '/statistics';
 
 get '/' => require_login sub {
-    redirect '/statistics/phd-bkp-gw';
+    redirect "/statistics/$servername";
 };
 
 get '/schedule.json' => require_login sub {
@@ -31,6 +32,7 @@ get '/schedule-all.json' => require_login sub {
 get '/schedule' => require_login sub {
     template 'statistics-schedule', {
         section      => 'statistics',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         title        => "Backup schedule of last night",
@@ -42,6 +44,7 @@ get '/schedule' => require_login sub {
 get '/schedule-all' => require_login sub {
     template 'statistics-schedule', {
         section      => 'statistics',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         title        => "Backup schedule by host",
@@ -53,6 +56,7 @@ get '/schedule-all' => require_login sub {
 get '/variations' => require_login sub {
     template 'statistics-variations', {
         section            => 'statistics',
+        servername         => $servername,
         remotehost         => request->remote_host,
         webDancerEnv       => config->{run_env},
         largest_variations => statistics_groupshare_variations(),
@@ -65,6 +69,7 @@ get '/diffpreday/:host/:group' => require_login sub {
     my $predays = "14";
     template 'statistics-diffpreday', {
         section      => 'statistics',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         predays      => $predays,
@@ -110,6 +115,7 @@ get '/barchart/:name/:taskid' => require_login sub {
     }
     template 'statistics-barchart', {
         section      => 'statistics',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         chartname    => $chartname,
@@ -136,6 +142,7 @@ get '/:bkpserver' => require_login sub {
 
     template 'statistics', {
         section      => 'statistics',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         title        => "Cumulated Backup Statistics of $bkpserver",
@@ -151,6 +158,7 @@ get '/:host/:share' => require_login sub {
 
     template 'statistics', {
         section      => 'statistics',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         title        => "Statistics for $host:$share",

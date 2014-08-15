@@ -15,6 +15,7 @@ get '/' => require_role isg => sub {
 
     template 'schedule', {
         section      => 'schedule',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         hosts        => \%hosts,

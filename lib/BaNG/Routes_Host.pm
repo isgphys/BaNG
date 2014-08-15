@@ -18,6 +18,7 @@ get '/:host' => require_role isg => sub {
 
     template 'host', {
         section       => 'host',
+        servername    => $servername,
         remotehost    => request->remote_host,
         webDancerEnv  => config->{run_env},
         host          => param('host'),

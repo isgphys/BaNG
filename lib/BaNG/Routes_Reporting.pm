@@ -15,6 +15,7 @@ get '/' => require_role isg => sub {
 
     template 'reporting-bkpreport' => {
         section           => 'reporting',
+        servername        => $servername,
         RecentBackupsLast => bangstat_recentbackups_last(),
     };
 };

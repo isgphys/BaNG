@@ -95,7 +95,7 @@ sub statistics_json {
 
 sub statistics_cumulated_json {
     my ($BkpServer, $lastXdays) = @_;
-    $BkpServer ||= 'phd-bkp-gw';
+    $BkpServer ||= $servername;
     $lastXdays ||= $lastXdays_default;
 
     get_serverconfig();
@@ -197,7 +197,7 @@ sub statistics_cumulated_json {
 
 sub statistics_hosts_shares {
     my ($BkpServer) = @_;
-    $BkpServer ||= 'phd-bkp-gw';
+    $BkpServer ||= $servername;
 
     get_serverconfig();
     my $conn = bangstat_db_connect($serverconfig{config_bangstat});
@@ -542,7 +542,7 @@ sub statistics_schedule {
         FROM statistic_all
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
         AND isThread is Null
-        AND BkpToHost LIKE 'phd-bkp-gw'
+        AND BkpToHost LIKE '$servername'
         ORDER BY Start;
     ");
     $sth->execute();

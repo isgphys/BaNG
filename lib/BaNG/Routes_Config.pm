@@ -14,13 +14,14 @@ get '/defaults' => require_role isg => sub {
     get_serverconfig();
 
     template 'configs-defaults' => {
-        section        => 'configs',
-        remotehost     => request->remote_host,
-        webDancerEnv   => config->{run_env},
-        serverconfig   => \%serverconfig,
-        hostdefaults   => get_host_config_defaults(),
-        servername     => $servername,
-        prefix_path    => $prefix,
+        section      => 'configs',
+        servername   => $servername,
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        serverconfig => \%serverconfig,
+        hostdefaults => get_host_config_defaults(),
+        servername   => $servername,
+        prefix_path  => $prefix,
     };
 };
 
@@ -34,6 +35,7 @@ get '/allhosts/:filter?' => require_role isg => sub {
 
     template 'configs-hosts' => {
         section      => 'configs',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         filtervalue  => param('filter'),
@@ -48,6 +50,7 @@ get '/allgroups' => require_role isg => sub {
 
     template 'configs-groups' => {
         section      => 'configs',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         groups       => \%groups,
@@ -59,6 +62,7 @@ get '/allservers' => require_role isg => sub {
 
     template 'configs-servers' => {
         section      => 'configs',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         servers      => \%servers,
@@ -78,6 +82,7 @@ get '/new/:configtype/?:errmsg?' => require_role isg => sub {
 
     template 'configs-create' => {
         section      => 'configs',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         groups       => \%groups,
@@ -116,11 +121,11 @@ post '/new/:configtype' => require_role isg => sub {
 post '/modify/:configtype' => require_role isg => sub {
     get_serverconfig();
     my $configtype = param('configtype');
-    my $host_arg  = param('host_arg') || "";
+    my $host_arg   = param('host_arg') || "";
     my $group_arg  = param('group_arg');
-    my $key_arg  = param('key_arg');
-    my $val_arg  = param('val_arg');
-    my $updatedby = session('logged_in_user');
+    my $key_arg    = param('key_arg');
+    my $val_arg    = param('val_arg');
+    my $updatedby  = session('logged_in_user');
 
     my ($return_code, $return_msg) = update_config($configtype, $host_arg, $group_arg, $key_arg, $val_arg);
     warning "$return_msg updated by $updatedby!";

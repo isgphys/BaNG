@@ -12,7 +12,8 @@ prefix '/restore';
 
 get '/' => require_login sub {
     template 'restore' => {
-        section      => 'restore',
+        section    => 'restore',
+        servername => $servername,
     };
 };
 
@@ -28,8 +29,10 @@ get '/restore_content' => require_login sub {
 
     template 'restore-content' => {
         section      => 'restore',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
+        servername   => $servername,
         hosts        => \%hosts,
         backupstack  => \%hosts_stack,
         automount    => get_automount_paths(),

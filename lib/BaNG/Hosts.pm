@@ -49,7 +49,7 @@ sub get_fsinfo {
             };
         }
 
-        if ($server eq "phd-bkp-gw") {
+        if ($server eq $servername) {
             @mounts = remotewrapper_command( $server, 'BaNG/bang_di' ) ;
             foreach my $mount (@mounts) {
                 $mount =~ qr{

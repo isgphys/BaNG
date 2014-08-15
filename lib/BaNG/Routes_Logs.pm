@@ -16,6 +16,7 @@ get '/global' => require_role isg => sub {
 
     template 'logs-global', {
         section       => 'logs',
+        servername    => $servername,
         remotehost    => request->remote_host,
         webDancerEnv  => config->{run_env},
         logdata       => read_global_log(),
@@ -29,6 +30,7 @@ get '/:host/:group/?:showlogsnumber?' => require_role isg => sub {
 
     template 'logs-host', {
         section       => 'logs',
+        servername    => $servername,
         remotehost    => request->remote_host,
         webDancerEnv  => config->{run_env},
         host          => param('host'),

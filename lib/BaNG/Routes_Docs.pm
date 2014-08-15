@@ -21,6 +21,7 @@ get '/:file' => sub {
     my $markdown = do { local $/; <$MARKDOWN> };
     template 'documentation' => {
         section      => 'documentation',
+        servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         content      => $markdown,
