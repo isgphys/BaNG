@@ -288,7 +288,6 @@ sub start_threads {
 sub thread_work {
     my ($Q) = @_;
 
-
     while ( my $bkpjob = $Q->dequeue ) {
         my $tid          = threads->tid;
         my $taskid       = $bkpjob->{taskid};
@@ -301,7 +300,7 @@ sub thread_work {
         my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
         my $random_integer = int(rand(10)) + 1;
-        $random_integer = 0 if $verbose_arg;
+        $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
 
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
