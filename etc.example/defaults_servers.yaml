@@ -30,6 +30,9 @@ dryrun:                 0
 auto_wipe_limit:        5
 snapshot_wipe_limit:    3
 
+remote_app:             ""
+remote_app_path:        ""
+
 #*************************
 # Description of variables
 #
