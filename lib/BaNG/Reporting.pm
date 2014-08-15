@@ -74,7 +74,7 @@ sub bangstat_set_jobstatus {
     $sth->finish();
 
     $SQL =~ s/;.*/;/sg;
-    logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{debug} && $serverconfig{debuglevel} >= 2 );
+    logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
     logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group jobid $jobid" );
 
     return 1;
@@ -364,7 +364,7 @@ sub db_report {
     $sql .= "'$log_values{FileListSize}'      , '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
     $sql .= "'$log_values{TotBytesSent}'      , '$log_values{TotBytesRcv}' ";
     $sql .= ")";
-    logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{debuglevel} >= 2 );
+    logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
@@ -511,7 +511,7 @@ sub logit {
         Delete \s btrfs \s subvolume
     }x;
 
-    if ( $serverconfig{debug} ) {
+    if ( $serverconfig{verbose} ) {
         if ( $serverconfig{dryrun} ) {
             unless ( $group eq "GLOBAL" || $host eq "SERVER" ) {
                 # write into daily logfile per host_group

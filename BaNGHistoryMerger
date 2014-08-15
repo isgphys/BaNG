@@ -19,8 +19,8 @@ use BaNG::Common;
 use BaNG::Wipe;
 
 my $version = '0.1';
-my $debug_arg;
-my $debuglevel_arg;
+my $verbose_arg;
+my $verboselevel_arg;
 my $dryrun_arg = 1;
 my $group_arg;
 my $host_arg;
@@ -44,7 +44,7 @@ my $config = "$host-$group";
 my $current_bkpprefix = $hosts{$config}->{hostconfig}->{BKP_PREFIX};
 my $old_bkpprefix = $old_bkpprefix_arg;
 
-if ( $serverconfig{debug} ) {
+if ( $serverconfig{verbose} ) {
     print "\tHost: $hosts{$config}->{hostname}\n";
     print "\tGroup: $hosts{$config}->{group}\n";
     print "\tBKP-PREFIX current: $current_bkpprefix\n";
@@ -79,7 +79,7 @@ sub queue_history {
                 chomp $oldestCurFolder;
             }
             $count++;
-            print "\tCollect folder: $folder" if $serverconfig{debug};
+            print "\tCollect folder: $folder" if $serverconfig{verbose};
             push ( @backup_folders, $folder);
         }
     }
@@ -98,7 +98,7 @@ sub queue_history {
     logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} +1 ) .", keeping: $bkpkeep for host $host group $group");
 
     # generate wipe report with content of stacks
-    if ( $serverconfig{debuglevel} >= 2 && $serverconfig{debug} ) {
+    if ( $serverconfig{verboselevel} >= 2 && $serverconfig{verbose} ) {
         my $wipe_report = "Wipe report\n";
         foreach my $type ( sort keys %stack ) {
             $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
@@ -116,8 +116,8 @@ sub queue_history {
             push (@backup_folders_history, $folder);
         }
     }
-    if ( $serverconfig{debug} ){
-        print "Migrate following folders:\n" if $serverconfig{debug};
+    if ( $serverconfig{verbose} ){
+        print "Migrate following folders:\n" if $serverconfig{verbose};
         foreach my $folder ( reverse sort @backup_folders_history ) {
             print "\t$folder\n";
         }
@@ -140,7 +140,7 @@ sub logit {
     my $logmessage = "$timestamp $host-$group($taskid) : $msg";
     $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
 
-    if ( $serverconfig{debug} ) {
+    if ( $serverconfig{verbose} ) {
         if ( $serverconfig{dryrun} ) {
             print $logmessage;
         }
@@ -229,7 +229,7 @@ sub create_timeid {
 sub parse_command_options {
     GetOptions(
         "help"          => sub { usage('') },
-        "d|debug"       => \$debug_arg,
+        "v|verbose"     => \$verbose_arg,
         "n|dry-run"     => \$dryrun_arg,
         "g|group=s"     => \$group_arg,
         "h|host=s"      => \$host_arg,
@@ -237,16 +237,16 @@ sub parse_command_options {
     ) or usage("Invalid commmand line options.");
     usage("Check the arguments!") unless ( $host_arg && $group_arg && $old_bkpprefix_arg );
 
-    $debug_arg = 1 if $dryrun_arg;
+    $verbose_arg = 1 if $dryrun_arg;
 
     return 1;
 }
 
 sub cli_args_override_global_config {
 
-    $serverconfig{debug}      = $debug_arg      if $debug_arg;
-    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
-    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+    $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
+    $serverconfig{verboselevel} = $verboselevel_arg if $verboselevel_arg;
+    $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
 
     return 1;
 }
@@ -270,8 +270,8 @@ sub usage {
 
         Optional Arguments:
 
-        -d              # show debugging messages
-        -n              # dry-run without making changes
+        -v              # verbose mode to include debugging messages
+        -n              # dry-run without making changes (implies verbose)
 
 EOF
     exit 0;

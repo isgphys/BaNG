@@ -19,8 +19,8 @@ use BaNG::Common;
 my $version = '0.1';
 my ($add_arg, $delete_arg);
 my $crontabonly;
-my $debug_arg;
-my $debuglevel_arg;
+my $verbose_arg;
+my $verboselevel_arg;
 my $dryrun_arg;
 my $file_arg;
 my $group_arg;
@@ -112,7 +112,7 @@ sub parse_command_options {
     GetOptions(
         "help"        => sub { usage('') },
         "version"     => sub { usage("Current version number: $version") },
-        "d|debug"     => \$debug_arg,
+        "v|verbose"   => \$verbose_arg,
         "n|dry-run"   => \$dryrun_arg,
         "add"         => \$add_arg,
         "delete"      => \$delete_arg,
@@ -124,16 +124,16 @@ sub parse_command_options {
     usage("Do not use together!") if ( $crontabonly && $showgroups );
     usage("Check the arguments!") unless ( ($add_arg || $delete_arg ) && (( $host_arg && $group_arg ) || $group_arg  ) || ( $crontabonly || $showgroups ) );
 
-    $debug_arg = 1 if $dryrun_arg;
+    $verbose_arg = 1 if $dryrun_arg;
 
     return 1;
 }
 
 sub cli_args_override_global_config {
 
-    $serverconfig{debug}      = $debug_arg      if $debug_arg;
-    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
-    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+    $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
+    $serverconfig{verboselevel} = $verboselevel_arg if $verboselevel_arg;
+    $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
 
     return 1;
 }
@@ -166,8 +166,8 @@ sub usage {
 
         Optional Arguments:
 
-        -d              # show debugging messages
-        -n              # dry-run without making changes
+        -v              # verbose mode to include debugging messages
+        -n              # dry-run without making changes (implies verbose)
 
 EOF
     exit 0;

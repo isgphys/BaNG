@@ -35,8 +35,8 @@ my $host_arg;
 my $prefix_arg;
 my $nthreads_arg;
 my $finallysnapshots;
-my $debug_arg;
-my $debuglevel_arg;
+my $verbose_arg;
+my $verboselevel_arg;
 my $dryrun_arg;
 my @queue;
 my @finally_snapshots;
@@ -68,7 +68,7 @@ foreach my $config ( sort keys %hosts ) {
 }
 
 if ( !@queue ) {
-    print "Exit because queue is empty.\n" if ( $serverconfig{debug} && !$wipe );
+    print "Exit because queue is empty.\n" if ( $serverconfig{verbose} && !$wipe );
     exit 0;
 }
 
@@ -99,13 +99,13 @@ sub reorder_queue_by_priority {
 
         my $prio = $hosts{"$host-$group"}->{hostconfig}->{BKP_PRIORITY}->{"$path"} || 0;
         $bkpjob->{priority} = $prio;
-        print "$path set priority to $prio\n" if $serverconfig{debug};
+        print "$path set priority to $prio\n" if $serverconfig{verbose};
         push( @prio_queue, $bkpjob );
     }
 
     # reorder queue by priority
     foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue) {
-        print "$bkpjob->{priority} $bkpjob->{path}\n" if $serverconfig{debug};
+        print "$bkpjob->{priority} $bkpjob->{path}\n" if $serverconfig{verbose};
         push( @prio_queue_sorted, $bkpjob );
     }
 
@@ -266,11 +266,11 @@ sub start_threads {
     if ( $nthreads_arg ) {
         # If nthreads was defined by cli argument, use it
         $nthreads = $nthreads_arg;
-        print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{debug};
+        print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
     } elsif ( $host_arg && $group_arg ) {
         # If no nthreads was given, and we back up a single host and group, get nthreads from its config
         $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
-        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $serverconfig{debug};
+        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $serverconfig{verbose};
     } else {
         $nthreads = 1;
     }
@@ -300,7 +300,7 @@ sub thread_work {
         my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
         my $random_integer = int(rand(10)) + 1;
-        $random_integer = 0 if $debug_arg;
+        $random_integer = 0 if $verbose_arg;
 
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
@@ -347,7 +347,7 @@ sub eval_rsync_options {
     $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
     $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
     $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_NODEVICES};
-    $rsync_options .= "-v "             if ($serverconfig{debug} && ($serverconfig{debuglevel} == 3));
+    $rsync_options .= "-v "             if ($serverconfig{verbose} && ($serverconfig{verboselevel} == 3));
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
@@ -468,7 +468,7 @@ sub execute_rsync {
 
     waitpid( $rsyncpid, 0 );
 
-    logit( $taskid, $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{debuglevel} >=2 );
+    logit( $taskid, $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >=2 );
     logit( $taskid, $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
     logit( $taskid, $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
 
@@ -576,7 +576,7 @@ sub wipe {
     logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} +1 ) .", keeping: $bkpkeep for host $host group $group" );
 
     # generate wipe report with content of stacks
-    if ( $serverconfig{debuglevel} >= 2 ) {
+    if ( $serverconfig{verboselevel} >= 2 ) {
         my $wipe_report = "Wipe report\n";
         foreach my $type ( sort keys %stack ) {
             $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
@@ -740,7 +740,7 @@ sub bkp_to_current_server {
     # make sure backup's target host matches local hostname
     my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
     if ( $bkp_target_host ne $servername && $bkp_target_host ne '*' ) {
-        logit( $taskid, $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $serverconfig{debug};
+        logit( $taskid, $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $serverconfig{verbose};
         return 0;
     }
 
@@ -755,7 +755,7 @@ sub parse_command_options {
     GetOptions(
         "help"             => sub { usage('') },
         "version"          => sub { usage("Current version number: $version") },
-        "d|debug"          => \$debug_arg,
+        "v|verbose"        => \$verbose_arg,
         "n|dry-run"        => \$dryrun_arg,
         "g|group=s"        => \$group_arg,
         "h|host=s"         => \$host_arg,
@@ -772,16 +772,16 @@ sub parse_command_options {
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
 
-    $debug_arg = 1 if $dryrun_arg;
+    $verbose_arg = 1 if $dryrun_arg;
 
     return 1;
 }
 
 sub cli_args_override_global_config {
 
-    $serverconfig{debug}      = $debug_arg      if $debug_arg;
-    $serverconfig{debuglevel} = $debuglevel_arg if $debuglevel_arg;
-    $serverconfig{dryrun}     = $dryrun_arg     if $dryrun_arg;
+    $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
+    $serverconfig{verboselevel} = $verboselevel_arg if $verboselevel_arg;
+    $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
 
     return 1;
 }
@@ -809,7 +809,6 @@ sub usage {
 
         Optional Arguments:
 
-        -n                 # dry-run without making changes
         -t <nr>            # number of threads, default: 1
         -p <path>          # override path to folder containing etc/
         -w                 # wipe the backup
@@ -819,7 +818,8 @@ sub usage {
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
         --hobbit           # send only hobbit report
-        -d                 # show debugging messages
+        -v                 # verbose mode to include debugging messages
+        -n                 # dry-run without making changes (implies verbose)
 
 EOF
     exit 0;

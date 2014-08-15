@@ -24,8 +24,8 @@ path_taskset:           /usr/bin/taskset
 #
 report_to:              admin@example.com
 #
-debug:                  0
-debuglevel:             2
+verbose:                0
+verboselevel:           2
 dryrun:                 0
 auto_wipe_limit:        5
 snapshot_wipe_limit:    3
@@ -57,10 +57,10 @@ HELP:
 
   report_to:                email-addresses for reporting (comma separated)
 
-  debug:                    |
+  verbose:                  |
                             0 = be quiet
                             1 = Write debug output to console
-  debuglevel:               |
+  verboselevel:             |
                             0 = be quiet
                             1 = unused ;-)
                             2 = log sql commands, Rsync STDOUT, Wipe report
