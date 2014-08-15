@@ -27,7 +27,13 @@ Whenever possible restore only specific files or folders. If you restore the ful
 
 ### Server-side
 
-    sudo port install rsync core-utils
+    sudo port install rsync coreutils p5-timedate p5-file-find-rule p5-yaml-tiny p5-dbd-mysql p5-mime-lite p5-template-toolkit
+
+The perl `forks` package is not available through MacPorts and has to be installed for instance with `cpanm`:
+
+    curl -L http://cpanmin.us > cpanm
+    chmod u+x cpanm
+    ./cpanm install forks
 
 #### OS X specific BaNG configuration
 
