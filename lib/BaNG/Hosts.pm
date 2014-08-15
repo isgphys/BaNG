@@ -23,7 +23,7 @@ sub get_fsinfo {
     my %fsinfo;
     foreach my $server ( keys %servers ) {
         my @mounts;
-        @mounts = remotewrapper_command( $server, 'BaNG/bang_df' );
+        @mounts = remote_command( $server, 'BaNG/bang_df' );
 
         foreach my $mount (@mounts) {
             $mount =~ qr{
@@ -50,7 +50,7 @@ sub get_fsinfo {
         }
 
         if ($server eq $servername) {
-            @mounts = remotewrapper_command( $server, 'BaNG/bang_di' ) ;
+            @mounts = remote_command( $server, 'BaNG/bang_di' ) ;
             foreach my $mount (@mounts) {
                 $mount =~ qr{
                 ^(?<filesystem> [\/\w\d-]+)
@@ -78,7 +78,7 @@ sub get_fsinfo {
 sub get_lockfiles {
     my %lockfiles;
     foreach my $server ( keys %servers ) {
-        my @lockfiles = remotewrapper_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
+        my @lockfiles = remote_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
 
         foreach my $lockfile ( @lockfiles  ) {
             my ($host, $group, $path, $timestamp, $file) = split_lockfile_name($lockfile);
@@ -211,13 +211,16 @@ sub check_lockfile {
 }
 
 #################################
-# RemoteWrapper
+# Remote_Command
 #
-sub remotewrapper_command {
+sub remote_command {
     my ($remoteHost, $remoteCommand, $remoteArgument) = @_;
     $remoteArgument ||= '';
 
-    my $results = `ssh -x -o IdentitiesOnly=yes -i /var/www/.ssh/remotesshwrapper root\@$remoteHost /usr/local/bin/remotesshwrapper $remoteCommand $remoteArgument 2>/dev/null`;
+    my $remote_app_path = $serverconfig{remote_app} ? "" : $serverconfig{remote_app_path};
+    $remote_app_path .= "/" if $remote_app_path !~ /.*\/$/;
+
+    my $results = `ssh -x -o IdentitiesOnly=yes -o ConnectTimeout=2 -i /var/www/.ssh/remotesshwrapper root\@$remoteHost $serverconfig{remote_app} ${remote_app_path}$remoteCommand $remoteArgument 2>/dev/null`;
     my @results = split( "\n", $results );
 
     return @results;

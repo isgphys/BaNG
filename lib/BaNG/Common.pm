@@ -40,7 +40,7 @@ sub get_backup_folders {
     if ( $server eq $servername) {
         @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}[0-9\./_]*' 2>/dev/null`;
     } else {
-        @backup_folders = &BaNG::Hosts::remotewrapper_command( $server, 'BaNG/bang_getBackupFolders', $bkpdir );
+        @backup_folders = &BaNG::Hosts::remote_command( $server, 'BaNG/bang_getBackupFolders', $bkpdir );
     }
     return @backup_folders;
 }
