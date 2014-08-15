@@ -1,7 +1,6 @@
 *.swp
 config.yml
-etc
-t/etc/bangstat_db.yaml
+/etc
 TODO
 debug.pl
 /lib/Dancer*
