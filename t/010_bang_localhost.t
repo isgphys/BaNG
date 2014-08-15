@@ -16,6 +16,10 @@ like(   $output,    qr|Exit because queue is empty|                             
 
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group`;
+like(   $output,    qr|because target_path does not exist|                       , 'Skip backup target_path does not exist'             );
+
+$group = 'snapshot-simple';
+$output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Queueing backup for host localhost group $group|          , "Queueing backup for localhost $group"               );
 like(   $output,    qr|check_client_connection|                                  , "Check online status of localhost $group"            );
 like(   $output,    qr|Number of partitions: 1 \( :/ \)|                         , "Correct partitions for localhost $group"            );
@@ -40,21 +44,21 @@ unlike( $output,    qr|Error|i                                                  
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 
 $group = 'snapshot-subfolders';
-$output = `$bangcmd -h localhost -g $group`;
+$output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 like(   $output,    qr|eval subfolders command|                                  , "Eval subfolders for localhost $group"               );
 
 $group = 'differentserver';
-$output = `$bangcmd -h localhost -g $group`;
+$output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Skipping .* for server doesnotexist instead of|           , "Skip backup to different server of localhost $group");
 
 $group = 'missingexclude';
-$output = `$bangcmd -h localhost -g $group`;
+$output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Warning: could not find excludefile|                      , "Warn about missing excludefile for localhost $group");
 
-$output = `$bangcmd  --hobbit -h localhost -g snapshot-simple`;
+$output = `$bangcmd  --hobbit -h localhost -g snapshot-simple --initial`;
 like(   $output,    qr|Hobbit report sent\.\s*Exit because queue is empty|       , "Hobbit only command argument sends report"          );
 
 done_testing();
