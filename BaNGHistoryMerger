@@ -20,7 +20,6 @@ use BaNG::Wipe;
 
 my $version = '0.1';
 my $verbose_arg;
-my $verboselevel_arg;
 my $dryrun_arg = 1;
 my $group_arg;
 my $host_arg;
@@ -245,7 +244,6 @@ sub parse_command_options {
 sub cli_args_override_global_config {
 
     $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
-    $serverconfig{verboselevel} = $verboselevel_arg if $verboselevel_arg;
     $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
 
     return 1;

@@ -36,7 +36,6 @@ my $prefix_arg;
 my $nthreads_arg;
 my $finallysnapshots;
 my $verbose_arg;
-my $verboselevel_arg;
 my $dryrun_arg;
 my @queue;
 my @finally_snapshots;
@@ -780,7 +779,6 @@ sub parse_command_options {
 sub cli_args_override_global_config {
 
     $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
-    $serverconfig{verboselevel} = $verboselevel_arg if $verboselevel_arg;
     $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
 
     return 1;
