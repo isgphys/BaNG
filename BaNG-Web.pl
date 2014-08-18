@@ -4,5 +4,8 @@ use Dancer;
 
 use BaNG::Routes;
 
-Dancer->dance;
-
+if ( -e "config.yml" ) {
+    Dancer->dance;
+} else {
+    print "Error config.yml missing!\n";
+}
