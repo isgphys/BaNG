@@ -10,15 +10,17 @@
     <tbody>
       <%- FOREACH server IN fsinfo.keys.sort %>
         <tr>
-            <td colspan=4><b><% server %></b> (<% fsinfo.$server.size %>)</td>
+            <td colspan=1><b><% server %></b> (<% fsinfo.$server.size %>)</td>
+            <td colspan=3><b><% servers.$server.serverconfig.description %></b></td>
         </tr>
         <%- FOREACH mount IN fsinfo.$server.keys.sort %>
         <tr>
-            <td><% mount %></td>
+            <td class="<%- IF fsinfo.$server.$mount.rwstatus %> <%- fsinfo.$server.$mount.rwstatus %><%- END %>"><% mount %></td>
             <td class="center"><% fsinfo.$server.$mount.fstyp %></td>
             <td class="center"><% fsinfo.$server.$mount.available %></td>
             <td class="center"><% fsinfo.$server.$mount.freediff %></td>
             <td class="center <%- IF fsinfo.$server.$mount.css_class %> <%- fsinfo.$server.$mount.css_class %><%- END %>"><% fsinfo.$server.$mount.used_per %></td>
+            <%- IF fsinfo.$server.$mount.rwstatus %><td class="center">READ-ONLY</td><%- END %>
         </tr>
         <%- END %>
       <%- END %>

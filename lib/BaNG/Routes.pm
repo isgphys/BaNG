@@ -35,6 +35,7 @@ get '/fsinfo_report' => require_role isg => sub {
 
     template 'dashboard-fsinfo' => {
         fsinfo       => get_fsinfo(),
+        servers      => \%servers,
     },{ layout => 0 };
 };
 
