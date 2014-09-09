@@ -24,7 +24,7 @@ Edit `config.yml` and insert the hostname of your ldap server and its base dn.
 
 Rename `etc/servers/bangserver_defaults.yaml` to match your server name.
 
-Fields you typically want to change in the config filesi:
+Fields you typically want to change in the config files:
 
   * `defaults_servers.yaml`: `report_to`
   * `defaults_hosts.yaml`: `BKP_TARGET_HOST`
