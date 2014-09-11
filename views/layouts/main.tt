@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>BaNG - 2013</title>
+        <title>BaNG</title>
         <meta charset="utf-8">
         <% IF section == 'dashboard' %><meta http-equiv="refresh" content="300"><% END %>
         <link rel="icon" type="image/ico" href="/favicon">
