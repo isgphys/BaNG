@@ -135,12 +135,18 @@ sub bangstat_recentbackups {
     }
     $sth->finish();
 
+    # depending on the current time, define when the next backup period starts
+    my $now      = time;
+    my $today    = `$serverconfig{path_date} -d \@$now +"%Y-%m-%d"`;
+    my $one_day  = 24 * 3600;
+    my $next_bkp = str2time("$today $BkpStartHour:00:00");
+    $next_bkp   += $one_day if ( $next_bkp < $now );
+
     # scan for missing backups
-    my $now     = time;
-    my $today   = `$serverconfig{path_date} -d \@$now +"%Y-%m-%d"`;
-    my $tonight = str2time("$today $BkpStartHour:00:00");
     foreach my $hostpath ( keys %RecentBackupTimes ) {
-        my $thatnight = $tonight;
+        my $nextBkpStart = $next_bkp;
+        my $prevBkpStart = $nextBkpStart - $one_day;
+
         my @bkp = @{$RecentBackupTimes{$hostpath}};
         my $missingBkpFromPath = $bkp[0]->{BkpFromPath} || 'NA';
         my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
@@ -156,16 +162,17 @@ sub bangstat_recentbackups {
             } else {
                 # or if no backup occured during that day
                 my $latestbkp = str2time( $bkp[0]->{Starttime} );
-                unless ( $latestbkp > $thatnight - 24*3600
-                      && $latestbkp < $thatnight ) {
+                unless ( $latestbkp > $prevBkpStart
+                      && $latestbkp < $nextBkpStart ) {
                     $isMissing = 1;
                 }
             }
 
             if ( $isMissing ) {
                 # add empty entry for missing backups
-                my $missingepoch = $thatnight - 24 * 3600;
+                my $missingepoch = $prevBkpStart;
                 my $missingday   = `$serverconfig{path_date} -d \@$missingepoch +"%Y-%m-%d"`;
+                chomp $missingday;
                 my $nobkp = {
                     Starttime   => $missingday,
                     Stoptime    => '',
@@ -180,12 +187,13 @@ sub bangstat_recentbackups {
                 splice( @{$RecentBackups{"$missingHost-$missingBkpGroup"}}, $Xdays - 1, 0, $nobkp );
             } else {
                 # remove successful backups of that day from list
-                while ( @bkp && str2time( $bkp[0]->{Starttime} ) > $thatnight - 24 * 3600 ) {
+                while ( @bkp && str2time( $bkp[0]->{Starttime} ) > $prevBkpStart ) {
                     shift @bkp;
                 }
             }
             # then look at previous day
-            $thatnight -= 24 * 3600;
+            $nextBkpStart -= $one_day;
+            $prevBkpStart -= $one_day;
         }
     }
 
