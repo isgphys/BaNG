@@ -29,6 +29,7 @@ my $wipe;
 my $initial;
 my $cleanup;
 my $hobbitonly;
+my $noreport;
 my $missingonly;
 my $group_arg;
 my $host_arg;
@@ -726,8 +727,10 @@ sub finish_backupjob {
         create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
 
         my %RecentBackups = bangstat_recentbackups($host);
-        hobbit_report( $taskid, $host, $group, %RecentBackups );
-        mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
+        unless ( $noreport ) {
+            hobbit_report( $taskid, $host, $group, %RecentBackups );
+            mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
+        }
         logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
     }
 
@@ -770,6 +773,7 @@ sub parse_command_options {
         "force"            => \$force,
         "missingonly"      => \$missingonly,
         "hobbit"           => \$hobbitonly,
+        "noreport"         => \$noreport,
     ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
     usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
@@ -821,6 +825,7 @@ sub usage {
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
         --hobbit           # send only hobbit report
+        --noreport         # do not send any report
         -v | -vv | -vvv    # verbose mode to include debugging messages of level 1-3
         -n                 # dry-run without making changes (implies verbose)
 
