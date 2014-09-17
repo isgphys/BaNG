@@ -19,11 +19,12 @@
     BaNG -h <host>                        # Start backup of all groups of given host (provided BulkAllow is set)
     BaNG -h <host> -g <group>             # Start backup of given group and host
 
-Optional argument:
+Optional arguments:
 
     --initial                             # need for initial backup
     --finallysnapshots                    # make snapshots after the hole backup stuff
     --missingonly                         # backup only hosts without recent backup (e.g. machines that were offline during the night)
+    --noreport                            # do not send any reports
 
 ### Wipe old backups
 
