@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-use lib '/opt/BaNG/lib';
 use Cwd qw( abs_path );
 use Dancer;
 use BaNG::Routes;
