@@ -17,12 +17,13 @@ use Exporter 'import';
 our @EXPORT = qw(
     $bangstat_dbh
     bangstat_db_connect
-    bangstat_set_jobstatus
     bangstat_recentbackups
     bangstat_recentbackups_all
     bangstat_recentbackups_last
+    bangstat_start_backupjob
+    bangstat_update_backupjob
+    bangstat_finish_backupjob
     send_hobbit_report
-    db_report
     mail_report
     hobbit_report
     logit
@@ -49,34 +50,6 @@ sub bangstat_db_connect {
     );
 
     return 0 unless $bangstat_dbh;
-    return 1;
-}
-
-sub bangstat_set_jobstatus {
-    my ($taskid, $jobid, $host, $group, $lastbkp, $status) = @_;
-
-    my $SQL = qq(
-        UPDATE statistic
-        SET JobStatus = '$status'
-        WHERE BkpFromHost = '$host'
-        AND BkpGroup = '$group'
-        AND JobID = '$jobid';
-    );
-
-    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
-    if ( !$conn ) {
-        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
-        return 1;
-    }
-
-    my $sth = $bangstat_dbh->prepare($SQL);
-    $sth->execute() unless $serverconfig{dryrun};
-    $sth->finish();
-
-    $SQL =~ s/;.*/;/sg;
-    logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
-    logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group jobid $jobid" );
-
     return 1;
 }
 
@@ -315,8 +288,39 @@ sub send_hobbit_report {
     return 1;
 }
 
-sub db_report {
+sub bangstat_start_backupjob {
     my ($taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
+
+    $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
+    my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
+
+    my $sql;
+    $sql .= "INSERT INTO statistic (";
+    $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop";
+    $sql .= ") VALUES (";
+    $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
+    $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')";
+    $sql .= ")";
+    logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    if ( !$conn ) {
+        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
+        return 1;
+    }
+
+    my $sth = $bangstat_dbh->prepare($sql);
+    $sth->execute() unless $serverconfig{dryrun};
+    $sth->finish();
+    $bangstat_dbh->disconnect;
+
+    logit( $taskid, $host, $group, "Bangstat start_backup sent." );
+
+    return 1;
+}
+
+sub bangstat_update_backupjob {
+    my ($taskid, $jobid, $host, $group, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
 
     my %parse_log_keys = (
         'last backup'                 => 'LastBkp',
@@ -357,22 +361,31 @@ sub db_report {
     $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
     my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
-    my $sql;
-    $sql .= "INSERT INTO statistic (";
-    $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop, ";
-    $sql .= " NumOfFiles, NumOfFilesTrans, NumOfFilesCreated, NumOfFilesDel, TotFileSize, TotFileSizeTrans, LitData, MatchData, ";
-    $sql .= " FileListSize, FileListGenTime, FileListTransTime, TotBytesSent, TotBytesRcv ";
-    $sql .= ") VALUES (";
-    $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
-    $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp'), ";
-    $sql .= "'$log_values{NumOfFiles}'        , '$log_values{NumOfFilesTrans}', ";
-    $sql .= "'$log_values{NumOfFilesCreated}' , '$log_values{NumOfFilesDel}', ";
-    $sql .= "'$log_values{TotFileSize}'       , '$log_values{TotFileSizeTrans}', ";
-    $sql .= "'$log_values{LitData}'           , '$log_values{MatchData}', ";
-    $sql .= "'$log_values{FileListSize}'      , '$log_values{FileListGenTime}', '$log_values{FileListTransTime}', ";
-    $sql .= "'$log_values{TotBytesSent}'      , '$log_values{TotBytesRcv}' ";
-    $sql .= ")";
-    logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
+    my $SQL = qq(
+        UPDATE statistic
+        SET JobStatus = '$jobstatus',
+            LastBkp = '$lastbkp',
+            isThread = '$isSubfolderThread',
+            ErrStatus = '$errcode',
+            Stop = FROM_UNIXTIME('$endstamp'),
+            NumOfFiles = '$log_values{NumOfFiles}',
+            NumOfFilesTrans = '$log_values{NumOfFilesTrans}',
+            NumOfFilesCreated = '$log_values{NumOfFilesCreated}',
+            NumOfFilesDel = '$log_values{NumOfFilesDel}',
+            TotFileSize = '$log_values{TotFileSize}',
+            TotFileSizeTrans = '$log_values{TotFileSizeTrans}',
+            LitData = '$log_values{LitData}',
+            MatchData = '$log_values{MatchData}',
+            FileListSize = '$log_values{FileListSize}',
+            FileListGenTime = '$log_values{FileListGenTime}',
+            FileListTransTime = '$log_values{FileListTransTime}',
+            TotBytesSent = '$log_values{TotBytesSent}',
+            TotBytesRcv = '$log_values{TotBytesRcv}'
+        WHERE TaskID='$taskid'
+            AND JobID = '$jobid'
+            AND BkpFromHost = '$host'
+            AND BkpGroup = '$group';
+    );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
@@ -380,12 +393,42 @@ sub db_report {
         return 1;
     }
 
-    my $sth = $bangstat_dbh->prepare($sql);
+    my $sth = $bangstat_dbh->prepare($SQL);
     $sth->execute() unless $serverconfig{dryrun};
     $sth->finish();
     $bangstat_dbh->disconnect;
 
-    logit( $taskid, $host, $group, "Bangstat report sent." );
+    $SQL =~ s/;.*/;/sg;
+    logit( $taskid, $host, $group, "Bangstat update SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "Bangstat update to $jobstatus for host $host group $group jobid $jobid" );
+
+    return 1;
+}
+
+sub bangstat_finish_backupjob {
+    my ($taskid, $jobid, $host, $group, $status) = @_;
+
+    my $SQL = qq(
+        UPDATE statistic
+        SET JobStatus = '$status'
+        WHERE BkpFromHost = '$host'
+        AND BkpGroup = '$group'
+        AND JobID = '$jobid';
+    );
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    if ( !$conn ) {
+        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
+        return 1;
+    }
+
+    my $sth = $bangstat_dbh->prepare($SQL);
+    $sth->execute() unless $serverconfig{dryrun};
+    $sth->finish();
+
+    $SQL =~ s/;.*/;/sg;
+    logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group jobid $jobid" );
 
     return 1;
 }

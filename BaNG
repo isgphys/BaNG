@@ -164,7 +164,7 @@ sub queue_backup {
         my $endstamp = $startstamp;
         $jobid = create_timeid($host, $group, $taskid);
         logit( $taskid, $host, $group, "Error: host $host is offline" );
-        db_report($taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '');
+        bangstat_start_backupjob($taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '') unless $noreport;
         return 1;
     }
 
@@ -424,6 +424,9 @@ sub execute_rsync {
     $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
     my $startstamp = time();
 
+    # report rsync start to DB, jobstatus => 0
+    bangstat_start_backupjob($taskid, $jobid, $host, $group, $startstamp, '', $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '0', '');
+
     my $taskset = "";
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
            if (-e $serverconfig{path_taskset} ) {
@@ -486,7 +489,9 @@ sub execute_rsync {
     } else {
         logit( $taskid, $host, $group, "Rsync successful for host $host group $group path $path" );
     }
-    db_report($taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '0', @outlines);
+
+    #report finished rsync to DB, jobstatus => 1
+    bangstat_update_backupjob($taskid, $jobid, $host, $group, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '1', @outlines);
 
     return 1;
 }
@@ -720,8 +725,6 @@ sub finish_backupjob {
     my $lastbkp      = $bkpjob->{'lastbkp'};
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
-    bangstat_set_jobstatus( $taskid, $jobid, $host, $group, $lastbkp, '1' );
-
     if ( $dosnapshot ) {
         create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
         create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
@@ -733,6 +736,9 @@ sub finish_backupjob {
         }
         logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
     }
+
+    # report finished job to DB, jobstatus => 2
+    bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' );
 
     return 1;
 }
