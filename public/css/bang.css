@@ -103,6 +103,11 @@ tr.active {
     background-position: center center;
     background-size: 15px 15px;
 }
+.hook_box {
+    background: url("/images/hook-box.png") no-repeat transparent;
+    background-position: center center;
+    background-size: 15px 15px;
+}
 .hook3 {
     background: url("/images/hook3.png") no-repeat transparent;
     background-position: center center;
