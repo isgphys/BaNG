@@ -132,7 +132,7 @@ sub num2human {
     my ($num, $base) = @_;
     $base ||= 1000.;
 
-    foreach my $unit ( '', qw(K M G T P) ) {
+    foreach my $unit ( '', qw(k M G T P) ) {
         if ( $num < $base ) {
             if ( $num < 10 && $num > 0 ) {
                 return sprintf( "\%.1f \%s", $num, $unit );    # print small values with 1 decimal
