@@ -15,10 +15,10 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
             <th>Starttime</th>
             <th>Last Backup</th>
             <th>Runtime</th>
-            <th>FilesCreated</th>
-            <th>FilesDel</th>
-            <th>FilesTrans</th>
-            <th>SizeTrans</th>
+            <th class="sorter-metric" data-metric-name="$">FilesCreated</th>
+            <th class="sorter-metric" data-metric-name="$">FilesDel</th>
+            <th class="sorter-metric" data-metric-name="$">FilesTrans</th>
+            <th class="sorter-metric" data-metric-name="$">SizeTrans</th>
             <th>Log</th>
         </tr>
     </thead>
