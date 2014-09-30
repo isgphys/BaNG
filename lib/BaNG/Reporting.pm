@@ -359,13 +359,11 @@ sub bangstat_update_backupjob {
     }
 
     $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
-    my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
     my $SQL = qq(
         UPDATE statistic
         SET JobStatus = '$jobstatus',
             LastBkp = '$lastbkp',
-            isThread = '$isSubfolderThread',
             ErrStatus = '$errcode',
             Stop = FROM_UNIXTIME('$endstamp'),
             NumOfFiles = '$log_values{NumOfFiles}',
@@ -384,7 +382,8 @@ sub bangstat_update_backupjob {
         WHERE TaskID='$taskid'
             AND JobID = '$jobid'
             AND BkpFromHost = '$host'
-            AND BkpGroup = '$group';
+            AND BkpGroup = '$group'
+            AND BkpFromPath = '$path';
     );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
