@@ -425,7 +425,7 @@ sub execute_rsync {
     my $startstamp = time();
 
     # report rsync start to DB, jobstatus => 0
-    bangstat_start_backupjob($taskid, $jobid, $host, $group, $startstamp, '', $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '0', '');
+    bangstat_start_backupjob($taskid, $jobid, $host, $group, $startstamp, '', $path, targetpath($host, $group), $lastbkp, '0' , '0', '');
 
     my $taskset = "";
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
