@@ -292,7 +292,7 @@ sub bangstat_start_backupjob {
     my ($taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
 
     $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
-    my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? '1' : 'NULL';
+    my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
     my $sql;
     $sql .= "INSERT INTO statistic (";
