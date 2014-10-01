@@ -20,6 +20,7 @@ our @EXPORT = qw(
     bangstat_recentbackups
     bangstat_recentbackups_all
     bangstat_recentbackups_last
+    bangstat_task_jobs
     bangstat_start_backupjob
     bangstat_update_backupjob
     bangstat_finish_backupjob
@@ -269,6 +270,49 @@ sub bangstat_recentbackups_last {
     $sth->finish();
 
     return \%RecentBackupsLast;
+}
+
+sub bangstat_task_jobs {
+    my ($taskid) = @_;
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT *
+        FROM statistic
+        WHERE TaskID = '$taskid'
+        ORDER BY JobStatus, Start;
+    ");
+    $sth->execute();
+
+    my %TaskJobs;
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        $BkpFromPath =~ s/^:$/:\//g;
+        push( @{$TaskJobs{'Data'}}, {
+            TaskID       => $dbrow->{'TaskID'},
+            JobID        => $dbrow->{'JobID'},
+            Starttime    => $dbrow->{'Start'},
+            Stoptime     => $dbrow->{'Stop'},
+            BkpFromPath  => $BkpFromPath ,
+            BkpToPath    => $dbrow->{'BkpToPath'},
+            isThread     => $dbrow->{'isThread'},
+            LastBkp      => $dbrow->{'LastBkp'},
+            ErrStatus    => $dbrow->{'ErrStatus'},
+            JobStatus    => $dbrow->{'JobStatus'},
+            BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
+            BkpHost      => $dbrow->{'BkpFromHost'},
+            BkpToHost    => $dbrow->{'BkpToHost'},
+            FilesCreated => &BaNG::Common::num2human($dbrow->{'NumOfFilesCreated'}),
+            FilesDel     => &BaNG::Common::num2human($dbrow->{'NumOfFilesDel'}),
+            FilesTrans   => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans    => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
+        });
+    }
+    $sth->finish();
+
+    return \%TaskJobs;
 }
 
 sub send_hobbit_report {

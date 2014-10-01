@@ -20,4 +20,15 @@ get '/' => require_role isg => sub {
     };
 };
 
+get '/task/:taskid' => require_role isg => sub {
+    get_serverconfig();
+
+    template 'reporting-task_jobs' => {
+        section    => 'reporting',
+        servername => $servername,
+        taskid     => param('taskid'),
+        taskjobs   => bangstat_task_jobs(param('taskid')),
+    };
+};
+
 1;
