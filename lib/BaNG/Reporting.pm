@@ -299,7 +299,7 @@ sub bangstat_start_backupjob {
     $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop";
     $sql .= ") VALUES (";
     $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
-    $sql .= " '$isSubfolderThread' , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')";
+    $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')";
     $sql .= ")";
     logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
 
