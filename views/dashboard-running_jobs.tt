@@ -18,7 +18,7 @@
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.path %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.timestamp %></td>
-                <td class="center"><% lockfiles.$server.$lockfile.taskid.substr(0,8) %>...</td>
+                <td class="center"><a href="/reporting/task/<% lockfiles.$server.$lockfile.taskid %>"><% lockfiles.$server.$lockfile.taskid.substr(8) %></a></td>
             </tr>
         <%- END %>
       <%- END %>
