@@ -25,7 +25,7 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
                     <% ELSIF bkp.JobStatus == 1 AND bkp.isThread %>class="jobrun" title="Still running">
                     <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
-                    <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
+                    <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://xymon.phys.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
                     <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
                 <td class="center"><a href="/host/<% bkp.BkpHost %>"><% bkp.BkpHost %></a></td>
                 <td class="center"><a href="/config/allhosts/<% bkp.BkpGroup %>"><% bkp.BkpGroup %></a></td>

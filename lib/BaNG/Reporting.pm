@@ -24,9 +24,9 @@ our @EXPORT = qw(
     bangstat_start_backupjob
     bangstat_update_backupjob
     bangstat_finish_backupjob
-    send_hobbit_report
+    send_xymon_report
     mail_report
-    hobbit_report
+    xymon_report
     logit
     read_log
     read_global_log
@@ -315,11 +315,11 @@ sub bangstat_task_jobs {
     return \%TaskJobs;
 }
 
-sub send_hobbit_report {
+sub send_xymon_report {
     my ($report) = @_;
 
     my $socket = IO::Socket::INET->new(
-        PeerAddr => 'hobbit.phys.ethz.ch',
+        PeerAddr => 'xymon.phys.ethz.ch',
         PeerPort => '1984',
         Proto    => 'tcp',
     );
@@ -524,7 +524,7 @@ sub mail_report {
     return 1;
 }
 
-sub hobbit_report {
+sub xymon_report {
     my ($taskid, $host, $group, %RecentBackups)  = @_;
 
     my $topcolor = 'green';
@@ -548,7 +548,7 @@ sub hobbit_report {
     my $RecentBackups = {
         RecentBackups  => \%RecentBackups,
         Group          => "$host-$group",
-        HobbitTopColor => $topcolor,
+        xymonTopColor  => $topcolor,
         Errormsg       => $hosts{"$host-$group"}->{errormsg},
     };
 
@@ -556,7 +556,7 @@ sub hobbit_report {
     my $DATE      = `$serverconfig{path_date}`;
     chomp $DATE;
 
-    my $hobbitreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";
+    my $xymonreport = "status+$STATUSTTL $host.bkp $topcolor $DATE (TTL=$STATUSTTL min)\n";
 
     my $tt = Template->new(
         START_TAG    => '<%',
@@ -564,12 +564,12 @@ sub hobbit_report {
         INCLUDE_PATH => "$prefix/views",
     );
     my $report;
-    $tt->process( 'report-hobbit.tt', $RecentBackups, \$report )
-        or logit( $taskid, $host, $group, "ERROR generating hobbit report template: " . $tt->error() );
-    $hobbitreport .= $report;
+    $tt->process( 'report-xymon.tt', $RecentBackups, \$report )
+        or logit( $taskid, $host, $group, "ERROR generating xymon report template: " . $tt->error() );
+    $xymonreport .= $report;
 
-    send_hobbit_report($hobbitreport) unless $serverconfig{dryrun};
-    logit( $taskid, $host, $group, "Hobbit report sent." );
+    send_xymon_report($xymonreport) unless $serverconfig{dryrun};
+    logit( $taskid, $host, $group, "xymon report sent." );
 
     return 1;
 }

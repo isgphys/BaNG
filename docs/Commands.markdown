@@ -36,10 +36,10 @@ Optional argument:
 
     --force                               # force wipe of too many backups (override auto_wipe_limit)
 
-### Generate Hobbit reports
+### Generate xymon reports
 
-    BaNG -h <host> -g <group> --hobbit    # Generate and send hobbit report (without making backups)
-    BaNG --hobbit                         # Generate and send all hobbit reports (without making backups)
+    BaNG -h <host> -g <group> --xymon     # Generate and send xymon report (without making backups)
+    BaNG --xymon                          # Generate and send all xymon reports (without making backups)
 
 
  BaNGadm : admin tasks

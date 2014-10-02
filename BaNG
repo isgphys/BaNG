@@ -28,7 +28,7 @@ my $force;
 my $wipe;
 my $initial;
 my $cleanup;
-my $hobbitonly;
+my $xymononly;
 my $noreport;
 my $missingonly;
 my $group_arg;
@@ -59,11 +59,11 @@ foreach my $config ( sort keys %hosts ) {
         wipe( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $force );
     } elsif ( $cleanup ) {
         print "Let's go!\n";
-    } elsif ( $hobbitonly ) {
+    } elsif ( $xymononly ) {
         my $host  = $hosts{$config}->{hostname};
         my $group = $hosts{$config}->{group};
         my %RecentBackups = bangstat_recentbackups($host);
-        hobbit_report( $taskid, $host, $group, %RecentBackups );
+        xymon_report( $taskid, $host, $group, %RecentBackups );
     } else {
         queue_backup( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
@@ -731,7 +731,7 @@ sub finish_backupjob {
 
         my %RecentBackups = bangstat_recentbackups($host);
         unless ( $noreport ) {
-            hobbit_report( $taskid, $host, $group, %RecentBackups );
+            xymon_report( $taskid, $host, $group, %RecentBackups );
             mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
         }
         logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
@@ -778,7 +778,7 @@ sub parse_command_options {
         "finallysnapshots" => \$finallysnapshots,
         "force"            => \$force,
         "missingonly"      => \$missingonly,
-        "hobbit"           => \$hobbitonly,
+        "xymon"            => \$xymononly,
         "noreport"         => \$noreport,
     ) or usage("Invalid commmand line options.");
     usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
@@ -830,7 +830,7 @@ sub usage {
         --cleanup          # cleanup threaded jobs
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
-        --hobbit           # send only hobbit report
+        --xymon            # send only xymon report
         --noreport         # do not send any report
         -v | -vv | -vvv    # verbose mode to include debugging messages of level 1-3
         -n                 # dry-run without making changes (implies verbose)
