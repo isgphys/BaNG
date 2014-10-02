@@ -3,7 +3,6 @@ Total Jobs: <% taskjobs.Data.size %>
 <table class="reporting default-table border tablesorter tablefilter">
     <thead>
         <tr>
-            <th>JobID</th>
             <th>JobStatus</th>
             <th>Host</th>
             <th>Group</th>
@@ -23,7 +22,6 @@ Total Jobs: <% taskjobs.Data.size %>
     <tbody>
         <%- FOREACH job IN taskjobs.Data %>
             <tr>
-                <td class="center" title="<% job.JobID %>"><% job.JobID.substr(12) %></td>
                 <td <%- IF job.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF job.JobStatus == 1 %>class="hook_box" title="Rsync done">
                     <% ELSIF job.JobStatus == -1 %>class="offline pointer" data-href='https://omniculars.ethz.ch/hobbit-cgi/bb-hostsvc.sh?HOST=<% job.jobHost %>&SERVICE=conn' title="Host offline">
