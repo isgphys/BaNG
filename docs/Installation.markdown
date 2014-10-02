@@ -8,7 +8,7 @@ Requirements:
 Install dependencies:
 
 ```sh
-apt-get install rsync perl starman libdancer-perl libclone-perl libdatetime-perl libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl libmodule-refresh-perl libtemplate-perl libyaml-tiny-perl libmime-lite-perl libnet-ldap-perl libtext-markdown-perl nis
+apt-get install rsync perl starman libdancer-perl libclone-perl libdatetime-perl libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl libdbd-mysql-perl libmodule-refresh-perl libtemplate-perl libyaml-tiny-perl libmime-lite-perl libnet-ldap-perl libtext-markdown-perl nis
 ```
 
 
