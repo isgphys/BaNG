@@ -149,14 +149,18 @@ sub time2human {
     # convert large times in minutes to hours
     my ($minutes) = @_;
 
-    if ( $minutes < 60 ) {
-        if ($minutes < 1 ) {
-            return sprintf( "< 1 min", $minutes );
-        } else {
-            return sprintf( "%d min", $minutes );
-        }
+    if ( $minutes eq "-" ) {
+        return "-" ;
     } else {
-        return sprintf( "\%dh\%02dmin", floor( $minutes / 60 ), $minutes % 60 );
+        if ( $minutes < 60 ) {
+            if ($minutes < 1 ) {
+                return sprintf( "< 1 min", $minutes );
+            } else {
+                return sprintf( "%d min", $minutes );
+            }
+        } else {
+            return sprintf( "\%dh\%02dmin", floor( $minutes / 60 ), $minutes % 60 );
+        }
     }
 }
 

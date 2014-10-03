@@ -9,8 +9,9 @@ Total Jobs: <% taskjobs.Data.size %>
             <th>Target</th>
             <th>Path</th>
             <th colspan="2">ErrStatus</th>
-            <th>Starttime</th>
-            <th>Stoptime</th>
+            <th>Star</th>
+            <th>Stop</th>
+            <th>Runtime</th>
             <th>Last Backup</th>
             <th class="sorter-metric" data-metric-name="$">FilesCreated</th>
             <th class="sorter-metric" data-metric-name="$">FilesDel</th>
@@ -40,6 +41,7 @@ Total Jobs: <% taskjobs.Data.size %>
                 <td class="center"><% job.ErrStatus %></td>
                 <td style="white-space: nowrap;" class="center"><% job.Starttime %></td>
                 <td style="white-space: nowrap;" class="center"><% job.Stoptime %></td>
+                <td class="center"><% job.Runtime %></td>
                 <td class="center"><% job.LastBkp %></td>
                 <td class="center"><% job.FilesCreated %></td>
                 <td class="center"><% job.FilesDel %></td>

@@ -75,15 +75,16 @@ sub bangstat_recentbackups {
     my %RecentBackups;
     my %RecentBackupTimes;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        my $BkpGroup = $dbrow->{'BkpGroup'} || 'NA';
+        my $BkpGroup    = $dbrow->{'BkpGroup'} || 'NA';
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/^:$/:\//g;
+        $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
-            Runtime      => &BaNG::Common::time2human($dbrow->{'Runtime'}/60),
+            Runtime      => &BaNG::Common::time2human($Runtime),
             BkpFromPath  => $BkpFromPath,
             BkpToPath    => $dbrow->{'BkpToPath'} ,
             isThread     => $dbrow->{'isThread'},
@@ -198,14 +199,15 @@ sub bangstat_recentbackups_all {
 
     my %RecentBackupsAll;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/^:$/:\//g;
+        $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
-            Runtime      => &BaNG::Common::time2human($dbrow->{'Runtime'}/60),
+            Runtime      => &BaNG::Common::time2human($Runtime),
             BkpFromPath  => $BkpFromPath ,
             BkpToPath    => $dbrow->{'BkpToPath'},
             isThread     => $dbrow->{'isThread'},
@@ -244,14 +246,15 @@ sub bangstat_recentbackups_last {
 
     my %RecentBackupsLast;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/^:$/:\//g;
+        $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsLast{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
-            Runtime      => &BaNG::Common::time2human($dbrow->{'Runtime'}/60),
+            Runtime      => &BaNG::Common::time2human($Runtime),
             BkpFromPath  => $BkpFromPath ,
             BkpToPath    => $dbrow->{'BkpToPath'},
             isThread     => $dbrow->{'isThread'},
@@ -279,7 +282,7 @@ sub bangstat_task_jobs {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
+        SELECT *, TIMESTAMPDIFF(Second, Start , Stop) as Runtime
         FROM statistic
         WHERE TaskID = '$taskid'
         ORDER BY JobStatus, Start;
@@ -288,13 +291,15 @@ sub bangstat_task_jobs {
 
     my %TaskJobs;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/^:$/:\//g;
+        $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$TaskJobs{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
+            Runtime      => &BaNG::Common::time2human($Runtime),
             BkpFromPath  => $BkpFromPath ,
             BkpToPath    => $dbrow->{'BkpToPath'},
             isThread     => $dbrow->{'isThread'},
