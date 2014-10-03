@@ -35,9 +35,9 @@ like(   $output,    qr|Rsync successful for host localhost group $group|        
 like(   $output,    qr|Touch current folder for host localhost group $group|     , "Touch current folder for localhost $group"          );
 like(   $output,    qr|Create btrfs snapshot for host localhost group $group|    , "Create btrfs snapshot for localhost $group"         );
 like(   $output,    qr|Write lastBkpFile:|                                       , "Write lastBkpFile for localhost $group"             );
-like(   $output,    qr|Set jobstatus to 1 for host localhost group $group|       , "Set bangstat jobstatus for localhost $group"        );
-like(   $output,    qr|Bangstat report sent|                                     , "Bangstat report sent for localhost $group"          );
-like(   $output,    qr|xymon report sent|                                        , "xymon report sent for localhost $group"            );
+like(   $output,    qr|Set jobstatus to 1 for host localhost group $group|       , "Set bangstat jobstatus 1 for localhost $group"      );
+like(   $output,    qr|Set jobstatus to 2 for host localhost group $group|       , "Set bangstat jobstatus 2 for localhost $group"      );
+like(   $output,    qr|xymon report sent|                                        , "xymon report sent for localhost $group"             );
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 like(   $output,    qr|Removed lockfile|                                         , "Removed lockfile for localhost $group"              );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
