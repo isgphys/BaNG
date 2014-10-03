@@ -447,18 +447,18 @@ sub bangstat_update_backupjob {
     $bangstat_dbh->disconnect;
 
     $SQL =~ s/;.*/;/sg;
-    logit( $taskid, $host, $group, "Bangstat update SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
-    logit( $taskid, $host, $group, "Bangstat update to $jobstatus for host $host group $group jobid $jobid" );
+    logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "Set jobstatus to $jobstatus for host $host group $group jobid $jobid" );
 
     return 1;
 }
 
 sub bangstat_finish_backupjob {
-    my ($taskid, $jobid, $host, $group, $status) = @_;
+    my ($taskid, $jobid, $host, $group, $jobstatus) = @_;
 
     my $SQL = qq(
         UPDATE statistic
-        SET JobStatus = '$status'
+        SET JobStatus = '$jobstatus'
         WHERE BkpFromHost = '$host'
         AND BkpGroup = '$group'
         AND JobID = '$jobid';
@@ -466,7 +466,7 @@ sub bangstat_finish_backupjob {
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
-        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to set jobstatus to $status for host $host group $group" );
+        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to set jobstatus to $jobstatus for host $host group $group" );
         return 1;
     }
 
@@ -476,7 +476,7 @@ sub bangstat_finish_backupjob {
 
     $SQL =~ s/;.*/;/sg;
     logit( $taskid, $host, $group, "Set jobstatus SQL command: $SQL" ) if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 );
-    logit( $taskid, $host, $group, "Set jobstatus to $status for host $host group $group jobid $jobid" );
+    logit( $taskid, $host, $group, "Set jobstatus to $jobstatus for host $host group $group jobid $jobid" );
 
     return 1;
 }
