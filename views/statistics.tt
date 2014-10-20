@@ -9,11 +9,11 @@
         <link rel="stylesheet" href="/css/rickshaw.css">
         <link rel="stylesheet" href="/css/rickshaw-graph.css">
         <link rel="stylesheet" href="/css/jquery-ui.css">
-        <script src="/javascripts/d3.js"></script>
-        <script src="/javascripts/rickshaw.js"></script>
-        <script src="/javascripts/jquery.js"></script>
-        <script src="/javascripts/jquery-ui.js"></script>
-        <script src="/javascripts/jquery.chained.js"></script>
+        <script src="/javascripts/d3.min.js"></script>
+        <script src="/javascripts/rickshaw.min.js"></script>
+        <script src="/javascripts/jquery.min.js"></script>
+        <script src="/javascripts/jquery-ui.min.js"></script>
+        <script src="/javascripts/jquery.chained.min.js"></script>
     </head>
     <body>
         <% INCLUDE header.tt %>

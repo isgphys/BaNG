@@ -8,11 +8,11 @@
         <link rel="stylesheet" href="/css/tablesorter.css">
         <link rel="stylesheet" href="/css/isg-dancer-common.css">
         <link rel="stylesheet" href="/css/bang.css">
-        <script src="/javascripts/jquery.js"></script>
+        <script src="/javascripts/jquery.min.js"></script>
         <script src="/javascripts/jquery.uitablefilter.js" type="text/javascript"></script>
-        <script src="/javascripts/jquery.tablesorter.js"></script>
+        <script src="/javascripts/jquery.tablesorter.min.js"></script>
         <script src="/javascripts/jquery.tablesorter.parser-metric.js"></script>
-        <script src="/javascripts/jquery.tablesorter.widgets.js"></script>
+        <script src="/javascripts/jquery.tablesorter.widgets.min.js"></script>
         <script>
             function updateTime() {
                 document.getElementById("LastUpdate").firstChild.nodeValue =

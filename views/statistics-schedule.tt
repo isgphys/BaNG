@@ -8,9 +8,9 @@
         <link rel="stylesheet" href="/css/bang.css">
         <link rel="stylesheet" href="/css/swimlanes.css">
         <link rel="stylesheet" href="/css/statistics_schedule.css">
-        <script src="/javascripts/d3.js"></script>
+        <script src="/javascripts/d3.min.js"></script>
         <script src="/javascripts/swimlanes.js"></script>
-        <script src="/javascripts/jquery.js"></script>
+        <script src="/javascripts/jquery.min.js"></script>
     </head>
     <body>
         <% INCLUDE header.tt %>
