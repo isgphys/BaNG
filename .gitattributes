@@ -1,2 +1,3 @@
-# Treat minified JavaScript as binary
+# Treat minified JavaScript and CSS files as binary
 *.min.js    binary
+*.min.css   binary
