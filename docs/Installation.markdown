@@ -1,16 +1,13 @@
 Installation
 ============
 
-Requirements:
-
-  * perl module `forks` >= 0.35
-
 Install dependencies:
 
 ```sh
 apt-get install rsync perl starman libdancer-perl libclone-perl libdatetime-perl libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl libdbd-mysql-perl libmodule-refresh-perl libtemplate-perl libyaml-tiny-perl libmime-lite-perl libnet-ldap-perl libtext-markdown-perl nis
 ```
 
+Note that `libforks-perl` must be version 0.35 or later. If your distribution ships an older version, you should install the module from cpan.
 
 ```sh
 git clone git@gitlab.phys.ethz.ch:dancer/bang.git /opt/BaNG
@@ -34,3 +31,11 @@ Adapt `etc/hosts` and `etc/groups` to your needs.
 Create the MySQL database following `docs/Database.markdown` and edit `etc/bangstat_db.yaml` accordingly.
 
 Create (BTRFS) partition and try a first backup.
+
+The tests require a symlink to your server config:
+
+```sh
+ln -s /opt/BaNG/etc/servers/yourserver_defaults.yaml /opt/BaNG/t/etc/servers/
+```
+
+Use `prove` to run the small test suite.
