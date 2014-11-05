@@ -528,8 +528,6 @@ sub delete_btrfs_subvolume {
 sub create_btrfs_snapshot {
     my ( $taskid, $host, $group, $bkptimestamp ) = @_;
 
-    return unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
-
     my $btrfs_cmd             = $serverconfig{path_btrfs};
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
     my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . $bkptimestamp;
@@ -729,7 +727,9 @@ sub finish_backupjob {
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
     if ( $dosnapshot ) {
-        create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
+        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+            create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
+        }
         create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
 
         my %RecentBackups = bangstat_recentbackups($host);
