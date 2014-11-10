@@ -307,8 +307,9 @@ sub thread_work {
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
-        execute_rsync( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
-        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path)" );
+        my $rsync_err;
+        $rsync_err = execute_rsync( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
+        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
         unless( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ( $finallysnapshots ) ) {
             my $bkpjob = {
                 taskid       => $taskid,
@@ -317,6 +318,7 @@ sub thread_work {
                 group        => $group,
                 lastbkp      => $lastbkp,
                 bkptimestamp => $bkptimestamp,
+                rsync_err    => $rsync_err,
                 dosnapshot   => $dosnapshot,
             };
             finish_backupjob($bkpjob);
@@ -493,7 +495,7 @@ sub execute_rsync {
     #report finished rsync to DB, jobstatus => 1
     bangstat_update_backupjob($taskid, $jobid, $host, $group, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '1', @outlines);
 
-    return 1;
+    return $errcode;
 }
 
 #################################
@@ -525,8 +527,6 @@ sub delete_btrfs_subvolume {
 
 sub create_btrfs_snapshot {
     my ( $taskid, $host, $group, $bkptimestamp ) = @_;
-
-    return unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' );
 
     my $btrfs_cmd             = $serverconfig{path_btrfs};
     my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
@@ -723,10 +723,13 @@ sub finish_backupjob {
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
     my $lastbkp      = $bkpjob->{'lastbkp'};
+    my $rsync_err    = $bkpjob->{'rsync_err'};
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
     if ( $dosnapshot ) {
-        create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
+        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+            create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
+        }
         create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
 
         my %RecentBackups = bangstat_recentbackups($host);
