@@ -599,6 +599,7 @@ sub logit {
         sleep \s |
         NOCACHE \s selected |
         working \s on |
+        PID |
         finished \s with |
         Backup \s successful |
         ERROR |
