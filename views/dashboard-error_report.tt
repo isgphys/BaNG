@@ -19,7 +19,7 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
     </thead>
     <tbody>
         <%- FOREACH bkp IN RecentBackupsAll.Data %>
-            <% NEXT IF ( bkp.JobStatus == 2 AND bkp.ErrStatus == 0 ) OR ( bkp.JobStatus == 2 AND ( bkp.ErrStatus == 24 OR bkp.ErrStatus == "0,24" ) ) %>
+            <% NEXT IF ( bkp.JobStatus == 2 AND bkp.ErrStatus == 0 ) OR ( bkp.JobStatus == -1 AND bkp.BkpGroup == 'mac-workstation' ) OR ( bkp.JobStatus == 2 AND ( bkp.ErrStatus == 24 OR bkp.ErrStatus == "0,24" ) ) %>
             <tr height="20">
                 <td <%- IF bkp.JobStatus == 2 AND bkp.isThread %>class="hook3" title="forked Job done">
                     <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
