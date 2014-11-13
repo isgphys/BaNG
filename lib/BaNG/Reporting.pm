@@ -193,7 +193,7 @@ sub bangstat_recentbackups_all {
             WHERE G.bkpfromhost = recent_backups.bkpfromhost
             AND Start > DATE_SUB(NOW(), INTERVAL $lastXhours HOUR)
             GROUP BY G.bkpfromhost, G.bkpgroup)
-        ORDER BY JobStatus DESC, Start DESC;
+        ORDER BY JobStatus, Start DESC;
     ");
     $sth->execute();
 
