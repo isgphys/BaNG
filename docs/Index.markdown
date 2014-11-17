@@ -8,3 +8,4 @@
   * [Database](./Database) : BaNG database configuration
   * [Wipe](./Wipe) : BaNG wipe strategy and long-time backups
   * [Mac OS X](./MacOSX) : BaNG on Mac OS X servers and clients
+  * [Advanced](./Advanced) : BaNG features for advanced users
