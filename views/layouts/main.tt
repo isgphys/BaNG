@@ -15,8 +15,10 @@
         <script src="/javascripts/jquery.tablesorter.widgets.min.js"></script>
         <script>
             function updateTime() {
+                var d = new Date();
                 document.getElementById("LastUpdate").firstChild.nodeValue =
-                new Date().toTimeString().substring(0, 8);
+                d.toTimeString().substring(0, 8) + " " + d.toLocaleDateString();
+
             }
 
             function updateFilter() {
