@@ -55,7 +55,7 @@ get '/error_report' => require_role isg => sub {
     },{ layout => 0 };
 };
 
-get '/wipe_status' => require_login sub {
+get '/wipe_status' => require_role isg => sub {
     get_serverconfig();
     get_host_config('*');
 
