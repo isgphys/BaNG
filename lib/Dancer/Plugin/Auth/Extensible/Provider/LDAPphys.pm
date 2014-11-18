@@ -108,7 +108,7 @@ sub _user_groups {
     foreach my $group ($ldap_result->entries) {
         my $has_members   = $group->get_value('memberUid');
         my @group_members = @{ $group->get_value( 'memberUid', asref => 1 ) } if $has_members;
-        if ( $username ~~ @group_members ) {
+        if ( grep { $_ eq $username } @group_members ) {
             my $groupname = ($group->get_value('cn'))[0];
             push( @user_groups, $groupname );
         }

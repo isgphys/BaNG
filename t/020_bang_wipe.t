@@ -116,7 +116,7 @@ sub test_pattern {
             next CHAR;
         }
         foreach my $type (qw( monthly weekly daily wipe )) {
-            if ( $available[$i] ~~ @{$stack{$type}} ) {
+            if ( grep { $_ eq $available[$i] } @{$stack{$type}} ) {
                 my $flag = (split( '', $type ))[0];
                 $flag = '/' if $type eq 'wipe';
                 $output .= $flag;

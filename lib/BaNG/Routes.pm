@@ -84,7 +84,7 @@ post '/login' => sub {
         session logged_in_user       => param('username');
         session logged_in_fullname   => Dancer::Plugin::Auth::Extensible::Provider::LDAPphys::_user_fullname(param('username'));
         session logged_in_roles      => Dancer::Plugin::Auth::Extensible::Provider::LDAPphys::get_user_roles('',param('username'));
-        session logged_in_admin      => 'isg' ~~ session('logged_in_roles') || '0';
+        session logged_in_admin      => grep { $_ eq 'isg' } session('logged_in_roles') || '0';
         session logged_in_user_realm => 'ldap';
 
         if ( !session('logged_in_admin') && session('return_url') eq '/' ) {
