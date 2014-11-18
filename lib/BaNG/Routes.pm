@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
-use Dancer::Plugin::Auth::Extensible::Provider::LDAPphys;
 use BaNG::Common;
 use BaNG::Config;
 use BaNG::Hosts;
@@ -81,11 +80,10 @@ get '/login' => sub {
 
 post '/login' => sub {
     if ( authenticate_user(param('username'), param('password')) ) {
-        session logged_in_user       => param('username');
-        session logged_in_fullname   => Dancer::Plugin::Auth::Extensible::Provider::LDAPphys::_user_fullname(param('username'));
-        session logged_in_roles      => Dancer::Plugin::Auth::Extensible::Provider::LDAPphys::get_user_roles('',param('username'));
-        session logged_in_admin      => grep { $_ eq 'isg' } session('logged_in_roles') || '0';
         session logged_in_user_realm => 'ldap';
+        session logged_in_user       => param('username');
+        session logged_in_fullname   => logged_in_user()->{'cn'};
+        session logged_in_admin      => user_has_role( param('username'), 'isg' ) ? 1 : 0;
 
         if ( !session('logged_in_admin') && session('return_url') eq '/' ) {
             redirect '/restore';
