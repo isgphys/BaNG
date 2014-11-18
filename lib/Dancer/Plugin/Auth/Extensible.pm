@@ -7,13 +7,16 @@ use Carp;
 use Dancer::Plugin;
 use Dancer qw(:syntax);
 
-our $VERSION = '0.20';
+our $VERSION = '0.30';
 
 my $settings = plugin_setting;
 
 my $loginpage = $settings->{login_page} || '/login';
+my $userhomepage = $settings->{user_home_page} || '/';
 my $logoutpage = $settings->{logout_page} || '/logout';
 my $deniedpage = $settings->{denied_page} || '/login/denied';
+my $exitpage = $settings->{exit_page};
+
 
 =head1 NAME
 
@@ -28,9 +31,11 @@ provides role-based access control, and supports various authentication
 methods/sources (config file, database, Unix system users, etc).
 
 Designed to support multiple authentication realms and to be as extensible as
-possible, and to make secure password handling easy (the base class for auth
+possible, and to make secure password handling easy.  The base class for auth
 providers makes handling C<RFC2307>-style hashed passwords really simple, so you
-have no excuse for storing plain-text passwords).
+have no excuse for storing plain-text passwords.  A simple script to generate
+RFC2307-style hashed passwords is included, or you can use L<Crypt::SaltedHash>
+yourself to do so, or use the C<slappasswd> utility if you have it installed.
 
 
 =head1 SYNOPSIS
@@ -105,7 +110,7 @@ Keywords are provided to check if a user is logged in / has appropriate roles.
 
 If the user is not logged in, they will be redirected to the login page URL to
 log in.  The default URL is C</login> - this may be changed with the
-C<login_url> option.
+C<login_page> option.
 
 =item require_role - require the user to have a specified role
 
@@ -143,6 +148,22 @@ redirected to the access denied URL.
 By default, the plugin adds a route to present a simple login form at that URL.
 If you would rather add your own, set the C<no_default_pages> setting to a true
 value, and define your own route which responds to C</login> with a login page.
+Alternatively you can let DPAE add the routes and handle the status codes, etc.
+and simply define the setting C<login_page_handler> and/or
+C<permission_denied_page_handler> with the name of a subroutine to be called to
+handle the route. Note that it must be a fully qualified sub. E.g.
+
+    plugins:
+      Auth::Extensible:
+        login_page_handler: 'My::App:login_page_handler'
+        permission_denied_page_handler: 'My::App:permission_denied_page_handler'
+
+Then in your code you might simply use a template:
+
+    sub permission_denied_page_handler {
+        template 'account/login';
+    }
+
 
 If the user is logged in, but tries to access a route which requires a specific
 role they don't have, they will be redirected to the "permission denied" page
@@ -175,7 +196,8 @@ and should do at least the following:
         session->destroy;
     };
     
-
+If you want to use the default C<post '/login'> and C<any '/logout'> routes
+you can configure them. See below.
 
 =head2 Keywords
 
@@ -201,7 +223,7 @@ sub require_login {
         if (!$user) {
             execute_hook('login_required', $coderef);
             # TODO: see if any code executed by that hook set up a response
-            return redirect uri_for($loginpage, { return_url => request->path });
+            return redirect uri_for($loginpage, { return_url => request->request_uri });
         }
         return $coderef->();
     };
@@ -276,13 +298,13 @@ sub _build_wrapper {
         if (!$user) {
             execute_hook('login_required', $coderef);
             # TODO: see if any code executed by that hook set up a response
-            return redirect uri_for($loginpage, { return_url => request->path });
+            return redirect uri_for($loginpage, { return_url => request->request_uri });
         }
 
         my $role_match;
         if ($mode eq 'single') {
             for (user_roles()) {
-                $role_match++ and last if $_ ~~ $require_role;
+                $role_match++ and last if _smart_match($_, $require_role);
             }
         } elsif ($mode eq 'any') {
             my %role_ok = map { $_ => 1 } @role_list;
@@ -300,12 +322,14 @@ sub _build_wrapper {
         }
 
         if ($role_match) {
+            # We're happy with their roles, so go head and execute the route
+            # handler coderef.
             return $coderef->();
         }
 
         execute_hook('permission_denied', $coderef);
         # TODO: see if any code executed by that hook set up a response
-        return redirect uri_for($deniedpage, { return_url => request->path });
+        return redirect uri_for($deniedpage, { return_url => request->request_uri });
     };
 }
 
@@ -377,10 +401,12 @@ Returns a list or arrayref depending on context.
 =cut
 
 sub user_roles {
-    my ($username) = @_;
+    my ($username, $realm) = @_;
     $username = session 'logged_in_user' unless defined $username;
 
-    my $roles = auth_provider()->get_user_roles($username);
+    my $search_realm = ($realm ? $realm : '');
+
+    my $roles = auth_provider($search_realm)->get_user_roles($username);
     return unless defined $roles;
     return wantarray ? @$roles : $roles;
 }
@@ -446,6 +472,10 @@ In your application's configuation file:
         Auth::Extensible:
             # Set to 1 if you want to disable the use of roles (0 is default)
             disable_roles: 0
+            # After /login: If no return_url is given: land here ('/' is default)
+            user_home_page: '/user'
+            # After /logout: If no return_url is given: land here (no default)
+            exit_page: '/'
             
             # List each authentication realm, with the provider to use and the
             # provider-specific settings (see the documentation for the provider
@@ -489,8 +519,11 @@ sub auth_provider {
     if ($provider_class !~ /::/) {
         $provider_class = __PACKAGE__ . "::Provider::$provider_class";
     }
-    Dancer::ModuleLoader->load($provider_class)
-        or die "Cannot load provider $provider_class";
+    my ($ok, $error) = Dancer::ModuleLoader->load($provider_class);
+
+    if (! $ok) {
+        die "Cannot load provider $provider_class: $error";
+    }
 
     return $realm_provider{$realm} = $provider_class->new($realm_settings);
 }
@@ -521,14 +554,25 @@ sub _try_realms {
 }
 
 # Set up routes to serve default pages, if desired
-if (!$settings->{no_default_pages}) {
+if ( !$settings->{no_default_pages} ) {
     get $loginpage => sub {
+        if(logged_in_user()) {
+            redirect params->{return_url} || $userhomepage;
+        }
+
         status 401;
-        return _default_login_page();
+        my $_default_login_page =
+          $settings->{login_page_handler} || '_default_login_page';
+        no strict 'refs';
+        return &{$_default_login_page}();
     };
     get $deniedpage => sub {
         status 403;
-        return _default_permission_denied_page();
+        my $_default_permission_denied_page =
+          $settings->{permission_denied_page_handler}
+          || '_default_permission_denied_page';
+        no strict 'refs';
+        return &{$_default_permission_denied_page}();
     };
 }
 
@@ -538,13 +582,35 @@ if (!$settings->{no_login_handler}) {
 
 # Handle logging in...
 post $loginpage => sub {
+    # For security, ensure the username and password are straight scalars; if
+    # the app is using a serializer and we were sent a blob of JSON, they could
+    # have come from that JSON, and thus could be hashrefs (JSON SQL injection)
+    # - for database providers, feeding a carefully crafted hashref to the SQL
+    # builder could result in different SQL to what we'd expect.
+    # For instance, if we pass password => params->{password} to an SQL builder,
+    # we'd expect the query to include e.g. "WHERE password = '...'" (likely
+    # with paremeterisation) - but if params->{password} was something
+    # different, e.g. { 'like' => '%' }, we might end up with some SQL like
+    # WHERE password LIKE '%' instead - which would not be a Good Thing.
+    my ($username, $password) = @{ params() }{qw(username password)};
+    for ($username, $password) {
+        if (ref $_) {
+            # TODO: handle more cleanly
+            die "Attempt to pass a reference as username/password blocked";
+        }
+    }
+
+    if(logged_in_user()) {
+        redirect params->{return_url} || $userhomepage;
+    }
+
     my ($success, $realm) = authenticate_user(
-        params->{username}, params->{password}
+        $username, $password
     );
     if ($success) {
-        session logged_in_user => params->{username};
+        session logged_in_user => $username;
         session logged_in_user_realm => $realm;
-        redirect params->{return_url} || '/';
+        redirect params->{return_url} || $userhomepage;
     } else {
         vars->{login_failed}++;
         forward $loginpage, { login_failed => 1 }, { method => 'GET' };
@@ -556,6 +622,8 @@ any ['get','post'] => $logoutpage => sub {
     session->destroy;
     if (params->{return_url}) {
         redirect params->{return_url};
+    } elsif ($exitpage) {
+        redirect $exitpage;
     } else {
         # TODO: perhaps make this more configurable, perhaps by attempting to
         # render a template first.
@@ -602,6 +670,24 @@ $login_fail_message
 </form>
 PAGE
 }
+
+# Replacement for much maligned and misunderstood smartmatch operator
+sub _smart_match {
+    my ($got, $want) = @_;
+    if (!ref $want) {
+        return $got eq $want;
+    } elsif (ref $want eq 'Regexp') {
+        return $got =~ $want;
+    } elsif (ref $want eq 'ARRAY') {
+        return grep { $_ eq $got } @$want;
+    } else {
+        carp "Don't know how to match against a " . ref $want;
+    }
+}
+
+
+
+
 =head1 AUTHOR
 
 David Precious, C<< <davidp at preshweb.co.uk> >>
@@ -627,9 +713,16 @@ Configurable login/logout URLs added by Rene (hertell)
 
 Regex support for require_role by chenryn
 
+Support for user_roles looking in other realms by Colin Ewen (casao)
+
+LDAP provider added by Mark Meyer (ofosos)
+
+Config options for default login/logout handlers by Henk van Oers (hvoers)
+
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2012 David Precious.
+
+Copyright 2012-13 David Precious.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
