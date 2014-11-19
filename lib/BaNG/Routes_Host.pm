@@ -11,7 +11,7 @@ use BaNG::Reporting;
 
 prefix '/host';
 
-get '/:host' => require_role isg => sub {
+get '/:host' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config(param('host'));
     my %RecentBackups = bangstat_recentbackups( param('host') );

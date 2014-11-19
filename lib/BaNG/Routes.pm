@@ -21,7 +21,7 @@ use BaNG::Routes_Statistics;
 
 prefix undef;
 
-get '/' => require_role isg => sub {
+get '/' => require_role config->{admin_role} => sub {
 
     template 'dashboard' => {
         section    => "dashboard",
@@ -29,7 +29,7 @@ get '/' => require_role isg => sub {
     };
 };
 
-get '/fsinfo_report' => require_role isg => sub {
+get '/fsinfo_report' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'dashboard-fsinfo' => {
@@ -38,7 +38,7 @@ get '/fsinfo_report' => require_role isg => sub {
     },{ layout => 0 };
 };
 
-get '/lockfile_report' => require_role isg => sub {
+get '/lockfile_report' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'dashboard-running_jobs' => {
@@ -46,7 +46,7 @@ get '/lockfile_report' => require_role isg => sub {
     },{ layout => 0 };
 };
 
-get '/error_report' => require_role isg => sub {
+get '/error_report' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'dashboard-error_report' => {
@@ -54,7 +54,7 @@ get '/error_report' => require_role isg => sub {
     },{ layout => 0 };
 };
 
-get '/wipe_status' => require_role isg => sub {
+get '/wipe_status' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config('*');
 
@@ -85,7 +85,7 @@ post '/login' => sub {
         session logged_in_user_realm => $realm;
         session logged_in_user       => param('username');
         session logged_in_fullname   => logged_in_user()->{'cn'};
-        session logged_in_admin      => user_has_role( param('username'), 'isg' ) ? 1 : 0;
+        session logged_in_admin      => user_has_role( param('username'), config->{admin_role} ) ? 1 : 0;
 
         if ( !session('logged_in_admin') && session('return_url') eq '/' ) {
             redirect '/restore';

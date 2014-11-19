@@ -11,7 +11,7 @@ use BaNG::Reporting;
 
 prefix '/logs';
 
-get '/global' => require_role isg => sub {
+get '/global' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'logs-global', {
@@ -23,7 +23,7 @@ get '/global' => require_role isg => sub {
     };
 };
 
-get '/:host/:group/?:showlogsnumber?' => require_role isg => sub {
+get '/:host/:group/?:showlogsnumber?' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     my $show_logs_number = param('showlogsnumber') || $serverconfig{show_logs_number};

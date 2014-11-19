@@ -10,7 +10,7 @@ use BaNG::Reporting;
 
 prefix '/reporting';
 
-get '/' => require_role isg => sub {
+get '/' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'reporting-bkpreport' => {
@@ -20,7 +20,7 @@ get '/' => require_role isg => sub {
     };
 };
 
-get '/task/:taskid' => require_role isg => sub {
+get '/task/:taskid' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'reporting-task_jobs' => {

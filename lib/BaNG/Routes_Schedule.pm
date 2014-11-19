@@ -9,7 +9,7 @@ use BaNG::Config;
 
 prefix '/schedule';
 
-get '/' => require_role isg => sub {
+get '/' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config('*');
 

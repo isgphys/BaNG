@@ -10,7 +10,7 @@ use BaNG::Config;
 
 prefix '/config';
 
-get '/defaults' => require_role isg => sub {
+get '/defaults' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'configs-defaults' => {
@@ -25,11 +25,11 @@ get '/defaults' => require_role isg => sub {
     };
 };
 
-get '/allhosts' => require_role isg => sub {
+get '/allhosts' => require_role config->{admin_role} => sub {
     redirect '/config/allhosts/';
 };
 
-get '/allhosts/:filter?' => require_role isg => sub {
+get '/allhosts/:filter?' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config("*");
 
@@ -43,7 +43,7 @@ get '/allhosts/:filter?' => require_role isg => sub {
     };
 };
 
-get '/allgroups' => require_role isg => sub {
+get '/allgroups' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config("*");
     get_group_config("*");
@@ -57,7 +57,7 @@ get '/allgroups' => require_role isg => sub {
     };
 };
 
-get '/allservers' => require_role isg => sub {
+get '/allservers' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'configs-servers' => {
@@ -69,7 +69,7 @@ get '/allservers' => require_role isg => sub {
     };
 };
 
-get '/new/:configtype/?:errmsg?' => require_role isg => sub {
+get '/new/:configtype/?:errmsg?' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_group_config("*");
     my $configtype = param('configtype');
@@ -91,7 +91,7 @@ get '/new/:configtype/?:errmsg?' => require_role isg => sub {
     };
 };
 
-post '/new/:configtype' => require_role isg => sub {
+post '/new/:configtype' => require_role config->{admin_role} => sub {
     get_serverconfig();
     my $hostname   = param('hostname') || "";
     my $bkpgroup   = param('newgroup') ? param('newgroup') : param('bkpgroup');
@@ -118,7 +118,7 @@ post '/new/:configtype' => require_role isg => sub {
 
 };
 
-post '/modify/:configtype' => require_role isg => sub {
+post '/modify/:configtype' => require_role config->{admin_role} => sub {
     get_serverconfig();
     my $configtype = param('configtype');
     my $host_arg   = param('host_arg') || "";
@@ -131,7 +131,7 @@ post '/modify/:configtype' => require_role isg => sub {
     warning "$return_msg updated by $updatedby!";
 };
 
-post '/delete/:configtype/:file' => require_role isg => sub {
+post '/delete/:configtype/:file' => require_role config->{admin_role} => sub {
     get_serverconfig();
     my $configtype = param('configtype');
     my $file  = param('file');
