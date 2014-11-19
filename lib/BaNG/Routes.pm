@@ -79,8 +79,10 @@ get '/login' => sub {
 };
 
 post '/login' => sub {
-    if ( authenticate_user(param('username'), param('password')) ) {
-        session logged_in_user_realm => 'ldap';
+    my ($authenticated, $realm) = authenticate_user( params->{username}, params->{password} );
+
+    if ( $authenticated ) {
+        session logged_in_user_realm => $realm;
         session logged_in_user       => param('username');
         session logged_in_fullname   => logged_in_user()->{'cn'};
         session logged_in_admin      => user_has_role( param('username'), 'isg' ) ? 1 : 0;
