@@ -39,7 +39,7 @@ our $bangstat_dbh;
 sub bangstat_db_connect {
     my ($ConfigBangstat) = @_;
 
-    my $yaml = YAML::Tiny->read($ConfigBangstat);
+    my $yaml       = YAML::Tiny->read($ConfigBangstat);
     my $DBhostname = $yaml->[0]{DBhostname};
     my $DBusername = $yaml->[0]{DBusername};
     my $DBdatabase = $yaml->[0]{DBdatabase};
@@ -55,7 +55,7 @@ sub bangstat_db_connect {
 }
 
 sub bangstat_recentbackups {
-    my ($host, $lastXdays) = @_;
+    my ( $host, $lastXdays ) = @_;
 
     $lastXdays ||= 14;
     my $BkpStartHour = 18;
@@ -76,7 +76,7 @@ sub bangstat_recentbackups {
     my %RecentBackupTimes;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $BkpGroup    = $dbrow->{'BkpGroup'} || 'NA';
-        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
@@ -115,14 +115,14 @@ sub bangstat_recentbackups {
     my $today    = `$serverconfig{path_date} -d \@$now +"%Y-%m-%d"`;
     my $one_day  = 24 * 3600;
     my $next_bkp = str2time("$today $BkpStartHour:00:00");
-    $next_bkp   += $one_day if ( $next_bkp < $now );
+    $next_bkp += $one_day if ( $next_bkp < $now );
 
     # scan for missing backups
     foreach my $hostpath ( keys %RecentBackupTimes ) {
         my $nextBkpStart = $next_bkp;
         my $prevBkpStart = $nextBkpStart - $one_day;
 
-        my @bkp = @{$RecentBackupTimes{$hostpath}};
+        my @bkp                = @{$RecentBackupTimes{$hostpath}};
         my $missingBkpFromPath = $bkp[0]->{BkpFromPath} || 'NA';
         my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
         my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
@@ -138,12 +138,13 @@ sub bangstat_recentbackups {
                 # or if no backup occured during that day
                 my $latestbkp = str2time( $bkp[0]->{Starttime} );
                 unless ( $latestbkp > $prevBkpStart
-                      && $latestbkp < $nextBkpStart ) {
+                      && $latestbkp < $nextBkpStart )
+                {
                     $isMissing = 1;
                 }
             }
 
-            if ( $isMissing ) {
+            if ($isMissing) {
                 # add empty entry for missing backups
                 my $missingepoch = $prevBkpStart;
                 my $missingday   = `$serverconfig{path_date} -d \@$missingepoch +"%Y-%m-%d"`;
@@ -166,6 +167,7 @@ sub bangstat_recentbackups {
                     shift @bkp;
                 }
             }
+
             # then look at previous day
             $nextBkpStart -= $one_day;
             $prevBkpStart -= $one_day;
@@ -199,7 +201,7 @@ sub bangstat_recentbackups_all {
 
     my %RecentBackupsAll;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
@@ -246,7 +248,7 @@ sub bangstat_recentbackups_last {
 
     my %RecentBackupsLast;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsLast{'Data'}}, {
@@ -291,7 +293,7 @@ sub bangstat_task_jobs {
 
     my %TaskJobs;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'}/60 : '-';
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$TaskJobs{'Data'}}, {
@@ -330,7 +332,7 @@ sub send_xymon_report {
     );
 
     if ( defined $socket and $socket != 0 ) {
-        $socket->print("$report");
+        $socket->print($report);
         $socket->close();
     }
 
@@ -338,18 +340,20 @@ sub send_xymon_report {
 }
 
 sub bangstat_start_backupjob {
-    my ($taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
+    my ( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines ) = @_;
 
     $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
     my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
-    my $sql;
-    $sql .= "INSERT INTO statistic (";
-    $sql .= " TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, ErrStatus, JobStatus, Start, Stop";
-    $sql .= ") VALUES (";
-    $sql .= "'$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp', ";
-    $sql .= " $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')";
-    $sql .= ")";
+    my $sql = qq(
+        INSERT INTO statistic (
+            TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp,
+            isThread, ErrStatus, JobStatus, Start, Stop
+        ) VALUES (
+            '$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp',
+            $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')
+        )
+    );
     logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
@@ -369,24 +373,24 @@ sub bangstat_start_backupjob {
 }
 
 sub bangstat_update_backupjob {
-    my ($taskid, $jobid, $host, $group, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines) = @_;
+    my ( $taskid, $jobid, $host, $group, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines ) = @_;
 
     my %parse_log_keys = (
-        'last backup'                 => 'LastBkp',
-        'Number of files'             => 'NumOfFiles',
+        'last backup'                         => 'LastBkp',
+        'Number of files'                     => 'NumOfFiles',
         'Number of regular files transferred' => 'NumOfFilesTrans',
-        'Number of created files'     => 'NumOfFilesCreated',
-        'Number of deleted files'     => 'NumOfFilesDel',
-        'Number of files transferred' => 'NumOfFilesTrans',
-        'Total file size'             => 'TotFileSize',
-        'Total transferred file size' => 'TotFileSizeTrans',
-        'Literal data'                => 'LitData',
-        'Matched data'                => 'MatchData',
-        'File list size'              => 'FileListSize',
-        'File list generation time'   => 'FileListGenTime',
-        'File list transfer time'     => 'FileListTransTime',
-        'Total bytes sent'            => 'TotBytesSent',
-        'Total bytes received'        => 'TotBytesRcv',
+        'Number of created files'             => 'NumOfFilesCreated',
+        'Number of deleted files'             => 'NumOfFilesDel',
+        'Number of files transferred'         => 'NumOfFilesTrans',
+        'Total file size'                     => 'TotFileSize',
+        'Total transferred file size'         => 'TotFileSizeTrans',
+        'Literal data'                        => 'LitData',
+        'Matched data'                        => 'MatchData',
+        'File list size'                      => 'FileListSize',
+        'File list generation time'           => 'FileListGenTime',
+        'File list transfer time'             => 'FileListTransTime',
+        'Total bytes sent'                    => 'TotBytesSent',
+        'Total bytes received'                => 'TotBytesRcv',
     );
 
     my %log_values;
@@ -397,7 +401,7 @@ sub bangstat_update_backupjob {
     foreach my $outline (@outlines) {
         next unless $outline =~ m/:/;
         chomp $outline;
-        my ($key, $value) = split( ': ', $outline );
+        my ( $key, $value ) = split( ': ', $outline );
         foreach my $logkey ( keys %parse_log_keys ) {
             if ( $logkey eq $key ) {
                 $value =~ s/^\D*([\d\.,]+).*?$/$1/;
@@ -411,33 +415,33 @@ sub bangstat_update_backupjob {
 
     my $SQL = qq(
         UPDATE statistic
-        SET JobStatus = '$jobstatus',
-            LastBkp = '$lastbkp',
-            ErrStatus = '$errcode',
-            Stop = FROM_UNIXTIME('$endstamp'),
-            NumOfFiles = '$log_values{NumOfFiles}',
-            NumOfFilesTrans = '$log_values{NumOfFilesTrans}',
+        SET JobStatus         = '$jobstatus',
+            LastBkp           = '$lastbkp',
+            ErrStatus         = '$errcode',
+            Stop              = FROM_UNIXTIME('$endstamp'),
+            NumOfFiles        = '$log_values{NumOfFiles}',
+            NumOfFilesTrans   = '$log_values{NumOfFilesTrans}',
             NumOfFilesCreated = '$log_values{NumOfFilesCreated}',
-            NumOfFilesDel = '$log_values{NumOfFilesDel}',
-            TotFileSize = '$log_values{TotFileSize}',
-            TotFileSizeTrans = '$log_values{TotFileSizeTrans}',
-            LitData = '$log_values{LitData}',
-            MatchData = '$log_values{MatchData}',
-            FileListSize = '$log_values{FileListSize}',
-            FileListGenTime = '$log_values{FileListGenTime}',
+            NumOfFilesDel     = '$log_values{NumOfFilesDel}',
+            TotFileSize       = '$log_values{TotFileSize}',
+            TotFileSizeTrans  = '$log_values{TotFileSizeTrans}',
+            LitData           = '$log_values{LitData}',
+            MatchData         = '$log_values{MatchData}',
+            FileListSize      = '$log_values{FileListSize}',
+            FileListGenTime   = '$log_values{FileListGenTime}',
             FileListTransTime = '$log_values{FileListTransTime}',
-            TotBytesSent = '$log_values{TotBytesSent}',
-            TotBytesRcv = '$log_values{TotBytesRcv}'
-        WHERE TaskID='$taskid'
-            AND JobID = '$jobid'
-            AND BkpFromHost = '$host'
-            AND BkpGroup = '$group'
-            AND BkpFromPath = '$path';
+            TotBytesSent      = '$log_values{TotBytesSent}',
+            TotBytesRcv       = '$log_values{TotBytesRcv}'
+        WHERE TaskID          = '$taskid'
+            AND JobID         = '$jobid'
+            AND BkpFromHost   = '$host'
+            AND BkpGroup      = '$group'
+            AND BkpFromPath   = '$path';
     );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     if ( !$conn ) {
-        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
+        logit( $taskid, $host, $group, 'ERROR: Could not connect to DB to send bangstat report.' );
         return 1;
     }
 
@@ -454,14 +458,14 @@ sub bangstat_update_backupjob {
 }
 
 sub bangstat_finish_backupjob {
-    my ($taskid, $jobid, $host, $group, $jobstatus) = @_;
+    my ( $taskid, $jobid, $host, $group, $jobstatus ) = @_;
 
     my $SQL = qq(
         UPDATE statistic
-        SET JobStatus = '$jobstatus'
+            SET JobStatus = '$jobstatus'
         WHERE BkpFromHost = '$host'
-        AND BkpGroup = '$group'
-        AND JobID = '$jobid';
+            AND BkpGroup  = '$group'
+            AND JobID     = '$jobid';
     );
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
@@ -482,7 +486,7 @@ sub bangstat_finish_backupjob {
 }
 
 sub mail_report {
-    my ($taskid, $host, $group, %RecentBackups) = @_;
+    my ( $taskid, $host, $group, %RecentBackups ) = @_;
 
     my $status = $hosts{"$host-$group"}->{errormsg} ? 'warnings' : 'success';
 
@@ -509,7 +513,7 @@ sub mail_report {
         foreach my $mailtype (qw(plain html)) {
             my $report;
             $tt->process( "report-mail_$mailtype.tt", $RecentBackups, \$report )
-                or logit( $taskid, $host, $group, "ERROR generating mail report template: " . $tt->error() );
+                or logit( $taskid, $host, $group, 'ERROR generating mail report template: ' . $tt->error() );
 
             my $mail_att = MIME::Lite->new(
                 Type     => 'text',
@@ -521,16 +525,16 @@ sub mail_report {
         }
 
         unless ( $serverconfig{dryrun} ) {
-            $mail_msg->send or logit( $taskid, $host, $group, "mail_report error" );
+            $mail_msg->send or logit( $taskid, $host, $group, 'mail_report error' );
         }
 
-        logit( $taskid, $host, $group, "Mail report sent." );
+        logit( $taskid, $host, $group, 'Mail report sent.' );
     }
     return 1;
 }
 
 sub xymon_report {
-    my ($taskid, $host, $group, %RecentBackups)  = @_;
+    my ( $taskid, $host, $group, %RecentBackups ) = @_;
 
     my $topcolor = 'green';
     my $errcode;
@@ -551,10 +555,10 @@ sub xymon_report {
     $topcolor = 'yellow' unless %RecentBackups;
 
     my $RecentBackups = {
-        RecentBackups  => \%RecentBackups,
-        Group          => "$host-$group",
-        xymonTopColor  => $topcolor,
-        Errormsg       => $hosts{"$host-$group"}->{errormsg},
+        RecentBackups => \%RecentBackups,
+        Group         => "$host-$group",
+        xymonTopColor => $topcolor,
+        Errormsg      => $hosts{"$host-$group"}->{errormsg},
     };
 
     my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
@@ -580,23 +584,23 @@ sub xymon_report {
 }
 
 sub logit {
-    my ($taskid, $host, $group, $msg) = @_;
+    my ( $taskid, $host, $group, $msg ) = @_;
 
-    my $timestamp  = strftime "%b %d %H:%M:%S", localtime;
-    my $logmonth   = strftime "%Y-%m", localtime;
-    my $logdate    = strftime $serverconfig{global_log_date}, localtime;
-    my $logfolder  = "$serverconfig{path_logs}/${host}_${group}";
+    my $timestamp     = strftime '%b %d %H:%M:%S', localtime;
+    my $logmonth      = strftime '%Y-%m',          localtime;
+    my $logdate       = strftime $serverconfig{global_log_date}, localtime;
+    my $logfolder     = "$serverconfig{path_logs}/${host}_${group}";
     my $globallogfile = "$serverconfig{path_logs}/global_$logmonth.log";
-    my $logfile    = "$logfolder/$logdate.log";
-    my $logmessage = "$timestamp $host-$group($taskid) : $msg";
-    $logmessage   .= "\n" unless ( $logmessage =~ m/\n$/ );
+    my $logfile       = "$logfolder/$logdate.log";
+    my $logmessage    = "$timestamp $host-$group($taskid) : $msg";
+    $logmessage .= "\n" unless ( $logmessage =~ m/\n$/ );
 
     # write selection of messages to global logfile
     my $selection = qr{
         Queueing \s backup \s for |
         Skipping \s because |
         reorder \s queue |
-        sleep \s |
+        sleep |
         NOCACHE \s selected |
         working \s on |
         PID |
@@ -613,29 +617,31 @@ sub logit {
 
     if ( $serverconfig{verbose} ) {
         if ( $serverconfig{dryrun} ) {
-            unless ( $group eq "GLOBAL" || $host eq "SERVER" ) {
+            unless ( $group eq 'GLOBAL' || $host eq 'SERVER' ) {
+
                 # write into daily logfile per host_group
                 print "Write to HOST log: $logmessage";
             }
-            if ( $logmessage =~ /$selection/ || $group eq "GLOBAL" || $host eq "SERVER" ) {
+            if ( $logmessage =~ /$selection/ || $group eq 'GLOBAL' || $host eq 'SERVER' ) {
                 print "Write to GLOBAL log: $logmessage";
             }
-        }else {
+        } else {
             print $logmessage;
         }
     }
 
     unless ( $serverconfig{dryrun} ) {
-        unless ( $group eq "GLOBAL" || $host eq "SERVER" ) {
+        unless ( $group eq 'GLOBAL' || $host eq 'SERVER' ) {
+
             # write into daily logfile per host_group
             mkdir($logfolder) unless -d $logfolder;
-            open my $log, ">>", $logfile or print "ERROR opening logfile $logfile: $!\n";
+            open my $log, '>>', $logfile or print "ERROR opening logfile $logfile: $!\n";
             print {$log} $logmessage;
             close $log;
         }
 
-        if ( $logmessage =~ /$selection/ || $group eq "GLOBAL" || $host eq "SERVER" ) {
-            open my $log, ">>", $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
+        if ( $logmessage =~ /$selection/ || $group eq 'GLOBAL' || $host eq "SERVER" ) {
+            open my $log, '>>', $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
             print {$log} $logmessage;
             close $log;
         }
@@ -649,15 +655,15 @@ sub logit {
 }
 
 sub read_log {
-    my ($host, $group, $show_logs_number) = @_;
+    my ( $host, $group, $show_logs_number ) = @_;
 
     my %parsed_logdata;
     my $logfolder = "$serverconfig{path_logs}/${host}_${group}";
     my @logfiles  = glob("$logfolder/*.log");
     $show_logs_number = $#logfiles + 1 if ( $#logfiles < $show_logs_number );
 
-    foreach my $logfile (@logfiles[-$show_logs_number..-1]) {
-        open(LOGDATA, $logfile) or print "ERROR opening logfile $logfile: $!\n";
+    foreach my $logfile ( @logfiles[ -$show_logs_number .. -1 ] ) {
+        open( LOGDATA, $logfile ) or print "ERROR opening logfile $logfile: $!\n";
         my @logdata = <LOGDATA>;
         close LOGDATA;
 
@@ -676,7 +682,7 @@ sub read_log {
                     message   => $+{message},
                 });
             } else {
-                $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
+                $parsed_logdata{( sort keys %parsed_logdata )[-1]}[-1]->{message} .= "<br />$logline";
             }
         }
     }
@@ -687,38 +693,38 @@ sub read_log {
 sub read_global_log {
 
     my %parsed_logdata;
-    my $logmonth   = strftime "%Y-%m", localtime;
+    my $logmonth = strftime '%Y-%m', localtime;
     my $globallogfile = "$serverconfig{path_logs}/global_$logmonth.log";
 
-        open(LOGDATA, $globallogfile) or print "ERROR opening logfile $globallogfile: $!\n";
-        my @logdata = <LOGDATA>;
-        close LOGDATA;
+    open( LOGDATA, $globallogfile ) or print "ERROR opening logfile $globallogfile: $!\n";
+    my @logdata = <LOGDATA>;
+    close LOGDATA;
 
-        foreach my $logline (@logdata) {
-            if ( $logline =~ qr{
-                    (?<logdate> \w{3}\s\d{2} ) \s
-                    (?<logtime> \d{2}:\d{2}:\d{2} ) \s
-                    (?<hostgroup> [^:]* )\s:\s
-                    (?<message> .* )
-                }x )
-            {
-                my $msg = $+{message};
-                my $logdate = $+{logdate};
-                my $logtime = $+{logtime};
-                my $hostgroup = $+{hostgroup};
+    foreach my $logline (@logdata) {
+        if ( $logline =~ qr{
+                (?<logdate> \w{3}\s\d{2} ) \s
+                (?<logtime> \d{2}:\d{2}:\d{2} ) \s
+                (?<hostgroup> [^:]* )\s:\s
+                (?<message> .* )
+            }x )
+        {
+            my $msg       = $+{message};
+            my $logdate   = $+{logdate};
+            my $logtime   = $+{logtime};
+            my $hostgroup = $+{hostgroup};
 
-                if ( $msg =~ /ERR/ ) {
-                    push( @{ $parsed_logdata{$logdate} }, {
-                            date      => $logdate,
-                            time      => $logtime,
-                            hostgroup => $hostgroup,
-                            message   => $msg,
-                        });
-                }
-            } else {
-                $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
+            if ( $msg =~ /ERR/ ) {
+                push( @{ $parsed_logdata{$logdate} }, {
+                    date      => $logdate,
+                    time      => $logtime,
+                    hostgroup => $hostgroup,
+                    message   => $msg,
+                });
             }
+        } else {
+            $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
         }
+    }
 
     return \%parsed_logdata;
 }

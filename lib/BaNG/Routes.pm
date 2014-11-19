@@ -74,14 +74,13 @@ get '/wipe_status' => require_role config->{admin_role} => sub {
 get '/login' => sub {
     session 'return_url' => params->{return_url} || '/';
 
-    template 'login' => {
-    };
+    template 'login' => {};
 };
 
 post '/login' => sub {
-    my ($authenticated, $realm) = authenticate_user( params->{username}, params->{password} );
+    my ( $authenticated, $realm ) = authenticate_user( params->{username}, params->{password} );
 
-    if ( $authenticated ) {
+    if ($authenticated) {
         session logged_in_user_realm => $realm;
         session logged_in_user       => param('username');
         session logged_in_fullname   => logged_in_user()->{'cn'};
@@ -94,14 +93,13 @@ post '/login' => sub {
         }
 
     } else {
-        debug("Login failed - password incorrect for " . param('username'));
+        debug( 'Login failed - password incorrect for ' . param('username') );
         redirect '/';
-    };
+    }
 };
 
 get '/login/denied' => sub {
-    template 'denied' => {
-    };
+    template 'denied' => {};
 };
 
 get '/logout' => sub {

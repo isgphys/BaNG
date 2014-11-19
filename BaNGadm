@@ -12,12 +12,13 @@ use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
 use POSIX qw( strftime );
 
-use lib dirname( abs_path($0) ) . "/lib";
+use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
 use BaNG::Common;
 
 my $version = '0.1';
-my ($add_arg, $delete_arg);
+my $add_arg;
+my $delete_arg;
 my $crontabonly;
 my $verbose_arg;
 my $dryrun_arg;
@@ -34,49 +35,51 @@ parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
-if ( $crontabonly ) {
+if ($crontabonly) {
     my $crontab = generated_crontab();
-    if ( $serverconfig{dryrun} ){
+    if ( $serverconfig{dryrun} ) {
         print "$crontab\n";
     } else {
         print "write crontab\n";
-        open(CRONTAB, "> /etc/cron.d/BaNG") || die ("Could not open /etc/cron.d/BaNG");
+        open CRONTAB, '>', '/etc/cron.d/BaNG'
+            or die('Could not open /etc/cron.d/BaNG');
         print CRONTAB $crontab;
-        close(CRONTAB);
+        close CRONTAB;
     }
+
     exit 0;
 }
 
-if ( $showgroups ) {
+if ($showgroups) {
     get_group_config();
 
-    print "All available Backup-Groups:\n";
-    print "---------------------------\n";
-    foreach my $group (sort keys %groups) {
+    print "All available Backup Groups:\n";
+    print "----------------------------\n";
+    foreach my $group ( sort keys %groups ) {
         print "$group \n";
     }
 
     exit 0;
 }
 
-if ( $add_arg ) {
-    my $timestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
-    my $createdby = "root with CLI";
+if ($add_arg) {
+    my $timestamp = strftime( '%Y/%m/%d %H:%M:%S', localtime );
+    my $createdby = 'root with CLI';
     my $configtype;
 
     if ( $host_arg && $group_arg ) {
-        $configtype = "host";
-    } elsif ( ! $host_arg && $group_arg ) {
-        $host_arg   = "0";
-        $configtype = "group";
-    };
+        $configtype = 'host';
+    } elsif ( !$host_arg && $group_arg ) {
+        $host_arg   = '0';
+        $configtype = 'group';
+    }
 
     my $settings;
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
-    my ($return_code, $return_msg) = write_config($configtype, "add", "$host_arg", "$group_arg", $settings);
+    my ( $return_code, $return_msg ) = write_config( $configtype, 'add', $host_arg, $group_arg, $settings );
 
-    if ( $return_code eq "1" ) {
+    if ( $return_code eq '1' ) {
         print "Configfile $return_msg created\n";
     } else {
         print "$return_msg\n";
@@ -85,19 +88,19 @@ if ( $add_arg ) {
     exit 0;
 }
 
-if ( $delete_arg ) {
+if ($delete_arg) {
     my $configtype;
     my $file;
 
     if ( $host_arg && $group_arg ) {
-        $configtype = "host";
-        $file = "$host_arg" . "_" . "$group_arg.yaml";
-    } elsif ( ! $host_arg && $group_arg ) {
-        $configtype = "group";
-        $file = "$group_arg.yaml";
-    };
+        $configtype = 'host';
+        $file       = $host_arg . '_' . "$group_arg.yaml";
+    } elsif ( !$host_arg && $group_arg ) {
+        $configtype = 'group';
+        $file       = "$group_arg.yaml";
+    }
 
-    my ($return_code, $return_msg) = delete_config($configtype, "$file");
+    my ( $return_code, $return_msg ) = delete_config( $configtype, $file );
     print "$return_msg\n";
 
     exit 0;
@@ -109,19 +112,19 @@ if ( $delete_arg ) {
 sub parse_command_options {
 
     GetOptions(
-        "help"        => sub { usage('') },
-        "version"     => sub { usage("Current version number: $version") },
-        "v|verbose"   => \$verbose_arg,
-        "n|dry-run"   => \$dryrun_arg,
-        "add"         => \$add_arg,
-        "delete"      => \$delete_arg,
-        "g|group=s"   => \$group_arg,
-        "h|host=s"    => \$host_arg,
-        "crontab"     => \$crontabonly,
-        "showgroups"  => \$showgroups,
-    ) or usage("Invalid commmand line options.");
-    usage("Do not use together!") if ( $crontabonly && $showgroups );
-    usage("Check the arguments!") unless ( ($add_arg || $delete_arg ) && (( $host_arg && $group_arg ) || $group_arg  ) || ( $crontabonly || $showgroups ) );
+        'help'       => sub { usage('') },
+        'version'    => sub { usage("Current version number: $version") },
+        'v|verbose'  => \$verbose_arg,
+        'n|dry-run'  => \$dryrun_arg,
+        'add'        => \$add_arg,
+        'delete'     => \$delete_arg,
+        'g|group=s'  => \$group_arg,
+        'h|host=s'   => \$host_arg,
+        'crontab'    => \$crontabonly,
+        'showgroups' => \$showgroups,
+    ) or usage('Invalid commmand line options.');
+    usage('Do not use together!') if ( $crontabonly && $showgroups );
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabonly || $showgroups ) );
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -130,8 +133,8 @@ sub parse_command_options {
 
 sub cli_args_override_global_config {
 
-    $serverconfig{verbose}      = $verbose_arg      if $verbose_arg;
-    $serverconfig{dryrun}       = $dryrun_arg       if $dryrun_arg;
+    $serverconfig{verbose} = $verbose_arg if $verbose_arg;
+    $serverconfig{dryrun}  = $dryrun_arg  if $dryrun_arg;
 
     return 1;
 }
@@ -145,7 +148,7 @@ sub usage {
     }
 
     my $command = $0;
-    $command    =~ s#^.*/##;
+    $command =~ s#^.*/##;
 
     print <<"EOF";
         $message
@@ -168,6 +171,6 @@ sub usage {
         -n              # dry-run without making changes (implies verbose)
 
 EOF
+
     exit 0;
 }
-

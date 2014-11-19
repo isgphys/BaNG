@@ -43,11 +43,11 @@ sub statistics_decode_path {
 }
 
 sub statistics_json {
-    my ($host, $share, $days) = @_;
+    my ( $host, $share, $days ) = @_;
     my $lastXdays = $days || $lastXdays_default;
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -62,16 +62,17 @@ sub statistics_json {
 
     # gather information into hash
     my %BackupsByPath;
-    while (my $dbrow=$sth->fetchrow_hashref()) {
-        # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
-        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
-        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
+
+        # reformat timestamp as 'YYYY/MM/DD HH:MM:SS' for cross-browser compatibility
+        ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
+        ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
         my $hostname    = $dbrow->{'BkpFromHost'};
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g; # remove colon separators
+        $BkpFromPath =~ s/://g;    # remove colon separators
 
         # compute wall-clock runtime of backup in minutes with 2 digits
-        my $RealRuntime = sprintf("%.2f", (str2time($time_stop)-str2time($time_start)) / 60.);
+        my $RealRuntime = sprintf( "%.2f", ( str2time($time_stop) - str2time($time_start) ) / 60. );
 
         push( @{$BackupsByPath{$BkpFromPath}}, {
             time_coord       => str2time($time_start),
@@ -90,16 +91,16 @@ sub statistics_json {
     }
     $sth->finish();
 
-    return rickshaw_json(\%BackupsByPath);
+    return rickshaw_json( \%BackupsByPath );
 }
 
 sub statistics_cumulated_json {
-    my ($BkpServer, $lastXdays) = @_;
+    my ( $BkpServer, $lastXdays ) = @_;
     $BkpServer ||= $servername;
     $lastXdays ||= $lastXdays_default;
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -117,44 +118,47 @@ sub statistics_cumulated_json {
     my %realtime_start = ();
     my %realtime_stop  = ();
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        my ($date, $time) = split( /\s+/, $dbrow->{'Start'} );
+        my ( $date, $time ) = split( /\s+/, $dbrow->{'Start'} );
 
         # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
-        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
-        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+        ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
+        ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
         my $hostname    = $dbrow->{'BkpFromHost'};
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g; # remove colon separators
+        $BkpFromPath =~ s/://g;    # remove colon separators
 
         # backups started in the evening belong to next day
         # use epoch as hash key for fast date incrementation
         my $epoch = str2time("$date 00:00:00");
-        my ($ss,$mm,$hh,$DD,$MM,$YY,$zone) = strptime($dbrow->{'Start'});
+        my ( $ss, $mm, $hh, $DD, $MM, $YY, $zone ) = strptime( $dbrow->{'Start'} );
         if ( $hh >= $BackupStartHour ) {
             $epoch += 24 * 3600;
         }
 
         # compute wall-clock runtime of backup in minutes with 2 digits
-        if( !$realtime_start{$epoch} && !$realtime_stop{$epoch} ) {
+        if ( !$realtime_start{$epoch} && !$realtime_stop{$epoch} ) {
+
             # initialize reference time interval
             $realtime_start{$epoch} = str2time($time_start);
             $realtime_stop{$epoch}  = str2time($time_stop);
-            $CumulateByDate{$epoch}{RealRuntime} += sprintf("%.2f",
+            $CumulateByDate{$epoch}{RealRuntime} += sprintf('%.2f',
                 ( $realtime_stop{$epoch} - $realtime_start{$epoch} ) / 60.
             );
         }
-        if( str2time($time_stop) > $realtime_stop{$epoch} ) {
+        if ( str2time($time_stop) > $realtime_stop{$epoch} ) {
             if ( str2time($time_start) <= $realtime_stop{$epoch} ) {
+
                 # bkp started during reference interval, but finished afterwards
-                $CumulateByDate{$epoch}{RealRuntime} += sprintf("%.2f",
+                $CumulateByDate{$epoch}{RealRuntime} += sprintf('%.2f',
                     ( str2time($time_stop) - $realtime_stop{$epoch} ) / 60.
                 );
                 $realtime_stop{$epoch}  = str2time($time_stop);
             } else {
+
                 # bkp started after end of reference interval, ie there was a gap without running bkps
                 $realtime_start{$epoch} = str2time($time_start);
                 $realtime_stop{$epoch}  = str2time($time_stop);
-                $CumulateByDate{$epoch}{RealRuntime} += sprintf("%.2f",
+                $CumulateByDate{$epoch}{RealRuntime} += sprintf('%.2f',
                     ( $realtime_stop{$epoch} - $realtime_start{$epoch} ) / 60.
                 );
             }
@@ -192,7 +196,7 @@ sub statistics_cumulated_json {
         });
     }
 
-    return rickshaw_json(\%BackupsByDay);
+    return rickshaw_json( \%BackupsByDay );
 }
 
 sub statistics_hosts_shares {
@@ -200,7 +204,7 @@ sub statistics_hosts_shares {
     $BkpServer ||= $servername;
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -217,8 +221,8 @@ sub statistics_hosts_shares {
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $hostname    = $dbrow->{'BkpFromHost'};
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/\s//g; # remove whitespace
-        my ($empty, @shares) = split( /:/, $BkpFromPath );
+        $BkpFromPath =~ s/\s//g;    # remove whitespace
+        my ( $empty, @shares ) = split( /:/, $BkpFromPath );
 
         # distinguish data and system shares
         foreach my $share (@shares) {
@@ -240,13 +244,13 @@ sub statistics_hosts_shares {
 }
 
 sub statistics_diffpreday {
-    my ($host, $group, $lastXdays) = @_;
-    $host ||= "%";
-    $group ||= "%";
+    my ( $host, $group, $lastXdays ) = @_;
+    $host      ||= "%";
+    $group     ||= "%";
     $lastXdays ||= $lastXdays_diffperday;
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -279,7 +283,7 @@ sub statistics_diffpreday {
 
 sub statistics_work_duration {
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -289,32 +293,32 @@ sub statistics_work_duration {
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
         GROUP BY TaskID
         ORDER BY Runtime DESC;
-        ");
-        $sth->execute();
+    ");
+    $sth->execute();
 
-        my @top_time;
-        while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $runtime )  = $sth->fetchrow_array() ) {
-            next if $runtime < 2;
-            $bkppath =~ s/\://g;
-            $bkppath =~ s/\//_/g;
-            push( @top_time, {
-                    name  => $bkpgroup,
-                    value => $runtime,
-                    label => time2human($runtime/60),
-                    url   => "/statistics/barchart/worktime/$taskid",
-                });
-        }
-        $sth->finish();
+    my @top_time;
+    while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
+        next if $runtime < 2;
+        $bkppath =~ s/\://g;
+        $bkppath =~ s/\//_/g;
+        push( @top_time, {
+            name  => $bkpgroup,
+            value => $runtime,
+            label => time2human( $runtime / 60 ),
+            url   => "/statistics/barchart/worktime/$taskid",
+        });
+    }
+    $sth->finish();
 
-        return \@top_time;
+    return \@top_time;
 }
 
 sub statistics_work_duration_details {
     my ($taskid) = @_;
-    my (@top_size, $sth, $sqltranstype, $sqlbkpgroup);
+    my ( @top_size, $sth, $sqltranstype, $sqlbkpgroup );
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     $sth = $bangstat_dbh->prepare("
@@ -325,10 +329,10 @@ sub statistics_work_duration_details {
         WHERE TaskID = '$taskid'
         GROUP BY JobID
         ORDER BY Runtime DESC
-        ");
+    ");
     $sth->execute();
 
-    while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime )  = $sth->fetchrow_array() ) {
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
         next if $runtime < 2;
         $sqlbkpgroup = $bkpgroup;
         $bkppath =~ s/\://g;
@@ -336,7 +340,7 @@ sub statistics_work_duration_details {
         push( @top_size, {
             name  => $bkphost,
             value => $runtime,
-            label => time2human($runtime/60),
+            label => time2human( $runtime / 60 ),
             url   => "/statistics/$bkphost/$bkppath",
         });
     }
@@ -348,18 +352,18 @@ sub statistics_work_duration_details {
             FROM statistic
             WHERE TaskID = '$taskid' AND bkpgroup LIKE '$sqlbkpgroup'
             ORDER BY Runtime DESC;
-            ");
+        ");
         $sth->execute();
 
-        while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime )  = $sth->fetchrow_array() ) {
+        while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
             next if $runtime < 2;
             $bkppath =~ s/\://g;
             $bkppath =~ s/^.*\/(.*)$/$1/;
             push( @top_size, {
                 name  => $bkppath,
                 value => $runtime,
-                label => time2human($runtime/60),
-                url   => "#",
+                label => time2human( $runtime / 60 ),
+                url   => '#',
             });
         }
     }
@@ -372,12 +376,12 @@ sub statistics_top_trans {
     my ($transtype) = @_;
     my $sqltranstype;
     if ( $transtype eq 'files' ) {
-        $sqltranstype =  'NumOfFilesTrans' ;
-    } elsif ($transtype eq 'size') {
-        $sqltranstype =  'TotFileSizeTrans' ;
+        $sqltranstype = 'NumOfFilesTrans';
+    } elsif ( $transtype eq 'size' ) {
+        $sqltranstype = 'TotFileSizeTrans';
     }
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -387,37 +391,37 @@ sub statistics_top_trans {
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
         GROUP BY TaskID
         ORDER BY $sqltranstype DESC;
-        ");
-        $sth->execute();
+    ");
+    $sth->execute();
 
-        my @top_size;
-        while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
-            next if $size < 2;
-            $bkppath =~ s/\://g;
-            $bkppath =~ s/\//_/g;
-            push( @top_size, {
-                    name  => $bkpgroup,
-                    value => $size,
-                    label => num2human($size, 1024),
-                    url   => "/statistics/barchart/toptrans$transtype/$taskid",
-                });
-        }
-        $sth->finish();
+    my @top_size;
+    while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
+        next if $size < 2;
+        $bkppath =~ s/\://g;
+        $bkppath =~ s/\//_/g;
+        push( @top_size, {
+            name  => $bkpgroup,
+            value => $size,
+            label => num2human( $size, 1024 ),
+            url   => "/statistics/barchart/toptrans$transtype/$taskid",
+        });
+    }
+    $sth->finish();
 
-        return \@top_size;
+    return \@top_size;
 }
 
 sub statistics_top_trans_details {
-    my ($transtype, $taskid) = @_;
-    my (@top_size, $sth, $sqltranstype, $sqlbkpgroup);
+    my ( $transtype, $taskid ) = @_;
+    my ( @top_size, $sth, $sqltranstype, $sqlbkpgroup );
 
     if ( $transtype eq 'files' ) {
-        $sqltranstype =  'NumOfFilesTrans' ;
-    } elsif ($transtype eq 'size') {
-        $sqltranstype =  'TotFileSizeTrans' ;
+        $sqltranstype = 'NumOfFilesTrans';
+    } elsif ( $transtype eq 'size' ) {
+        $sqltranstype = 'TotFileSizeTrans';
     }
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     $sth = $bangstat_dbh->prepare("
@@ -428,10 +432,10 @@ sub statistics_top_trans_details {
         WHERE TaskID = '$taskid'
         GROUP BY JobID
         ORDER BY $sqltranstype DESC;
-        ");
+    ");
     $sth->execute();
 
-    while ( my ( $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
         next if $size < 2;
         $sqlbkpgroup = $bkpgroup;
         $bkppath =~ s/\://g;
@@ -439,7 +443,7 @@ sub statistics_top_trans_details {
         push( @top_size, {
             name  => $bkphost,
             value => $size,
-            label => num2human($size, 1024),
+            label => num2human( $size, 1024 ),
             url   => "/statistics/$bkphost/$bkppath",
         });
     }
@@ -451,18 +455,18 @@ sub statistics_top_trans_details {
             FROM statistic
             WHERE TaskID = '$taskid' AND bkpgroup LIKE '$sqlbkpgroup'
             ORDER BY $sqltranstype desc;
-            ");
+        ");
         $sth->execute();
 
-        while ( my ( $bkphost, $bkpgroup, $bkppath, $size )  = $sth->fetchrow_array() ) {
+        while ( my ( $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
             next if $size < 2;
             $bkppath =~ s/\://g;
             $bkppath =~ s/^.*\/(.*)$/$1/;
             push( @top_size, {
                 name  => $bkppath,
                 value => $size,
-                label => num2human($size, 1024),
-                url   => "#",
+                label => num2human( $size, 1024 ),
+                url   => '#',
             });
         }
     }
@@ -474,7 +478,7 @@ sub statistics_top_trans_details {
 sub statistics_groupshare_variations {
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -502,13 +506,14 @@ sub statistics_groupshare_variations {
     my %largest_variations;
     foreach my $N (@variation_intervals) {
         foreach my $field (qw(TotFileSize NumOfFiles)) {
+
             # compute maximal variation for each share
             my %delta;
             foreach my $bkppath ( keys %datahash ) {
-                my @lastXdays = map{$_->{$field}} @{$datahash{$bkppath}};
-                my @lastNdays = splice( @lastXdays, 0, $N);
-                my $max = sprintf("%.2f", max( @lastNdays ));
-                my $min = sprintf("%.2f", min( @lastNdays ));
+                my @lastXdays = map { $_->{$field} } @{$datahash{$bkppath}};
+                my @lastNdays = splice( @lastXdays, 0, $N );
+                my $max = sprintf( '%.2f', max(@lastNdays) );
+                my $min = sprintf( '%.2f', min(@lastNdays) );
                 $delta{$N}{$bkppath} = $max - $min;
             }
 
@@ -530,11 +535,11 @@ sub statistics_groupshare_variations {
 }
 
 sub statistics_schedule {
-    my ($days, $sortBy) = @_;
+    my ( $days, $sortBy ) = @_;
     my $lastXdays = $days || $lastXdays_default;
 
     get_serverconfig();
-    my $conn = bangstat_db_connect($serverconfig{config_bangstat});
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
@@ -549,10 +554,10 @@ sub statistics_schedule {
 
     my %datahash;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        (my $time_start = $dbrow->{'Start'}) =~ s/\-/\//g;
-        (my $time_stop  = $dbrow->{'Stop' }) =~ s/\-/\//g;
+        ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
+        ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g; # remove colon separators
+        $BkpFromPath =~ s/://g;    # remove colon separators
 
         # flag system backups
         my $systemBkp = 0;
@@ -586,16 +591,18 @@ sub statistics_schedule {
 
 sub rickshaw_json {
     my ($datahash_ref) = @_;
-    my %datahash = %{ $datahash_ref };
+    my %datahash = %{$datahash_ref};
 
     my %rickshaw_data;
     foreach my $bkppath ( sort keys %datahash ) {
-        my (%min, %max);
+        my ( %min, %max );
         foreach my $field (@fields) {
+
             # find min- and maxima of given fields
-            $max{$field}  = sprintf("%.2f", max( map{$_->{$field}} @{$datahash{$bkppath}} ));
-            $min{$field}  = sprintf("%.2f", min( map{$_->{$field}} @{$datahash{$bkppath}} ));
+            $max{$field} = sprintf( '%.2f', max( map { $_->{$field} } @{$datahash{$bkppath}} ) );
+            $min{$field} = sprintf( '%.2f', min( map { $_->{$field} } @{$datahash{$bkppath}} ) );
         }
+
         # use same normalization for both runtimes to ensure curves coincide
         foreach my $field (qw(RealRuntime TotRuntime)) {
             $max{$field} = max( $max{RealRuntime}, $max{TotRuntime} );
@@ -603,21 +610,21 @@ sub rickshaw_json {
         }
 
         foreach my $bkp ( @{$datahash{$bkppath}} ) {
-            my $t = $bkp->{'time_coord'}; # monotonically increasing coordinate to have single-valued function
+            my $t = $bkp->{'time_coord'};    # monotonically increasing coordinate to have single-valued function
 
             foreach my $field (@fields) {
                 my $normalized = 0.5;
                 if ( $min{$field} != $max{$field} ) {
-                    $normalized = ($bkp->{$field} - $min{$field}) / ($max{$field} - $min{$field});
+                    $normalized = ( $bkp->{$field} - $min{$field} ) / ( $max{$field} - $min{$field} );
                 }
 
                 my $humanreadable;
                 if ( $field =~ /Runtime/ ) {
-                    $humanreadable = "\"" . time2human($bkp->{$field}) . "\"";
+                    $humanreadable = "\"" . time2human( $bkp->{$field} ) . "\"";
                 } elsif ( $field =~ /Size/ ) {
-                    $humanreadable = "\"" . num2human($bkp->{$field}, 1024.) . "\"";
+                    $humanreadable = "\"" . num2human( $bkp->{$field}, 1024. ) . "\"";
                 } else {
-                    $humanreadable = "\"" . num2human($bkp->{$field})  . "\"";
+                    $humanreadable = "\"" . num2human( $bkp->{$field} ) . "\"";
                 }
 
                 $rickshaw_data{Normalized}{$field}    .= qq|\n        { "x": $t, "y": $normalized },|;
@@ -628,13 +635,13 @@ sub rickshaw_json {
     }
 
     my %color = (
-        "RealRuntime"      => "#00CC00",
-        "TotRuntime"       => "#009900",
-        "NumOfFiles"       => "#0066B3",
-        "NumOfFilesTrans"  => "#330099",
-        "TotFileSize"      => "#FFCC00",
-        "TotFileSizeTrans" => "#FF8000",
-        "NumOfFilesDel"    => "#FF3333",
+        'RealRuntime'      => '#00CC00',
+        'TotRuntime'       => '#009900',
+        'NumOfFiles'       => '#0066B3',
+        'NumOfFilesTrans'  => '#330099',
+        'TotFileSize'      => '#FFCC00',
+        'TotFileSizeTrans' => '#FF8000',
+        'NumOfFilesDel'    => '#FF3333',
     );
 
     my $json .= "[\n";
@@ -648,8 +655,8 @@ sub rickshaw_json {
     }
     $json .= "]\n";
 
-    $json =~ s/\},(\s*)\]/\}$1\]/g; # sanitize json by removing trailing spaces
-    $json =~ s/\s+//g;              # minimize json by removing all whitespaces
+    $json =~ s/\},(\s*)\]/\}$1\]/g;    # sanitize json by removing trailing spaces
+    $json =~ s/\s+//g;                 # minimize json by removing all whitespaces
 
     return $json;
 }

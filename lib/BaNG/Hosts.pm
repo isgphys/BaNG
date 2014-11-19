@@ -22,73 +22,71 @@ our @EXPORT = qw(
 sub get_fsinfo {
     my %fsinfo;
     foreach my $server ( keys %servers ) {
-        my @mounts;
-        @mounts = remote_command( $server, 'BaNG/bang_df' );
+        my @mounts = remote_command( $server, 'BaNG/bang_df' );
 
         foreach my $mount (@mounts) {
             $mount =~ qr{
-                        ^(?<filesystem> [\/\w\d-]+)
-                        \s+(?<fstyp> [\w\d]+)
-                        \s+(?<blocks> [\d]+)
-                        \s+(?<used> [\d]+)
-                        \s+(?<available>[\d]+)
-                        \s+(?<usedper> [\d]+)
-                        .\s+(?<mountpt> [\/\w\d-]+)
+                ^(?<filesystem> [\/\w\d-]+)
+                \s+(?<fstyp> [\w\d]+)
+                \s+(?<blocks> [\d]+)
+                \s+(?<used> [\d]+)
+                \s+(?<available>[\d]+)
+                \s+(?<usedper> [\d]+)
+                .\s+(?<mountpt> [\/\w\d-]+)
             }x;
 
             $fsinfo{$server}{$+{mountpt}} = {
                 'filesystem' => $+{filesystem},
                 'mount'      => $+{mountpt},
                 'fstyp'      => $+{fstyp},
-                'blocks'     => num2human($+{blocks}),
-                'used'       => num2human($+{used}*1024,1024),
-                'available'  => num2human($+{available}*1024,1024),
-                'freediff'   => "",
-                'rwstatus'   => "",
+                'blocks'     => num2human( $+{blocks} ),
+                'used'       => num2human( $+{used} * 1024, 1024 ),
+                'available'  => num2human( $+{available} * 1024, 1024 ),
+                'freediff'   => '',
+                'rwstatus'   => '',
                 'used_per'   => $+{usedper},
-                'css_class'  => check_fill_level($+{usedper}),
+                'css_class'  => check_fill_level( $+{usedper} ),
             };
         }
 
-        @mounts = remote_command( $server, 'BaNG/procmounts' ) ;
+        @mounts = remote_command( $server, 'BaNG/procmounts' );
         foreach my $mount (@mounts) {
             $mount =~ qr{
-            ^(?<device>[\/\w\d-]+)
-            \s+(?<mountpt>[\/\w\d-]+)
-            \s+(?<fstyp>[\w\d]+)
-            \s+(?<mountopt>[\w\d\,\=]+)
-            \s+(?<dump>[\d]+)
-            \s+(?<pass>[\d]+)$
+                ^(?<device>[\/\w\d-]+)
+                \s+(?<mountpt>[\/\w\d-]+)
+                \s+(?<fstyp>[\w\d]+)
+                \s+(?<mountopt>[\w\d\,\=]+)
+                \s+(?<dump>[\d]+)
+                \s+(?<pass>[\d]+)$
             }x;
 
             my $mountpt  = $+{mountpt};
             my $mountopt = $+{mountopt};
-            my $rwstatus = "check_red" if $mountopt =~ /ro/;
+            my $rwstatus = 'check_red' if $mountopt =~ /ro/;
 
             $fsinfo{$server}{$mountpt}{rwstatus} = $rwstatus;
         }
 
-        if ($server eq $servername) {
-            @mounts = remote_command( $server, 'BaNG/bang_di' ) ;
+        if ( $server eq $servername ) {
+            @mounts = remote_command( $server, 'BaNG/bang_di' );
             foreach my $mount (@mounts) {
                 $mount =~ qr{
-                ^(?<filesystem> [\/\w\d-]+)
-                \s+(?<fstyp>[\w\d]+)
-                \s+(?<blocks>[\d]+)
-                \s+(?<used>[\d]+)
-                \s+(?<available>[\d]+)
-                \s+(?<free>[\d]+)
-                \s+(?<usedper>[\d]+)
-                .\s+(?<mountpt>[\/\w\d-]+)
+                    ^(?<filesystem> [\/\w\d-]+)
+                    \s+(?<fstyp>[\w\d]+)
+                    \s+(?<blocks>[\d]+)
+                    \s+(?<used>[\d]+)
+                    \s+(?<available>[\d]+)
+                    \s+(?<free>[\d]+)
+                    \s+(?<usedper>[\d]+)
+                    .\s+(?<mountpt>[\/\w\d-]+)
                 }x;
 
                 my $freediff    = $+{free} - $+{available};
                 my $freediffper = 100 / $+{free} * $freediff;
 
-                $fsinfo{$server}{$+{mountpt}}{freediff} = ( $freediffper > 10 ) ? num2human($freediff*1024,1024) : "" ;
+                $fsinfo{$server}{$+{mountpt}}{freediff} = ( $freediffper > 10 ) ? num2human( $freediff * 1024, 1024 ) : '';
             }
         }
-
     }
 
     return \%fsinfo;
@@ -96,11 +94,12 @@ sub get_fsinfo {
 
 sub get_lockfiles {
     my %lockfiles;
+
     foreach my $server ( keys %servers ) {
         my @lockfiles = remote_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
 
-        foreach my $lockfile ( @lockfiles  ) {
-            my ($host, $group, $path, $timestamp, $file) = split_lockfile_name($lockfile);
+        foreach my $lockfile (@lockfiles) {
+            my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
             my $taskid = `cat $serverconfig{path_lockfiles}/$file`;
             $lockfiles{$server}{"$host-$group-$path"} = {
                 'taskid'    => $taskid,
@@ -120,29 +119,29 @@ sub check_fill_level {
     my $css_class = '';
 
     if ( $level > 98 ) {
-        $css_class = "alert_red";
+        $css_class = 'alert_red';
     } elsif ( $level > 90 ) {
-        $css_class = "alert_orange";
+        $css_class = 'alert_orange';
     } elsif ( $level > 80 ) {
-        $css_class = "alert_yellow";
+        $css_class = 'alert_yellow';
     }
 
     return $css_class;
 }
 
 sub check_client_connection {
-    my ($host, $gwhost) = @_;
+    my ( $host, $gwhost ) = @_;
 
     my $state = 0;
-    my $msg   = "Host offline";
-    my $p     = Net::Ping->new( "tcp", 2 );
+    my $msg   = 'Host offline';
+    my $p     = Net::Ping->new( 'tcp', 2 );
 
-    if ( $p->ping("$host") ) {
+    if ( $p->ping($host) ) {
         $state = 1;
-        $msg   = "Host online";
+        $msg   = 'Host online';
     } elsif ($gwhost) {
         $state = 1;
-        $msg   = "Host not pingable because behind a Gateway-Host";
+        $msg   = 'Host not pingable because behind a Gateway-Host';
     }
     $p->close();
 
@@ -153,7 +152,7 @@ sub check_client_connection {
 # Lockfile
 #
 sub lockfile {
-    my ($host, $group, $path) = @_;
+    my ( $host, $group, $path ) = @_;
 
     $path =~ s/^://g;
     $path =~ s/\s:/\+/g;
@@ -165,7 +164,7 @@ sub lockfile {
 }
 
 sub create_lockfile {
-    my ($taskid, $host, $group, $path) = @_;
+    my ( $taskid, $host, $group, $path ) = @_;
 
     my $lockfile = lockfile( $host, $group, $path );
 
@@ -182,7 +181,7 @@ sub create_lockfile {
 }
 
 sub remove_lockfile {
-    my ($taskid, $host, $group, $path) = @_;
+    my ( $taskid, $host, $group, $path ) = @_;
 
     my $lockfile = lockfile( $host, $group, $path );
     unlink $lockfile unless $serverconfig{dryrun};
@@ -193,7 +192,7 @@ sub remove_lockfile {
 
 sub split_lockfile_name {
     my ($lockfile) = @_;
-    my ($host, $group, $path, $timestamp) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
+    my ( $host, $group, $path, $timestamp ) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
     my $file = "${host}_${group}_${path}.lock";
     $file =~ s/\'/\\'/g;
 
@@ -206,7 +205,7 @@ sub split_lockfile_name {
 }
 
 sub check_lockfile {
-    my ($taskid, $host, $group) = @_;
+    my ( $taskid, $host, $group ) = @_;
 
     my @lockfiles;
     my $ffr_obj = File::Find::Rule->file()
@@ -222,7 +221,7 @@ sub check_lockfile {
     logit( $taskid, $host, $group, "Check for running backup tasks" );
 
     if ( $#lockfiles > -1 ) {
-        logit( $taskid, $host, $group, "ERROR: Wipe canceled, still ". ( $#lockfiles +1 ) ." running backup!" );
+        logit( $taskid, $host, $group, 'ERROR: Wipe canceled, still ' . ( $#lockfiles + 1 ) . ' running backup!' );
         return 0;
     }
 
@@ -233,11 +232,11 @@ sub check_lockfile {
 # Remote_Command
 #
 sub remote_command {
-    my ($remoteHost, $remoteCommand, $remoteArgument) = @_;
+    my ( $remoteHost, $remoteCommand, $remoteArgument ) = @_;
     $remoteArgument ||= '';
 
-    my $remote_app_path = $serverconfig{remote_app} ? "" : $serverconfig{remote_app_path};
-    $remote_app_path .= "/" if $remote_app_path !~ /.*\/$/;
+    my $remote_app_path = $serverconfig{remote_app} ? '' : $serverconfig{remote_app_path};
+    $remote_app_path .= '/' if $remote_app_path !~ /.*\/$/;
 
     my $results = `ssh -x -o IdentitiesOnly=yes -o ConnectTimeout=2 -i /var/www/.ssh/remotesshwrapper root\@$remoteHost $serverconfig{remote_app} ${remote_app_path}$remoteCommand $remoteArgument 2>/dev/null`;
     my @results = split( "\n", $results );

@@ -1,0 +1,16 @@
+-l=0        # unlimited line width
+#-i=4       # indent level
+#-cti=0     # closing token indentation
+-ci=4       # continuation indent level
+-ce         # cuddle else on same line as }
+#-pt=1      # amount of spaces in parentheses
+-bt=2       # no extra amount of spaces in curly braces
+#-bbt=0     # amount of spaces for braced code blocks
+#-sbt=1     # amount of spaces in square brackets
+-nsbl       # opening brace on same line as sub
+-nsfs       # no space before semicolons
+-nolc       # keep indentation of long comments
+-nolq       # keep indentation of long quotes
+-nola       # keep indentation of loop labels
+-st         # output to stdout
+-se         # errors to stderr, use -nse to write to file.ERR

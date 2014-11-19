@@ -16,7 +16,7 @@ get '/' => sub {
 };
 
 get '/:file' => sub {
-    my $file = "$prefix/docs/" . param('file') . ".markdown";
+    my $file = "$prefix/docs/" . param('file') . '.markdown';
     open my $MARKDOWN, '<', $file;
     my $markdown = do { local $/; <$MARKDOWN> };
     template 'documentation' => {

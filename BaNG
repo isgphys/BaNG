@@ -16,7 +16,7 @@ use IPC::Open3;
 use Time::HiRes qw( gettimeofday );
 use Thread::Queue;
 
-use lib dirname( abs_path($0) ) . "/lib";
+use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Hosts;
 use BaNG::Common;
 use BaNG::Config;
@@ -50,18 +50,18 @@ parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
-my $taskid = create_timeid($host_arg, $group_arg);
+my $taskid = create_timeid( $host_arg, $group_arg );
 
-get_host_config($host_arg, $group_arg);
+get_host_config( $host_arg, $group_arg );
 
 foreach my $config ( sort keys %hosts ) {
-    if ( $wipe ) {
+    if ($wipe) {
         wipe( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $force );
-    } elsif ( $cleanup ) {
+    } elsif ($cleanup) {
         print "Let's go!\n";
-    } elsif ( $xymononly ) {
-        my $host  = $hosts{$config}->{hostname};
-        my $group = $hosts{$config}->{group};
+    } elsif ($xymononly) {
+        my $host          = $hosts{$config}->{hostname};
+        my $group         = $hosts{$config}->{group};
         my %RecentBackups = bangstat_recentbackups($host);
         xymon_report( $taskid, $host, $group, %RecentBackups );
     } else {
@@ -84,11 +84,11 @@ exit 0;
 # Queuing
 #
 sub reorder_queue_by_priority {
-    my ($taskid, $host, $group) = @_;
+    my ( $taskid, $host, $group ) = @_;
     my @prio_queue;
     my @prio_queue_sorted;
-    $host  ||= "SERVER";
-    $group ||= "GLOBAL";
+    $host  ||= 'SERVER';
+    $group ||= 'GLOBAL';
 
     logit( $taskid, $host, $group, "reorder queue by priority!" );
 
@@ -106,12 +106,12 @@ sub reorder_queue_by_priority {
     }
 
     # reorder queue by priority
-    foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue) {
+    foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue ) {
         print "$bkpjob->{priority} $bkpjob->{path}\n" if $serverconfig{verbose};
         push( @prio_queue_sorted, $bkpjob );
     }
 
-    if ($#queue == $#prio_queue_sorted ) {
+    if ( $#queue == $#prio_queue_sorted ) {
         @queue = @prio_queue_sorted;
     } else {
         logit( $taskid, $host, $group, "ERROR: reorder_queue_by_priority queue lengths don't match!" );
@@ -121,23 +121,23 @@ sub reorder_queue_by_priority {
 }
 
 sub queue_backup {
-    my ($taskid, $host, $group) = @_;
+    my ( $taskid, $host, $group ) = @_;
     my $jobid;
 
     logit( $taskid, $host, $group, "Queueing backup for host $host group $group" );
 
     # make sure we are on the correct backup server
-    return unless bkp_to_current_server($taskid, $host, $group);
+    return unless bkp_to_current_server( $taskid, $host, $group );
 
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{BKP_ENABLED};
 
     # stop if trying to do bulk backup if it's not allowed
-    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
+    return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
     # check for existing target_path folder
-    my ($check_rsync_target_code) = check_rsync_target($host, $group);
-    if ($check_rsync_target_code gt 0 && !$initial) {
+    my ($check_rsync_target_code) = check_rsync_target( $host, $group );
+    if ( $check_rsync_target_code gt 0 && !$initial ) {
         logit( $taskid, $host, $group, "Skipping because target_path ($check_rsync_target_code) does not exist for host $host group $group" );
         print "Skipping backup of $host because target_path does not exist!\n";
         print "use --initial for the first backup run, otherwise check availability of mount!\n";
@@ -145,45 +145,45 @@ sub queue_backup {
     }
 
     # check if last backup exists
-    my $lastbkp = check_last_bkp($taskid, $host, $group);
+    my $lastbkp = check_last_bkp( $taskid, $host, $group );
 
     # if missingonly, don't queue host if we had a backup within the last 20 hours
     if ( $missingonly && $lastbkp =~ qr{ (?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d) }x ) {
-        my $lastbkpepoch = str2time( "$+{date} $+{HH}:$+{MM}:$+{SS}" );
-        if ( (time - $lastbkpepoch) < 20 * 3600 ) {
+        my $lastbkpepoch = str2time("$+{date} $+{HH}:$+{MM}:$+{SS}");
+        if ( ( time - $lastbkpepoch ) < 20 * 3600 ) {
             logit( $taskid, $host, $group, "Skipping because recent backup found for host $host group $group" );
             return 1;
         }
     }
 
     # make sure host is online
-    my ($conn_status, $conn_msg) = check_client_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    my ( $conn_status, $conn_msg ) = check_client_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     logit( $taskid, $host, $group, "check_client_connection: $conn_status, $conn_msg" );
     if ( !$conn_status ) {
         my $startstamp = time();
-        my $endstamp = $startstamp;
-        $jobid = create_timeid($host, $group, $taskid);
+        my $endstamp   = $startstamp;
+        $jobid = create_timeid( $host, $group, $taskid );
         logit( $taskid, $host, $group, "Error: host $host is offline" );
-        bangstat_start_backupjob($taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath($host, $group), $lastbkp, '0' , '-1', '') unless $noreport;
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath( $host, $group ), $lastbkp, '0', '-1', '' ) unless $noreport;
         return 1;
     }
 
-    my $bkptimestamp  = eval_bkptimestamp($host, $group);
+    my $bkptimestamp = eval_bkptimestamp( $host, $group );
 
     # get list of partitions to back up
     my (@src_part) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
-    logit( $taskid, $host, $group, "Number of partitions: " . ($#src_part+1) . " ( @src_part )" );
+    logit( $taskid, $host, $group, 'Number of partitions: ' . ( $#src_part + 1 ) . " ( @src_part )" );
 
     # optionally queue each subfolder of the partitions
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
 
         my $dosnapshot = 0;
-        my $numPart = @src_part;
+        my $numPart    = @src_part;
 
         foreach my $part (@src_part) {
-            $jobid = create_timeid($host, $group, $taskid);
+            $jobid = create_timeid( $host, $group, $taskid );
 
-            $numPart --;
+            $numPart--;
             if ( $numPart == 0 ) {
                 $dosnapshot = 1;
             }
@@ -191,8 +191,9 @@ sub queue_backup {
             queue_remote_subfolders( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $part );
         }
     } else {
+
         # queue list of partitions as a whole
-        $jobid = create_timeid($host, $group, $taskid);
+        $jobid = create_timeid( $host, $group, $taskid );
         my $bkpjob = {
             taskid       => $taskid,
             jobid        => $jobid,
@@ -201,10 +202,10 @@ sub queue_backup {
             path         => "@src_part",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
-            dosnapshot   => "1",
+            dosnapshot   => 1,
         };
         push( @queue, $bkpjob );
-        push( @finally_snapshots, $bkpjob ) if ( $finallysnapshots );
+        push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
     }
 
     logit( $taskid, $host, $group, "End of queueing backup of host $host group $group" );
@@ -213,14 +214,14 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ($taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition) = @_;
-    $partition =~ s/://;
+    my ( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition ) = @_;
 
+    $partition =~ s/://;
     my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
     my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1 | sort`;
 
     # if @remotedirlist empty (rsh troubles?) then use the $partition
-    if ( $#remotedirlist == -1 ){
+    if ( $#remotedirlist == -1 ) {
         push( @remotedirlist, $partition );
         logit( $taskid, $host, $group, "ERROR: eval subfolders command failed, use now with:\n @remotedirlist" );
     } else {
@@ -241,7 +242,7 @@ sub queue_remote_subfolders {
             path         => ":'${remotedir}'",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
-            dosnapshot   => "0",
+            dosnapshot   => 0,
         };
         push( @queue, $bkpjob );
     }
@@ -263,13 +264,16 @@ sub queue_remote_subfolders {
 # Threading
 #
 sub start_threads {
+
     # define number of threads
     my $nthreads;
-    if ( $nthreads_arg ) {
+    if ($nthreads_arg) {
+
         # If nthreads was defined by cli argument, use it
         $nthreads = $nthreads_arg;
         print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
     } elsif ( $host_arg && $group_arg ) {
+
         # If no nthreads was given, and we back up a single host and group, get nthreads from its config
         $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
         print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $serverconfig{verbose};
@@ -278,7 +282,7 @@ sub start_threads {
     }
 
     my $Q = Thread::Queue->new;
-    my @threads = map { threads->create( \&thread_work, $Q ) } (1 .. $nthreads);
+    my @threads = map { threads->create( \&thread_work, $Q ) } ( 1 .. $nthreads );
     $Q->enqueue($_) for @queue;
     $Q->enqueue( (undef) x $nthreads );
     $_->join for @threads;
@@ -300,7 +304,7 @@ sub thread_work {
         my $bkptimestamp = $bkpjob->{bkptimestamp};
         my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
-        my $random_integer = int(rand(10)) + 1;
+        my $random_integer = int( rand(10) ) + 1;
         $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
 
         return unless create_lockfile( $taskid, $host, $group, $path );
@@ -310,7 +314,7 @@ sub thread_work {
         my $rsync_err;
         $rsync_err = execute_rsync( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
-        unless( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ( $finallysnapshots ) ) {
+        unless ( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ($finallysnapshots) ) {
             my $bkpjob = {
                 taskid       => $taskid,
                 jobid        => $jobid,
@@ -333,24 +337,24 @@ sub thread_work {
 # Rsync
 #
 sub eval_rsync_options {
-    my ($taskid, $host, $group, $lastbkp) = @_;
+    my ( $taskid, $host, $group, $lastbkp ) = @_;
     my $rsync_options = '';
     my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
 
-    $rsync_options .= "--stats ";
-    $rsync_options .= "-a "             if $hostconfig->{BKP_RSYNC_ARCHIV};
-    $rsync_options .= "-x "             if $hostconfig->{BKP_RSYNC_ONE_FS};
-    $rsync_options .= "-R "             if $hostconfig->{BKP_RSYNC_RELATIV};
-    $rsync_options .= "-H "             if $hostconfig->{BKP_RSYNC_HLINKS};
-    $rsync_options .= "-W "             if $hostconfig->{BKP_RSYNC_WHOLEFILE};
-    $rsync_options .= "--delete "       if $hostconfig->{BKP_RSYNC_DELETE};
-    $rsync_options .= "--force "        if $hostconfig->{BKP_RSYNC_DELETE_FORCE};
-    $rsync_options .= "--numeric-ids "  if $hostconfig->{BKP_RSYNC_NUM_IDS};
-    $rsync_options .= "--inplace "      if $hostconfig->{BKP_RSYNC_INPLACE};
-    $rsync_options .= "--acls "         if $hostconfig->{BKP_RSYNC_ACL};
-    $rsync_options .= "--xattrs "       if $hostconfig->{BKP_RSYNC_XATTRS};
-    $rsync_options .= "--no-D "         if $hostconfig->{BKP_RSYNC_NODEVICES};
-    $rsync_options .= "-v "             if ($serverconfig{verbose} && ($serverconfig{verboselevel} == 3));
+    $rsync_options .= '--stats ';
+    $rsync_options .= '-a '            if $hostconfig->{BKP_RSYNC_ARCHIV};
+    $rsync_options .= '-x '            if $hostconfig->{BKP_RSYNC_ONE_FS};
+    $rsync_options .= '-R '            if $hostconfig->{BKP_RSYNC_RELATIV};
+    $rsync_options .= '-H '            if $hostconfig->{BKP_RSYNC_HLINKS};
+    $rsync_options .= '-W '            if $hostconfig->{BKP_RSYNC_WHOLEFILE};
+    $rsync_options .= '--delete '      if $hostconfig->{BKP_RSYNC_DELETE};
+    $rsync_options .= '--force '       if $hostconfig->{BKP_RSYNC_DELETE_FORCE};
+    $rsync_options .= '--numeric-ids ' if $hostconfig->{BKP_RSYNC_NUM_IDS};
+    $rsync_options .= '--inplace '     if $hostconfig->{BKP_RSYNC_INPLACE};
+    $rsync_options .= '--acls '        if $hostconfig->{BKP_RSYNC_ACL};
+    $rsync_options .= '--xattrs '      if $hostconfig->{BKP_RSYNC_XATTRS};
+    $rsync_options .= '--no-D '        if $hostconfig->{BKP_RSYNC_NODEVICES};
+    $rsync_options .= '-v '            if ( $serverconfig{verbose} && ( $serverconfig{verboselevel} == 3 ) );
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
@@ -363,8 +367,8 @@ sub eval_rsync_options {
     }
 
     # use links if told to and if lastbkp exists
-    if ( ($hostconfig->{BKP_STORE_MODUS} eq 'links') && ($lastbkp ne 'nolastbkp') ) {
-        $rsync_options .= "--link-dest " . targetpath($host, $group) . "/$lastbkp ";
+    if ( ( $hostconfig->{BKP_STORE_MODUS} eq 'links' ) && ( $lastbkp ne 'nolastbkp' ) ) {
+        $rsync_options .= '--link-dest ' . targetpath( $host, $group ) . "/$lastbkp ";
     }
 
     if ( $hostconfig->{BKP_RSYNC_RSHELL} ) {
@@ -375,20 +379,19 @@ sub eval_rsync_options {
         }
     }
 
-
-    $rsync_options =~ s/\s+$//; # remove trailing space
+    $rsync_options =~ s/\s+$//;    # remove trailing space
 
     return $rsync_options;
 }
 
 sub check_rsync_target {
-    my ($host, $group) = @_;
+    my ( $host, $group ) = @_;
     my $return_code = 0;
 
-    my $rsync_target = targetpath($host, $group);
+    my $rsync_target = targetpath( $host, $group );
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-        $rsync_target .= "/current";
+        $rsync_target .= '/current';
     }
 
     if ( !-d $rsync_target ) {
@@ -399,16 +402,16 @@ sub check_rsync_target {
 }
 
 sub eval_rsync_target {
-    my ($host, $group, $bkptimestamp) = @_;
+    my ( $host, $group, $bkptimestamp ) = @_;
 
-    my $rsync_target = targetpath($host, $group);
+    my $rsync_target = targetpath( $host, $group );
 
     if ( !-d $rsync_target ) {
         system("mkdir -p $rsync_target") unless $serverconfig{dryrun};
     }
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-        $rsync_target .= "/current";
+        $rsync_target .= '/current';
 
         if ( !-d $rsync_target ) {
             create_btrfs_subvolume( $taskid, $host, $group, $rsync_target );
@@ -421,49 +424,49 @@ sub eval_rsync_target {
 }
 
 sub execute_rsync {
-    my ($taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path) = @_;
+    my ( $taskid, $jobid, $host, $group, $lastbkp, $bkptimestamp, $path ) = @_;
 
-    $bkptimestamp  = eval_bkptimestamp($host, $group) unless $bkptimestamp;
+    $bkptimestamp = eval_bkptimestamp( $host, $group ) unless $bkptimestamp;
     my $startstamp = time();
 
     # report rsync start to DB, jobstatus => 0
-    bangstat_start_backupjob($taskid, $jobid, $host, $group, $startstamp, '', $path, targetpath($host, $group), $lastbkp, '0' , '0', '');
+    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $path, targetpath( $host, $group ), $lastbkp, '0', '0', '' );
 
-    my $taskset = "";
+    my $taskset = '';
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
-           if (-e $serverconfig{path_taskset} ) {
-                $taskset = $serverconfig{path_taskset} . " " . $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} . " ";
-            } else {
-                logit( $taskid, $host, $group, "TASKSET selected but command $serverconfig{path_taskset} not found!" );
-            }
+        if ( -e $serverconfig{path_taskset} ) {
+            $taskset = $serverconfig{path_taskset} . ' ' . $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} . ' ';
+        } else {
+            logit( $taskid, $host, $group, "TASKSET selected but command $serverconfig{path_taskset} not found!" );
+        }
     }
 
-    my $nocache = "";
+    my $nocache = '';
     if ( $hosts{"$host-$group"}->{hostconfig}->{NOCACHE_ENABLED} ) {
-           if (-e $serverconfig{path_nocache} ) {
-                $nocache = $serverconfig{path_nocache} . " ";
-            } else {
-                logit( $taskid, $host, $group, "NOCACHE selected but command $serverconfig{path_nocache} not found!" );
-            }
+        if ( -e $serverconfig{path_nocache} ) {
+            $nocache = $serverconfig{path_nocache} . ' ';
+        } else {
+            logit( $taskid, $host, $group, "NOCACHE selected but command $serverconfig{path_nocache} not found!" );
+        }
     }
 
-    my $ionice = "";
+    my $ionice = '';
     if ( $hosts{"$host-$group"}->{hostconfig}->{IONICE_OPTIONS} ) {
-           if (-e $serverconfig{path_ionice} ) {
-                $ionice = $serverconfig{path_ionice} . " " . $hosts{"$host-$group"}->{hostconfig}->{IONICE_OPTIONS} . " ";
-            } else {
-                logit( $taskid, $host, $group, "IONICE selected but command $serverconfig{path_ionice} not found!" );
-            }
+        if ( -e $serverconfig{path_ionice} ) {
+            $ionice = $serverconfig{path_ionice} . ' ' . $hosts{"$host-$group"}->{hostconfig}->{IONICE_OPTIONS} . ' ';
+        } else {
+            logit( $taskid, $host, $group, "IONICE selected but command $serverconfig{path_ionice} not found!" );
+        }
     }
 
     my $rsync_cmd     = $nocache . $ionice . $taskset . $serverconfig{path_rsync};
-    my $rsync_options = eval_rsync_options($taskid, $host, $group, $lastbkp);
-    my $rsync_target  = eval_rsync_target($host, $group, $bkptimestamp);
+    my $rsync_options = eval_rsync_options( $taskid, $host, $group, $lastbkp );
+    my $rsync_target  = eval_rsync_target( $host, $group, $bkptimestamp );
 
     logit( $taskid, $host, $group, "Rsync Command: $rsync_cmd $rsync_options$path $rsync_target" );
     logit( $taskid, $host, $group, "Executing rsync for host $host group $group path $path" );
 
-    local(*HIS_IN, *HIS_OUT, *HIS_ERR);
+    local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
     $rsync_cmd = "echo $rsync_cmd" if $serverconfig{dryrun};
     my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options$path $rsync_target" );
 
@@ -477,14 +480,14 @@ sub execute_rsync {
 
     waitpid( $rsyncpid, 0 );
 
-    logit( $taskid, $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >=2 );
+    logit( $taskid, $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
     logit( $taskid, $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
     logit( $taskid, $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
 
-    my $errcode = 0;
+    my $errcode  = 0;
     my $endstamp = time();
 
-    if ( @errlines ){
+    if (@errlines) {
         foreach my $errline (@errlines) {
             if ( $errline =~ /.* \(code (\d+)/ ) {
                 $errcode = $1;
@@ -496,7 +499,7 @@ sub execute_rsync {
     }
 
     #report finished rsync to DB, jobstatus => 1
-    bangstat_update_backupjob($taskid, $jobid, $host, $group, $endstamp, $path, targetpath($host, $group), $lastbkp, $errcode, '1', @outlines);
+    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $path, targetpath( $host, $group ), $lastbkp, $errcode, '1', @outlines );
 
     return $errcode;
 }
@@ -508,7 +511,7 @@ sub create_btrfs_subvolume {
     my ( $taskid, $host, $group, $path ) = @_;
 
     my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume create $path >/dev/null 2>&1";
-    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
+    $btrfs_subvolume_cmd = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
 
     logit( $taskid, $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
     system($btrfs_subvolume_cmd) and logit( $taskid, $host, $group, "ERROR: creating subvolume for $host-$group: $!" );
@@ -520,7 +523,7 @@ sub delete_btrfs_subvolume {
     my ( $taskid, $host, $group, $path ) = @_;
 
     my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume delete $path >/dev/null 2>&1";
-    $btrfs_subvolume_cmd    = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
+    $btrfs_subvolume_cmd = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
 
     logit( $taskid, $host, $group, "Delete btrfs subvolume: $btrfs_subvolume_cmd" );
     system($btrfs_subvolume_cmd) and logit( $taskid, $host, $group, "ERROR: deleting subvolume for $host-$group: $!" );
@@ -532,16 +535,16 @@ sub create_btrfs_snapshot {
     my ( $taskid, $host, $group, $bkptimestamp ) = @_;
 
     my $btrfs_cmd             = $serverconfig{path_btrfs};
-    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
-    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/" . $bkptimestamp;
+    my $btrfs_snapshot_source = targetpath( $host, $group ) . '/current';
+    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . '/' . $bkptimestamp;
 
-    my $touch_current_cmd    = "touch $btrfs_snapshot_source >/dev/null 2>&1";
-    $touch_current_cmd       = "echo $touch_current_cmd" if $serverconfig{dryrun};
+    my $touch_current_cmd = "touch $btrfs_snapshot_source >/dev/null 2>&1";
+    $touch_current_cmd = "echo $touch_current_cmd" if $serverconfig{dryrun};
     logit( $taskid, $host, $group, "Touch current folder for host $host group $group" );
     system($touch_current_cmd) and logit( $taskid, $host, $group, "ERROR: touching current folder for $host-$group: $!" );
 
-    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+    my $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
+    $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
     logit( $taskid, $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
     system($btrfs_snapshot_cmd) and logit( $taskid, $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
 
@@ -552,17 +555,16 @@ sub create_btrfs_snapshot {
 # Wipe old backups
 #
 sub wipe {
-    my ($taskid, $host, $group, $force) = @_;
+    my ( $taskid, $host, $group, $force ) = @_;
 
     # make sure we are on the correct backup server
-    return unless bkp_to_current_server($taskid, $host, $group);
+    return unless bkp_to_current_server( $taskid, $host, $group );
 
     # make sure wipe is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{WIPE_ENABLED};
 
     # stop if trying to do bulk wipe if it's not allowed
-    return unless ( ($group_arg && $host_arg) || $hosts{"$host-$group"}->{hostconfig}->{WIPE_BULK_ALLOW} );
-
+    return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{WIPE_BULK_ALLOW} );
 
     # check for still running backups
     return unless check_lockfile( $taskid, $host, $group );
@@ -579,10 +581,10 @@ sub wipe {
     my $bkpcount = $#backup_folders + 1;
 
     # get list of folders to wipe
-    my %stack    = list_folders_to_wipe( $host, $group, @backup_folders );
-    my @wipedirs = @{ $stack{wipe} };
+    my %stack = list_folders_to_wipe( $host, $group, @backup_folders );
+    my @wipedirs = @{$stack{wipe}};
 
-    logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} +1 ) .", keeping: $bkpkeep for host $host group $group" );
+    logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} + 1 ) . ", keeping: $bkpkeep for host $host group $group" );
 
     # generate wipe report with content of stacks
     if ( $serverconfig{verboselevel} >= 2 ) {
@@ -597,10 +599,10 @@ sub wipe {
     }
 
     # don't automatically wipe too many backups
-    if ( $force ) {
-        logit( $taskid, $host, $group, "Wipe WARNING: forced to wipe, namely " . ( $#{$stack{wipe}} + 1 ) . "." );
+    if ($force) {
+        logit( $taskid, $host, $group, 'Wipe WARNING: forced to wipe, namely ' . ( $#{$stack{wipe}} + 1 ) . '.' );
     } elsif ( $#{$stack{wipe}} >= $serverconfig{auto_wipe_limit} ) {
-        logit( $taskid, $host, $group, "Wipe WARNING: too many folders to wipe, namely " . ( $#{$stack{wipe}} + 1 ) . ". Wipe manually or use --force." );
+        logit( $taskid, $host, $group, 'Wipe WARNING: too many folders to wipe, namely ' . ( $#{$stack{wipe}} + 1 ) . '. Wipe manually or use --force.' );
         return ();
     }
 
@@ -612,13 +614,14 @@ sub wipe {
 
     # remove subvolumes or folders
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+
         # Limit snapshot wipe to the last x days -> performance issues
         if ( ( $#{$stack{wipe}} + 1 ) > $serverconfig{snapshot_wipe_limit} ) {
-           logit( $taskid, $host, $group, "Wipe WARNING: snapshot limit reached, wipe only oldest $serverconfig{snapshot_wipe_limit} snapshots." );
+            logit( $taskid, $host, $group, "Wipe WARNING: snapshot limit reached, wipe only oldest $serverconfig{snapshot_wipe_limit} snapshots." );
         }
-        @wipedirs = splice(@wipedirs,0,$serverconfig{snapshot_wipe_limit});
+        @wipedirs = splice( @wipedirs, 0, $serverconfig{snapshot_wipe_limit} );
 
-        delete_btrfs_subvolume( $taskid, $host, $group, join(' ', @wipedirs) );
+        delete_btrfs_subvolume( $taskid, $host, $group, join( ' ', @wipedirs ) );
         delete_logfiles( $taskid, $host, $group, @wipedirs );
     } else {
         my $rmcmd = 'rm -Rf';
@@ -635,30 +638,30 @@ sub wipe {
 }
 
 sub delete_logfiles {
-    my ($taskid, $host, $group, @wipedirs) = @_;
+    my ( $taskid, $host, $group, @wipedirs ) = @_;
 
-        foreach my $dir (@wipedirs) {
-            my ($logdate) = $dir =~ /.*\/(\d{4}\.\d{2}\.\d{2})/;
-            $logdate =~ s/\./\-/g;
-            my $today = `$serverconfig{path_date} +"%Y-%m-%d"`;
-            chomp $today;
-            unless ( $logdate eq $today ) {
-                my $logfolder  = "$serverconfig{path_logs}/${host}_${group}";
-                my $logfile    = "$logfolder/$logdate.log";
-                my $rmcmd = 'rm -f';
-                $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
+    foreach my $dir (@wipedirs) {
+        my ($logdate) = $dir =~ /.*\/(\d{4}\.\d{2}\.\d{2})/;
+        $logdate =~ s/\./\-/g;
+        my $today = `$serverconfig{path_date} +"%Y-%m-%d"`;
+        chomp $today;
+        unless ( $logdate eq $today ) {
+            my $logfolder = "$serverconfig{path_logs}/${host}_${group}";
+            my $logfile   = "$logfolder/$logdate.log";
+            my $rmcmd     = 'rm -f';
+            $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
 
-                logit( $taskid, $host, $group, "Delete logfile $logfile" );
-                system("$rmcmd $logfile") and logit( $taskid, $host, $group, "ERROR: deleting logfile $logfile: $!" );
-            }
+            logit( $taskid, $host, $group, "Delete logfile $logfile" );
+            system("$rmcmd $logfile") and logit( $taskid, $host, $group, "ERROR: deleting logfile $logfile: $!" );
         }
+    }
 }
 
 #################################
 # last_bkp_file
 #
 sub last_bkp_file {
-    my ($host, $group) = @_;
+    my ( $host, $group ) = @_;
 
     my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
     my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
@@ -668,10 +671,10 @@ sub last_bkp_file {
 }
 
 sub check_last_bkp {
-    my ($taskid, $host, $group) = @_;
+    my ( $taskid, $host, $group ) = @_;
 
     my $lastbkp = 'nolastbkp';
-    my $lastBkpFile = last_bkp_file($host, $group);
+    my $lastBkpFile = last_bkp_file( $host, $group );
 
     if ( -e $lastBkpFile ) {
         $lastbkp = `cat $lastBkpFile`;
@@ -684,9 +687,9 @@ sub check_last_bkp {
 }
 
 sub create_last_bkp_file {
-    my ($taskid, $host, $group, $bkptimestamp) = @_;
+    my ( $taskid, $host, $group, $bkptimestamp ) = @_;
 
-    my $lastBkpFile = last_bkp_file($host, $group);
+    my $lastBkpFile = last_bkp_file( $host, $group );
     system("echo \"$bkptimestamp\" > $lastBkpFile") unless $serverconfig{dryrun};
     logit( $taskid, $host, $group, "Write lastBkpFile: $bkptimestamp \-\> $lastBkpFile" );
 
@@ -697,12 +700,13 @@ sub create_last_bkp_file {
 # Helper subroutines
 #
 sub create_timeid {
-    my ($host, $group, $taskid) = @_;
-    my ($s, $usec) = gettimeofday;
-    my $timeid      = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
+    my ( $host, $group, $taskid ) = @_;
+
+    my ( $s, $usec ) = gettimeofday;
+    my $timeid = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
     $timeid =~ s/\n//g;
-    $host  ||= "SERVER";
-    $group ||= "GLOBAL";
+    $host   ||= "SERVER";
+    $group  ||= "GLOBAL";
     $taskid ||= $timeid;
     logit( $taskid, $host, $group, "Created TimeID: $timeid" );
 
@@ -710,7 +714,7 @@ sub create_timeid {
 }
 
 sub eval_bkptimestamp {
-    my ($host, $group) = @_;
+    my ( $host, $group ) = @_;
 
     my $bkptimestamp = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
     chomp($bkptimestamp);
@@ -719,7 +723,7 @@ sub eval_bkptimestamp {
 }
 
 sub finish_backupjob {
-    my ($bkpjob) = @_;
+    my ($bkpjob)     = @_;
     my $taskid       = $bkpjob->{'taskid'};
     my $jobid        = $bkpjob->{'jobid'};
     my $host         = $bkpjob->{'host'};
@@ -729,14 +733,14 @@ sub finish_backupjob {
     my $rsync_err    = $bkpjob->{'rsync_err'};
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
 
-    if ( $dosnapshot ) {
+    if ($dosnapshot) {
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
             create_btrfs_snapshot( $taskid, $host, $group, $bkptimestamp );
         }
         create_last_bkp_file( $taskid, $host, $group, $bkptimestamp );
 
         my %RecentBackups = bangstat_recentbackups($host);
-        unless ( $noreport ) {
+        unless ($noreport) {
             xymon_report( $taskid, $host, $group, %RecentBackups );
             mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
         }
@@ -750,7 +754,7 @@ sub finish_backupjob {
 }
 
 sub bkp_to_current_server {
-    my ($taskid, $host, $group) = @_;
+    my ( $taskid, $host, $group ) = @_;
 
     # make sure backup's target host matches local hostname
     my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
@@ -768,27 +772,27 @@ sub bkp_to_current_server {
 sub parse_command_options {
 
     GetOptions(
-        "help"             => sub { usage('') },
-        "version"          => sub { usage("Current version number: $version") },
-        "v|verbose"        => \$verbose_arg,
-        "vv"               => \$vv_arg,
-        "vvv"              => \$vvv_arg,
-        "n|dry-run"        => \$dryrun_arg,
-        "g|group=s"        => \$group_arg,
-        "h|host=s"         => \$host_arg,
-        "p|prefix=s"       => \$prefix_arg,
-        "t|threads=i"      => \$nthreads_arg,
-        "w|wipe"           => \$wipe,
-        "initial"          => \$initial,
-        "cleanup"          => \$cleanup,
-        "finallysnapshots" => \$finallysnapshots,
-        "force"            => \$force,
-        "missingonly"      => \$missingonly,
-        "xymon"            => \$xymononly,
-        "noreport"         => \$noreport,
-    ) or usage("Invalid commmand line options.");
-    usage("You must provide some arguments")    unless ( $host_arg || $group_arg );
-    usage("Number of threads must be positive") if ( $nthreads_arg && $nthreads_arg <= 0 );
+        'help'             => sub { usage('') },
+        'version'          => sub { usage("Current version number: $version") },
+        'v|verbose'        => \$verbose_arg,
+        'vv'               => \$vv_arg,
+        'vvv'              => \$vvv_arg,
+        'n|dry-run'        => \$dryrun_arg,
+        'g|group=s'        => \$group_arg,
+        'h|host=s'         => \$host_arg,
+        'p|prefix=s'       => \$prefix_arg,
+        't|threads=i'      => \$nthreads_arg,
+        'w|wipe'           => \$wipe,
+        'initial'          => \$initial,
+        'cleanup'          => \$cleanup,
+        'finallysnapshots' => \$finallysnapshots,
+        'force'            => \$force,
+        'missingonly'      => \$missingonly,
+        'xymon'            => \$xymononly,
+        'noreport'         => \$noreport,
+    ) or usage('Invalid commmand line options.');
+    usage('You must provide some arguments') unless ( $host_arg || $group_arg );
+    usage('Number of threads must be positive') if ( $nthreads_arg && $nthreads_arg <= 0 );
 
     $verbose_arg = 1 if ( $dryrun_arg || $vv_arg || $vvv_arg );
 
@@ -797,10 +801,10 @@ sub parse_command_options {
 
 sub cli_args_override_global_config {
 
-    $serverconfig{verbose}      = $verbose_arg  if $verbose_arg;
-    $serverconfig{dryrun}       = $dryrun_arg   if $dryrun_arg;
-    $serverconfig{verboselevel} = 2             if $vv_arg;
-    $serverconfig{verboselevel} = 3             if $vvv_arg;
+    $serverconfig{verbose}      = $verbose_arg if $verbose_arg;
+    $serverconfig{dryrun}       = $dryrun_arg  if $dryrun_arg;
+    $serverconfig{verboselevel} = 2            if $vv_arg;
+    $serverconfig{verboselevel} = 3            if $vvv_arg;
 
     return 1;
 }
@@ -814,7 +818,7 @@ sub usage {
     }
 
     my $command = $0;
-    $command    =~ s#^.*/##;
+    $command =~ s#^.*/##;
 
     print <<"EOF";
         $message
@@ -842,5 +846,6 @@ sub usage {
         -n                 # dry-run without making changes (implies verbose)
 
 EOF
+
     exit 0;
 }

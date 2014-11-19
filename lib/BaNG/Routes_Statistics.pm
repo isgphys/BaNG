@@ -16,17 +16,19 @@ get '/' => require_login sub {
 };
 
 get '/schedule.json' => require_login sub {
-    my %schedule = statistics_schedule(1,'time');
+    my %schedule = statistics_schedule( 1, 'time' );
     error404('Could not fetch data') unless %schedule;
     my %json_options = ( canonical => 1 );
-    return to_json(\%schedule, \%json_options);
+
+    return to_json( \%schedule, \%json_options );
 };
 
 get '/schedule-all.json' => require_login sub {
-    my %schedule = statistics_schedule(60,'host');
+    my %schedule = statistics_schedule( 60, 'host' );
     error404('Could not fetch data') unless %schedule;
     my %json_options = ( canonical => 1 );
-    return to_json(\%schedule, \%json_options);
+
+    return to_json( \%schedule, \%json_options );
 };
 
 get '/schedule' => require_login sub {
@@ -35,9 +37,9 @@ get '/schedule' => require_login sub {
         servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
-        title        => "Backup schedule of last night",
+        title        => 'Backup schedule of last night',
         fullplot     => 0,
-        json_url     => "/statistics/schedule.json",
+        json_url     => '/statistics/schedule.json',
     },{ layout       => 0 };
 };
 
@@ -47,9 +49,9 @@ get '/schedule-all' => require_login sub {
         servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
-        title        => "Backup schedule by host",
+        title        => 'Backup schedule by host',
         fullplot     => 1,
-        json_url     => "/statistics/schedule-all.json",
+        json_url     => '/statistics/schedule-all.json',
     },{ layout       => 0 };
 };
 
@@ -66,53 +68,56 @@ get '/variations' => require_login sub {
 get '/diffpreday/:host/:group' => require_login sub {
     my $host    = param('host');
     my $group   = param('group');
-    my $predays = "14";
+    my $predays = '14';
+
     template 'statistics-diffpreday', {
         section      => 'statistics',
         servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         predays      => $predays,
-        diffPreDay   => statistics_diffpreday("$host","$group",$predays),
+        diffPreDay   => statistics_diffpreday( $host, $group, $predays ),
     };
 };
 
 get '/barchart/:name/:taskid.json' => require_login sub {
     my $chartname = param('name');
     my $json;
-    if ( $chartname eq 'toptranssize'  ) {
-        if( param('taskid') eq 'all' ) {
-            $json = to_json(statistics_top_trans('size'));
+    if ( $chartname eq 'toptranssize' ) {
+        if ( param('taskid') eq 'all' ) {
+            $json = to_json( statistics_top_trans('size') );
         } else {
-            $json = to_json(statistics_top_trans_details('size', param('taskid')));
+            $json = to_json( statistics_top_trans_details( 'size', param('taskid') ) );
         }
-    } elsif ( $chartname eq 'toptransfiles'  ) {
-        if( param('taskid') eq 'all' ) {
-            $json = to_json(statistics_top_trans('files'));
+    } elsif ( $chartname eq 'toptransfiles' ) {
+        if ( param('taskid') eq 'all' ) {
+            $json = to_json( statistics_top_trans('files') );
         } else {
-            $json = to_json(statistics_top_trans_details('files', param('taskid')));
+            $json = to_json( statistics_top_trans_details( 'files', param('taskid') ) );
         }
-    } elsif ( $chartname eq 'worktime'  ) {
-        if( param('taskid') eq 'all' ) {
-            $json = to_json(statistics_work_duration());
+    } elsif ( $chartname eq 'worktime' ) {
+        if ( param('taskid') eq 'all' ) {
+            $json = to_json( statistics_work_duration() );
         } else {
-            $json = to_json(statistics_work_duration_details(param('taskid')));
+            $json = to_json( statistics_work_duration_details( param('taskid') ) );
         }
     }
     error404('Could not fetch data') unless $json;
+
     return $json;
 };
 
 get '/barchart/:name/:taskid' => require_login sub {
     my $chartname = param('name') . '/' . param('taskid');
-    my $title = "Bar Chart";
-    if ( $chartname =~ /toptranssize/  ) {
-       $title = "Top Transfered Filesize - last 24h";
-    }elsif ( $chartname =~ /toptransfiles/  ) {
-       $title = "Top Transfered Number of Files - last 24h";
-    }elsif ( $chartname =~ /worktime/  ) {
-       $title = "Duration of Tasks - last 24h";
+    my $title     = 'Bar Chart';
+    if ( $chartname =~ /toptranssize/ ) {
+        $title = 'Top Transfered Filesize - last 24h';
+    } elsif ( $chartname =~ /toptransfiles/ ) {
+        $title = 'Top Transfered Number of Files - last 24h';
+    } elsif ( $chartname =~ /worktime/ ) {
+        $title = 'Duration of Tasks - last 24h';
     }
+
     template 'statistics-barchart', {
         section      => 'statistics',
         servername   => $servername,
@@ -125,14 +130,14 @@ get '/barchart/:name/:taskid' => require_login sub {
 };
 
 get '/:bkpserver.json' => require_login sub {
-    my $json = statistics_cumulated_json(param('bkpserver'));
+    my $json = statistics_cumulated_json( param('bkpserver') );
     error404('Could not fetch data') unless $json;
     return $json;
 };
 
 get '/:host/:share.json' => require_login sub {
-    my $share = statistics_decode_path(param('share'));
-    my $json  = statistics_json(param('host'),$share);
+    my $share = statistics_decode_path( param('share') );
+    my $json = statistics_json( param('host'), $share );
     error404('Could not fetch data') unless $json;
     return $json;
 };

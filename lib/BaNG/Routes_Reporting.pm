@@ -27,7 +27,7 @@ get '/task/:taskid' => require_role config->{admin_role} => sub {
         section    => 'reporting',
         servername => $servername,
         taskid     => param('taskid'),
-        taskjobs   => bangstat_task_jobs(param('taskid')),
+        taskjobs   => bangstat_task_jobs( param('taskid') ),
     };
 };
 

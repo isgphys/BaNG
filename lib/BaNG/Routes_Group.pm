@@ -11,7 +11,7 @@ prefix '/group';
 
 get '/:group' => require_role config->{admin_role} => sub {
     get_serverconfig();
-    get_group_config(param('group'));
+    get_group_config( param('group') );
 
     template 'group', {
         section      => 'group',
