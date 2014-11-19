@@ -6,9 +6,11 @@ use warnings;
 
 sub new {
     my ($class, $realm_settings) = @_;
+
     my $self = {
         realm_settings => $realm_settings,
     };
+
     return bless $self => $class;
 }
 

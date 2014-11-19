@@ -9,9 +9,11 @@ my $config = Dancer::Config::setting('plugins')->{'Auth::Extensible'}->{'realms'
 
 sub new {
     my ($class, $realm_settings) = @_;
+
     my $self = {
         realm_settings => $realm_settings,
     };
+
     return bless $self => $class;
 }
 
