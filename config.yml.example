@@ -25,3 +25,14 @@ plugins:
         server:     'ldap.example.com'
         base_dn:    'ou=Company,o=example,c=com'
         group_filter: '(objectClass=groupclass)'
+      config:
+        provider:   'Config'
+        users:
+          - user:   'admin'
+            pass:   'supersecret'
+            cn:     'Admin User'
+            roles:
+              - 'isg'
+          - user:   'guest'
+            pass:   'guest'
+            cn:     'Guest User'
