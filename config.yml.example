@@ -21,11 +21,6 @@ plugins:
     no_default_pages: 1
     no_login_handler: 1
     realms:
-      ldap:
-        provider:   'LDAPphys'
-        server:     'ldap.example.com'
-        base_dn:    'ou=Company,o=example,c=com'
-        group_filter: '(objectClass=groupclass)'
       config:
         provider:   'Config'
         users:
@@ -37,3 +32,8 @@ plugins:
           - user:   'guest'
             pass:   'guest'
             cn:     'Guest User'
+     #ldap:
+     #  provider:   'LDAPphys'
+     #  server:     'ldap.example.com'
+     #  base_dn:    'ou=Company,o=example,c=com'
+     #  group_filter: '(objectClass=groupclass)'
