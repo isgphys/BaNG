@@ -24,3 +24,4 @@ plugins:
         provider:   'LDAPphys'
         server:     'ldap.example.com'
         base_dn:    'ou=Company,o=example,c=com'
+        group_filter: '(objectClass=groupclass)'

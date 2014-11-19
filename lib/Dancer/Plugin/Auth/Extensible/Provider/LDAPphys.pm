@@ -98,7 +98,7 @@ sub _user_groups {
     my $ldap_result = $ldap->search(
         base   => $config->{base_dn},
         scope  => 'sub',
-        filter => '(objectClass=dphysGroup)',
+        filter => $config->{group_filter},
         attrs  => ['cn', 'memberUid'],
     );
     $ldap->unbind;
