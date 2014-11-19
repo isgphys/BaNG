@@ -4,9 +4,6 @@ use 5.010;
 use strict;
 use warnings;
 use Net::LDAP;
-use Dancer qw(warning);
-
-our $VERSION = '0.1';
 
 my $config = Dancer::Config::setting('plugins')->{'Auth::Extensible'}->{'realms'}->{'ldap'};
 
