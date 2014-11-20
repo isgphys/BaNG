@@ -635,13 +635,13 @@ sub rickshaw_json {
     }
 
     my %color = (
-        'RealRuntime'      => '#00CC00',
-        'TotRuntime'       => '#009900',
-        'NumOfFiles'       => '#0066B3',
-        'NumOfFilesTrans'  => '#330099',
-        'TotFileSize'      => '#FFCC00',
-        'TotFileSizeTrans' => '#FF8000',
-        'NumOfFilesDel'    => '#FF3333',
+        RealRuntime      => '#00CC00',
+        TotRuntime       => '#009900',
+        NumOfFiles       => '#0066B3',
+        NumOfFilesTrans  => '#330099',
+        TotFileSize      => '#FFCC00',
+        TotFileSizeTrans => '#FF8000',
+        NumOfFilesDel    => '#FF3333',
     );
 
     my $json .= "[\n";

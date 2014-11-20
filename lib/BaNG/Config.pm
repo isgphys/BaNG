@@ -54,9 +54,9 @@ sub get_serverconfig {
         my ( $serverconfig, $confighelper ) = _read_server_configfile($server);
 
         $servers{$server} = {
-            'configfile'   => $serverconfigfile,
-            'serverconfig' => $serverconfig,
-            'confighelper' => $confighelper,
+            configfile   => $serverconfigfile,
+            serverconfig => $serverconfig,
+            confighelper => $confighelper,
         };
     }
 
@@ -171,14 +171,14 @@ sub get_host_config {
         my $nobulk_css_class = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? 'nobulk ' : '';
 
         $hosts{"$hostname-$group"} = {
-            'hostname'         => $hostname,
-            'group'            => $group,
-            'status'           => $status,
-            'configfile'       => $hostconfigfile,
-            'css_class'        => $css_class,
-            'nobulk_css_class' => $nobulk_css_class,
-            'hostconfig'       => $hostconfig,
-            'confighelper'     => $confighelper,
+            hostname         => $hostname,
+            group            => $group,
+            status           => $status,
+            configfile       => $hostconfigfile,
+            css_class        => $css_class,
+            nobulk_css_class => $nobulk_css_class,
+            hostconfig       => $hostconfig,
+            confighelper     => $confighelper,
         };
     }
 
@@ -203,14 +203,14 @@ sub get_group_config {
         my $css_class        = $isEnabled ? 'active ' : '';
         my $nobulk_css_class = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? 'nobulk ' : '';
 
-        $groups{"$groupname"} = {
-            'status'           => $status,
-            'configfile'       => $groupconfigfile,
-            'css_class'        => $css_class,
-            'nobulk_css_class' => $nobulk_css_class,
-            'groupconfig'      => $groupconfig,
-            'confighelper'     => $confighelper,
-            'groupmembers'     => @groupmembers,
+        $groups{$groupname} = {
+            status           => $status,
+            configfile       => $groupconfigfile,
+            css_class        => $css_class,
+            nobulk_css_class => $nobulk_css_class,
+            groupconfig      => $groupconfig,
+            confighelper     => $confighelper,
+            groupmembers     => @groupmembers,
         };
     }
 
@@ -235,10 +235,10 @@ sub get_cronjob_config {
                 my ( $host, $group ) = split( /_/, $cronjob );
 
                 $unsortedcronjobs{$server}{$jobtype}{$cronjob} = {
-                    'host'  => $host,
-                    'group' => $group,
-                    'ident' => "$host-$group",
-                    'cron'  => $cronjobslist->{$cronjob},
+                    host  => $host,
+                    group => $group,
+                    ident => "$host-$group",
+                    cron  => $cronjobslist->{$cronjob},
                 };
             }
 

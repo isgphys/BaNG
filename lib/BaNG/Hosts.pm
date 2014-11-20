@@ -36,16 +36,16 @@ sub get_fsinfo {
             }x;
 
             $fsinfo{$server}{$+{mountpt}} = {
-                'filesystem' => $+{filesystem},
-                'mount'      => $+{mountpt},
-                'fstyp'      => $+{fstyp},
-                'blocks'     => num2human( $+{blocks} ),
-                'used'       => num2human( $+{used} * 1024, 1024 ),
-                'available'  => num2human( $+{available} * 1024, 1024 ),
-                'freediff'   => '',
-                'rwstatus'   => '',
-                'used_per'   => $+{usedper},
-                'css_class'  => check_fill_level( $+{usedper} ),
+                filesystem => $+{filesystem},
+                mount      => $+{mountpt},
+                fstyp      => $+{fstyp},
+                blocks     => num2human( $+{blocks} ),
+                used       => num2human( $+{used} * 1024, 1024 ),
+                available  => num2human( $+{available} * 1024, 1024 ),
+                freediff   => '',
+                rwstatus   => '',
+                used_per   => $+{usedper},
+                css_class  => check_fill_level( $+{usedper} ),
             };
         }
 
@@ -102,11 +102,11 @@ sub get_lockfiles {
             my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
             my $taskid = `cat $serverconfig{path_lockfiles}/$file`;
             $lockfiles{$server}{"$host-$group-$path"} = {
-                'taskid'    => $taskid,
-                'host'      => $host,
-                'group'     => $group,
-                'path'      => $path,
-                'timestamp' => $timestamp,
+                taskid    => $taskid,
+                host      => $host,
+                group     => $group,
+                path      => $path,
+                timestamp => $timestamp,
             };
         }
     }
