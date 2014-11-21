@@ -663,7 +663,7 @@ sub read_log {
     $show_logs_number = $#logfiles + 1 if ( $#logfiles < $show_logs_number );
 
     foreach my $logfile ( @logfiles[ -$show_logs_number .. -1 ] ) {
-        open( LOGDATA, $logfile ) or print "ERROR opening logfile $logfile: $!\n";
+        open LOGDATA, '<', $logfile or print "ERROR opening logfile $logfile: $!\n";
         my @logdata = <LOGDATA>;
         close LOGDATA;
 
@@ -696,7 +696,7 @@ sub read_global_log {
     my $logmonth = strftime '%Y-%m', localtime;
     my $globallogfile = "$serverconfig{path_logs}/global_$logmonth.log";
 
-    open( LOGDATA, $globallogfile ) or print "ERROR opening logfile $globallogfile: $!\n";
+    open LOGDATA, '<', $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
     my @logdata = <LOGDATA>;
     close LOGDATA;
 
