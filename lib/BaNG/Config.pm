@@ -161,8 +161,8 @@ sub get_host_config {
     my @hostconfigs = _find_configs( "$host\_$group\.yaml", "$serverconfig{path_hostconfig}" );
 
     foreach my $hostconfigfile (@hostconfigs) {
-        my ( $hostname, $group ) = _split_configname($hostconfigfile);
-        my ( $hostconfig, $confighelper ) = _read_host_configfile( $hostname, $group );
+        my ( $hostname, $groupname ) = _split_configname($hostconfigfile);
+        my ( $hostconfig, $confighelper ) = _read_host_configfile( $hostname, $groupname );
         my $isEnabled        = $hostconfig->{BKP_ENABLED};
         my $isBulkbkp        = $hostconfig->{BKP_BULK_ALLOW};
         my $isBulkwipe       = $hostconfig->{WIPE_BULK_ALLOW};
@@ -172,7 +172,7 @@ sub get_host_config {
 
         $hosts{"$hostname-$group"} = {
             hostname         => $hostname,
-            group            => $group,
+            group            => $groupname,
             status           => $status,
             configfile       => $hostconfigfile,
             css_class        => $css_class,
