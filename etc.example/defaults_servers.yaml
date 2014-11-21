@@ -49,7 +49,6 @@ HELP:
   path_excludes:
   path_lockfiles:
   path_logs:
-  HELP:                     This Hash includes this HELP content
   global_log_date:
   show_logs_number:         the number of logs shown on Backup Logfile Reports
 
