@@ -8,7 +8,7 @@ WIPE_ENABLED:           0                         # 1 = make wipe, 0 = don't mak
 BKP_BULK_ALLOW:         0
 WIPE_BULK_ALLOW:        0
 BKP_SOURCE_PARTITION:   ""                        # source partitions, start allways with :{partition}
-BKP_TARGET_HOST:        "bangserver.example.com"  # default backup server
+BKP_TARGET_HOST:        "bangserver"              # default backup server (hostname -s)
 BKP_TARGET_PATH:        "/export/backup"          # default backup path
 BKP_PREFIX:             "unknown"                 # BASEDST/[BKPPREFIX] > /export/backup/system
 BKP_FOLDER:             "`date +%Y.%m.%d_%H%M%S`" # destination folder
