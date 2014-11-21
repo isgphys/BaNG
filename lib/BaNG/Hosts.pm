@@ -62,9 +62,8 @@ sub get_fsinfo {
 
             my $mountpt  = $+{mountpt};
             my $mountopt = $+{mountopt};
-            my $rwstatus = 'check_red' if $mountopt =~ /ro/;
 
-            $fsinfo{$server}{$mountpt}{rwstatus} = $rwstatus;
+            $fsinfo{$server}{$mountpt}{rwstatus} = 'check_red' if $mountopt =~ /ro/;
         }
 
         if ( $server eq $servername ) {
