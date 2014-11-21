@@ -644,7 +644,7 @@ sub rickshaw_json {
         NumOfFilesDel    => '#FF3333',
     );
 
-    my $json .= "[\n";
+    my $json = "[\n";
     foreach my $field (@fields) {
         $json .= qq|{\n|;
         $json .= qq|    "name"          : "$field",\n|;
