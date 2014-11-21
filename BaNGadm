@@ -22,7 +22,6 @@ my $delete_arg;
 my $crontabonly;
 my $verbose_arg;
 my $dryrun_arg;
-my $file_arg;
 my $group_arg;
 my $host_arg;
 my $prefix_arg;
