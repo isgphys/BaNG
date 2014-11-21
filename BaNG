@@ -655,6 +655,8 @@ sub delete_logfiles {
             system("$rmcmd $logfile") and logit( $taskid, $host, $group, "ERROR: deleting logfile $logfile: $!" );
         }
     }
+
+    return 1;
 }
 
 #################################
