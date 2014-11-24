@@ -170,7 +170,7 @@ sub get_host_config {
         my $css_class        = $isEnabled ? 'active ' : '';
         my $nobulk_css_class = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? 'nobulk ' : '';
 
-        $hosts{"$hostname-$group"} = {
+        $hosts{"$hostname-$groupname"} = {
             hostname         => $hostname,
             group            => $groupname,
             status           => $status,
