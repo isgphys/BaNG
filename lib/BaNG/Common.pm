@@ -89,7 +89,7 @@ sub get_automount_paths {
 
     my %automnt;
 
-    if ( -e $serverconfig{path_ypcat} ) {
+    if ( $serverconfig{path_ypcat} && -e $serverconfig{path_ypcat} ) {
 
         my @autfstbl = `$serverconfig{path_ypcat} -k $ypfile`;
 
