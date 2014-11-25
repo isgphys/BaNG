@@ -1,31 +1,22 @@
 BaNG Database
 =============
 
+
 Basics
 ------
 
-BaNG uses a **MySQL** database to store backup statistics.
+BaNG uses a **MySQL** database to store backup statistics. It can be hosted on any server and should be configured through `etc/bangstat_db.yaml`.
 
-View columns of table ```statistics``` in database ```bangstat```
 
-    use bangstat;
-    describe statistic;
+Initial Setup
+-------------
 
-Use profiling to view query statistics
-
-    set profiling = 1;
-    show profiles;
-    show profile for query 1;
-
-Change MySQL engine from ```MyISAM``` to ```InnoDB```
-
-    ALTER TABLE mytable ENGINE = InnoDB;
-
-Create database and user
-------------------------
+### Create database
 
     CREATE DATABASE bangstat;
     USE bangstat;
+
+### Create user
 
     GRANT USAGE
         ON *.*
@@ -39,8 +30,8 @@ Create database and user
 
     FLUSH PRIVILEGES;
 
-Create table
-------------
+
+### Create table
 
     CREATE TABLE statistic (
       ID int(11) NOT NULL AUTO_INCREMENT,
@@ -76,39 +67,61 @@ Create table
       PRIMARY KEY (ID)
     ) ENGINE=InnoDB AUTO_INCREMENT=194120 DEFAULT CHARSET=utf8;
 
-Create views
-------------
+
+### Create views
 
     CREATE OR REPLACE VIEW recent_backups AS
-    SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime, BkpFromHost,
-    IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),BkpFromPath) as BkpFromPath,
-    BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+    SELECT
+        TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, BkpFromHost,
+        IF(isThread, SUBSTRING_INDEX(BkpFromPath, '/', (LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath, '/', '')))), BkpFromPath) as BkpFromPath,
+        BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
         SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
-    GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, MIN(JobStatus) AS JobStatus
+        GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, MIN(JobStatus) as JobStatus
     FROM statistic
-    WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
+        WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
     GROUP BY JobID;
 
     CREATE OR REPLACE VIEW statistic_job_sum AS
-    SELECT TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start) , Max(Stop)) as Runtime,
-    BkpFromHost, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
-    BkpFromPath) as BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
-    SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
-    SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
-    SUM(TotFileSizeTrans) as TotFileSizeTrans
+    SELECT
+        TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime, BkpFromHost,
+        IF(isThread, SUBSTRING_INDEX(BkpFromPath, '/', (LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath, '/', '')))), BkpFromPath) as BkpFromPath,
+        BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
+        SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+        SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
+        SUM(TotFileSizeTrans) as TotFileSizeTrans
     FROM statistic
-    WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
+        WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
     GROUP BY JobID;
 
     CREATE OR REPLACE VIEW statistic_job_thread AS
-    SELECT TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
-    BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
-    NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
+    SELECT
+        TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
+        BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
+        NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
     FROM statistic
-    WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
+        WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
     AND isThread = 1;
 
     CREATE OR REPLACE VIEW statistic_all AS
     SELECT * FROM statistic_job_sum
     UNION
     SELECT * FROM statistic_job_thread;
+
+
+Misc commands
+-------------
+
+View columns of table `statistics` in database `bangstat`
+
+    use bangstat;
+    describe statistic;
+
+Use profiling to view query statistics
+
+    set profiling = 1;
+    show profiles;
+    show profile for query 1;
+
+Change MySQL engine from `MyISAM` to `InnoDB`
+
+    ALTER TABLE mytable ENGINE = InnoDB;
