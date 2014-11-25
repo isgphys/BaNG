@@ -326,7 +326,7 @@ sub send_xymon_report {
     my ($report) = @_;
 
     my $socket = IO::Socket::INET->new(
-        PeerAddr => 'xymon.phys.ethz.ch',
+        PeerAddr => $serverconfig{xymon_server},
         PeerPort => '1984',
         Proto    => 'tcp',
     );

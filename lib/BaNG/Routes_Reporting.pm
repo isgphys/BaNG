@@ -17,6 +17,7 @@ get '/' => require_role config->{admin_role} => sub {
         section           => 'reporting',
         servername        => $servername,
         RecentBackupsLast => bangstat_recentbackups_last(),
+        xymon_server      => $serverconfig{xymon_server},
     };
 };
 
@@ -24,10 +25,11 @@ get '/task/:taskid' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'reporting-task_jobs' => {
-        section    => 'reporting',
-        servername => $servername,
-        taskid     => param('taskid'),
-        taskjobs   => bangstat_task_jobs( param('taskid') ),
+        section      => 'reporting',
+        servername   => $servername,
+        taskid       => param('taskid'),
+        taskjobs     => bangstat_task_jobs( param('taskid') ),
+        xymon_server => $serverconfig{xymon_server},
     };
 };
 

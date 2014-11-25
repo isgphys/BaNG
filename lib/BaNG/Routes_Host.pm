@@ -26,6 +26,7 @@ get '/:host' => require_role config->{admin_role} => sub {
         backupstack   => backup_folders_stack( param('host') ),
         cronjobs      => get_cronjob_config(),
         RecentBackups => \%RecentBackups,
+        xymon_server  => $serverconfig{xymon_server},
     };
 };
 

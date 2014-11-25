@@ -51,7 +51,7 @@
                         <li><a href="https://munin.phys.ethz.ch/munin" target="_blank">Munin - Monitoring</a></li>
                         <li><a href="https://admin.phys.ethz.ch/lvm2FS/index.pl#phd-bkp-gw" target="_blank">VMchart - LVM and BTRFS Monitoring</a></li>
                         <li><a href="https://admin.phys.ethz.ch/cacti/graph_view.php?action=tree&tree_id=5&leaf_id=233" target="_blank">Cacti Monitoring</a></li>
-                        <li><a href="http://xymon.phys.ethz.ch/mrtg/fileserver-day.html" target="_blank">Fileserver Storage Monitoring</a></li>
+                        <li><a href="http://<% xymon_server %>/mrtg/fileserver-day.html" target="_blank">Fileserver Storage Monitoring</a></li>
                     </ul>
                 </li>
             </ul>

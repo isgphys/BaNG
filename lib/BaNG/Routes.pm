@@ -22,10 +22,12 @@ use BaNG::Routes_Statistics;
 prefix undef;
 
 get '/' => require_role config->{admin_role} => sub {
+    get_serverconfig();
 
     template 'dashboard' => {
-        section    => "dashboard",
-        servername => $servername,
+        section      => "dashboard",
+        servername   => $servername,
+        xymon_server => $serverconfig{xymon_server},
     };
 };
 
@@ -51,6 +53,7 @@ get '/error_report' => require_role config->{admin_role} => sub {
 
     template 'dashboard-error_report' => {
         RecentBackupsAll => bangstat_recentbackups_all(),
+        xymon_server     => $serverconfig{xymon_server},
     },{ layout => 0 };
 };
 
