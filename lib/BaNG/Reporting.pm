@@ -325,6 +325,8 @@ sub bangstat_task_jobs {
 sub send_xymon_report {
     my ($report) = @_;
 
+    return 1 unless $serverconfig{xymon_server};
+
     my $socket = IO::Socket::INET->new(
         PeerAddr => $serverconfig{xymon_server},
         PeerPort => '1984',
