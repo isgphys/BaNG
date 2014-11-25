@@ -23,6 +23,7 @@ path_ionice:            /usr/bin/ionice
 path_taskset:           /usr/bin/taskset
 #
 report_to:              admin@example.com
+xymon_server:
 #
 verbose:                0
 verboselevel:           2
@@ -58,6 +59,7 @@ HELP:
   path_rsync:
 
   report_to:                email-addresses for reporting (comma separated)
+  xymon_server:             hostname of xymon server
 
   verbose:                  |
                             0 = be quiet
