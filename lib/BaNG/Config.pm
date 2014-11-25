@@ -17,6 +17,7 @@ our @EXPORT = qw(
     %serverconfig
     $prefix
     $servername
+    get_server_config_defaults
     get_serverconfig
     get_host_config_defaults
     get_host_config
@@ -71,6 +72,16 @@ sub get_serverconfig {
     }
 
     return 1;
+}
+
+sub get_server_config_defaults {
+    my $defaults_server_file = $serverconfig{config_defaults_servers};
+    my $settings;
+    if ( _sanityfilecheck($defaults_server_file) ) {
+        $settings = LoadFile($defaults_server_file);
+    }
+
+    return $settings;
 }
 
 sub get_host_config_defaults {

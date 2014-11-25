@@ -30,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-          <% FOREACH config IN serverconfig.keys.sort %>
+          <% FOREACH config IN serverdefaults.keys.sort %>
             <tr>
                 <td>
                     <% config %>
@@ -40,12 +40,12 @@
                     <% IF config == "defaults_hosts" %>
                         Look at "Hosts Defaults Configfile"
                     <% ELSE %>
-                        <% serverconfig.$config %>
+                        <% serverdefaults.$config %>
                     <% END %>
                   <% END %>
                 </td>
                 <td>
-                  <% serverconfig.HELP.$config FILTER html_line_break %>
+                  <% serverdefaults.HELP.$config FILTER html_line_break %>
                 </td>
             </tr>
           <% END %>

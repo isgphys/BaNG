@@ -14,14 +14,15 @@ get '/defaults' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'configs-defaults' => {
-        section      => 'configs',
-        servername   => $servername,
-        remotehost   => request->remote_host,
-        webDancerEnv => config->{run_env},
-        serverconfig => \%serverconfig,
-        hostdefaults => get_host_config_defaults(),
-        servername   => $servername,
-        prefix_path  => $prefix,
+        section        => 'configs',
+        servername     => $servername,
+        remotehost     => request->remote_host,
+        webDancerEnv   => config->{run_env},
+        serverconfig   => \%serverconfig,
+        serverdefaults => get_server_config_defaults(),
+        hostdefaults   => get_host_config_defaults(),
+        servername     => $servername,
+        prefix_path    => $prefix,
     };
 };
 
