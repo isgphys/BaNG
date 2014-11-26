@@ -40,12 +40,13 @@ chomp $servername;
 sub get_serverconfig {
     my ($prefix_arg) = @_;
 
-    # Run test suite with specific server name
-    $servername = 'bangtestserver' if $prefix_arg eq 't';
+    if ($prefix_arg) {
+        $prefix     = $prefix_arg;
+        $servername = 'bangtestserver' if $prefix_arg eq 't';    # Run test suite with specific server name
+    }
 
     undef %servers;
     undef %serverconfig;
-    $prefix = $prefix_arg if $prefix_arg;
     $serverconfig{path_configs}            = "$prefix/etc";
     $serverconfig{config_defaults_servers} = "$serverconfig{path_configs}/defaults_servers.yaml";
     $serverconfig{path_serverconfig}       = "$serverconfig{path_configs}/servers";
