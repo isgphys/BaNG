@@ -12,6 +12,6 @@ ok( grep( /# created on/                                             , @crontab 
 ok( grep( /#--- backup ---/                                          , @crontab ) , 'Crontab contains a section for backups'        );
 ok( grep( /0  2  \*  \*  \*     root    t\/BaNG -g somegroup -t 1/   , @crontab ) , 'Crontab contains an entry for a backup'        );
 ok( grep( /#--- wipe ---/                                            , @crontab ) , 'Crontab contains a section for wipes'          );
-ok( grep( /0  4  \*  \*  \*     root    t\/BaNG --wipe -g somegroup/ , @crontab ) , 'Crontab contains an entry for a wipe'          );
+ok( grep( /0  4  \*  \*  1     root    t\/BaNG --wipe -g somegroup/  , @crontab ) , 'Crontab contains an entry for a wipe'          );
 
 done_testing();

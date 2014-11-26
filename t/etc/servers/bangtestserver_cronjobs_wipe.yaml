@@ -2,6 +2,6 @@
 BULK_somegroup:
     MIN:     0
     HOUR:    4
-    DOM:     '*'
-    MONTH:   '*'
-    DOW:     '*'
+    #DOM:     '*'
+    #MONTH:   '*'
+    DOW:     '1'

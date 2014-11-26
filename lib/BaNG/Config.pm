@@ -254,6 +254,12 @@ sub get_cronjob_config {
                     ident => "$host-$group",
                     cron  => $cronjobslist->{$cronjob},
                 };
+
+                # We mostly specify the time of the cronjob and therefore the other values default to '*'
+                foreach my $key (qw( DOM MONTH DOW )) {
+                    my $cron = $unsortedcronjobs{$server}{$jobtype}{$cronjob}->{cron};
+                    $cron->{$key} = $cron->{$key} || '*';
+                }
             }
 
             my $id = 1;
