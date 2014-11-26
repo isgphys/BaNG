@@ -13,7 +13,7 @@ path_logs:              var/log
 global_log_date:        "%Y-%m-%d"
 show_logs_number:       5
 #
-path_btrfs:
+path_btrfs:             '/usr/bin/env btrfs'
 path_date:              /bin/date
 path_rsh:               /usr/bin/rsh
 path_rsync:             /usr/bin/rsync
