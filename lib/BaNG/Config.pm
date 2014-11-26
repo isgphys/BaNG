@@ -232,7 +232,7 @@ sub get_cronjob_config {
     my %unsortedcronjobs;
     my %sortedcronjobs;
 
-    my @cronconfigs = _find_configs( "*_cronjobs_*.yaml", "$serverconfig{path_serverconfig}" );
+    my @cronconfigs = _find_configs( '*_cronjobs_*.yaml', $serverconfig{path_serverconfig} );
 
     foreach my $cronconfigfile (@cronconfigs) {
         my ( $server, $jobtype ) = _split_cron_configname($cronconfigfile);
@@ -259,8 +259,8 @@ sub get_cronjob_config {
                 <=>
                 sprintf('%02d%02d', $unsortedcronjobs{$server}{$jobtype}{$b}{cron}->{HOUR}, $unsortedcronjobs{$server}{$jobtype}{$b}{cron}->{MIN})
                 } keys %{ $unsortedcronjobs{$server}{$jobtype} } ) {
-                my $PastMidnight = ( $unsortedcronjobs{$server}{$jobtype}{$cronjob}{cron}->{HOUR} >= 18 ) ? 0 : 1;
 
+                my $PastMidnight = ( $unsortedcronjobs{$server}{$jobtype}{$cronjob}{cron}->{HOUR} >= 18 ) ? 0 : 1;
                 $sortedcronjobs{$server}{$jobtype}{sprintf( "$jobtype$PastMidnight%05d", $id )} = $unsortedcronjobs{$server}{$jobtype}{$cronjob};
                 $id++;
             }
@@ -275,7 +275,7 @@ sub generated_crontab {
     my $today    = `$serverconfig{path_date} +'%Y-%m-%d %H:%M:%S'`;
 
     my $crontab = "# Automatically generated; do not edit locally\n";
-    $crontab .= "# created on $today";
+    $crontab   .= "# created on $today";
 
     foreach my $jobtype ( sort keys %{$cronjobs->{$servername}} ) {
         $crontab .= "#--- $jobtype ---\n";
