@@ -21,6 +21,10 @@ Edit `config.yml` and update the user credentials.
 
 Rename `etc/servers/bangserver_defaults.yaml` to match your server name.
 
+```sh
+mv etc/servers/bangserver_defaults.yaml etc/servers/`hostname -s`_defaults.yaml
+```
+
 Fields you typically want to change in the config files:
 
   * `defaults_servers.yaml`: `report_to`
