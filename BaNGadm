@@ -120,6 +120,7 @@ sub parse_command_options {
         'g|group=s'  => \$group_arg,
         'h|host=s'   => \$host_arg,
         'crontab'    => \$crontabonly,
+        'p|prefix=s' => \$prefix_arg,
         'showgroups' => \$showgroups,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $crontabonly && $showgroups );
