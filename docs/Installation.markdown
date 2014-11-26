@@ -46,12 +46,6 @@ Allow rsh connections from localhost for testing purposes
 echo '127.0.0.1   root' > ~root/.rhosts
 ```
 
-The tests require a symlink to your server config:
-
-```sh
-ln -s /opt/BaNG/etc/servers/yourserver_defaults.yaml /opt/BaNG/t/etc/servers/
-```
-
 Use `prove` to run the small test suite.
 
 Try a first backup of a client.
