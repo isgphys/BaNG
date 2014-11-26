@@ -40,6 +40,9 @@ chomp $servername;
 sub get_serverconfig {
     my ($prefix_arg) = @_;
 
+    # Run test suite with specific server name
+    $servername = 'bangtestserver' if $prefix_arg eq 't';
+
     undef %servers;
     undef %serverconfig;
     $prefix = $prefix_arg if $prefix_arg;
