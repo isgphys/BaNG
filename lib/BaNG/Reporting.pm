@@ -97,6 +97,8 @@ sub bangstat_recentbackups {
             FilesDel     => &BaNG::Common::num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
             SizeTrans    => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
+            TotFileSize  => &BaNG::Common::num2human($dbrow->{'TotFileSize'},1024),
+            NumOfFiles   => &BaNG::Common::num2human($dbrow->{'NumOfFiles'}),
         });
         push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
             TaskID      => $dbrow->{'TaskID'},
@@ -223,6 +225,8 @@ sub bangstat_recentbackups_all {
             FilesDel     => &BaNG::Common::num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
             SizeTrans    => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
+            TotFileSize  => &BaNG::Common::num2human($dbrow->{'TotFileSize'},1024),
+            NumOfFiles   => &BaNG::Common::num2human($dbrow->{'NumOfFiles'}),
         });
     }
     $sth->finish();
@@ -270,6 +274,8 @@ sub bangstat_recentbackups_last {
             FilesDel     => &BaNG::Common::num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
             SizeTrans    => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
+            TotFileSize  => &BaNG::Common::num2human($dbrow->{'TotFileSize'},1024),
+            NumOfFiles   => &BaNG::Common::num2human($dbrow->{'NumOfFiles'}),
         });
     }
     $sth->finish();

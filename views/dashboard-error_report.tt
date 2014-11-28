@@ -15,6 +15,8 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
             <th>FilesDel</th>
             <th>FilesTrans</th>
             <th>SizeTrans</th>
+            <th>TotalFiles</th>
+            <th>TotalSize</th>
         </tr>
     </thead>
     <tbody>
@@ -44,6 +46,8 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
                 <td class="center"><% bkp.FilesDel %></td>
                 <td class="center"><% bkp.FilesTrans %></td>
                 <td class="center"><% bkp.SizeTrans %></td>
+                <td class="center"><% bkp.NumOfFiles %></td>
+                <td class="center"><% bkp.TotFileSize %></td>
             </tr>
         <%- END %>
     </tbody>
