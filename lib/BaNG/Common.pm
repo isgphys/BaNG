@@ -138,9 +138,9 @@ sub num2human {
     foreach my $unit ( '', qw(k M G T P) ) {
         if ( $num < $base ) {
             if ( $num < 10 && $num > 0 ) {
-                return sprintf( '%.1f %s', $num, $unit );    # print small values with 1 decimal
+                return sprintf( '%.2f %s', $num, $unit );    # print small values with 1 decimal
             } else {
-                return sprintf( '%.0f %s', $num, $unit );    # print larger values without decimals
+                return sprintf( '%.1f %s', $num, $unit );    # print larger values without decimals
             }
         }
         $num = $num / $base;
