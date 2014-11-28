@@ -12,7 +12,7 @@
                 <th rowspan="2" class="center" style="vertical-align: bottom;">Mode</th>
                 <th colspan="3" class="center">Backup Count</th>
               <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
-                <th colspan="2" class="center">Total</th>
+                <th colspan="2" class="center">Total ( last Bkp )</th>
                 <th rowspan="2" class="center">Log</th>
                 <th rowspan="2" class="center">Delete</th>
               <% END %>
