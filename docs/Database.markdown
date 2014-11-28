@@ -74,7 +74,9 @@ Initial Setup
     SELECT
         TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, BkpFromHost,
         IF(isThread, SUBSTRING_INDEX(BkpFromPath, '/', (LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath, '/', '')))), BkpFromPath) as BkpFromPath,
-        BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup, SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+        BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup,
+        SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+        SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
         SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
         GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, MIN(JobStatus) as JobStatus
     FROM statistic
