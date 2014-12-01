@@ -17,6 +17,8 @@ Total Jobs: <% taskjobs.Data.size %>
             <th class="sorter-metric" data-metric-name="$">FilesDel</th>
             <th class="sorter-metric" data-metric-name="$">FilesTrans</th>
             <th class="sorter-metric" data-metric-name="$">SizeTrans</th>
+            <th class="sorter-metric" data-metric-name="$">TotalFiles</th>
+            <th class="sorter-metric" data-metric-name="$">TotalSize</th>
             <th>Log</th>
         </tr>
     </thead>
@@ -47,6 +49,8 @@ Total Jobs: <% taskjobs.Data.size %>
                 <td class="center"><% job.FilesDel %></td>
                 <td class="center"><% job.FilesTrans %></td>
                 <td class="center"><% job.SizeTrans %></td>
+                <td class="center"><% job.NumOfFiles %></td>
+                <td class="center"><% job.TotFileSize %></td>
                 <td class="zoom pointer" data-href='/logs/<% job.BkpHost %>/<% job.BkpGroup %>'></td>
             </tr>
         <%- END %>

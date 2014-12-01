@@ -321,6 +321,8 @@ sub bangstat_task_jobs {
             FilesDel     => &BaNG::Common::num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => &BaNG::Common::num2human($dbrow->{'NumOfFilesTrans'}),
             SizeTrans    => &BaNG::Common::num2human($dbrow->{'TotFileSizeTrans'},1024),
+            TotFileSize  => &BaNG::Common::num2human($dbrow->{'TotFileSize'},1024),
+            NumOfFiles   => &BaNG::Common::num2human($dbrow->{'NumOfFiles'}),
         });
     }
     $sth->finish();
