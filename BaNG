@@ -27,7 +27,6 @@ my $version = '3.4';
 my $force;
 my $wipe;
 my $initial;
-my $cleanup;
 my $xymononly;
 my $noreport;
 my $missingonly;
@@ -58,8 +57,6 @@ get_host_config( $host_arg, $group_arg );
 foreach my $config ( sort keys %hosts ) {
     if ($wipe) {
         wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group}, $force );
-    } elsif ($cleanup) {
-        print "Let's go!\n";
     } elsif ($xymononly) {
         my $host          = $hosts{$config}->{hostname};
         my $group         = $hosts{$config}->{group};
@@ -781,7 +778,6 @@ sub parse_command_options {
         't|threads=i'      => \$nthreads_arg,
         'w|wipe'           => \$wipe,
         'initial'          => \$initial,
-        'cleanup'          => \$cleanup,
         'finallysnapshots' => \$finallysnapshots,
         'force'            => \$force,
         'missingonly'      => \$missingonly,
@@ -834,7 +830,6 @@ sub usage {
         -w                 # wipe the backup
         -w --force         # forcing wipe the backup (override auto_wipe_limit)
         --initial          # create nonexisting backup targets
-        --cleanup          # cleanup threaded jobs
         --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
         --xymon            # send only xymon report
