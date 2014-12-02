@@ -20,6 +20,7 @@ my $version = '0.1';
 my $add_arg;
 my $delete_arg;
 my $crontabonly;
+my $setprop;
 my $verbose_arg;
 my $dryrun_arg;
 my $group_arg;
@@ -58,6 +59,41 @@ if ($showgroups) {
         print "$group \n";
     }
 
+    exit 0;
+}
+
+if ($setprop) {
+    get_host_config( $host_arg, $group_arg );
+    my @backup_folders = get_backup_folders( $host_arg, $group_arg );
+
+    if ($setprop eq "list") {
+        print "Snapshot property (rw/ro) of $host_arg - $group_arg\n";
+        foreach my $folder (@backup_folders) {
+            chomp $folder;
+            my $result = `$serverconfig{path_btrfs} property get -ts $folder`;
+            chomp $result;
+            if ( $result =~ /^ro=true$/ ) {
+                $result = "Read-Only";
+            } else {
+                $result = "=> Read-Write !!!";
+            }
+            print "$folder $result\n";
+        }
+    } elsif ($setprop eq "ro") {
+        print "Set snapshots property of $host_arg - $group_arg to Read-Only\n";
+        foreach my $folder (@backup_folders) {
+            chomp $folder;
+            my $result = `/usr/local/bin/btrfs property set -ts $folder ro true`;
+            print "set $folder to Read-Only\n";
+        }
+    } elsif ($setprop eq "rw") {
+        print "Set snapshots property of $host_arg - $group_arg to Read-Write\n";
+        foreach my $folder (@backup_folders) {
+            chomp $folder;
+            my $result = `/usr/local/bin/btrfs property set -ts $folder ro false`;
+            print "set $folder to Read-Write\n";
+        }
+    }
     exit 0;
 }
 
@@ -122,9 +158,10 @@ sub parse_command_options {
         'crontab'    => \$crontabonly,
         'p|prefix=s' => \$prefix_arg,
         'showgroups' => \$showgroups,
+        'setprop=s'  => \$setprop,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $crontabonly && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabonly || $showgroups ) );
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabonly || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -154,16 +191,19 @@ sub usage {
         $message
         Usage Examples:
 
-        $command --add -h <hostname> -g <group>     # create a new host config
-        $command --add -g <group>                   # create a new group config
+        $command --add -h <hostname> -g <group>           # create a new host config
+        $command --add -g <group>                         # create a new group config
 
-        $command --delete -h <hostname> -g <group>  # delete a existing host config
-        $command --delete -g <group>                # delete a existing group config
+        $command --delete -h <hostname> -g <group>        # delete a existing host config
+        $command --delete -g <group>                      # delete a existing group config
 
-        $command --crontab                          # generated and write crontab
-        $command --showgroups                       # show available groups
-        $command --help                             # show this help message
-        $command --version                          # show version number and help
+        $command --setprop list -h <hostname> -g <group>  # show Read-Write/Read-Only status of all snaphots
+        $command --setprop rw|ro -h <hostname> -g <group> # set all snapshots to Read-Write/Read-Only
+
+        $command --crontab                                # generated and write crontab
+        $command --showgroups                             # show available groups
+        $command --help                                   # show this help message
+        $command --version                                # show version number and help
 
         Optional Arguments:
 
