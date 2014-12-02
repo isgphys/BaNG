@@ -55,7 +55,7 @@ sub get_serverconfig {
     my @serverconfigs = _find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
 
     foreach my $serverconfigfile (@serverconfigs) {
-        my ($server) = _split_server_configname($serverconfigfile);
+        my $server = _split_server_configname($serverconfigfile);
         my ( $serverconfig, $confighelper ) = _read_server_configfile($server);
 
         $servers{$server} = {
@@ -236,24 +236,23 @@ sub get_cronjob_config {
     my %unsortedcronjobs;
     my %sortedcronjobs;
 
-    my @cronconfigs = _find_configs( '*_cronjobs_*.yaml', $serverconfig{path_serverconfig} );
+    my @cronconfigs = _find_configs( '*_cronjobs.yaml', $serverconfig{path_serverconfig} );
 
     foreach my $cronconfigfile (@cronconfigs) {
-        my ( $server, $jobtype ) = _split_cron_configname($cronconfigfile);
+        my $server       = _split_cron_configname($cronconfigfile);
+        my $cronjobsfile = "$serverconfig{path_serverconfig}/${server}_cronjobs.yaml";
+        next unless _sanityfilecheck($cronjobsfile);
+        my $cronjobslist = LoadFile($cronjobsfile);
 
         JOBTYPE: foreach my $jobtype (qw( backup wipe )) {
-            my $cronjobsfile = "$serverconfig{path_serverconfig}/${server}_cronjobs_$jobtype.yaml";
-            next JOBTYPE unless _sanityfilecheck($cronjobsfile);
-            my $cronjobslist = LoadFile($cronjobsfile);
-
-            foreach my $cronjob ( keys %{$cronjobslist} ) {
+            foreach my $cronjob ( keys %{$cronjobslist->{$jobtype}} ) {
                 my ( $host, $group ) = split( /_/, $cronjob );
 
                 $unsortedcronjobs{$server}{$jobtype}{$cronjob} = {
                     host  => $host,
                     group => $group,
                     ident => "$host-$group",
-                    cron  => $cronjobslist->{$cronjob},
+                    cron  => $cronjobslist->{$jobtype}->{$cronjob},
                 };
 
                 # We mostly specify the time of the cronjob and therefore the other values default to '*'
@@ -420,15 +419,15 @@ sub _split_server_configname {
 
     my ($server) = $configfile =~ /^([\w\d-]+)_defaults\.yaml/;
 
-    return ($server);
+    return $server;
 }
 
 sub _split_cron_configname {
     my ($cronconfigfile) = @_;
 
-    my ( $server, $jobtype ) = $cronconfigfile =~ /^([\w\d-]+)_cronjobs_([\w\d-]+)\.yaml/;
+    my ($server) = $cronconfigfile =~ /^([\w\d-]+)_cronjobs\.yaml/;
 
-    return ( $server, $jobtype );
+    return $server;
 }
 
 1;

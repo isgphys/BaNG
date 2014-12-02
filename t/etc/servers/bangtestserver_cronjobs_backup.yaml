@@ -1,8 +1,0 @@
----
-BULK_somegroup:
-    MIN:     0
-    HOUR:    2
-    #DOM:     '*'
-    #MONTH:   '*'
-    #DOW:     '*'
-    THREADS: 1

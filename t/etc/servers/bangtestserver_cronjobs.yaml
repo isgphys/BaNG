@@ -1,0 +1,16 @@
+---
+backup:
+    BULK_somegroup:
+        MIN:     0
+        HOUR:    2
+        #DOM:     '*'
+        #MONTH:   '*'
+        #DOW:     '*'
+        THREADS: 1
+wipe:
+    BULK_somegroup:
+        MIN:     0
+        HOUR:    4
+        #DOM:     '*'
+        #MONTH:   '*'
+        DOW:     '1'
