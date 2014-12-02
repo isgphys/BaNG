@@ -1,4 +1,7 @@
 ---
+header:
+    MAILTO:     'admin@example.com'
+    PATH:       '/usr/local/bin:/usr/bin:/bin'
 backup:
     BULK_somegroup:
         MIN:     0

@@ -244,6 +244,8 @@ sub get_cronjob_config {
         next unless _sanityfilecheck($cronjobsfile);
         my $cronjobslist = LoadFile($cronjobsfile);
 
+        $sortedcronjobs{$server}{header} = $cronjobslist->{header};
+
         JOBTYPE: foreach my $jobtype (qw( backup wipe )) {
             foreach my $cronjob ( keys %{$cronjobslist->{$jobtype}} ) {
                 my ( $host, $group ) = split( /_/, $cronjob );
@@ -286,7 +288,11 @@ sub generated_crontab {
     my $crontab = "# Automatically generated; do not edit locally\n";
     $crontab   .= "# created on $today";
 
-    foreach my $jobtype ( sort keys %{$cronjobs->{$servername}} ) {
+    foreach my $headerkey (sort keys %{ $cronjobs->{$servername}->{header} } ) {
+        $crontab .= "$headerkey=$cronjobs->{$servername}->{header}->{$headerkey}\n";
+    }
+
+    foreach my $jobtype (qw( backup wipe )) {
         $crontab .= "#--- $jobtype ---\n";
         foreach my $cronjob ( sort keys %{$cronjobs->{$servername}->{$jobtype}} ) {
             my %cron;
