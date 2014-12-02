@@ -1,0 +1,24 @@
+---
+header:
+    MAILTO:     'admin@example.com'
+    PATH:       '/usr/local/bin:/usr/bin:/bin'
+backup:
+    BULK_somegroup:
+        MIN:     0
+        HOUR:    2
+        #DOM:     '*'
+        #MONTH:   '*'
+        #DOW:     '*'
+        THREADS: 1
+backup_missingonly:
+    BULK_somegroup:
+        MIN:     0
+        HOUR:    12
+        THREADS: 1
+wipe:
+    BULK_somegroup:
+        MIN:     0
+        HOUR:    4
+        #DOM:     '*'
+        #MONTH:   '*'
+        DOW:     '1'
