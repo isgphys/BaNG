@@ -31,7 +31,6 @@ sub targetpath {
 
 sub get_backup_folders {
     my ( $host, $group ) = @_;
-
     my $bkpdir = targetpath( $host, $group );
     my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
     my @backup_folders;
