@@ -26,7 +26,7 @@
             </thead>
 
             <tbody>
-                <% FOREACH jobtype = [ 'backup', 'wipe' ] %>
+                <% FOREACH jobtype = [ 'backup', 'backup_missingonly', 'wipe' ] %>
                     <% FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
                         <% IF cronjobs.$server.$jobtype.$cronjob.cron.HOUR != '' %>
                             <tr class="<% jobtype %>">

@@ -10,6 +10,11 @@ backup:
         #MONTH:   '*'
         #DOW:     '*'
         THREADS: 1
+backup_missingonly:
+    BULK_somegroup:
+        MIN:     0
+        HOUR:    12
+        THREADS: 1
 wipe:
     BULK_somegroup:
         MIN:     0

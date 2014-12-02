@@ -94,7 +94,7 @@
 <div class="float-left">
     <h3>CronJobs (Single-Run)</h3>
     <table class="default-table border" >
-        <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
+        <%- FOREACH jobtype = [ 'backup', 'backup_missingonly', 'wipe' ] %>
             <tr><td>
                 <table class="default-table border">
                     <thead>
@@ -134,7 +134,7 @@
 <div class="float-left">
     <h3>CronJobs (Bulk-Run)</h3>
     <table class="default-table border">
-      <%- FOREACH jobtype = [ 'backup', 'wipe' ] %>
+      <%- FOREACH jobtype = [ 'backup', 'backup_missingonly', 'wipe' ] %>
         <%- FOREACH cronjob IN cronjobs.$server.$jobtype.keys.sort %>
           <%- IF cronjobs.$server.$jobtype.$cronjob.host == "BULK" || ( cronjobs.$server.$jobtype.$cronjob.group == "BULK" && cronjobs.$server.$jobtype.$cronjob.host == host ) %>
             <%- IF cronjobs.$server.$jobtype.$cronjob.host == "BULK" %>
@@ -172,7 +172,7 @@
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOW %></td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.DOM %></td>
                               <%- IF jobtype == "backup" %> <% bulkflag = 'BKP_BULK_ALLOW' %><% ELSE %> <% bulkflag = 'WIPE_BULK_ALLOW' %><%- END %>
-                              <td 
+                              <td
                                 class = <%- IF hosts.$bulkident.hostconfig.$bulkflag %> "hook" <%- ELSE %> "notallow" <%- END %>>
                               </td>
                               <td class="center"><% cronjobs.$server.$jobtype.$cronjob.cron.THREADS %></td>

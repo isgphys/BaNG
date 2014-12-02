@@ -246,7 +246,7 @@ sub get_cronjob_config {
 
         $sortedcronjobs{$server}{header} = $cronjobslist->{header};
 
-        JOBTYPE: foreach my $jobtype (qw( backup wipe )) {
+        JOBTYPE: foreach my $jobtype (qw( backup backup_missingonly wipe )) {
             foreach my $cronjob ( keys %{$cronjobslist->{$jobtype}} ) {
                 my ( $host, $group ) = split( /_/, $cronjob );
 
@@ -292,7 +292,7 @@ sub generated_crontab {
         $crontab .= "$headerkey=$cronjobs->{$servername}->{header}->{$headerkey}\n";
     }
 
-    foreach my $jobtype (qw( backup wipe )) {
+    foreach my $jobtype (qw( backup backup_missingonly wipe )) {
         $crontab .= "#--- $jobtype ---\n";
         foreach my $cronjob ( sort keys %{$cronjobs->{$servername}->{$jobtype}} ) {
             my %cron;
@@ -301,8 +301,6 @@ sub generated_crontab {
                 $crontab .= sprintf( '%2s ', $cron{$key} );
             }
             $crontab .= "    root    $prefix/BaNG";
-
-            $crontab .= " --wipe" if ( $jobtype eq 'wipe' );
 
             my $host = "$cronjobs->{$servername}->{$jobtype}->{$cronjob}->{host}";
             $crontab .= " -h $host" unless $host eq 'BULK';
@@ -315,6 +313,9 @@ sub generated_crontab {
 
             my $finallysnapshots = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{FINALLYSNAPSHOTS};
             $crontab .= " --finallysnapshots" if $finallysnapshots;
+
+            $crontab .= " --wipe"        if ( $jobtype eq 'wipe' );
+            $crontab .= " --missingonly" if ( $jobtype eq 'backup_missingonly' );
 
             $crontab .= "\n";
         }
