@@ -29,7 +29,6 @@ We export the backup partitions via NFS to the clients for easy restoring of fil
 
 Backup and wipe jobs have to be run on a regular basis, which is typically done using cron jobs. BaNG allows to configure the cronjobs in dedicated config files (see `etc.example/servers/bangserver_cronjobs.yaml`) and can create the corresponding file in `/etc/cron.d/`.
 
-```sh
-BaNGadm --crontab -n    # show crontab for current server
-BaNGadm --crontab       # write cron file for current server to /etc/cron.d/
-```
+
+    BaNGadm --crontab -n    # show crontab for current server
+    BaNGadm --crontab       # write cron file for current server to /etc/cron.d/
