@@ -13,7 +13,7 @@
     <body>
         <% INCLUDE header.tt %>
         <% INCLUDE navbar.tt %>
-        <div id="content"></div>
+        <div id="content" class="documentation"></div>
 
         <script>
             marked.setOptions({

@@ -196,3 +196,7 @@ nav ul.updated {
 nav ul.updated li:hover {
     background: #C1CDE0;
 }
+
+.documentation {
+    font-size: 14px;
+}
