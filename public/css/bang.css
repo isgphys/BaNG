@@ -200,3 +200,7 @@ nav ul.updated li:hover {
 .documentation {
     font-size: 14px;
 }
+
+pre {
+    padding-left: 10px;
+}
