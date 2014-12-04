@@ -6,8 +6,6 @@ use warnings;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
-use Template::Plugin::Markdown;
-use Text::Markdown;
 
 prefix '/docs';
 
@@ -20,13 +18,16 @@ get '/:file' => sub {
     open my $MARKDOWN, '<', $file;
     my $markdown = do { local $/; <$MARKDOWN> };
     close $MARKDOWN;
+    $markdown =~ s/'/\\'/g;
+    $markdown =~ s/\n/\\n/g;
+
     template 'documentation' => {
         section      => 'documentation',
         servername   => $servername,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         content      => $markdown,
-    };
+    },{ layout       => 0 };
 };
 
 1;

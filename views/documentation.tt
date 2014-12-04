@@ -1,2 +1,28 @@
-<% USE Markdown %>
-<% content | markdown %>
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>BaNG</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/ico" href="/favicon">
+        <link rel="stylesheet" href="/css/isg-dancer-common.css">
+        <link rel="stylesheet" href="/css/bang.css">
+        <link rel="stylesheet" href="/css/highlight.min.css">
+        <script src="/javascripts/marked.min.js"></script>
+        <script src="/javascripts/highlight.min.js"></script>
+    </head>
+    <body>
+        <% INCLUDE header.tt %>
+        <% INCLUDE navbar.tt %>
+        <div id="content"></div>
+
+        <script>
+            marked.setOptions({
+              highlight: function (code) {
+                return hljs.highlightAuto(code).value;
+              }
+            });
+            document.getElementById('content').innerHTML =
+            marked('<% content %>');
+        </script>
+    </body>
+</html>
