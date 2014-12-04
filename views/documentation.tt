@@ -17,9 +17,15 @@
 
         <script>
             marked.setOptions({
-              highlight: function (code) {
-                return hljs.highlightAuto(code).value;
-              }
+                highlight: function(code, lang) {
+                    var highlighted;
+                    try {
+                        highlighted = hljs.highlight(lang, code);
+                    } catch(err) {
+                        highlighted = hljs.highlightAuto(code);
+                    }
+                    return highlighted.value;
+                }
             });
             document.getElementById('content').innerHTML =
             marked('<% content %>');
