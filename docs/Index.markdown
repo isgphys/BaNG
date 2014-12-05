@@ -1,5 +1,5 @@
-  BaNG Documentation
-======================
+BaNG Documentation
+==================
 
   * [Readme](Readme) : General overview
   * [Installation](Installation) : initial setup of BaNG

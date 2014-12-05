@@ -1,8 +1,8 @@
-  BaNG Command Line Tools
-===========================
+BaNG Command Line Tools
+=======================
 
- BaNG : backup and wipe
-------------------------
+BaNG : backup and wipe
+----------------------
 
 ```sh
 BaNG --help                           # Display help with some usage examples
@@ -56,8 +56,8 @@ BaNG --xymon                          # Generate and send all xymon reports (wit
 ```
 
 
- BaNGadm : admin tasks
------------------------
+BaNGadm : admin tasks
+---------------------
 
 ```sh
 BaNGadm --add -h <host> -g <group>          # create a new host config
@@ -71,8 +71,8 @@ BaNGadm --crontab                           # generate crontab, use -n to show o
 ```
 
 
- BaNG-Web : web frontend
-----------------------------
+BaNG-Web : web frontend
+-----------------------
 
 ```sh
 service BaNG-Web start|stop|status    # Start/Stop Starman web server for production environment

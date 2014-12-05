@@ -1,8 +1,8 @@
-  BaNG Configuration
-======================
+BaNG Configuration
+==================
 
- Config files
---------------
+Config files
+------------
 
 All configuration files are stored in the `./etc` folder.
 
@@ -16,7 +16,7 @@ All configuration files are stored in the `./etc` folder.
 The default settings apply to all, but can be overriden by server-, group- and host-specific settings.
 
 
- Add a new host
-----------------
+Add a new host
+--------------
 
 To add a new host to an existing group, it's enough to copy and adapt another member's config file in the `hosts/` folder.

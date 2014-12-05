@@ -1,5 +1,5 @@
-  BaNG Wipe Strategy and Long-Time Backups
-============================================
+BaNG Wipe Strategy and Long-Time Backups
+========================================
 
 BaNG supports keeping a given number of daily/weekly/monthly backups. This allows to keep certain backups that are several months old, without having to store all intermediate dates.
 
