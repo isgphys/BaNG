@@ -1,10 +1,11 @@
 BaNG Configuration
 ==================
 
+
 Config files
 ------------
 
-All configuration files are stored in the `./etc` folder.
+All configuration files are stored in the local `etc/` folder.
 
   * `defaults_servers.yaml`              : common default settings for servers
   * `defaults_hosts.yaml`                : common default settings for hosts
@@ -13,7 +14,7 @@ All configuration files are stored in the `./etc` folder.
   * `hosts/<hostname>_<groupname>.yaml`  : host-specific settings
   * `excludes/excludelist_<name>`        : rsync exclude list for given group or host
 
-The default settings apply to all, but can be overriden by server-, group- and host-specific settings.
+The default settings apply to all, but can be overridden by server-, group- and host-specific settings.
 
 
 Add a new host

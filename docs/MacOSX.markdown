@@ -1,7 +1,7 @@
 BaNG on Mac OS X
 ================
 
-BaNG can be installed on a Mac OS X computer allowing to back up OS X clients to a native HFS+ filesystem for full support of extended attributes. Given that the OS X filesystem lacks a snapshotting feature, incremental backups are made with hardlinks using the `--link-dest` option of rsync. Note that BaNG is primarily meant for backups of user data. If you need to be able to restore a full system you should use TimeMachine instead.
+BaNG can be installed on a Mac OS X computer allowing to back up OS X clients to a native HFS+ file system for full support of extended attributes. Given that the OS X file system lacks a snapshotting feature, incremental backups are made with hardlinks using the `--link-dest` option of rsync. Note that BaNG is primarily meant for backups of user data. If you need to be able to restore a full system you should use TimeMachine instead.
 
 
 Rsync command for restore
@@ -13,7 +13,8 @@ Rsync command for restore
 
 Whenever possible restore only specific files or folders. If you restore the full home, all local copies of emails and other caches will have to be regenerated (as they are typically excluded from the backup).
 
-Requirements
+
+Installation
 ------------
 
 ### Client-side

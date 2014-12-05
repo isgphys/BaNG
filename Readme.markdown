@@ -1,11 +1,11 @@
-  BaNG - Backup Next Generation
-=================================
+BaNG - Backup Next Generation
+=============================
 
 Backup tool developed by the [IT Services Group](http://isg.phys.ethz.ch) of the Physics Department at ETH Zurich.
 
 
- Main Features
----------------
+Main Features
+-------------
 
   * Perl wrapper for established rsync tool
     * compatible with Linux and OS X
@@ -14,7 +14,7 @@ Backup tool developed by the [IT Services Group](http://isg.phys.ethz.ch) of the
     * generate cron entry for scheduled backups and wipes
   * Reporting
     * Report detailed statistics to MySQL backend
-    * Report via socket to Hobbit/Xymon
+    * Report via socket to Xymon monitoring server
     * Report per email
   * Perl Dancer web frontend
     * Dashboard with most important information
@@ -25,13 +25,13 @@ Backup tool developed by the [IT Services Group](http://isg.phys.ethz.ch) of the
     * Documentation rendering markdown files
 
 
- Authors
----------
+Authors
+-------
 
 Patrick Schmid (schmid@phys.ethz.ch) & Claude Becker (becker@phys.ethz.ch)
 
 
- License
----------
+License
+-------
 
 GNU General Public License version 3 or later.

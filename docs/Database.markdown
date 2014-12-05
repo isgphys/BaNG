@@ -34,7 +34,6 @@ GRANT
 FLUSH PRIVILEGES;
 ```
 
-
 ### Create table
 
 ```sql
@@ -72,7 +71,6 @@ CREATE TABLE statistic (
   PRIMARY KEY (ID)
 ) ENGINE=InnoDB AUTO_INCREMENT=194120 DEFAULT CHARSET=utf8;
 ```
-
 
 ### Create views
 
@@ -123,15 +121,21 @@ Misc commands
 
 View columns of table `statistics` in database `bangstat`
 
-    use bangstat;
-    describe statistic;
+```sql
+use bangstat;
+describe statistic;
+```
 
 Use profiling to view query statistics
 
-    set profiling = 1;
-    show profiles;
-    show profile for query 1;
+```sql
+set profiling = 1;
+show profiles;
+show profile for query 1;
+```
 
 Change MySQL engine from `MyISAM` to `InnoDB`
 
-    ALTER TABLE mytable ENGINE = InnoDB;
+```sql
+ALTER TABLE statistic ENGINE = InnoDB;
+```

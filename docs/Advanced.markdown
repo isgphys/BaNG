@@ -18,7 +18,7 @@ BaNG can be run on multiple backup servers for load distribution or to support b
 Note that every backup server has its own config files and cron scheduling. This independence prevents the BaNG master to become a single point of failure.
 
 
-NFS Automounts
+NFS automounts
 --------------
 
 We export the backup partitions via NFS to the clients for easy restoring of files. The `get_autmount_paths` subroutine polls NIS for the list of automount paths, provided `path_ypcat` is defined. The paths are then displayed in the `/restore` route.
@@ -28,7 +28,6 @@ Cronjobs
 --------
 
 Backup and wipe jobs have to be run on a regular basis, which is typically done using cron jobs. BaNG allows to configure the cronjobs in dedicated config files (see `etc.example/servers/bangserver_cronjobs.yaml`) and can create the corresponding file in `/etc/cron.d/`.
-
 
 ```sh
 BaNGadm --crontab -n    # show crontab for current server
