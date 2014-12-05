@@ -1,10 +1,4 @@
 #!/usr/bin/env perl
-#
-# Copyright 2013 Patrick Schmid <schmid@phys.ethz.ch>, distributed under
-# the terms of the GNU General Public License version 2 or later.
-#
-# Authors: Patrick Schmid <schmid@phys.ethz.ch> & Claude Becker <becker@phys.ethz.ch>
-#
 use strict;
 use warnings;
 use forks;
