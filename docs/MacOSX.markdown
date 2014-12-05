@@ -25,7 +25,7 @@ sudo port install rsync
 
 #### Enable rsh login
 
-  * edit `/var/root/.rhosts` and add `mac-bang.example.com      root`
+  * edit `/var/root/.rhosts` and allow root logins from your BaNG server by adding `mac-bang.example.com      root`
   * edit `/System/Library/LaunchDaemons/shell.plist` and set disable to false
   * `launchctl load /System/Library/LaunchDaemons/shell.plist`
   * `launchctl start com.apple.rshd`
@@ -51,8 +51,8 @@ The path for the `rsync` and `date` commands has to point to the MacPorts instal
 `etc/servers/macserver_defaults.yaml`
 
 ```yaml
-path_date:          /opt/local/bin/gdate
-path_rsync:         /opt/local/bin/rsync
+path_date:              "/opt/local/bin/gdate"
+path_rsync:             "/opt/local/bin/rsync"
 ```
 
 Use hardlinks for incremental backups and also transfer extended attributes, but exclude special device files.
