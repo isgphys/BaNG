@@ -1,0 +1,9 @@
+<li><a href="#">Custom</a>
+    <ul>
+        <li class="gosubmenu"><a href="#">Links</a>
+            <ul>
+                <li><a href="https://example.come" target="_blank">Example Page</a></li>
+            </ul>
+        </li>
+    </ul>
+</li>

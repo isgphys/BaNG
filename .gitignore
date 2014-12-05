@@ -5,3 +5,4 @@ TODO
 debug.pl
 /lib/Dancer*
 tuning
+views/navbar-custom-items.tt
