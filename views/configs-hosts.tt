@@ -8,9 +8,7 @@
             <th>Server</th>
             <th>Config-Files</th>
             <th>Status</th>
-            <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
-                <th>Delete</th>
-            <% END %>
+            <th>Delete</th>
         </tr>
     </thead>
     <tbody>
@@ -41,11 +39,9 @@
             <td class="center">
               <% hosts.$hostname.status %>
             </td>
-          <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
             <td align="center">
                 <img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>">
             </td>
-          <% END %>
         </tr>
       <% END %>
     </tbody>

@@ -10,9 +10,7 @@
                 <th rowspan="2" class="center" style="vertical-align: bottom;">SubFolder</th>
                 <th rowspan="2" class="center" style="vertical-align: bottom;">Forks</th>
                 <th rowspan="2" class="center" style="vertical-align: bottom;">Mode</th>
-              <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
                 <th rowspan="2" class="center">Delete</th>
-              <% END %>
             </tr>
             <tr>
                 <th class="left">Configfile</th>
@@ -46,11 +44,9 @@
                 </td>
                 <td class="center"><%- groups.$group.groupconfig.BKP_THREADS_DEFAULT %></td>
                 <td class="center"><%- groups.$group.groupconfig.BKP_STORE_MODUS %></td>
-              <% IF session.logged_in_user == 'schmid' || session.logged_in_user == 'beckercl' %>
                 <td align="center">
                     <img class="delete pointer" src="/images/delete.png" data-configtype="group" data-deleteconfigfile="<% groups.$group.configfile %>">
                 </td>
-              <% END %>
             </tr>
             <%- IF groups.$group.hostconfig.COMMENT %>
             <tr>
