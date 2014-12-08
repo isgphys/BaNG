@@ -18,8 +18,9 @@ get '/:file' => sub {
     open my $MARKDOWN, '<', $file;
     my $markdown = do { local $/; <$MARKDOWN> };
     close $MARKDOWN;
-    $markdown =~ s/'/\\'/g;
-    $markdown =~ s/\n/\\n/g;
+    $markdown =~ s/\\/\\\\/g;    # escape backslashes
+    $markdown =~ s/'/\\'/g;      # escape single quotes for JavaScript string
+    $markdown =~ s/\n/\\n/g;     # stringify newlines (will be converted by JS)
 
     template 'documentation' => {
         section      => 'documentation',
