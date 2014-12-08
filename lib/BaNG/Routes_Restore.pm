@@ -14,6 +14,7 @@ get '/' => require_login sub {
     template 'restore' => {
         section    => 'restore',
         servername => $servername,
+        servers      => \%servers,
     };
 };
 
@@ -30,6 +31,7 @@ get '/restore_content' => require_login sub {
     template 'restore-content' => {
         section      => 'restore',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         servername   => $servername,

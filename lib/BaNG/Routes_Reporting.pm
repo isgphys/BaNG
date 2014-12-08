@@ -16,6 +16,7 @@ get '/' => require_role config->{admin_role} => sub {
     template 'reporting-bkpreport' => {
         section           => 'reporting',
         servername        => $servername,
+        servers           => \%servers,
         RecentBackupsLast => bangstat_recentbackups_last(),
         xymon_server      => $serverconfig{xymon_server},
     };
@@ -27,6 +28,7 @@ get '/task/:taskid' => require_role config->{admin_role} => sub {
     template 'reporting-task_jobs' => {
         section      => 'reporting',
         servername   => $servername,
+        servers      => \%servers,
         taskid       => param('taskid'),
         taskjobs     => bangstat_task_jobs( param('taskid') ),
         xymon_server => $serverconfig{xymon_server},

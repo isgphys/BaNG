@@ -16,6 +16,7 @@ get '/' => require_role config->{admin_role} => sub {
     template 'schedule', {
         section      => 'schedule',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         hosts        => \%hosts,

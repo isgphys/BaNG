@@ -16,6 +16,7 @@ get '/defaults' => require_role config->{admin_role} => sub {
     template 'configs-defaults' => {
         section        => 'configs',
         servername     => $servername,
+        servers        => \%servers,
         remotehost     => request->remote_host,
         webDancerEnv   => config->{run_env},
         serverconfig   => \%serverconfig,
@@ -37,6 +38,7 @@ get '/allhosts/:filter?' => require_role config->{admin_role} => sub {
     template 'configs-hosts' => {
         section      => 'configs',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         filtervalue  => param('filter'),
@@ -52,6 +54,7 @@ get '/allgroups' => require_role config->{admin_role} => sub {
     template 'configs-groups' => {
         section      => 'configs',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         groups       => \%groups,
@@ -64,6 +67,7 @@ get '/allservers' => require_role config->{admin_role} => sub {
     template 'configs-servers' => {
         section      => 'configs',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         servers      => \%servers,
@@ -84,6 +88,7 @@ get '/new/:configtype/?:errmsg?' => require_role config->{admin_role} => sub {
     template 'configs-create' => {
         section      => 'configs',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         groups       => \%groups,

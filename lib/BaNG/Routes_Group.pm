@@ -16,6 +16,7 @@ get '/:group' => require_role config->{admin_role} => sub {
     template 'group', {
         section      => 'group',
         servername   => $servername,
+        servers      => \%servers,
         webDancerEnv => config->{run_env},
         group        => param('group'),
         groups       => \%groups,

@@ -15,11 +15,12 @@ get '/global' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'logs-global', {
-        section       => 'logs',
-        servername    => $servername,
-        remotehost    => request->remote_host,
-        webDancerEnv  => config->{run_env},
-        logdata       => read_global_log(),
+        section      => 'logs',
+        servername   => $servername,
+        servers      => \%servers,
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        logdata      => read_global_log(),
     };
 };
 
@@ -29,13 +30,14 @@ get '/:host/:group/?:showlogsnumber?' => require_role config->{admin_role} => su
     my $show_logs_number = param('showlogsnumber') || $serverconfig{show_logs_number};
 
     template 'logs-host', {
-        section       => 'logs',
-        servername    => $servername,
-        remotehost    => request->remote_host,
-        webDancerEnv  => config->{run_env},
-        host          => param('host'),
-        group         => param('group'),
-        logdata       => read_log(param('host'), param('group'), $show_logs_number),
+        section      => 'logs',
+        servername   => $servername,
+        servers      => \%servers,
+        remotehost   => request->remote_host,
+        webDancerEnv => config->{run_env},
+        host         => param('host'),
+        group        => param('group'),
+        logdata      => read_log(param('host'), param('group'), $show_logs_number),
     };
 };
 

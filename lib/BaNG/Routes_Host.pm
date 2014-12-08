@@ -19,6 +19,7 @@ get '/:host' => require_role config->{admin_role} => sub {
     template 'host', {
         section       => 'host',
         servername    => $servername,
+        servers       => \%servers,
         remotehost    => request->remote_host,
         webDancerEnv  => config->{run_env},
         host          => param('host'),

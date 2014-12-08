@@ -27,6 +27,7 @@ get '/' => require_role config->{admin_role} => sub {
     template 'dashboard' => {
         section      => "dashboard",
         servername   => $servername,
+        servers      => \%servers,
         xymon_server => $serverconfig{xymon_server},
     };
 };

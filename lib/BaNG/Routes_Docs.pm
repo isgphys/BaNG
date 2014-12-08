@@ -24,6 +24,7 @@ get '/:file' => sub {
     template 'documentation' => {
         section      => 'documentation',
         servername   => $servername,
+        servers      => \%servers,
         remotehost   => request->remote_host,
         webDancerEnv => config->{run_env},
         content      => $markdown,

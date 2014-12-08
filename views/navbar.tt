@@ -26,9 +26,9 @@
             <ul>
                 <li class="gosubmenu"><a href="/statistics">Overview</a>
                     <ul>
-                        <li><a href="/statistics/<% servername %>"><% servername %></a></li>
-                        <li><a href="/statistics/galleon">galleon</a></li>
-                        <li><a href="/statistics/etscherzapfen">etscherzapfen</a></li>
+                      <% FOREACH server IN servers.keys.sort %>
+                        <li><a href="/statistics/<% server %>"><% server %></a></li>
+                      <% END %>
                     </ul>
                 </li>
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
