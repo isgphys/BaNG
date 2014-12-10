@@ -178,12 +178,6 @@ tr.active {
 .gosubmenu {
     border-right: 2px solid blue;
 }
-.cutter {
-    float: none;
-    border-top: 4px solid red;
-    border-left: 2px solid red;
-    position: relative;
-}
 
 nav ul.updated {
     Float: right;

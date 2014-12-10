@@ -10,8 +10,12 @@
                 <li><a href="/config/allgroups">Group Configs</a></li>
                 <li><a href="/config/allservers">Server Configs</a></li>
                 <li><a href="/config/defaults">Default Configs</a></li>
-                <li class="cutter"><a href="/config/new/host">Add New Host</a></li>
-                <li><a href="/config/new/group">Add New Group</a></li>
+                <li class="gosubmenu"><a href="#">Create new</a>
+                    <ul>
+                        <li><a href="/config/new/host">Host config</a></li>
+                        <li><a href="/config/new/group">Group config</a></li>
+                    </ul>
+                </li>
             </ul>
         </li>
         <% END %>
