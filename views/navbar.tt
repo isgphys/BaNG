@@ -24,7 +24,7 @@
         <% END %>
         <li><a href="#"<% IF section == 'statistics' %>class="activetab"<% END %>>Statistics</a>
             <ul>
-                <li class="gosubmenu"><a href="/statistics">Overview</a>
+                <li class="gosubmenu"><a href="#">Overview</a>
                     <ul>
                       <% FOREACH server IN servers.keys.sort %>
                         <li><a href="/statistics/<% server %>"><% server %></a></li>
@@ -34,7 +34,7 @@
               <li><a href="/statistics/schedule">Schedule of last night</a></li>
               <li><a href="/statistics/schedule-all">Schedule by host</a></li>
               <li><a href="/statistics/diffpreday/phd-san-gw2/dphys-groupdata">DiffPreDay (Groupdata)</a></li>
-                <li class="gosubmenu"><a href="/statistics">Top of</a>
+                <li class="gosubmenu"><a href="#">Top of</a>
                     <ul>
                         <li><a href="/statistics/barchart/toptranssize/all">Transfered File Size</a></li>
                         <li><a href="/statistics/barchart/toptransfiles/all">Transfered Files</a></li>

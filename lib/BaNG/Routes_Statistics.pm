@@ -11,10 +11,6 @@ use BaNG::Statistics;
 
 prefix '/statistics';
 
-get '/' => require_login sub {
-    redirect "/statistics/$servername";
-};
-
 get '/schedule.json' => require_login sub {
     my %schedule = statistics_schedule( 1, 'time' );
     error404('Could not fetch data') unless %schedule;
