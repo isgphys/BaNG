@@ -20,16 +20,11 @@ our @EXPORT = qw(
     statistics_top_trans_details
     statistics_work_duration
     statistics_work_duration_details
-    statistics_groupshare_variations
     statistics_schedule
 );
 
 my @fields = qw( TotFileSizeTrans TotFileSize NumOfFilesDel NumOfFilesTrans NumOfFiles RealRuntime TotRuntime );
 my $lastXdays_default    = 90;  # retrieve info of last X days from database
-my $lastXdays_variations = 30;  # find largest variation of the last X days
-my $lastXdays_diffperday = 5;   # show TotOfFiles difference to previous day from the last X days
-my @variation_intervals  = (2, 5, 10, 30); # largest variations for these intervals of days
-my $topX_variations      = 5;   # return the top X shares with largest variations
 my $BackupStartHour      = 18;  # backups started after X o'clock belong to next day
 
 sub statistics_decode_path {
@@ -434,65 +429,6 @@ sub statistics_top_trans_details {
     $sth->finish();
 
     return \@top_size;
-}
-
-sub statistics_groupshare_variations {
-
-    get_serverconfig();
-    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
-    return '' unless $conn;
-
-    my $sth = $bangstat_dbh->prepare("
-        SELECT BkpFromPath, TotFileSize, NumOfFiles
-        FROM statistic_all
-        WHERE Start > date_sub(now(), interval $lastXdays_variations day)
-        AND BkpFromHost = 'phd-san-gw2'
-        AND BkpFromPath LIKE '\%export/groupdata/\%'
-        ORDER BY Start;
-    ");
-    $sth->execute();
-
-    my %datahash;
-    while ( my $dbrow = $sth->fetchrow_hashref() ) {
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s%:/export/groupdata/%%g;
-
-        push( @{$datahash{$BkpFromPath}}, {
-            TotFileSize => $dbrow->{'TotFileSize'},
-            NumOfFiles  => $dbrow->{'NumOfFiles'},
-        });
-    }
-    $sth->finish();
-
-    my %largest_variations;
-    foreach my $N (@variation_intervals) {
-        foreach my $field (qw(TotFileSize NumOfFiles)) {
-
-            # compute maximal variation for each share
-            my %delta;
-            foreach my $bkppath ( keys %datahash ) {
-                my @lastXdays = map { $_->{$field} } @{$datahash{$bkppath}};
-                my @lastNdays = splice( @lastXdays, 0, $N );
-                my $max = sprintf( '%.2f', max(@lastNdays) );
-                my $min = sprintf( '%.2f', min(@lastNdays) );
-                $delta{$N}{$bkppath} = $max - $min;
-            }
-
-            # extract groupshares with largest variations (in absolute values)
-            my $count = 1;
-            my $base  = $field =~ /Size/ ? 1024. : 1000.;
-            foreach my $bkppath ( reverse sort {abs($delta{$N}{$a})<=>abs($delta{$N}{$b})} keys %{ $delta{$N} } ) {
-                push( @{$largest_variations{$N}{$field}}, {
-                    share => $bkppath,
-                    delta => num2human($delta{$N}{$bkppath}, $base),
-                });
-                last if $count >= $topX_variations;
-                $count++;
-            }
-        }
-    }
-
-    return \%largest_variations;
 }
 
 sub statistics_schedule {

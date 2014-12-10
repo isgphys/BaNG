@@ -42,7 +42,6 @@
                         <li><a href="/statistics/barchart/toptranssize/all">Transfered File Size</a></li>
                         <li><a href="/statistics/barchart/toptransfiles/all">Transfered Files</a></li>
                         <li><a href="/statistics/barchart/worktime/all">Task Duration</a></li>
-                        <li><a href="/statistics/variations">Groupdata Variations</a></li>
                     </ul>
                 </li>
             </ul>

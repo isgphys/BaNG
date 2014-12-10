@@ -53,17 +53,6 @@ get '/schedule-all' => require_login sub {
     },{ layout       => 0 };
 };
 
-get '/variations' => require_login sub {
-    template 'statistics-variations', {
-        section            => 'statistics',
-        servername         => $servername,
-        servers            => \%servers,
-        remotehost         => request->remote_host,
-        webDancerEnv       => config->{run_env},
-        largest_variations => statistics_groupshare_variations(),
-    };
-};
-
 get '/barchart/:name/:taskid.json' => require_login sub {
     my $chartname = param('name');
     my $json;
