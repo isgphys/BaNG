@@ -64,22 +64,6 @@ get '/variations' => require_login sub {
     };
 };
 
-get '/diffpreday/:host/:group' => require_login sub {
-    my $host    = param('host');
-    my $group   = param('group');
-    my $predays = '14';
-
-    template 'statistics-diffpreday', {
-        section      => 'statistics',
-        servername   => $servername,
-        servers      => \%servers,
-        remotehost   => request->remote_host,
-        webDancerEnv => config->{run_env},
-        predays      => $predays,
-        diffPreDay   => statistics_diffpreday( $host, $group, $predays ),
-    };
-};
-
 get '/barchart/:name/:taskid.json' => require_login sub {
     my $chartname = param('name');
     my $json;
