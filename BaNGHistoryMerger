@@ -247,7 +247,7 @@ sub usage {
         $message
         Usage Examples:
 
-        $command -h <hostname> -g <group> --old-prefix <BKP_PREFIX>
+        $command -h <host> -g <group> --old-prefix <BKP_PREFIX>
 
         Optional Arguments:
 

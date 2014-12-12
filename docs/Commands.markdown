@@ -8,54 +8,54 @@ BaNG: backup and wipe
 ### General
 
 ```sh
-BaNG --help                                 # display help with some usage examples
+BaNG --help                                   # display help with some usage examples
 ```
 
 Optional arguments:
 
 ```sh
--v | -vv | -vvv                             # verbose mode to include debugging messages of level 1-3
--n                                          # dry-run mode to simulate a backup (implies verbose)
--t <integer>                                # number of threads to use (default: 1)
--p <path>                                   # override path to folder containing etc/
+-v | -vv | -vvv                               # verbose mode to include debugging messages of level 1-3
+-n                                            # dry-run mode to simulate a backup (implies verbose)
+-t <integer>                                  # number of threads to use (default: 1)
+-p <path>                                     # override path to folder containing etc/
 ```
 
 ### Start backups
 
 ```sh
-BaNG -g <group>                             # start backup of all hosts of given group (provided BulkAllow is set)
-BaNG -h <host>                              # start backup of all groups of given host (provided BulkAllow is set)
-BaNG -h <host> -g <group>                   # start backup of given group and host
+BaNG -g <group>                               # start backup of all hosts of given group (provided BulkAllow is set)
+BaNG -h <host>                                # start backup of all groups of given host (provided BulkAllow is set)
+BaNG -h <host> -g <group>                     # start backup of given group and host
 ```
 
 Optional arguments:
 
 ```sh
---initial                                   # needed for first backups to initially create the folder/subvolume
---finallysnapshots                          # make snapshots only after all the backups of this job have finished
---missingonly                               # backup only hosts without recent backup (e.g. machines that were offline)
---noreport                                  # do not send any reports
+--initial                                     # needed for first backups to initially create the folder/subvolume
+--finallysnapshots                            # make snapshots only after all the backups of this job have finished
+--missingonly                                 # backup only hosts without recent backup (e.g. machines that were offline)
+--noreport                                    # do not send any reports
 ```
 
 ### Wipe old backups
 
 ```sh
-BaNG -g <group> --wipe                      # start wipe of all hosts of given group (provided BulkAllow is set)
-BaNG -h <host> --wipe                       # start wipe of all groups of given host (provided BulkAllow is set)
-BaNG -h <host> -g <group> --wipe            # start wipe of given group and host
+BaNG -g <group> --wipe                        # start wipe of all hosts of given group (provided BulkAllow is set)
+BaNG -h <host> --wipe                         # start wipe of all groups of given host (provided BulkAllow is set)
+BaNG -h <host> -g <group> --wipe              # start wipe of given group and host
 ```
 
 Optional argument:
 
 ```sh
---force                                     # force wipe of too many backups (override auto_wipe_limit)
+--force                                       # force wipe of too many backups (override auto_wipe_limit)
 ```
 
 ### Generate Xymon reports
 
 ```sh
-BaNG -h <host> -g <group> --xymon           # generate and send Xymon report for given host (without making backups)
-BaNG --xymon                                # generate and send all Xymon reports (without making backups)
+BaNG -h <host> -g <group> --xymon             # generate and send Xymon report for given host (without making backups)
+BaNG --xymon                                  # generate and send all Xymon reports (without making backups)
 ```
 
 
@@ -63,14 +63,14 @@ BaNGadm: admin tasks
 --------------------
 
 ```sh
-BaNGadm --add -h <host> -g <group>          # create a new host config
-BaNGadm --add -g <group>                    # create a new group config
+BaNGadm --add -h <host> -g <group>            # create a new host config
+BaNGadm --add -g <group>                      # create a new group config
 
-BaNGadm --delete -h <hostname> -g <group>   # delete an existing host config
-BaNGadm --delete -g <group>                 # delete an existing group config
+BaNGadm --delete -h <host> -g <group>         # delete an existing host config
+BaNGadm --delete -g <group>                   # delete an existing group config
 
-BaNGadm --showgroups                        # show all available groups
-BaNGadm --crontab                           # generate cron entry, use -n to only show the contents
+BaNGadm --showgroups                          # show all available groups
+BaNGadm --crontab                             # generate cron entry, use -n to only show the contents
 ```
 
 
@@ -78,6 +78,6 @@ BaNG-Web: web front-end
 -----------------------
 
 ```sh
-service BaNG-Web start|stop|status          # start/stop starman web server for production environment
-BaNG-Web.pl                                 # start dancer web front-end in development mode on port 3000
+service BaNG-Web start|stop|status            # start/stop starman web server for production environment
+BaNG-Web.pl                                   # start dancer web front-end in development mode on port 3000
 ```

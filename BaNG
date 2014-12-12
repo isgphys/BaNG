@@ -811,11 +811,11 @@ sub usage {
         $message
         Usage Examples:
 
-        $command -h <hostname> -g <group>   # back up given host and group
-        $command -h <hostname>              # back up all groups of given host
-        $command -g <group>                 # back up all hosts of given group
-        $command --help                     # show this help message
-        $command --version                  # show version number and help
+        $command -h <host> -g <group> # back up given host and group
+        $command -h <host>            # back up all groups of given host
+        $command -g <group>           # back up all hosts of given group
+        $command --help               # show this help message
+        $command --version            # show version number and help
 
         Optional Arguments:
 

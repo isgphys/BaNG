@@ -185,19 +185,19 @@ sub usage {
         $message
         Usage Examples:
 
-        $command --add -h <hostname> -g <group>           # create a new host config
-        $command --add -g <group>                         # create a new group config
+        $command --add -h <host> -g <group>           # create a new host config
+        $command --add -g <group>                     # create a new group config
 
-        $command --delete -h <hostname> -g <group>        # delete a existing host config
-        $command --delete -g <group>                      # delete a existing group config
+        $command --delete -h <host> -g <group>        # delete a existing host config
+        $command --delete -g <group>                  # delete a existing group config
 
-        $command --setprop list -h <hostname> -g <group>  # show Read-Write/Read-Only status of all snaphots
-        $command --setprop rw|ro -h <hostname> -g <group> # set all snapshots to Read-Write/Read-Only
+        $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snaphots
+        $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
-        $command --crontab                                # generated and write crontab
-        $command --showgroups                             # show available groups
-        $command --help                                   # show this help message
-        $command --version                                # show version number and help
+        $command --crontab                            # generated and write crontab
+        $command --showgroups                         # show available groups
+        $command --help                               # show this help message
+        $command --version                            # show version number and help
 
         Optional Arguments:
 
