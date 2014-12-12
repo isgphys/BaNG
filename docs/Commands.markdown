@@ -69,6 +69,9 @@ BaNGadm --add -g <group>                      # create a new group config
 BaNGadm --delete -h <host> -g <group>         # delete an existing host config
 BaNGadm --delete -g <group>                   # delete an existing group config
 
+BaNGadm --setprop list -h <host> -g <group>   # show Read-Write/Read-Only status of all snaphots
+BaNGadm --setprop rw|ro -h <host> -g <group>  # set all snapshots to Read-Write/Read-Only
+
 BaNGadm --showgroups                          # show all available groups
 BaNGadm --crontab                             # generate cron entry, use -n to only show the contents
 ```
