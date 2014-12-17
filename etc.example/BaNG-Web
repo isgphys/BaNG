@@ -15,7 +15,7 @@ DESC='BaNG web service'
 NAME='BaNG-Web'
 DAEMON='/usr/bin/starman'
 PIDFILE=/var/run/$NAME.pid
-DAEMON_ARGS="-D --listen 127.0.0.1:8030 --error-log /opt/BaNG/var/logs/production.log --group www-data --user www-data -E production --pid ${PIDFILE} /opt/BaNG/BaNG-Web.pl"
+DAEMON_ARGS="-D --listen 127.0.0.1:8030 --error-log /opt/BaNG/var/logs/production.log --group www-data --user www-data -E production --pid ${PIDFILE} /opt/BaNG/BaNG-Web"
 SCRIPTNAME=/etc/init.d/BaNG-Web
 
 # Exit if the package is not installed
