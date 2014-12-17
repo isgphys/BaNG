@@ -1,11 +1,11 @@
 BaNG Documentation
 ==================
 
-  * [Readme](Readme)               : General overview
-  * [Installation](Installation)   : Initial setup
-  * [Configuration](Configuration) : BaNG config files
-  * [Commands](Commands)           : BaNG command line tools
-  * [Database](Database)           : BaNG database configuration
-  * [Wipe](Wipe)                   : BaNG wipe strategy and long-time backups
-  * [Mac OS X](MacOSX)             : BaNG on Mac OS X servers and clients
-  * [Advanced](Advanced)           : BaNG features for advanced users
+  * [Readme](Readme.markdown)               : General overview
+  * [Installation](Installation.markdown)   : Initial setup
+  * [Configuration](Configuration.markdown) : BaNG config files
+  * [Commands](Commands.markdown)           : BaNG command line tools
+  * [Database](Database.markdown)           : BaNG database configuration
+  * [Wipe](Wipe.markdown)                   : BaNG wipe strategy and long-time backups
+  * [Mac OS X](MacOSX.markdown)             : BaNG on Mac OS X servers and clients
+  * [Advanced](Advanced.markdown)           : BaNG features for advanced users
