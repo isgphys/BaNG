@@ -2,6 +2,7 @@ BaNG Documentation
 ==================
 
   * [Readme](Readme.markdown)               : General overview
+  * [Screenshots](Screenshots.markdown)     : Screenshots of the web front-end
   * [Installation](Installation.markdown)   : Initial setup
   * [Configuration](Configuration.markdown) : BaNG config files
   * [Commands](Commands.markdown)           : BaNG command line tools
