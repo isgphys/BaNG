@@ -1,10 +1,10 @@
 BaNG Screenshots
 ================
 
-![Dashboard](/img/screenshot-dashboard)
+![Dashboard](/docs/img/screenshot-dashboard)
 
-![Host Info](/img/screenshot-hostinfo)
+![Host Info](/docs/img/screenshot-hostinfo)
 
-![Statistics](/img/screenshot-statistics)
+![Statistics](/docs/img/screenshot-statistics)
 
-![Schedule Overview](/img/screenshot-schedule)
+![Schedule Overview](/docs/img/screenshot-schedule)
