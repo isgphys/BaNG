@@ -10,11 +10,11 @@ use BaNG::Config;
 prefix '/docs';
 
 get '/' => sub {
-    redirect '/docs/Index';
+    redirect '/docs/Index.markdown';
 };
 
 get '/:file' => sub {
-    my $file = "$prefix/docs/" . param('file') . '.markdown';
+    my $file = "$prefix/docs/" . param('file');
     open my $MARKDOWN, '<', $file;
     my $markdown = do { local $/; <$MARKDOWN> };
     close $MARKDOWN;
