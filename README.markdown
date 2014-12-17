@@ -54,6 +54,7 @@ License
 -------
 
 > BaNG - Backup Next Generation
+>
 > Copyright 2014 Patrick Schmid & Claude Becker
 >
 > This program is free software: you can redistribute it and/or modify
