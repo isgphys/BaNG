@@ -1,10 +1,10 @@
 BaNG Screenshots
 ================
 
-![Dashboard](https://github.com/patschbo/BaNG/docs/img/screenshot-dashboard)
+![Dashboard](/img/screenshot-dashboard)
 
-![Host Info](https://github.com/patschbo/BaNG/docs/img/screenshot-hostinfo)
+![Host Info](/img/screenshot-hostinfo)
 
-![Statistics](https://github.com/patschbo/BaNG/docs/img/screenshot-statistics)
+![Statistics](/img/screenshot-statistics)
 
-![Schedule Overview](https://github.com/patschbo/BaNG/docs/img/screenshot-schedule)
+![Schedule Overview](/img/screenshot-schedule)
