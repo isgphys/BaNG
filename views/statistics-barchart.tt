@@ -41,6 +41,17 @@
             </div>
         </div>
         <script>
+            $(window).load(function() {
+
+                updateTime();
+
+                function updateTime() {
+                    var d = new Date();
+                    document.getElementById("LastUpdate").firstChild.nodeValue =
+                    d.toTimeString().substring(0, 8) + " " + d.toLocaleDateString();
+                }
+            });
+
             d3.json('/statistics/barchart/<% chartname %>.json', function(error, json) {
                 if (error) {
                     $('.loading_message').html('Error while loading data.');
