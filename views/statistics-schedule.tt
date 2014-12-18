@@ -11,6 +11,7 @@
         <script src="/javascripts/d3.min.js"></script>
         <script src="/javascripts/swimlanes.js"></script>
         <script src="/javascripts/jquery.min.js"></script>
+        <script src="/javascripts/lastupdate.js"></script>
     </head>
     <body>
         <% INCLUDE header.tt %>
@@ -29,11 +30,6 @@
 
                     updateTime();
 
-                    function updateTime() {
-                        var d = new Date();
-                        document.getElementById("LastUpdate").firstChild.nodeValue =
-                        d.toTimeString().substring(0, 8) + " " + d.toLocaleDateString();
-                    }
                 });
 
               <% IF fullplot %>

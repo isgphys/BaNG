@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/css/bang.css">
         <link rel="stylesheet" href="/css/highlight.min.css">
         <script src="/javascripts/jquery.min.js"></script>
+        <script src="/javascripts/lastupdate.js"></script>
         <script src="/javascripts/marked.min.js"></script>
         <script src="/javascripts/highlight.min.js"></script>
     </head>
@@ -22,11 +23,6 @@
 
         updateTime();
 
-        function updateTime() {
-            var d = new Date();
-            document.getElementById("LastUpdate").firstChild.nodeValue =
-            d.toTimeString().substring(0, 8) + " " + d.toLocaleDateString();
-        }
     });
 
     marked.setOptions({
