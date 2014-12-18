@@ -16,26 +16,27 @@
         <% INCLUDE header.tt %>
         <% INCLUDE navbar.tt %>
         <div id="content" class="documentation"></div>
+
+        <script>
+            $(window).load(function() {
+
+                updateTime();
+
+            });
+
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    var highlighted;
+                    try {
+                        highlighted = hljs.highlight(lang, code);
+                    } catch(err) {
+                        highlighted = hljs.highlightAuto(code);
+                    }
+                    return highlighted.value;
+                }
+            });
+            document.getElementById('content').innerHTML =
+            marked('<% content %>');
+        </script>
     </body>
 </html>
-<script>
-    $(window).load(function() {
-
-        updateTime();
-
-    });
-
-    marked.setOptions({
-        highlight: function(code, lang) {
-            var highlighted;
-            try {
-                highlighted = hljs.highlight(lang, code);
-            } catch(err) {
-                highlighted = hljs.highlightAuto(code);
-            }
-            return highlighted.value;
-        }
-    });
-    document.getElementById('content').innerHTML =
-    marked('<% content %>');
-</script>
