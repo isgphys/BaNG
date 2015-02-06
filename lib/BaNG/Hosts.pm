@@ -191,7 +191,7 @@ sub remove_lockfile {
 
 sub split_lockfile_name {
     my ($lockfile) = @_;
-    my ( $host, $group, $path, $timestamp ) = $lockfile =~ /^([\w\d-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
+    my ( $host, $group, $path, $timestamp ) = $lockfile =~ /^([\w\d\.-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
     my $file = "${host}_${group}_${path}.lock";
     $file =~ s/\'/\\'/g;
 
