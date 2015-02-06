@@ -106,7 +106,7 @@ sub write_config {
     my $path_config = 'path_' . $configtype . 'config';
     $host = ( $configtype eq 'group' ) ? 0 : $host;
 
-    if ( ( $host =~ /^[a-z\-0-9]+$/ ) && ( $group =~ /^[a-z\-0-9]+$/ ) ) {
+    if ( ( $host =~ /^[a-z\-0-9\.]+$/ ) && ( $group =~ /^[a-z\-0-9]+$/ ) ) {
         my $configName;
         if ( $configtype eq 'host' ) {
             $configName = $host . '_' . $group . '.yaml';
