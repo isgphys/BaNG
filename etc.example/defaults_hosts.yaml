@@ -33,6 +33,7 @@ BKP_RSYNC_RELATIV:      1                         # (-R) use relative path names
 BKP_RSYNC_HLINKS:       1                         # (-H) preserve hard links
 BKP_RSYNC_ONE_FS:       1                         # (-x) don't cross filesystem boundaries
 BKP_RSYNC_WHOLEFILE:    0                         # (-W) copy files whole (w/o delta-xfer algorithm)
+BKP_RSYNC_COMPRESS:     0                         # (-z) compress file data during the transfer
 BKP_RSYNC_RSHELL:       "rsh"                     # (-e) specify the remote shell to use
 BKP_RSYNC_RSHELL_PATH:  ""                        # (--rsync-path=PROGRAM) specify the rsync to run on remote machine
 BKP_RSYNC_DELETE:       1                         # (--delete) delete extraneous files from dest dir
@@ -92,6 +93,7 @@ HELP:
   BKP_RSYNC_HLINKS:       (-H) preserve hard links
   BKP_RSYNC_ONE_FS:       (-x) don't cross filesystem boundaries
   BKP_RSYNC_WHOLEFILE:    (-W) copy files whole (w/o delta-xfer algorithm)
+  BKP_RSYNC_COMPRESS:     (-z) compress file data during the transfer
   BKP_RSYNC_RSHELL:       (-e) specify the remote shell to use
   BKP_RSYNC_RSHELL_PATH:  (--rsync-path=PROGRAM) specify the rsync to run on remote machine
   BKP_RSYNC_DELETE:       (--delete) delete extraneous files from dest dir
