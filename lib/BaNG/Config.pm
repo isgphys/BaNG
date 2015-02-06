@@ -408,7 +408,7 @@ sub _find_configs {
 sub _split_configname {
     my ($configfile) = @_;
 
-    my ( $hostname, $groupname ) = $configfile =~ /^([\w\d-]+)_([\w\d-]+)\.yaml/;
+    my ( $hostname, $groupname ) = $configfile =~ /^([\w\d\.-]+)_([\w\d-]+)\.yaml/;
 
     return ( $hostname, $groupname );
 }
@@ -436,5 +436,3 @@ sub _split_cron_configname {
 
     return $server;
 }
-
-1;
