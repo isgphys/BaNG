@@ -335,17 +335,20 @@ sub send_xymon_report {
 
     return 1 unless $serverconfig{xymon_server};
 
-    my $socket = IO::Socket::INET->new(
-        PeerAddr => $serverconfig{xymon_server},
-        PeerPort => '1984',
-        Proto    => 'tcp',
-    );
+    my @xymon_servers = split(' ', $serverconfig{xymon_server});
 
-    if ( defined $socket and $socket != 0 ) {
-        $socket->print($report);
-        $socket->close();
+    foreach my $xymon_server (@xymon_servers) {
+        my $socket = IO::Socket::INET->new(
+            PeerAddr => $xymon_server,
+            PeerPort => '1984',
+            Proto    => 'tcp',
+        );
+
+        if ( defined $socket and $socket != 0 ) {
+            $socket->print($report);
+            $socket->close();
+        }
     }
-
     return 1;
 }
 
