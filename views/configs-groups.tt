@@ -38,7 +38,7 @@
             </td>
             <td>
               ( <% groups.$group.groupmembers.size %> )
-              <% groups.$group.groupmembers.join(', ') %>
+              <% groups.$group.groupmembers.sort.join(', ') %>
             </td>
             <td align="center">
                 <img class="delete pointer" src="/images/delete.png" data-configtype="group" data-deleteconfigfile="<% groups.$group.configfile %>">
