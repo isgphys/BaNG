@@ -236,7 +236,20 @@ sub queue_remote_subfolders {
         };
         push( @queue, $bkpjob );
     }
+
+    # add bkp job for files only
     my $bkpjob = {
+        jobid        => $jobid,
+        host         => $host,
+        group        => $group,
+        path         => ":'${srcfolder}'",
+        lastbkp      => $lastbkp,
+        bkptimestamp => $bkptimestamp,
+        dosnapshot   => 0,
+    };
+    push( @queue, $bkpjob );
+
+    $bkpjob = {
         jobid        => $jobid,
         host         => $host,
         group        => $group,
