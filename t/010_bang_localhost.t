@@ -22,7 +22,7 @@ $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Queueing backup for host localhost group $group|          , "Queueing backup for localhost $group"               );
 like(   $output,    qr|check_client_connection|                                  , "Check online status of localhost $group"            );
-like(   $output,    qr|Number of partitions: 1 \( :/ \)|                         , "Correct partitions for localhost $group"            );
+like(   $output,    qr|Number of source folders: 1 \( :/ \)|                     , "Correct source folders for localhost $group"        );
 like(   $output,    qr|End of queueing backup of host localhost group $group|    , "End of queueing backup of localhost $group"         );
 like(   $output,    qr|Thread \d+ working on|                                    , "Thread XX working on localhost $group"              );
 like(   $output,    qr|Created lockfile|                                         , "Created lockfile for localhost $group"              );
@@ -48,7 +48,7 @@ $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
-like(   $output,    qr|eval subfolders command|                                  , "Eval subfolders for localhost $group"               );
+like(   $output,    qr|eval subfolders|                                          , "Eval subfolders for localhost $group"               );
 
 $group = 'differentserver';
 $output = `$bangcmd -h localhost -g $group --initial`;
