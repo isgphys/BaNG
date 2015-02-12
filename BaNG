@@ -162,35 +162,35 @@ sub queue_backup {
 
     my $bkptimestamp = eval_bkptimestamp( $host, $group );
 
-    # get list of partitions to back up
-    my (@src_part) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
-    logit( $taskid, $host, $group, 'Number of partitions: ' . ( $#src_part + 1 ) . " ( @src_part )" );
+    # get list of source folders to back up
+    my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
+    logit( $taskid, $host, $group, 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
 
-    # optionally queue each subfolder of the partitions
+    # optionally queue each subfolder of the source folders
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
 
         my $dosnapshot = 0;
-        my $numPart    = @src_part;
+        my $numFolder  = @src_folders;
 
-        foreach my $part (@src_part) {
+        foreach my $folder (@src_folders) {
             $jobid = create_timeid( $host, $group );
 
-            $numPart--;
-            if ( $numPart == 0 ) {
+            $numFolder--;
+            if ( $numFolder == 0 ) {
                 $dosnapshot = 1;
             }
 
-            queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $part );
+            queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $folder );
         }
     } else {
 
-        # queue list of partitions as a whole
+        # queue list of source folders as a whole
         $jobid = create_timeid( $host, $group );
         my $bkpjob = {
             jobid        => $jobid,
             host         => $host,
             group        => $group,
-            path         => "@src_part",
+            path         => "@src_folders",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
             dosnapshot   => 1,
@@ -205,31 +205,31 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition ) = @_;
+    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $srcfolder ) = @_;
 
-    $partition =~ s/://;
-    my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1 | sort`;
+    $srcfolder =~ s/://;
+    my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
+    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 | sort`;
 
-    # if @remotedirlist empty (rsh troubles?) then use the $partition
-    if ( $#remotedirlist == -1 ) {
-        push( @remotedirlist, $partition );
-        logit( $taskid, $host, $group, "ERROR: eval subfolders command failed, use now with:\n @remotedirlist" );
+    # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
+    if ( $#remotesubfolders == -1 ) {
+        push( @remotesubfolders, $srcfolder );
+        logit( $taskid, $host, $group, "ERROR: eval subfolders failed, use now with:\n @remotesubfolders" );
     } else {
-        logit( $taskid, $host, $group, "eval subfolders command:\n @remotedirlist" );
+        logit( $taskid, $host, $group, "eval subfolders:\n @remotesubfolders" );
     }
 
-    foreach my $remotedir (@remotedirlist) {
-        chomp $remotedir;
-        $remotedir =~ s| |\\ |g;
-        $remotedir =~ s|\(|\\\(|g;
-        $remotedir =~ s|\)|\\\)|g;
+    foreach my $remotesubfolder (@remotesubfolders) {
+        chomp $remotesubfolder;
+        $remotesubfolder =~ s| |\\ |g;
+        $remotesubfolder =~ s|\(|\\\(|g;
+        $remotesubfolder =~ s|\)|\\\)|g;
 
         my $bkpjob = {
             jobid        => $jobid,
             host         => $host,
             group        => $group,
-            path         => ":'${remotedir}'",
+            path         => ":'${remotesubfolder}'",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
             dosnapshot   => 0,
