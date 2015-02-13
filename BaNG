@@ -219,6 +219,10 @@ sub queue_remote_subfolders {
         logit( $taskid, $host, $group, "eval subfolders:\n @remotesubfolders" );
     }
 
+    my $exclsubfolderfile = create_generic_exclude_file($host, $group, $jobid);
+
+    open(my $fhExcludeFile, '>>', $exclsubfolderfile) unless $serverconfig{dryrun};
+
     foreach my $remotesubfolder (@remotesubfolders) {
         chomp $remotesubfolder;
         $remotesubfolder =~ s| |\\ |g;
@@ -235,17 +239,23 @@ sub queue_remote_subfolders {
             dosnapshot   => 0,
         };
         push( @queue, $bkpjob );
+
+        $remotesubfolder =~ s|^/||g;
+        print $fhExcludeFile "- $remotesubfolder/\n" unless $serverconfig{dryrun};
+        print "- $remotesubfolder/\n" if $serverconfig{verbose};
     }
+    close $fhExcludeFile unless $serverconfig{dryrun};
 
     # add bkp job for files only
     my $bkpjob = {
-        jobid        => $jobid,
-        host         => $host,
-        group        => $group,
-        path         => ":'${srcfolder}'",
-        lastbkp      => $lastbkp,
-        bkptimestamp => $bkptimestamp,
-        dosnapshot   => 0,
+        jobid          => $jobid,
+        host           => $host,
+        group          => $group,
+        path           => ":'${srcfolder}'",
+        lastbkp        => $lastbkp,
+        bkptimestamp   => $bkptimestamp,
+        dosnapshot     => 0,
+        exclsubfolders => 1,
     };
     push( @queue, $bkpjob );
 
@@ -296,14 +306,15 @@ sub thread_work {
     my ($Q) = @_;
 
     while ( my $bkpjob = $Q->dequeue ) {
-        my $tid          = threads->tid;
-        my $jobid        = $bkpjob->{jobid};
-        my $host         = $bkpjob->{host};
-        my $group        = $bkpjob->{group};
-        my $path         = $bkpjob->{path};
-        my $lastbkp      = $bkpjob->{lastbkp};
-        my $bkptimestamp = $bkpjob->{bkptimestamp};
-        my $dosnapshot   = $bkpjob->{'dosnapshot'};
+        my $tid            = threads->tid;
+        my $jobid          = $bkpjob->{jobid};
+        my $host           = $bkpjob->{host};
+        my $group          = $bkpjob->{group};
+        my $path           = $bkpjob->{path};
+        my $lastbkp        = $bkpjob->{lastbkp};
+        my $bkptimestamp   = $bkpjob->{bkptimestamp};
+        my $dosnapshot     = $bkpjob->{'dosnapshot'};
+        my $exclsubfolders = $bkpjob->{'exclsubfolders'} || 0;
 
         my $random_integer = int( rand(10) ) + 1;
         $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
@@ -313,7 +324,7 @@ sub thread_work {
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         my $rsync_err;
-        $rsync_err = execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
+        $rsync_err = execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $exclsubfolders );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
         unless ( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ($finallysnapshots) ) {
             my $bkpjob = {
@@ -424,8 +435,16 @@ sub eval_rsync_target {
     return $rsync_target;
 }
 
+sub eval_rsync_generic_exclude_cmd {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_${jobid}";
+    my $exclsubfolderopt      = "--exclude-from=$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderopt;
+}
+
 sub execute_rsync {
-    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path ) = @_;
+    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $exclsubfolders ) = @_;
 
     $bkptimestamp = eval_bkptimestamp( $host, $group ) unless $bkptimestamp;
     my $startstamp = time();
@@ -464,12 +483,18 @@ sub execute_rsync {
     my $rsync_options = eval_rsync_options( $host, $group, $lastbkp );
     my $rsync_target  = eval_rsync_target( $host, $group, $bkptimestamp );
 
+    my $rsync_generic_exclude = '';
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} && $exclsubfolders ) {
+        $rsync_generic_exclude = eval_rsync_generic_exclude_cmd( $host, $group, $jobid );
+        logit( $taskid, $host, $group, "Apply subfolder excludelist: $rsync_generic_exclude" );
+    }
+
     logit( $taskid, $host, $group, "Rsync Command: $rsync_cmd $rsync_options$path $rsync_target" );
     logit( $taskid, $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
     $rsync_cmd = "echo $rsync_cmd" if $serverconfig{dryrun};
-    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options$path $rsync_target" );
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_generic_exclude $rsync_options$path $rsync_target" );
 
     logit( $taskid, $host, $group, "Rsync PID: $rsyncpid for host $host group $group path $path" );
 
@@ -752,6 +777,8 @@ sub finish_backupjob {
     # report finished job to DB, jobstatus => 2
     bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' );
 
+    remove_generic_exclude_file($host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
+
     return 1;
 }
 
@@ -764,6 +791,37 @@ sub bkp_to_current_server {
         logit( $taskid, $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $serverconfig{verbose};
         return 0;
     }
+
+    return 1;
+}
+
+sub generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_${jobid}";
+    my $exclsubfolderfile     = "$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderfile;
+}
+
+sub create_generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfile        = generic_exclude_file( $host, $group, $jobid );
+
+    unless ( $serverconfig{dryrun} ) {
+        system("touch \"$exclsubfolderfile\"") and logit( $taskid, $host, $group, "ERROR: could not create generated excludefile $exclsubfolderfile" );
+    }
+    logit( $taskid, $host, $group, "Create generated exclude file $exclsubfolderfile" );
+    return $exclsubfolderfile;
+}
+
+sub remove_generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfile        = generic_exclude_file( $host, $group, $jobid );
+
+    if ( -e $exclsubfolderfile ) {
+        unlink "$exclsubfolderfile";
+    }
+    logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
 
     return 1;
 }
