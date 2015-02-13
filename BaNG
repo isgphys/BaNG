@@ -450,7 +450,7 @@ sub execute_rsync {
     my $startstamp = time();
 
     # report rsync start to DB, jobstatus => 0
-    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $path, targetpath( $host, $group ), $lastbkp, '0', '0', '' );
+    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $path, targetpath( $host, $group ), $lastbkp, '0', '0', '' ) unless $noreport;
 
     my $taskset = '';
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
@@ -525,7 +525,7 @@ sub execute_rsync {
     }
 
     #report finished rsync to DB, jobstatus => 1
-    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $path, targetpath( $host, $group ), $lastbkp, $errcode, '1', @outlines );
+    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $path, targetpath( $host, $group ), $lastbkp, $errcode, '1', @outlines ) unless $noreport;
 
     return $errcode;
 }
@@ -775,7 +775,7 @@ sub finish_backupjob {
     }
 
     # report finished job to DB, jobstatus => 2
-    bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' );
+    bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' ) unless $noreport;
 
     remove_generic_exclude_file($host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
 
