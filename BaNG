@@ -156,14 +156,14 @@ sub queue_backup {
         my $endstamp   = $startstamp;
         $jobid = create_timeid( $host, $group );
         logit( $taskid, $host, $group, "Error: host $host is offline" );
-        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath( $host, $group ), $lastbkp, '0', '-1', '' ) unless $noreport;
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), $lastbkp, '0', '-1', '' ) unless $noreport;
         return 1;
     }
 
     my $bkptimestamp = eval_bkptimestamp( $host, $group );
 
     # get list of source folders to back up
-    my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
+    my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} );
     logit( $taskid, $host, $group, 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
 
     # optionally queue each subfolder of the source folders
