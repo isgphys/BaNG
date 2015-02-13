@@ -506,9 +506,9 @@ sub execute_rsync {
 
     waitpid( $rsyncpid, 0 );
 
-    logit( $taskid, $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
-    logit( $taskid, $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
-    logit( $taskid, $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
+    logit( $taskid, $host, $group, "Rsync[$rsyncpid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "ERROR: Rsync[$rsyncpid] STDERR: @errlines" ) if @errlines;
+    logit( $taskid, $host, $group, "ERROR: Rsync[$rsyncpid] child exited with status of $?" ) if $?;
 
     my $errcode  = 0;
     my $endstamp = time();
