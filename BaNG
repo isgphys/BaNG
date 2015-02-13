@@ -130,7 +130,7 @@ sub queue_backup {
     # check for existing target_path folder
     my ($check_rsync_target_code) = check_rsync_target( $host, $group );
     if ( $check_rsync_target_code > 0 && !$initial ) {
-        logit( $taskid, $host, $group, "Skipping because target_path ($check_rsync_target_code) does not exist for host $host group $group" );
+        logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
         print "Skipping backup of $host because target_path does not exist!\n";
         print "use --initial for the first backup run, otherwise check availability of mount!\n";
         return 1;
