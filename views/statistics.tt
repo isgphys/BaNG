@@ -48,7 +48,7 @@
                       <%- IF hosts_shares.datashare.size AND hosts_shares.systemshare.size %>
                       or
                       <%- END %>
-                      system partition
+                      system folders
                     <%- END %>
                     <select id="select-host-<%sharetype%>">
                         <option value="">&lt;host&gt;</option>

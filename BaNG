@@ -130,7 +130,7 @@ sub queue_backup {
     # check for existing target_path folder
     my ($check_rsync_target_code) = check_rsync_target( $host, $group );
     if ( $check_rsync_target_code > 0 && !$initial ) {
-        logit( $taskid, $host, $group, "Skipping because target_path ($check_rsync_target_code) does not exist for host $host group $group" );
+        logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
         print "Skipping backup of $host because target_path does not exist!\n";
         print "use --initial for the first backup run, otherwise check availability of mount!\n";
         return 1;
@@ -156,41 +156,41 @@ sub queue_backup {
         my $endstamp   = $startstamp;
         $jobid = create_timeid( $host, $group );
         logit( $taskid, $host, $group, "Error: host $host is offline" );
-        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION}, targetpath( $host, $group ), $lastbkp, '0', '-1', '' ) unless $noreport;
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), $lastbkp, '0', '-1', '' ) unless $noreport;
         return 1;
     }
 
     my $bkptimestamp = eval_bkptimestamp( $host, $group );
 
-    # get list of partitions to back up
-    my (@src_part) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_PARTITION} );
-    logit( $taskid, $host, $group, 'Number of partitions: ' . ( $#src_part + 1 ) . " ( @src_part )" );
+    # get list of source folders to back up
+    my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} );
+    logit( $taskid, $host, $group, 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
 
-    # optionally queue each subfolder of the partitions
+    # optionally queue each subfolder of the source folders
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
 
         my $dosnapshot = 0;
-        my $numPart    = @src_part;
+        my $numFolder  = @src_folders;
 
-        foreach my $part (@src_part) {
+        foreach my $folder (@src_folders) {
             $jobid = create_timeid( $host, $group );
 
-            $numPart--;
-            if ( $numPart == 0 ) {
+            $numFolder--;
+            if ( $numFolder == 0 ) {
                 $dosnapshot = 1;
             }
 
-            queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $part );
+            queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $folder );
         }
     } else {
 
-        # queue list of partitions as a whole
+        # queue list of source folders as a whole
         $jobid = create_timeid( $host, $group );
         my $bkpjob = {
             jobid        => $jobid,
             host         => $host,
             group        => $group,
-            path         => "@src_part",
+            path         => "@src_folders",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
             dosnapshot   => 1,
@@ -205,38 +205,61 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $partition ) = @_;
+    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $srcfolder ) = @_;
 
-    $partition =~ s/://;
-    my $remoteshell   = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotedirlist = `$remoteshell $host find $partition -xdev -mindepth 1 -maxdepth 1 | sort`;
+    $srcfolder =~ s/://;
+    my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
+    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 | sort`;
 
-    # if @remotedirlist empty (rsh troubles?) then use the $partition
-    if ( $#remotedirlist == -1 ) {
-        push( @remotedirlist, $partition );
-        logit( $taskid, $host, $group, "ERROR: eval subfolders command failed, use now with:\n @remotedirlist" );
+    # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
+    if ( $#remotesubfolders == -1 ) {
+        push( @remotesubfolders, $srcfolder );
+        logit( $taskid, $host, $group, "ERROR: eval subfolders failed, use now with:\n @remotesubfolders" );
     } else {
-        logit( $taskid, $host, $group, "eval subfolders command:\n @remotedirlist" );
+        logit( $taskid, $host, $group, "eval subfolders:\n @remotesubfolders" );
     }
 
-    foreach my $remotedir (@remotedirlist) {
-        chomp $remotedir;
-        $remotedir =~ s| |\\ |g;
-        $remotedir =~ s|\(|\\\(|g;
-        $remotedir =~ s|\)|\\\)|g;
+    my $exclsubfolderfile = create_generic_exclude_file($host, $group, $jobid);
+
+    open(my $fhExcludeFile, '>>', $exclsubfolderfile) unless $serverconfig{dryrun};
+
+    foreach my $remotesubfolder (@remotesubfolders) {
+        chomp $remotesubfolder;
+        $remotesubfolder =~ s| |\\ |g;
+        $remotesubfolder =~ s|\(|\\\(|g;
+        $remotesubfolder =~ s|\)|\\\)|g;
 
         my $bkpjob = {
             jobid        => $jobid,
             host         => $host,
             group        => $group,
-            path         => ":'${remotedir}'",
+            path         => ":'${remotesubfolder}'",
             lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
             dosnapshot   => 0,
         };
         push( @queue, $bkpjob );
+
+        $remotesubfolder =~ s|^/||g;
+        print $fhExcludeFile "- $remotesubfolder/\n" unless $serverconfig{dryrun};
+        print "- $remotesubfolder/\n" if $serverconfig{verbose};
     }
+    close $fhExcludeFile unless $serverconfig{dryrun};
+
+    # add bkp job for files only
     my $bkpjob = {
+        jobid          => $jobid,
+        host           => $host,
+        group          => $group,
+        path           => ":'${srcfolder}'",
+        lastbkp        => $lastbkp,
+        bkptimestamp   => $bkptimestamp,
+        dosnapshot     => 0,
+        exclsubfolders => 1,
+    };
+    push( @queue, $bkpjob );
+
+    $bkpjob = {
         jobid        => $jobid,
         host         => $host,
         group        => $group,
@@ -283,14 +306,15 @@ sub thread_work {
     my ($Q) = @_;
 
     while ( my $bkpjob = $Q->dequeue ) {
-        my $tid          = threads->tid;
-        my $jobid        = $bkpjob->{jobid};
-        my $host         = $bkpjob->{host};
-        my $group        = $bkpjob->{group};
-        my $path         = $bkpjob->{path};
-        my $lastbkp      = $bkpjob->{lastbkp};
-        my $bkptimestamp = $bkpjob->{bkptimestamp};
-        my $dosnapshot   = $bkpjob->{'dosnapshot'};
+        my $tid            = threads->tid;
+        my $jobid          = $bkpjob->{jobid};
+        my $host           = $bkpjob->{host};
+        my $group          = $bkpjob->{group};
+        my $path           = $bkpjob->{path};
+        my $lastbkp        = $bkpjob->{lastbkp};
+        my $bkptimestamp   = $bkpjob->{bkptimestamp};
+        my $dosnapshot     = $bkpjob->{'dosnapshot'};
+        my $exclsubfolders = $bkpjob->{'exclsubfolders'} || 0;
 
         my $random_integer = int( rand(10) ) + 1;
         $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
@@ -300,7 +324,7 @@ sub thread_work {
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         my $rsync_err;
-        $rsync_err = execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path );
+        $rsync_err = execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $exclsubfolders );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
         unless ( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ($finallysnapshots) ) {
             my $bkpjob = {
@@ -411,8 +435,16 @@ sub eval_rsync_target {
     return $rsync_target;
 }
 
+sub eval_rsync_generic_exclude_cmd {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_${jobid}";
+    my $exclsubfolderopt      = "--exclude-from=$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderopt;
+}
+
 sub execute_rsync {
-    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path ) = @_;
+    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $exclsubfolders ) = @_;
 
     $bkptimestamp = eval_bkptimestamp( $host, $group ) unless $bkptimestamp;
     my $startstamp = time();
@@ -451,12 +483,18 @@ sub execute_rsync {
     my $rsync_options = eval_rsync_options( $host, $group, $lastbkp );
     my $rsync_target  = eval_rsync_target( $host, $group, $bkptimestamp );
 
+    my $rsync_generic_exclude = '';
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} && $exclsubfolders ) {
+        $rsync_generic_exclude = eval_rsync_generic_exclude_cmd( $host, $group, $jobid );
+        logit( $taskid, $host, $group, "Apply subfolder excludelist: $rsync_generic_exclude" );
+    }
+
     logit( $taskid, $host, $group, "Rsync Command: $rsync_cmd $rsync_options$path $rsync_target" );
     logit( $taskid, $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
     $rsync_cmd = "echo $rsync_cmd" if $serverconfig{dryrun};
-    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_options$path $rsync_target" );
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_generic_exclude $rsync_options$path $rsync_target" );
 
     logit( $taskid, $host, $group, "Rsync PID: $rsyncpid for host $host group $group path $path" );
 
@@ -468,9 +506,9 @@ sub execute_rsync {
 
     waitpid( $rsyncpid, 0 );
 
-    logit( $taskid, $host, $group, "Rsync STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
-    logit( $taskid, $host, $group, "ERROR: Rsync STDERR: @errlines" ) if @errlines;
-    logit( $taskid, $host, $group, "ERROR: Rsync child exited with status of $?" ) if $?;
+    logit( $taskid, $host, $group, "Rsync[$rsyncpid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "ERROR: Rsync[$rsyncpid] STDERR: @errlines" ) if @errlines;
+    logit( $taskid, $host, $group, "ERROR: Rsync[$rsyncpid] child exited with status of $?" ) if $?;
 
     my $errcode  = 0;
     my $endstamp = time();
@@ -739,6 +777,8 @@ sub finish_backupjob {
     # report finished job to DB, jobstatus => 2
     bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' );
 
+    remove_generic_exclude_file($host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
+
     return 1;
 }
 
@@ -751,6 +791,37 @@ sub bkp_to_current_server {
         logit( $taskid, $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $serverconfig{verbose};
         return 0;
     }
+
+    return 1;
+}
+
+sub generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_${jobid}";
+    my $exclsubfolderfile     = "$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderfile;
+}
+
+sub create_generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfile        = generic_exclude_file( $host, $group, $jobid );
+
+    unless ( $serverconfig{dryrun} ) {
+        system("touch \"$exclsubfolderfile\"") and logit( $taskid, $host, $group, "ERROR: could not create generated excludefile $exclsubfolderfile" );
+    }
+    logit( $taskid, $host, $group, "Create generated exclude file $exclsubfolderfile" );
+    return $exclsubfolderfile;
+}
+
+sub remove_generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfile        = generic_exclude_file( $host, $group, $jobid );
+
+    if ( -e $exclsubfolderfile ) {
+        unlink "$exclsubfolderfile";
+    }
+    logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
 
     return 1;
 }

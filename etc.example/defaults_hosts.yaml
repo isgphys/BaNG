@@ -7,7 +7,7 @@ BKP_ENABLED:            0                         # 1 = make backup, 0 = don't m
 WIPE_ENABLED:           0                         # 1 = make wipe, 0 = don't make wipe
 BKP_BULK_ALLOW:         0
 WIPE_BULK_ALLOW:        0
-BKP_SOURCE_PARTITION:   ""                        # source partitions, start allways with :{partition}
+BKP_SOURCE_FOLDER:      ""                        # source folders, start always with :{folder}
 BKP_TARGET_HOST:        "bangtestserver"          # default backup server (hostname -s)
 BKP_TARGET_PATH:        "/export/backup"          # default backup path
 BKP_PREFIX:             "unknown"                 # BASEDST/[BKPPREFIX] > /export/backup/system
@@ -62,7 +62,7 @@ HELP:
   WIPE_BULK_ALLOW:        |
                           0 = deny bulk wiping
                           1 = allow bulk wiping
-  BKP_SOURCE_PARTITION:   source partitions, start allways with :{partition}
+  BKP_SOURCE_FOLDER:      source folders, start always with :{folder}
   BKP_TARGET_HOST:        default backup server
   BKP_TARGET_PATH:        default backup path
   BKP_PREFIX:             BASEDST/[BKPPREFIX] > /export/backup/system
