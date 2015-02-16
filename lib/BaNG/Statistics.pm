@@ -289,22 +289,22 @@ sub statistics_work_duration_details {
     $sth->execute();
 
     while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
-        next if $runtime < 2;
         $sqlbkpgroup = $bkpgroup;
         $bkppath =~ s/\://g;
         $bkppath =~ s/\//_/g;
         push( @top_size, {
             name  => $bkphost,
-            value => $runtime,
+            value => max( $runtime, 59 ),               # display all values smaller than 1 minute as 59 seconds
             label => time2human( $runtime / 60 ),
             url   => "/statistics/$bkphost/$bkppath",
         });
     }
 
+    # If we found a single element, the backup was done with subfolder threading, and we need to query using the bkpgroup
     if ( $#top_size == 0 ) {
         @top_size = ();
         $sth = $bangstat_dbh->prepare("
-            SELECT bkpfromhost, bkpgroup, bkpfrompath, TIMESTAMPDIFF(Second, Start , Stop) as Runtime
+            SELECT bkpfromhost, bkpgroup, BkpFromPath, TIMESTAMPDIFF(Second, Start , Stop) as Runtime
             FROM statistic
             WHERE TaskID = '$taskid' AND bkpgroup LIKE '$sqlbkpgroup'
             ORDER BY Runtime DESC;
@@ -312,12 +312,11 @@ sub statistics_work_duration_details {
         $sth->execute();
 
         while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
-            next if $runtime < 2;
             $bkppath =~ s/\://g;
             $bkppath =~ s/^.*\/(.*)$/$1/;
             push( @top_size, {
                 name  => $bkppath,
-                value => $runtime,
+                value => max( $runtime, 59 ),           # display all values smaller than 1 minute as 59 seconds
                 label => time2human( $runtime / 60 ),
                 url   => '#',
             });
@@ -392,13 +391,12 @@ sub statistics_top_trans_details {
     $sth->execute();
 
     while ( my ( $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
-        next if $size < 2;
         $sqlbkpgroup = $bkpgroup;
         $bkppath =~ s/\://g;
         $bkppath =~ s/\//_/g;
         push( @top_size, {
             name  => $bkphost,
-            value => $size,
+            value => max( $size, 10 ),
             label => num2human( $size, 1024 ),
             url   => "/statistics/$bkphost/$bkppath",
         });
@@ -415,12 +413,11 @@ sub statistics_top_trans_details {
         $sth->execute();
 
         while ( my ( $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
-            next if $size < 2;
             $bkppath =~ s/\://g;
             $bkppath =~ s/^.*\/(.*)$/$1/;
             push( @top_size, {
                 name  => $bkppath,
-                value => $size,
+                value => max( $size, 10 ),
                 label => num2human( $size, 1024 ),
                 url   => '#',
             });
