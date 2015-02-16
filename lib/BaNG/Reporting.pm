@@ -353,17 +353,17 @@ sub send_xymon_report {
 }
 
 sub bangstat_start_backupjob {
-    my ( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines ) = @_;
+    my ( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $srcfolder, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines ) = @_;
 
     $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
     my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
     my $sql = qq(
         INSERT INTO statistic (
-            TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpToHost, BkpToPath, LastBkp,
+            TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp,
             isThread, ErrStatus, JobStatus, Start, Stop
         ) VALUES (
-            '$taskid', '$jobid', '$host', '$group', '$path', '$servername', '$targetpath', '$lastbkp',
+            '$taskid', '$jobid', '$host', '$group', '$path', '$srcfolder', '$servername', '$targetpath', '$lastbkp',
             $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')
         )
     );
