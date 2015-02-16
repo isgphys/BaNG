@@ -47,6 +47,7 @@ CREATE TABLE statistic (
   BkpFromHost varchar(30) NOT NULL,
   BkpGroup varchar(30) DEFAULT NULL,
   BkpFromPath varchar(250) DEFAULT NULL,
+  BkpFromPathRoot varchar(250) DEFAULT NULL,
   BkpToHost varchar(30) NOT NULL,
   BkpToPath varchar(250) DEFAULT NULL,
   LastBkp varchar(30) DEFAULT NULL,
@@ -77,9 +78,8 @@ CREATE TABLE statistic (
 ```sql
 CREATE OR REPLACE VIEW recent_backups AS
 SELECT
-    TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, BkpFromHost,
-    IF(isThread, SUBSTRING_INDEX(BkpFromPath, '/', (LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath, '/', '')))), BkpFromPath) as BkpFromPath,
-    BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup,
+    TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+    BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup,
     SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
     SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
@@ -91,8 +91,7 @@ GROUP BY JobID;
 CREATE OR REPLACE VIEW statistic_job_sum AS
 SELECT
     TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime, BkpFromHost,
-    IF(isThread, SUBSTRING_INDEX(BkpFromPath, '/', (LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath, '/', '')))), BkpFromPath) as BkpFromPath,
-    BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
+    BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
     SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
     SUM(TotFileSizeTrans) as TotFileSizeTrans
@@ -103,7 +102,7 @@ GROUP BY JobID;
 CREATE OR REPLACE VIEW statistic_job_thread AS
 SELECT
     TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
-    BkpFromHost, BkpFromPath, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
+    BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
     NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
 FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
