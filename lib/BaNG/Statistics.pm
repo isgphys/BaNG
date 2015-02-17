@@ -243,8 +243,9 @@ sub statistics_work_duration {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT  TaskID, BkpFromHost, BkpGroup, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
-                BkpFromPath) as BkpFromPath, TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
+        SELECT  TaskID, BkpFromHost, BkpGroup,
+            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
         FROM statistic
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
         GROUP BY TaskID
@@ -279,8 +280,8 @@ sub statistics_work_duration_details {
 
     $sth = $bangstat_dbh->prepare("
         SELECT bkpfromhost, bkpgroup,
-            IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))), BkpFromPath) as BkpFromPath,
-            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
+            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+            TIMESTAMPDIFF(Second, Start , Stop) as Runtime
         FROM statistic
         WHERE TaskID = '$taskid'
         GROUP BY JobID
@@ -340,8 +341,9 @@ sub statistics_top_trans {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT  TaskID, BkpFromHost, BkpGroup, IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))),
-                BkpFromPath) as BkpFromPath, SUM($sqltranstype) as $sqltranstype
+        SELECT  TaskID, BkpFromHost, BkpGroup,
+            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+            SUM($sqltranstype) as $sqltranstype
         FROM statistic
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
         GROUP BY TaskID
@@ -381,7 +383,7 @@ sub statistics_top_trans_details {
 
     $sth = $bangstat_dbh->prepare("
         SELECT bkpfromhost, bkpgroup,
-            IF(isThread,SUBSTRING_INDEX(BkpFromPath,'/',(LENGTH(BkpFromPath)-LENGTH(REPLACE(BkpFromPath,'/','')))), BkpFromPath) as BkpFromPath,
+            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
             SUM($sqltranstype) AS $sqltranstype
         FROM statistic
         WHERE TaskID = '$taskid'
