@@ -204,7 +204,7 @@ sub bangstat_recentbackups_all {
     my %RecentBackupsAll;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
@@ -253,7 +253,7 @@ sub bangstat_recentbackups_last {
     my %RecentBackupsLast;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsLast{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
