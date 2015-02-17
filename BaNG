@@ -453,8 +453,11 @@ sub execute_rsync {
     $bkptimestamp = eval_bkptimestamp( $host, $group ) unless $bkptimestamp;
     my $startstamp = time();
 
+    # append custom string to path written to DB if we are excluding subfolders
+    my $bkpfrompath = $exclsubfolders ? "$path/FILESONLY" : $path;
+
     # report rsync start to DB, jobstatus => 0
-    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $path, $srcfolder, targetpath( $host, $group ), $lastbkp, '0', '0', '' ) unless $noreport;
+    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $bkpfrompath, $srcfolder, targetpath( $host, $group ), $lastbkp, '0', '0', '' ) unless $noreport;
 
     my $taskset = '';
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
@@ -529,7 +532,7 @@ sub execute_rsync {
     }
 
     #report finished rsync to DB, jobstatus => 1
-    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $path, targetpath( $host, $group ), $lastbkp, $errcode, '1', @outlines ) unless $noreport;
+    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $bkpfrompath, targetpath( $host, $group ), $lastbkp, $errcode, '1', @outlines ) unless $noreport;
 
     return $errcode;
 }
