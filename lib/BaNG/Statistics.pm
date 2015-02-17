@@ -450,7 +450,7 @@ sub statistics_schedule {
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
         ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         $BkpFromPath =~ s/://g;    # remove colon separators
 
         # flag system backups
