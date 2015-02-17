@@ -77,7 +77,7 @@ sub bangstat_recentbackups {
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $BkpGroup    = $dbrow->{'BkpGroup'} || 'NA';
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
             TaskID       => $dbrow->{'TaskID'},
@@ -100,11 +100,11 @@ sub bangstat_recentbackups {
             TotFileSize  => &BaNG::Common::num2human($dbrow->{'TotFileSize'},1024),
             NumOfFiles   => &BaNG::Common::num2human($dbrow->{'NumOfFiles'}),
         });
-        push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPath'}"}}, {
+        push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPathRoot'}"}}, {
             TaskID      => $dbrow->{'TaskID'},
             JobID       => $dbrow->{'JobID'},
             Starttime   => $dbrow->{'Start'},
-            BkpFromPath => $dbrow->{'BkpFromPath'},
+            BkpFromPath => $dbrow->{'BkpFromPathRoot'},
             BkpToPath   => $dbrow->{'BkpToPath'},
             Host        => $host,
             BkpGroup    => $BkpGroup,
@@ -125,7 +125,7 @@ sub bangstat_recentbackups {
         my $prevBkpStart = $nextBkpStart - $one_day;
 
         my @bkp                = @{$RecentBackupTimes{$hostpath}};
-        my $missingBkpFromPath = $bkp[0]->{BkpFromPath} || 'NA';
+        my $missingBkpFromPath = $bkp[0]->{BkpFromPathRoot} || 'NA';
         my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
         my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
         my $missingHost        = $bkp[0]->{Host}        || 'NA';
