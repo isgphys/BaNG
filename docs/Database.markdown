@@ -91,7 +91,7 @@ GROUP BY JobID;
 CREATE OR REPLACE VIEW statistic_job_sum AS
 SELECT
     TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime, BkpFromHost,
-    BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
+    IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
     SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
     SUM(TotFileSizeTrans) as TotFileSizeTrans
