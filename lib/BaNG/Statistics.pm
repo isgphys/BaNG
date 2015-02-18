@@ -67,8 +67,8 @@ sub statistics_json {
 
         push( @{$BackupsByPath{$BkpFromPath}}, {
             time_coord       => str2time($time_start),
-            RealRuntime      => sprintf( "%.2f", $dbrow->{'RealRunTime'} / 60. ),
-            TotRuntime       => $dbrow->{'Runtime'}/60.,
+            RealRuntime      => sprintf( "%.2f", $dbrow->{'Runtime'} / 60. ),
+            TotRuntime       => $dbrow->{'RealRunTime'}/60.,
             BkpFromPath      => $BkpFromPath,
             BkpToPath        => $dbrow->{'BkpToPath'},
             BkpFromHost      => $dbrow->{'BkpFromHost'},
@@ -157,7 +157,7 @@ sub statistics_cumulated_json {
 
         # store cumulated statistics for each day
         $CumulateByDate{$epoch}{time_coord}        = $epoch;
-        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'Runtime'} / 60.;
+        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'RealRunTime'} / 60.;
         $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
         $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
         $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
