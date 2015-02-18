@@ -10,3 +10,4 @@ BaNG Documentation
   * [Wipe](Wipe.markdown)                   : BaNG wipe strategy and long-time backups
   * [Mac OS X](MacOSX.markdown)             : BaNG on Mac OS X servers and clients
   * [Advanced](Advanced.markdown)           : BaNG features for advanced users
+  * [Terminology](Terminology.markdown)     : Glossary of concepts
