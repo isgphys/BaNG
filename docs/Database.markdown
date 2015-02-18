@@ -90,8 +90,10 @@ GROUP BY JobID;
 
 CREATE OR REPLACE VIEW statistic_job_sum AS
 SELECT
-    TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime, BkpFromHost,
-    IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread = Null as isThread, JobStatus, BkpGroup,
+    TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime,
+    SUM(TIMESTAMPDIFF(Second, Start, Stop)) as RealRunTime, BkpFromHost,
+    IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp,
+    isThread = Null as isThread, JobStatus, BkpGroup,
     SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
     SUM(TotFileSizeTrans) as TotFileSizeTrans
@@ -102,7 +104,8 @@ GROUP BY JobID;
 CREATE OR REPLACE VIEW statistic_job_thread AS
 SELECT
     TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
-    BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
+    TIMESTAMPDIFF(Second, Start, Stop) as RealRunTime, BkpFromHost, BkpFromPath, BkpFromPathRoot,
+    BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
     NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
 FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)

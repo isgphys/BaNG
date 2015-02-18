@@ -65,12 +65,9 @@ sub statistics_json {
         my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath =~ s/://g;    # remove colon separators
 
-        # compute wall-clock runtime of backup in minutes with 2 digits
-        my $RealRuntime = sprintf( "%.2f", ( str2time($time_stop) - str2time($time_start) ) / 60. );
-
         push( @{$BackupsByPath{$BkpFromPath}}, {
             time_coord       => str2time($time_start),
-            RealRuntime      => $RealRuntime,
+            RealRuntime      => sprintf( "%.2f", $dbrow->{'RealRunTime'} / 60. ),
             TotRuntime       => $dbrow->{'Runtime'}/60.,
             BkpFromPath      => $BkpFromPath,
             BkpToPath        => $dbrow->{'BkpToPath'},
