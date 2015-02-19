@@ -73,6 +73,17 @@ CREATE TABLE statistic (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
+### Create indexes
+
+```sql
+CREATE INDEX TaskID ON statistic (TaskID);
+CREATE INDEX JobID ON statistic (JobID);
+CREATE INDEX BkpFromHost ON statistic (BkpFromHost);
+CREATE INDEX BkpFromPath ON statistic (BkpFromPath);
+CREATE INDEX BkpToHost ON statistic (BkpToHost);
+CREATE INDEX Start ON statistic (Start);
+```
+
 ### Create views
 
 ```sql
@@ -116,7 +127,6 @@ SELECT * FROM statistic_job_sum
 UNION
 SELECT * FROM statistic_job_thread;
 ```
-
 
 Misc commands
 -------------
