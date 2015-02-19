@@ -201,7 +201,7 @@ sub statistics_hosts_shares {
     my $sth = $bangstat_dbh->prepare("
         SELECT
         DISTINCT BkpFromHost, BkpFromPath
-        FROM statistic_all
+        FROM statistic
         WHERE Start > date_sub(now(), interval $lastXdays_default day)
         AND BkpToHost LIKE '$BkpServer'
         ORDER BY BkpFromHost;
