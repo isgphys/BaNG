@@ -2,104 +2,112 @@
 #************************
 # default backup settings
 #
-COMMENT:                ""                        # write some comment
-BKP_ENABLED:            0                         # 1 = make backup, 0 = don't make backup
-WIPE_ENABLED:           0                         # 1 = make wipe, 0 = don't make wipe
-BKP_BULK_ALLOW:         0
-WIPE_BULK_ALLOW:        0
-BKP_SOURCE_FOLDER:      ""                        # source folders, start always with :{folder}
-BKP_TARGET_HOST:        "bangtestserver"          # default backup server (hostname -s)
-BKP_TARGET_PATH:        "/export/backup"          # default backup path
-BKP_PREFIX:             "unknown"                 # BASEDST/[BKPPREFIX] > /export/backup/system
-BKP_FOLDER:             "`date +%Y.%m.%d_%H%M%S`" # destination folder
-BKP_EXCLUDE_FILE:       ""                        # define an excludelist-file, only filename!
-BKP_GWHOST:             ""                        # Gateway-Host for backups of privat lan computers
-BKP_PRIORITY:                                     # add priority list (:path: Nr)
-NOCACHE_ENABLED:        0                         # 0 = dont use nocache, 1 = use nocache
-IONICE_OPTIONS:         ""                        # ionice options
-TASKSET_OPTIONS:        ""                        # taskset options
+COMMENT:                  ""                        # write some comment
+BKP_ENABLED:              0                         # 1 = make backup, 0 = don't make backup
+WIPE_ENABLED:             0                         # 1 = make wipe, 0 = don't make wipe
+BKP_BULK_ALLOW:           0
+WIPE_BULK_ALLOW:          0
+BKP_SOURCE_FOLDER:        ""                        # source folders, start always with :{folder}
+BKP_TARGET_HOST:          "bangtestserver"          # default backup server (hostname -s)
+BKP_TARGET_PATH:          "/export/backup"          # default backup path
+BKP_PREFIX:               "unknown"                 # BASEDST/[BKPPREFIX] > /export/backup/system
+BKP_FOLDER:               "`date +%Y.%m.%d_%H%M%S`" # destination folder
+BKP_EXCLUDE_FILE:         ""                        # define an excludelist-file, only filename!
+BKP_GWHOST:               ""                        # Gateway-Host for backups of privat lan computers
+BKP_PRIORITY:                                       # add priority list (:path: Nr)
+NOCACHE_ENABLED:          0                         # 0 = dont use nocache, 1 = use nocache
+IONICE_OPTIONS:           ""                        # ionice options
+TASKSET_OPTIONS:          ""                        # taskset options
 
-WIPE_KEEP_DAILY:        31                        # keep x daily backups
-WIPE_KEEP_WEEKLY:       0                         # keep x weekly backups
-WIPE_KEEP_MONTHLY:      5                         # keep x monthly backups
-BKP_THREADS_DEFAULT:    1                         # maximal amount of threads
-BKP_THREAD_SUBFOLDERS:  0                         # Queue each subfolder as a thread
-BKP_STORE_MODUS:        "snapshots"               # links (all Filesystems) / snapshots (only for BTRFS)
-BKP_LASTBKP_FILE:       "lastdst"                 # stores the foldername of last backup
-BKP_LASTBKP_SUFFIX:     ""                        # LASTBKP_FILE-[LASTBKP_SUFFIX]
+WIPE_KEEP_DAILY:          31                        # keep x daily backups
+WIPE_KEEP_WEEKLY:         0                         # keep x weekly backups
+WIPE_KEEP_MONTHLY:        5                         # keep x monthly backups
+BKP_THREADS_DEFAULT:      1                         # maximal amount of threads
+BKP_THREAD_SRCFOLDERS:    0                         # Queue each BKP_SOURCE_FOLDER if more than folder available
+BKP_THREAD_SUBFOLDERS:    0                         # Queue each subfolder of each BKP_SOURCE_FOLDER
+BKP_THREAD_SUBSUBFOLDERS: ""                        # Queue selected subsubfolders
+BKP_STORE_MODUS:          "snapshots"               # links (all Filesystems) / snapshots (only for BTRFS)
+BKP_LASTBKP_FILE:         "lastdst"                 # stores the foldername of last backup
+BKP_LASTBKP_SUFFIX:       ""                        # LASTBKP_FILE-[LASTBKP_SUFFIX]
 
-BKP_RSYNC_ARCHIV:       1                         # (-a) archive mode; equals -rlptgoD (no -H,-A,-X)
-BKP_RSYNC_RELATIV:      1                         # (-R) use relative path names
-BKP_RSYNC_HLINKS:       1                         # (-H) preserve hard links
-BKP_RSYNC_ONE_FS:       1                         # (-x) don't cross filesystem boundaries
-BKP_RSYNC_WHOLEFILE:    0                         # (-W) copy files whole (w/o delta-xfer algorithm)
-BKP_RSYNC_COMPRESS:     0                         # (-z) compress file data during the transfer
-BKP_RSYNC_RSHELL:       "rsh"                     # (-e) specify the remote shell to use
-BKP_RSYNC_RSHELL_PATH:  ""                        # (--rsync-path=PROGRAM) specify the rsync to run on remote machine
-BKP_RSYNC_DELETE:       1                         # (--delete) delete extraneous files from dest dir
-BKP_RSYNC_DELETE_FORCE: 0                         # (--force) force deletion of dirs even if not empty
-BKP_RSYNC_NUM_IDS:      0                         # (--numeric-ids) don't map uid/gid values by user/group name
-BKP_RSYNC_INPLACE:      0                         # (--inplace) update destination files in-place
-BKP_RSYNC_ACL:          0                         # (--acls) preserve ACLs
-BKP_RSYNC_XATTRS:       0                         # (--xattrs) preserve extended attributes
-BKP_RSYNC_NODEVICES:    0                         # (--no-D) don't copy devices or special files
+BKP_RSYNC_ARCHIV:         1                         # (-a) archive mode; equals -rlptgoD (no -H,-A,-X)
+BKP_RSYNC_RELATIV:        1                         # (-R) use relative path names
+BKP_RSYNC_HLINKS:         1                         # (-H) preserve hard links
+BKP_RSYNC_ONE_FS:         1                         # (-x) don't cross filesystem boundaries
+BKP_RSYNC_WHOLEFILE:      0                         # (-W) copy files whole (w/o delta-xfer algorithm)
+BKP_RSYNC_COMPRESS:       0                         # (-z) compress file data during the transfer
+BKP_RSYNC_RSHELL:         "rsh"                     # (-e) specify the remote shell to use
+BKP_RSYNC_RSHELL_PATH:    ""                        # (--rsync-path=PROGRAM) specify the rsync to run on remote machine
+BKP_RSYNC_DELETE:         1                         # (--delete) delete extraneous files from dest dir
+BKP_RSYNC_DELETE_FORCE:   0                         # (--force) force deletion of dirs even if not empty
+BKP_RSYNC_NUM_IDS:        0                         # (--numeric-ids) don't map uid/gid values by user/group name
+BKP_RSYNC_INPLACE:        0                         # (--inplace) update destination files in-place
+BKP_RSYNC_ACL:            0                         # (--acls) preserve ACLs
+BKP_RSYNC_XATTRS:         0                         # (--xattrs) preserve extended attributes
+BKP_RSYNC_NODEVICES:      0                         # (--no-D) don't copy devices or special files
 
 #*************************
 # Description of variables
 #
 HELP:
-  HELP:                   This Hash includes this HELP content
-  COMMENT:                self-explanatory
-  BKP_ENABLED:            |
-                          0 = don't make backup
-                          1 = make backup
-  WIPE_ENABLED:           |
-                          0 = don't make wipe
-                          1 = make wipe
-  BKP_BULK_ALLOW:         |
-                          0 = deny bulk backup
-                          1 = allow bulk backup
-  WIPE_BULK_ALLOW:        |
-                          0 = deny bulk wiping
-                          1 = allow bulk wiping
-  BKP_SOURCE_FOLDER:      source folders, start always with :{folder}
-  BKP_TARGET_HOST:        default backup server
-  BKP_TARGET_PATH:        default backup path
-  BKP_PREFIX:             BASEDST/[BKPPREFIX] > /export/backup/system
-  BKP_FOLDER:             destination folder
-  BKP_EXCLUDE_FILE:       define an excludelist-file, only filename!
-  BKP_GWHOST:             Gateway-Host for backups of privat lan computers
+  HELP:                     This Hash includes this HELP content
+  COMMENT:                  self-explanatory
+  BKP_ENABLED:              |
+                            0 = don't make backup
+                            1 = make backup
+  WIPE_ENABLED:             |
+                            0 = don't make wipe
+                            1 = make wipe
+  BKP_BULK_ALLOW:           |
+                            0 = deny bulk backup
+                            1 = allow bulk backup
+  WIPE_BULK_ALLOW:          |
+                            0 = deny bulk wiping
+                            1 = allow bulk wiping
+  BKP_SOURCE_FOLDER:        source folders, start always with :{folder}
+  BKP_TARGET_HOST:          default backup server
+  BKP_TARGET_PATH:          default backup path
+  BKP_PREFIX:               BASEDST/[BKPPREFIX] > /export/backup/system
+  BKP_FOLDER:               destination folder
+  BKP_EXCLUDE_FILE:         define an excludelist-file, only filename!
+  BKP_GWHOST:               Gateway-Host for backups of privat lan computers
 
-  WIPE_KEEP_DAILY:        keep x daily backups
-  WIPE_KEEP_WEEKLY:       keep x weekly backups
-  WIPE_KEEP_MONTHLY:      keep x monthly backups
-  BKP_THREADS_DEFAULT:    maximal amount of threads
-  BKP_THREAD_SUBFOLDERS:  Queue each subfolder as a thread
-  BKP_STORE_MODUS:        links (all Filesystems) / snapshots (only for BTRFS)
-  BKP_LASTBKP_FILE:       stores the foldername of last backup
-  BKP_LASTBKP_SUFFIX:     LASTBKP_FILE-[LASTBKP_SUFFIX]
-  BKP_PRIORITY:           |
-                          add priority as list (:path: Nr)
-                          0 = default
-                          < 0 higher prio (-1, -2, -3,...)
-                          > 0 lower prio (1, 2, 3,...)
-  NOCACHE_ENABLED:        |
-                          0 = dont use nocache
-                          1 = use nocache
-  IONICE_OPTIONS:         ionice options
-  TASKSET_OPTIONS:        taskset options
-  BKP_RSYNC_ARCHIV:       (-a) archive mode; equals -rlptgoD (no -H,-A,-X)
-  BKP_RSYNC_RELATIV:      (-R) use relative path names
-  BKP_RSYNC_HLINKS:       (-H) preserve hard links
-  BKP_RSYNC_ONE_FS:       (-x) don't cross filesystem boundaries
-  BKP_RSYNC_WHOLEFILE:    (-W) copy files whole (w/o delta-xfer algorithm)
-  BKP_RSYNC_COMPRESS:     (-z) compress file data during the transfer
-  BKP_RSYNC_RSHELL:       (-e) specify the remote shell to use
-  BKP_RSYNC_RSHELL_PATH:  (--rsync-path=PROGRAM) specify the rsync to run on remote machine
-  BKP_RSYNC_DELETE:       (--delete) delete extraneous files from dest dir
-  BKP_RSYNC_DELETE_FORCE: (--force) force deletion of dirs even if not empty
-  BKP_RSYNC_NUM_IDS:      (--numeric-ids) don't map uid/gid values by user/group name
-  BKP_RSYNC_INPLACE:      (--inplace) update destination files in-place
-  BKP_RSYNC_ACL:          (--acls) preserve ACLs
-  BKP_RSYNC_XATTRS:       (--xattrs) preserve extended attributes
-  BKP_RSYNC_NODEVICES:    (--no-D) don't copy devices or special files
+  WIPE_KEEP_DAILY:          keep x daily backups
+  WIPE_KEEP_WEEKLY:         keep x weekly backups
+  WIPE_KEEP_MONTHLY:        keep x monthly backups
+  BKP_THREADS_DEFAULT:      maximal amount of threads
+  BKP_THREAD_SRCFOLDERS:    |
+                            0 = queue BKP_SOURCE_FOLDER
+                            1 = queue each BKP_SOURCE_FOLDER if more than folder available
+  BKP_THREAD_SUBFOLDERS:    |
+                            0 = don't queue subfolders
+                            1 = queue each subfolder of each BKP_SOURCE_FOLDER
+  BKP_THREAD_SUBSUBFOLDERS: queue defined subsubfolders
+  BKP_STORE_MODUS:          links (all Filesystems) / snapshots (only for BTRFS)
+  BKP_LASTBKP_FILE:         stores the foldername of last backup
+  BKP_LASTBKP_SUFFIX:       LASTBKP_FILE-[LASTBKP_SUFFIX]
+  BKP_PRIORITY:             |
+                            add priority as list (:path: Nr)
+                            0 = default
+                            < 0 higher prio (-1, -2, -3,...)
+                            > 0 lower prio (1, 2, 3,...)
+  NOCACHE_ENABLED:          |
+                            0 = dont use nocache
+                            1 = use nocache
+  IONICE_OPTIONS:           ionice options
+  TASKSET_OPTIONS:          taskset options
+  BKP_RSYNC_ARCHIV:         (-a) archive mode; equals -rlptgoD (no -H,-A,-X)
+  BKP_RSYNC_RELATIV:        (-R) use relative path names
+  BKP_RSYNC_HLINKS:         (-H) preserve hard links
+  BKP_RSYNC_ONE_FS:         (-x) don't cross filesystem boundaries
+  BKP_RSYNC_WHOLEFILE:      (-W) copy files whole (w/o delta-xfer algorithm)
+  BKP_RSYNC_COMPRESS:       (-z) compress file data during the transfer
+  BKP_RSYNC_RSHELL:         (-e) specify the remote shell to use
+  BKP_RSYNC_RSHELL_PATH:    (--rsync-path=PROGRAM) specify the rsync to run on remote machine
+  BKP_RSYNC_DELETE:         (--delete) delete extraneous files from dest dir
+  BKP_RSYNC_DELETE_FORCE:   (--force) force deletion of dirs even if not empty
+  BKP_RSYNC_NUM_IDS:        (--numeric-ids) don't map uid/gid values by user/group name
+  BKP_RSYNC_INPLACE:        (--inplace) update destination files in-place
+  BKP_RSYNC_ACL:            (--acls) preserve ACLs
+  BKP_RSYNC_XATTRS:         (--xattrs) preserve extended attributes
+  BKP_RSYNC_NODEVICES:      (--no-D) don't copy devices or special files
