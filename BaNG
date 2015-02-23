@@ -165,25 +165,64 @@ sub queue_backup {
     # get list of source folders to back up
     my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} );
     logit( $taskid, $host, $group, 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
+    logit( $taskid, $host, $group, 'Status source folder threading: ' . $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} );
 
-    # optionally queue each subfolder of the source folders
-    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+    if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} ) || ( $#src_folders  == 0 )) {
+        # optionally queue each subfolder of the source folders while only 1 srcfolder defined
+        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} && ( $#src_folders  == 0 ) ) {
 
-        my $dosnapshot = 0;
-        my $numFolder  = @src_folders;
+            my $dosnapshot = 0;
+            my $numFolder  = @src_folders;
 
-        foreach my $folder (@src_folders) {
-            $jobid = create_timeid( $host, $group );
+            foreach my $folder (@src_folders) {
+                $jobid = create_timeid( $host, $group );
 
-            $numFolder--;
-            if ( $numFolder == 0 ) {
-                $dosnapshot = 1;
+                $numFolder--;
+                if ( $numFolder == 0 ) {
+                    $dosnapshot = 1;
+                }
+                queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $folder );
             }
 
-            queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $folder );
-        }
-    } else {
+        } else {
 
+            my $dosnapshot = 0;
+            my $numFolder  = @src_folders;
+
+            $jobid = create_timeid( $host, $group );
+
+            foreach my $folder (@src_folders) {
+
+                $numFolder--;
+                if ( $numFolder == 0 ) {
+                    $dosnapshot = 1;
+                }
+
+                my $bkpjob = {
+                    jobid        => $jobid,
+                    host         => $host,
+                    group        => $group,
+                    path         => "$folder",
+                    srcfolder    => "@src_folders",
+                    lastbkp      => $lastbkp,
+                    bkptimestamp => $bkptimestamp,
+                    dosnapshot   => $dosnapshot,
+                };
+                push( @queue, $bkpjob );
+            }
+
+            my $bkpjob = {
+                jobid        => $jobid,
+                host         => $host,
+                group        => $group,
+                lastbkp      => $lastbkp,
+                bkptimestamp => $bkptimestamp,
+                dosnapshot   => $dosnapshot,
+            };
+            push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
+        }
+
+    } else {
         # queue list of source folders as a whole
         $jobid = create_timeid( $host, $group );
         my $bkpjob = {
@@ -330,7 +369,9 @@ sub thread_work {
         my $rsync_err;
         $rsync_err = execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
-        unless ( ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) || ($finallysnapshots) ) {
+        unless (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} && !$dosnapshot ) ||
+                ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) ||
+                ( $finallysnapshots )) {
             my $bkpjob = {
                 jobid        => $jobid,
                 host         => $host,
