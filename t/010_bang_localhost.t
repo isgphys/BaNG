@@ -43,11 +43,21 @@ like(   $output,    qr|Removed lockfile|                                        
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 
+$group = 'snapshot-srcfolder-thread';
+$output = `$bangcmd -h localhost -g $group --initial`;
+like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
+unlike( $output,    qr|Number of source folders: 1|i                             , "need more then 1 srcfolder for localhost $group"    );
+like(   $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
+unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
+unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+
 $group = 'snapshot-subfolders';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+like(   $output,    qr|Number of source folders: 1|i                             , "Only 1 srcfolder for localhost $group"              );
+unlike( $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
 like(   $output,    qr|eval subfolders|                                          , "Eval subfolders for localhost $group"               );
 
 $group = 'differentserver';

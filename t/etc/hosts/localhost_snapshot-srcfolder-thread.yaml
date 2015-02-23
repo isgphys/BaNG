@@ -2,9 +2,10 @@
 BKP_ENABLED:            1
 BKP_BULK_ALLOW:         0
 WIPE_BULK_ALLOW:        0
-BKP_SOURCE_FOLDER:      ":/opt/BaNG/t/filesystem/simple"
+BKP_SOURCE_FOLDER:      ":/opt/BaNG/t/filesystem/srcfolder-threading/folder1 :/opt/BaNG/t/filesystem/srcfolder-threading/folder2 :/opt/BaNG/t/filesystem/srcfolder-threading/folder3"
 BKP_PREFIX:             "system"
 BKP_THREADS_DEFAULT:    1
+BKP_THREAD_SRCFOLDERS:  1
 BKP_THREAD_SUBFOLDERS:  0
 BKP_STORE_MODUS:        'snapshots'
 BKP_EXCLUDE_FILE:       'excludelist_system'
