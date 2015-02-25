@@ -495,7 +495,8 @@ sub execute_rsync {
     my $startstamp = time();
 
     # append custom string to path written to DB if we are excluding subfolders
-    my $bkpfrompath = $exclsubfolders ? "$path/FILESONLY" : $path;
+    my $filesonly = ( $path =~ /\/\'$/ ) ? "${path}FILESONLY" : "$path/FILESONLY";
+    my $bkpfrompath = $exclsubfolders ? $filesonly : $path;
 
     # report rsync start to DB, jobstatus => 0
     bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $bkpfrompath, $srcfolder, targetpath( $host, $group ), $lastbkp, '0', '0', '' ) unless $noreport;
