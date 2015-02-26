@@ -51,7 +51,7 @@ if ( $serverconfig{verbose} ) {
 }
 
 # fill up @migrate_folders_history -> all folders to migrate, excl. 'to wiped' folders
-queue_history( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+eval_history_folders( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group} );
 
 if ( !@migrate_folders_history ) {
     print "Exit because queue is empty.\n" if $serverconfig{verbose};
@@ -104,7 +104,7 @@ exit 0;
 #################################
 # Sub-Functions
 #
-sub queue_history {
+sub eval_history_folders {
     my ( $taskid, $host, $group ) = @_;
 
     logit( $taskid, $host, $group, "Queueing folders for host $host group $group" );
