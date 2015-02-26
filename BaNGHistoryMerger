@@ -12,13 +12,15 @@ use BaNG::Config;
 use BaNG::Common;
 use BaNG::Wipe;
 
-my $version = '0.1';
+my $version = '1.0';
 my $verbose_arg;
-my $dryrun_arg = 1;
+my $dryrun_arg;
+my $daylimit_arg;
 my $group_arg;
 my $host_arg;
 my $old_bkpprefix_arg;
 my $prefix_arg;
+my @migrate_folders_history;
 
 #################################
 # Main
@@ -27,15 +29,19 @@ parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
-my $taskid = create_timeid( $host_arg, $group_arg );
+my $btrfs_cmd = $serverconfig{path_btrfs};
+my $taskid    = create_timeid( $host_arg, $group_arg );
 
 get_host_config( $host_arg, $group_arg );
 
 my $host              = $host_arg;
 my $group             = $group_arg;
+my $daylimit          = $daylimit_arg || "3";
 my $config            = "$host-$group";
-my $current_bkpprefix = $hosts{$config}->{hostconfig}->{BKP_PREFIX};
+my $hostconfig        = $hosts{$config}->{hostconfig};
+my $current_bkpprefix = $hostconfig->{BKP_PREFIX};
 my $old_bkpprefix     = $old_bkpprefix_arg;
+
 
 if ( $serverconfig{verbose} ) {
     print "\tHost: $hosts{$config}->{hostname}\n";
@@ -44,8 +50,54 @@ if ( $serverconfig{verbose} ) {
     print "\tBKP-PREFIX old: $old_bkpprefix\n";
 }
 
-# fill up @backup_folders_history -> all folders to migrate, excl. 'to wiped' folders
+# fill up @migrate_folders_history -> all folders to migrate, excl. 'to wiped' folders
 queue_history( $taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+
+if ( !@migrate_folders_history ) {
+    print "Exit because queue is empty.\n" if $serverconfig{verbose};
+    exit 1;
+}
+
+# Limit migration folders to the last x days
+@migrate_folders_history = splice( @migrate_folders_history, 0, $daylimit );
+
+logit( $taskid, $host, $group, "START MIGRATION for host $host group $group, migrate $daylimit days" );
+foreach my $folder ( reverse sort @migrate_folders_history ) {
+    logit( $taskid, $host, $group, "Work on: $folder" );
+    my ($workfolder) = $folder =~ /\/([\d._]*)$/;
+
+    my $rsync_cmd     = $serverconfig{path_rsync};
+    my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
+
+    $hostconfig->{BKP_PREFIX} = $old_bkpprefix;
+    my $rsync_src  = targetpath( $host, $group ) . "/$workfolder/";
+    $hostconfig->{BKP_PREFIX} = $current_bkpprefix;
+    my $rsync_dest  = targetpath( $host, $group ) . "/current";
+
+    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
+        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+        } else {
+            print "Warning: could not find excludefile $excludefile.\n";
+        }
+    }
+
+    logit( $taskid, $host, $group, "RSYNC:\n\t$rsync_cmd $rsync_options $rsync_src $rsync_dest" );
+    system("$rsync_cmd $rsync_options $rsync_src $rsync_dest") unless $serverconfig{dryrun};
+
+    ### do Snapshot Work
+
+    $hostconfig->{BKP_PREFIX} = $current_bkpprefix;
+    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
+    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/$workfolder";
+
+    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
+    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+    logit( $taskid, $host, $group, "Create btrfs snapshot $folder using\n\t$btrfs_snapshot_cmd" );
+    system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
+    logit( $taskid, $host, $group, "FINISHED migration of $folder" );
+}
 
 exit 0;
 
@@ -55,22 +107,22 @@ exit 0;
 sub queue_history {
     my ( $taskid, $host, $group ) = @_;
 
-    logit( $taskid, $host, $group, "Queueing History Merge for host $host group $group" );
+    logit( $taskid, $host, $group, "Queueing folders for host $host group $group" );
 
     my @backup_folders;
     my $count = 0;
     my $oldestCurFolder;
 
     foreach my $bkpprefix ( $current_bkpprefix, $old_bkpprefix ) {
-        $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $bkpprefix;
-        logit( $taskid, $host, $group, "Collect folders for BKP-PREFIX: $bkpprefix" );
+        $hostconfig->{BKP_PREFIX} = $bkpprefix;
+        logit( $taskid, $host, $group, "Check available folders for BKP-PREFIX: $bkpprefix" );
         foreach my $folder ( get_backup_folders( $host, $group ) ) {
             if ( $count == 0 ) {
-                $oldestCurFolder = $folder if $count == 0;
+                $oldestCurFolder = $folder;
                 chomp $oldestCurFolder;
             }
             $count++;
-            print "\tCollect folder: $folder" if $serverconfig{verbose};
+            print "\tCollect folder for $bkpprefix: $folder" if $serverconfig{verbose};
             push( @backup_folders, $folder );
         }
     }
@@ -79,14 +131,14 @@ sub queue_history {
     # count existing backups
     my $bkpkeep = 0;
     foreach my $type (qw( DAILY WEEKLY MONTHLY )) {
-        $bkpkeep += $hosts{$config}->{hostconfig}->{"WIPE_KEEP_$type"};
+        $bkpkeep += $hostconfig->{"WIPE_KEEP_$type"};
     }
     my $bkpcount = $#backup_folders + 1;
 
     # get list of folders to wipe
     my %stack = list_folders_to_wipe( $host, $group, @backup_folders );
 
-    logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} + 1 ) . ", keeping: $bkpkeep for host $host group $group" );
+    logit( $taskid, $host, $group, "Backups existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} + 1 ) . ", keeping: $bkpkeep for host $host group $group" );
 
     # generate wipe report with content of stacks
     if ( $serverconfig{verboselevel} >= 2 && $serverconfig{verbose} ) {
@@ -100,16 +152,15 @@ sub queue_history {
         print $wipe_report;
     }
 
-    my @backup_folders_history;
     foreach my $type (qw( daily weekly monthly )) {
         foreach my $folder ( @{$stack{$type}} ) {
-            next if $folder =~ m/$current_bkpprefix/;
-            push( @backup_folders_history, $folder );
+            next if $folder =~ m/$current_bkpprefix\//;
+            push( @migrate_folders_history, $folder );
         }
     }
     if ( $serverconfig{verbose} ) {
         print "Migrate following folders:\n" if $serverconfig{verbose};
-        foreach my $folder ( reverse sort @backup_folders_history ) {
+        foreach my $folder ( reverse sort @migrate_folders_history ) {
             print "\t$folder\n";
         }
     }
@@ -160,51 +211,6 @@ sub create_timeid {
     return $timeid;
 }
 
-#
-#my $btrfs_cmd             = $serverconfig{path_btrfs};
-#
-#
-#my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
-#
-#foreach my $folder ( reverse sort @backup_folders_history ) {
-#    print "Work on: $folder\n";
-#    my ($workfolder) = $folder =~ /\/([\d._]*)$/;
-#
-#    my $rsync_cmd     = $serverconfig{path_rsync};
-#    my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
-#
-#    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $old_bkpprefix;
-#    my $rsync_src  = targetpath( $host, $group ) . "/$workfolder/";
-#    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $current_bkpprefix;
-#    my $rsync_dest  = targetpath( $host, $group ) . "/migrate";
-#
-#    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
-#        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
-#        if ( -e $excludefile ) {
-#            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
-#        } else {
-#            print "Warning: could not find excludefile $excludefile.\n";
-#        }
-#    }
-#
-#    print "$rsync_cmd $rsync_options $rsync_src $rsync_dest\n";
-#    system("$rsync_cmd $rsync_options $rsync_src $rsync_dest") unless $serverconfig{dryrun};
-#
-#
-#    ### do Snapshot Work
-#
-#    $hosts{$config}->{hostconfig}->{BKP_PREFIX} = $current_bkpprefix;
-#    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/migrate";
-#    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/$workfolder";
-#
-#    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-#    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
-#    print "Create btrfs snapshot for host $host group $group using\n$btrfs_snapshot_cmd\n";
-#    system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
-#
-#}
-#
-
 #################################
 # Command line arguments
 #
@@ -213,6 +219,7 @@ sub parse_command_options {
         'help'            => sub { usage('') },
         'v|verbose'       => \$verbose_arg,
         'n|dry-run'       => \$dryrun_arg,
+        'daylimit=s'      => \$daylimit_arg,
         'g|group=s'       => \$group_arg,
         'h|host=s'        => \$host_arg,
         'old-bkpprefix=s' => \$old_bkpprefix_arg,
@@ -247,12 +254,13 @@ sub usage {
         $message
         Usage Examples:
 
-        $command -h <host> -g <group> --old-prefix <BKP_PREFIX>
+        $command -h <host> -g <group> --old-bkpprefix <BKP_PREFIX>
 
         Optional Arguments:
 
-        -v              # verbose mode to include debugging messages
-        -n              # dry-run without making changes (implies verbose)
+        --daylimit <x>    # migrate only x days, default 3
+        -v                # verbose mode to include debugging messages
+        -n                # dry-run without making changes (implies verbose)
 
 EOF
 
