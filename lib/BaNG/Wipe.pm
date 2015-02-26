@@ -28,18 +28,19 @@ sub list_folders_to_wipe {
 
             # only keep latest backup of each date, wipe the rest
             if ( exists $available_backups{$+{date}} ) {
-                if ( $available_backups{$+{date}} < $+{time} ) {
+                if ( $available_backups{$+{date}}{time} < $+{time} ) {
                     push( @folders_to_wipe, $available_backups{$+{date}}{folder} );
                 } else {
                     push( @folders_to_wipe, $folder );
                 }
             }
             if ( ( !exists $available_backups{$+{date}} )
-              || ( $available_backups{$+{date}} < $+{time} ) ) {
+              || ( $available_backups{$+{date}}{time} < $+{time} ) ) {
                 # store by date to force same time (midnight) for all
                 $available_backups{$+{date}} = {
                     folder => $folder,
                     epoch  => str2time( $+{date} ),
+                    time   => $+{time},
                 };
             }
         }
