@@ -89,6 +89,7 @@ foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
 
     queue_migration($oldfolderpath);
     start_threads();
+    remove_generic_exclude_file($host, $group);
 
     ### do Snapshot Work
     if ( ! $rsync_err_check ) {
@@ -250,6 +251,18 @@ sub create_generic_exclude_file {
     }
     logit( $taskid, $host, $group, "Create generated exclude file $exclsubfolderfile" );
     return $exclsubfolderfile;
+}
+
+sub remove_generic_exclude_file {
+    my ( $host, $group )  = @_;
+    my $exclsubfolderfile = generic_exclude_file( $host, $group );
+
+    if ( -e $exclsubfolderfile ) {
+        unlink "$exclsubfolderfile";
+    }
+    logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
+
+    return 1;
 }
 
 sub generic_exclude_file {
