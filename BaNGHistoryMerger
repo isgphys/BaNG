@@ -1,27 +1,34 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use forks;
 use Cwd qw( abs_path );
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
+use IPC::Open3;
+use Thread::Queue;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( strftime );
 
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
 use BaNG::Common;
+use BaNG::Hosts;
 use BaNG::Wipe;
 
 my $version = '1.0';
 my $verbose_arg;
 my $dryrun_arg;
 my $daylimit_arg;
+my $nthreads_arg;
 my $group_arg;
 my $host_arg;
 my $old_bkpprefix_arg;
 my $prefix_arg;
 my @migrate_folders_history;
+my @queue;
 my $btrfs_snapshot_cmd;
+my $rsync_err_check;
 
 #################################
 # Main
@@ -70,42 +77,32 @@ my $btrfs_snapshot_current = targetpath( $host, $group ) . "/current";
 if ( ! -e $btrfs_snapshot_source ) {
     $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot $btrfs_snapshot_current $btrfs_snapshot_source >/dev/null 2>&1";
     logit( $taskid, $host, $group, "Create migration snapshot folder using:\n\t$btrfs_snapshot_cmd" );
+
     $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
     system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
 }
 
-foreach my $folder ( reverse sort @migrate_folders_history ) {
-    logit( $taskid, $host, $group, "Work on: $folder" );
-    my ($workfolder) = $folder =~ /\/([\d._]*)$/;
+# foreach day folder
+foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
+    logit( $taskid, $host, $group, "Work on: $oldfolderpath" );
+    my ($workfolder) = $oldfolderpath =~ /\/([\d._]*)$/;
 
-    my $rsync_cmd     = $serverconfig{path_rsync};
-    my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
-
-    $hostconfig->{BKP_PREFIX} = $old_bkpprefix;
-    my $rsync_src  = targetpath( $host, $group ) . "/$workfolder/";
-    $hostconfig->{BKP_PREFIX} = $current_bkpprefix;
-    my $rsync_dest  = targetpath( $host, $group ) . "/migrate";
-
-    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
-        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
-        if ( -e $excludefile ) {
-            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
-        } else {
-            print "Warning: could not find excludefile $excludefile.\n";
-        }
-    }
-
-    logit( $taskid, $host, $group, "RSYNC:\n\t$rsync_cmd $rsync_options $rsync_src $rsync_dest" );
-    system("$rsync_cmd $rsync_options $rsync_src $rsync_dest") unless $serverconfig{dryrun};
+    queue_migration($oldfolderpath);
+    start_threads();
 
     ### do Snapshot Work
-    my $btrfs_snapshot_dest = targetpath( $host, $group ) . "/$workfolder";
+    if ( ! $rsync_err_check ) {
+        my $btrfs_snapshot_dest = targetpath( $host, $group ) . "/$workfolder";
 
-    $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-    $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
-    logit( $taskid, $host, $group, "Create btrfs snapshot $folder using\n\t$btrfs_snapshot_cmd" );
-    system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
-    logit( $taskid, $host, $group, "FINISHED migration of $folder" );
+        $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
+        $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+
+        logit( $taskid, $host, $group, "Create btrfs snapshot $oldfolderpath using\n\t$btrfs_snapshot_cmd" );
+        system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
+        logit( $taskid, $host, $group, "FINISHED migration of $oldfolderpath" );
+    } else {
+        logit( $taskid, $host, $group, "FINISHED migration, of $oldfolderpath but with RSYNC ERRORS, no SNAPSHOT done!" );
+    }
 }
 
 exit 0;
@@ -180,6 +177,203 @@ sub eval_history_folders {
     return 1;
 }
 
+sub queue_migration {
+    my ( $oldfolderpath ) = @_;
+    print "\nStart queuing for folder $oldfolderpath\n\n";
+
+    # get list of source folders to back up
+    my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} );
+    logit( $taskid, $host, $group, 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
+
+    foreach my $folder (@src_folders) {
+        $folder =~ s/://;
+        my @subfolders = `find ${oldfolderpath}${folder} -xdev -mindepth 1 -maxdepth 1 -type d | sort`;
+
+        # if @subfolders empty (rsh troubles?) then use the $srcfolder
+        if ( $#subfolders == -1 ) {
+            push( @subfolders, $oldfolderpath );
+            logit( $taskid, $host, $group, "ERROR: eval subfolders failed, use now with:\n @subfolders" );
+        } else {
+            logit( $taskid, $host, $group, "eval subfolders:\n @subfolders" );
+        }
+
+        my $exclsubfolderfile = create_generic_exclude_file($host, $group);
+
+        open(my $fhExcludeFile, '>>', $exclsubfolderfile) unless $serverconfig{dryrun};
+
+        foreach my $subfolder (@subfolders) {
+            chomp $subfolder;
+            $subfolder =~ s| |\\ |g;
+            $subfolder =~ s|\(|\\\(|g;
+            $subfolder =~ s|\)|\\\)|g;
+
+            my $migratejob = {
+                host      => $host,
+                group     => $group,
+                path      => "$subfolder",
+                subfolder => "$folder",
+            };
+            push( @queue, $migratejob );
+
+            $subfolder =~ s|^/||g;
+            print $fhExcludeFile "- $subfolder/\n" unless $serverconfig{dryrun};
+            print "- $subfolder/\n" if $serverconfig{verbose};
+        }
+        close $fhExcludeFile unless $serverconfig{dryrun};
+        # add bkp job for files only
+        my $migratejob = {
+            host           => $host,
+            group          => $group,
+            path           => "${oldfolderpath}${folder}/",
+            subfolder      => "$folder",
+            exclsubfolders => 1,
+        };
+        push( @queue, $migratejob );
+    }
+    return 1;
+}
+
+sub eval_rsync_generic_exclude_cmd {
+    my ( $host, $group ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_migrate";
+    my $exclsubfolderopt      = "--exclude-from=$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderopt;
+}
+
+sub create_generic_exclude_file {
+    my ( $host, $group )  = @_;
+    my $exclsubfolderfile = generic_exclude_file( $host, $group );
+
+    unless ( $serverconfig{dryrun} ) {
+        system("touch \"$exclsubfolderfile\"") and logit( $taskid, $host, $group, "ERROR: could not create generated excludefile $exclsubfolderfile" );
+    }
+    logit( $taskid, $host, $group, "Create generated exclude file $exclsubfolderfile" );
+    return $exclsubfolderfile;
+}
+
+sub generic_exclude_file {
+    my ( $host, $group ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_migrate";
+    my $exclsubfolderfile     = "$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderfile;
+}
+
+#################################
+# Threading
+#
+sub start_threads {
+    # define number of threads
+    my $nthreads;
+    if ($nthreads_arg) {
+        # If nthreads was defined by cli argument, use it
+        $nthreads = $nthreads_arg;
+        print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
+    } else {
+        $nthreads = 1;
+    }
+
+    my $Q = Thread::Queue->new;
+    my @threads = map { threads->create( \&thread_work, $Q ) } ( 1 .. $nthreads );
+    $Q->enqueue($_) for @queue;
+    $Q->enqueue( (undef) x $nthreads );
+    $_->join for @threads;
+
+    return 1;
+}
+
+sub thread_work {
+    my ($Q) = @_;
+
+    while ( my $migratejob = $Q->dequeue ) {
+        my $tid            = threads->tid;
+        my $host           = $migratejob->{host};
+        my $group          = $migratejob->{group};
+        my $path           = $migratejob->{path};
+        my $subfolder      = $migratejob->{subfolder};
+        my $exclsubfolders = $migratejob->{'exclsubfolders'} || 0;
+
+        my $random_integer = int( rand(10) ) + 1;
+        $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
+
+        return unless create_lockfile( $taskid, $host, $group, $path );
+        logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
+        sleep($random_integer);
+
+        logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
+        my $rsync_err;
+        $rsync_err = execute_rsync( $host, $group, $path, $subfolder, $exclsubfolders );
+
+        $rsync_err_check = 1 if $rsync_err > 0;
+
+        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
+
+        remove_lockfile( $taskid, $host, $group, $path );
+    }
+
+    return 1;
+}
+
+sub execute_rsync {
+    my ( $host, $group, $path, $subfolder, $exclsubfolders ) = @_;
+
+    my $rsync_cmd     = $serverconfig{path_rsync};
+    my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
+    my $rsync_target  = targetpath( $host, $group ) . "/migrate$subfolder";
+
+    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
+        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $rsync_options .= "--exclude-from=$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE} ";
+        } else {
+            print "Warning: could not find excludefile $excludefile.\n";
+        }
+    }
+
+    my $rsync_generic_exclude = '';
+    if ( $exclsubfolders ) {
+        $rsync_generic_exclude = eval_rsync_generic_exclude_cmd( $host, $group );
+        logit( $taskid, $host, $group, "Apply subfolder excludelist: $rsync_generic_exclude" );
+    }
+
+    logit( $taskid, $host, $group, "Rsync Command:\n\t$rsync_cmd $rsync_options$path $rsync_target" );
+    logit( $taskid, $host, $group, "Executing rsync for host $host group $group path $path" );
+
+    local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
+    $rsync_cmd = "echo $rsync_cmd" if $serverconfig{dryrun};
+    my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_generic_exclude $rsync_options$path $rsync_target" );
+
+    logit( $taskid, $host, $group, "Rsync PID: $rsyncpid for host $host group $group path $path" );
+
+    my @outlines = <HIS_OUT>;
+    my @errlines = <HIS_ERR>;
+    close HIS_IN;
+    close HIS_OUT;
+    close HIS_ERR;
+
+    waitpid( $rsyncpid, 0 );
+
+    logit( $taskid, $host, $group, "Rsync[$rsyncpid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 1 );
+    logit( $taskid, $host, $group, "ERROR: Rsync[$rsyncpid] STDERR: @errlines" ) if @errlines;
+    logit( $taskid, $host, $group, "ERROR: Rsync[$rsyncpid] child exited with status of $?" ) if $?;
+
+    my $errcode  = 0;
+    my $endstamp = time();
+    if (@errlines) {
+        foreach my $errline (@errlines) {
+            if ( $errline =~ /.* \(code (\d+)/ ) {
+                $errcode = $1;
+                logit( $taskid, $host, $group, "Rsync errorcode: $errcode" );
+            }
+        }
+    } else {
+        logit( $taskid, $host, $group, "Rsync successful for host $host group $group path $path" );
+    }
+
+    return $errcode;
+}
+
 #################################
 # Helper subroutines
 #
@@ -231,11 +425,13 @@ sub parse_command_options {
         'v|verbose'       => \$verbose_arg,
         'n|dry-run'       => \$dryrun_arg,
         'daylimit=s'      => \$daylimit_arg,
+        't|threads=i'     => \$nthreads_arg,
         'g|group=s'       => \$group_arg,
         'h|host=s'        => \$host_arg,
         'old-bkpprefix=s' => \$old_bkpprefix_arg,
     ) or usage('Invalid commmand line options.');
     usage('Check the arguments!') unless ( $host_arg && $group_arg && $old_bkpprefix_arg );
+    usage('Number of threads must be positive') if ( $nthreads_arg && $nthreads_arg <= 0 );
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -270,6 +466,7 @@ sub usage {
         Optional Arguments:
 
         --daylimit <x>    # migrate only x days, default 3
+        -t <nr>           # number of threads, default: 1
         -v                # verbose mode to include debugging messages
         -n                # dry-run without making changes (implies verbose)
 
