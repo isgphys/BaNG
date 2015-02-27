@@ -21,6 +21,7 @@ my $host_arg;
 my $old_bkpprefix_arg;
 my $prefix_arg;
 my @migrate_folders_history;
+my $btrfs_snapshot_cmd;
 
 #################################
 # Main
@@ -58,10 +59,22 @@ if ( !@migrate_folders_history ) {
     exit 1;
 }
 
-# Limit migration folders to the last x days
+# Limit migration folders to the last x days (begin with the newest)
+@migrate_folders_history = reverse sort @migrate_folders_history;
 @migrate_folders_history = splice( @migrate_folders_history, 0, $daylimit );
 
 logit( $taskid, $host, $group, "START MIGRATION for host $host group $group, migrate $daylimit days" );
+$hostconfig->{BKP_PREFIX}  = $current_bkpprefix;
+my $btrfs_snapshot_source  = targetpath( $host, $group ) . "/migrate";
+my $btrfs_snapshot_current = targetpath( $host, $group ) . "/current";
+
+if ( ! -e $btrfs_snapshot_source ) {
+    $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot $btrfs_snapshot_current $btrfs_snapshot_source >/dev/null 2>&1";
+    logit( $taskid, $host, $group, "Create migration snapshot folder using:\n\t$btrfs_snapshot_cmd" );
+    $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+    system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
+}
+
 foreach my $folder ( reverse sort @migrate_folders_history ) {
     logit( $taskid, $host, $group, "Work on: $folder" );
     my ($workfolder) = $folder =~ /\/([\d._]*)$/;
@@ -72,7 +85,7 @@ foreach my $folder ( reverse sort @migrate_folders_history ) {
     $hostconfig->{BKP_PREFIX} = $old_bkpprefix;
     my $rsync_src  = targetpath( $host, $group ) . "/$workfolder/";
     $hostconfig->{BKP_PREFIX} = $current_bkpprefix;
-    my $rsync_dest  = targetpath( $host, $group ) . "/current";
+    my $rsync_dest  = targetpath( $host, $group ) . "/migrate";
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
         my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
@@ -87,13 +100,10 @@ foreach my $folder ( reverse sort @migrate_folders_history ) {
     system("$rsync_cmd $rsync_options $rsync_src $rsync_dest") unless $serverconfig{dryrun};
 
     ### do Snapshot Work
+    my $btrfs_snapshot_dest = targetpath( $host, $group ) . "/$workfolder";
 
-    $hostconfig->{BKP_PREFIX} = $current_bkpprefix;
-    my $btrfs_snapshot_source = targetpath( $host, $group ) . "/current";
-    my $btrfs_snapshot_dest   = targetpath( $host, $group ) . "/$workfolder";
-
-    my $btrfs_snapshot_cmd    = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-    $btrfs_snapshot_cmd       = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
+    $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
+    $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
     logit( $taskid, $host, $group, "Create btrfs snapshot $folder using\n\t$btrfs_snapshot_cmd" );
     system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
     logit( $taskid, $host, $group, "FINISHED migration of $folder" );
