@@ -60,7 +60,6 @@ if ( !@migrate_folders_history ) {
 }
 
 # Limit migration folders to the last x days (begin with the newest)
-@migrate_folders_history = reverse sort @migrate_folders_history;
 @migrate_folders_history = splice( @migrate_folders_history, 0, $daylimit );
 
 logit( $taskid, $host, $group, "START MIGRATION for host $host group $group, migrate $daylimit days" );
@@ -168,6 +167,8 @@ sub eval_history_folders {
             push( @migrate_folders_history, $folder );
         }
     }
+    @migrate_folders_history = reverse sort @migrate_folders_history;
+
     if ( $serverconfig{verbose} ) {
         print "Migrate following folders:\n" if $serverconfig{verbose};
         foreach my $folder ( reverse sort @migrate_folders_history ) {
