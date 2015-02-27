@@ -258,7 +258,7 @@ sub remove_generic_exclude_file {
     my $exclsubfolderfile = generic_exclude_file( $host, $group );
 
     if ( -e $exclsubfolderfile ) {
-        unlink "$exclsubfolderfile";
+        unlink "$exclsubfolderfile" unless $serverconfig{dryrun};;
     }
     logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
 
