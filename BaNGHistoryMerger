@@ -202,6 +202,7 @@ sub queue_migration {
 
         open(my $fhExcludeFile, '>>', $exclsubfolderfile) unless $serverconfig{dryrun};
 
+        my $jobid = create_timeid( $host, $group );
         foreach my $subfolder (@subfolders) {
             chomp $subfolder;
             $subfolder =~ s| |\\ |g;
@@ -211,6 +212,7 @@ sub queue_migration {
             my $migratejob = {
                 host      => $host,
                 group     => $group,
+                jobid     => $jobid,
                 path      => "${oldfolderpath}$folder$subfolder",
                 folder    => "$folder",
                 subfolder => "$subfolder",
@@ -229,6 +231,7 @@ sub queue_migration {
         my $migratejob = {
             host           => $host,
             group          => $group,
+            jobid          => $jobid,
             path           => "${oldfolderpath}${folder}/",
             folder         => "$folder",
             exclsubfolders => 1,
@@ -307,6 +310,7 @@ sub thread_work {
         my $tid            = threads->tid;
         my $host           = $migratejob->{host};
         my $group          = $migratejob->{group};
+        my $jobid          = $migratejob->{jobid};
         my $path           = $migratejob->{path};
         my $folder         = $migratejob->{folder};
         my $subfolder      = $migratejob->{subfolder} || "";
@@ -315,7 +319,7 @@ sub thread_work {
         my $random_integer = int( rand(10) ) + 1;
         $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
 
-        return unless create_lockfile( $taskid, $host, $group, "$folder${subfolder}_migration" );
+        return unless create_lockfile( $taskid, $host, $group, "$folder${subfolder}_migration-$jobid" );
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
 
@@ -327,7 +331,7 @@ sub thread_work {
 
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
 
-        remove_lockfile( $taskid, $host, $group, "$folder${subfolder}_migration" );
+        remove_lockfile( $taskid, $host, $group, "$folder${subfolder}_migration-$jobid" );
     }
 
     return 1;
