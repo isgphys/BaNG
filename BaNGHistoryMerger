@@ -98,7 +98,7 @@ foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
         $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
         $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
 
-        logit( $taskid, $host, $group, "Create btrfs snapshot $oldfolderpath using\n\t$btrfs_snapshot_cmd" );
+        logit( $taskid, $host, $group, "Create btrfs snapshot $oldfolderpath using:\n\t$btrfs_snapshot_cmd" );
         system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
         logit( $taskid, $host, $group, "FINISHED migration of $oldfolderpath" );
     } else {
