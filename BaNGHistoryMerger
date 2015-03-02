@@ -188,7 +188,7 @@ sub queue_migration {
 
     foreach my $folder (@src_folders) {
         $folder =~ s/://;
-        my @subfolders = `find ${oldfolderpath}${folder} -xdev -mindepth 1 -maxdepth 1 -type d | sort`;
+        my @subfolders = `find ${oldfolderpath}${folder} -xdev -mindepth 1 -maxdepth 1 -type d -printf '/%P\n' | sort`;
 
         # if @subfolders empty (rsh troubles?) then use the $srcfolder
         if ( $#subfolders == -1 ) {
@@ -211,14 +211,18 @@ sub queue_migration {
             my $migratejob = {
                 host      => $host,
                 group     => $group,
-                path      => "$subfolder",
-                subfolder => "$folder",
+                path      => "${oldfolderpath}$folder$subfolder",
+                folder    => "$folder",
+                subfolder => "$subfolder",
             };
             push( @queue, $migratejob );
 
             $subfolder =~ s|^/||g;
-            print $fhExcludeFile "- $subfolder/\n" unless $serverconfig{dryrun};
-            print "- $subfolder/\n" if $serverconfig{verbose};
+            my $folder_raw = $folder;
+            $folder_raw =~ s|^/||g;
+
+            print $fhExcludeFile "- $folder_raw/$subfolder/\n" unless $serverconfig{dryrun};
+            print "- $folder_raw/$subfolder/\n" if $serverconfig{verbose};
         }
         close $fhExcludeFile unless $serverconfig{dryrun};
         # add bkp job for files only
@@ -226,7 +230,7 @@ sub queue_migration {
             host           => $host,
             group          => $group,
             path           => "${oldfolderpath}${folder}/",
-            subfolder      => "$folder",
+            folder         => "$folder",
             exclsubfolders => 1,
         };
         push( @queue, $migratejob );
@@ -267,7 +271,7 @@ sub remove_generic_exclude_file {
 
 sub generic_exclude_file {
     my ( $host, $group ) = @_;
-    my $exclsubfolderfilename = "generated.${host}_${group}_migrate";
+    my $exclsubfolderfilename = "generated.${host}_${group}_migrate-$taskid";
     my $exclsubfolderfile     = "$serverconfig{path_excludes}/$exclsubfolderfilename";
 
     return $exclsubfolderfile;
@@ -304,36 +308,37 @@ sub thread_work {
         my $host           = $migratejob->{host};
         my $group          = $migratejob->{group};
         my $path           = $migratejob->{path};
-        my $subfolder      = $migratejob->{subfolder};
+        my $folder         = $migratejob->{folder};
+        my $subfolder      = $migratejob->{subfolder} || "";
         my $exclsubfolders = $migratejob->{'exclsubfolders'} || 0;
 
         my $random_integer = int( rand(10) ) + 1;
         $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
 
-        return unless create_lockfile( $taskid, $host, $group, $path );
+        return unless create_lockfile( $taskid, $host, $group, "$folder${subfolder}_migration" );
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
 
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         my $rsync_err;
-        $rsync_err = execute_rsync( $host, $group, $path, $subfolder, $exclsubfolders );
+        $rsync_err = execute_rsync( $host, $group, $path, $folder, $subfolder, $exclsubfolders );
 
         $rsync_err_check = 1 if $rsync_err > 0;
 
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
 
-        remove_lockfile( $taskid, $host, $group, $path );
+        remove_lockfile( $taskid, $host, $group, "$folder${subfolder}_migration" );
     }
 
     return 1;
 }
 
 sub execute_rsync {
-    my ( $host, $group, $path, $subfolder, $exclsubfolders ) = @_;
+    my ( $host, $group, $path, $folder, $subfolder, $exclsubfolders ) = @_;
 
     my $rsync_cmd     = $serverconfig{path_rsync};
     my $rsync_options = "--stats -a -H --delete --delete-excluded --acls -e rsh ";
-    my $rsync_target  = targetpath( $host, $group ) . "/migrate$subfolder";
+    my $rsync_target  = targetpath( $host, $group ) . "/migrate$folder";
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
         my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
@@ -350,7 +355,7 @@ sub execute_rsync {
         logit( $taskid, $host, $group, "Apply subfolder excludelist: $rsync_generic_exclude" );
     }
 
-    logit( $taskid, $host, $group, "Rsync Command:\n\t$rsync_cmd $rsync_options$path $rsync_target" );
+    logit( $taskid, $host, $group, "Rsync Command:\n\t$rsync_cmd $rsync_generic_exclude $rsync_options$path $rsync_target" );
     logit( $taskid, $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
