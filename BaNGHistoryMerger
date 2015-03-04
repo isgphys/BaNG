@@ -87,7 +87,9 @@ foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
     logit( $taskid, $host, $group, "Work on: $oldfolderpath" );
     my ($workfolder) = $oldfolderpath =~ /\/([\d._]*)$/;
 
-    queue_migration($oldfolderpath);
+    my $jobid = create_timeid( $host, $group );
+
+    queue_migration($jobid, $oldfolderpath);
     start_threads();
     remove_generic_exclude_file($host, $group);
 
@@ -179,7 +181,8 @@ sub eval_history_folders {
 }
 
 sub queue_migration {
-    my ( $oldfolderpath ) = @_;
+    my ( $jobid, $oldfolderpath ) = @_;
+    undef @queue;
     print "\nStart queuing for folder $oldfolderpath\n\n";
 
     # get list of source folders to back up
@@ -202,7 +205,6 @@ sub queue_migration {
 
         open(my $fhExcludeFile, '>>', $exclsubfolderfile) unless $serverconfig{dryrun};
 
-        my $jobid = create_timeid( $host, $group );
         foreach my $subfolder (@subfolders) {
             chomp $subfolder;
             $subfolder =~ s| |\\ |g;
