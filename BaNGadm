@@ -77,14 +77,14 @@ if ($setprop) {
         print "Set snapshots property of $host_arg - $group_arg to Read-Only\n";
         foreach my $folder (@backup_folders) {
             chomp $folder;
-            my $result = `/usr/local/bin/btrfs property set -ts $folder ro true`;
+            my $result = `$serverconfig{path_btrfs} property set -ts $folder ro true`;
             print "set $folder to Read-Only\n";
         }
     } elsif ($setprop eq "rw") {
         print "Set snapshots property of $host_arg - $group_arg to Read-Write\n";
         foreach my $folder (@backup_folders) {
             chomp $folder;
-            my $result = `/usr/local/bin/btrfs property set -ts $folder ro false`;
+            my $result = `$serverconfig{path_btrfs} property set -ts $folder ro false`;
             print "set $folder to Read-Write\n";
         }
     }
