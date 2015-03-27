@@ -56,6 +56,7 @@ if ( $serverconfig{verbose} ) {
     print "\tGroup: $hosts{$config}->{group}\n";
     print "\tBKP-PREFIX current: $current_bkpprefix\n";
     print "\tBKP-PREFIX old: $old_bkpprefix\n";
+    print "\tExclude-File: $serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}\n";
 }
 
 # fill up @migrate_folders_history -> all folders to migrate, excl. 'to wiped' folders
