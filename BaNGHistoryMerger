@@ -227,8 +227,8 @@ sub queue_migration {
             my $folder_raw = $folder;
             $folder_raw =~ s|^/||g;
 
-            print $fhExcludeFile "- $folder_raw/$subfolder/\n" unless $serverconfig{dryrun};
-            print "- $folder_raw/$subfolder/\n" if $serverconfig{verbose};
+            print $fhExcludeFile "- $subfolder/\n" unless $serverconfig{dryrun};
+            print "- $subfolder/\n" if $serverconfig{verbose};
         }
         close $fhExcludeFile unless $serverconfig{dryrun};
         # add bkp job for files only
