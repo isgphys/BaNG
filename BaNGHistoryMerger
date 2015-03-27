@@ -246,7 +246,7 @@ sub queue_migration {
 
 sub eval_rsync_generic_exclude_cmd {
     my ( $host, $group ) = @_;
-    my $exclsubfolderfilename = "generated.${host}_${group}_migrate";
+    my $exclsubfolderfilename = "generated.${host}_${group}_migrate-$taskid";
     my $exclsubfolderopt      = "--exclude-from=$serverconfig{path_excludes}/$exclsubfolderfilename";
 
     return $exclsubfolderopt;
