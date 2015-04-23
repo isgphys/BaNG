@@ -8,7 +8,7 @@
 <script>
     $(window).load(function() {
         $.ajax({
-            url: '/restore/restore_content',
+            url: '/restore/restore_content/<% showhost %>',
             success: function(content) {
                 $('#restore_content').html(content);
                 initializeAll();

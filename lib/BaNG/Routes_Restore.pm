@@ -10,17 +10,21 @@ use BaNG::Common;
 
 prefix '/restore';
 
-get '/' => require_login sub {
+get '/?:hostname?' => require_login sub {
+
+    my $showhost = param('hostname') || '*';
+
     template 'restore' => {
         section    => 'restore',
         servername => $servername,
-        servers      => \%servers,
+        showhost   => $showhost,
+        servers    => \%servers,
     };
 };
 
-get '/restore_content' => require_login sub {
+get '/restore_content/:showhost' => require_login sub {
     get_serverconfig();
-    get_host_config('*');
+    get_host_config(param('showhost'));
 
     my %hosts_stack;
     foreach my $hostgroup ( sort keys %hosts ) {
