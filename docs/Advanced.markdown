@@ -21,7 +21,7 @@ Note that every backup server has its own config files and cron scheduling. This
 NFS automounts
 --------------
 
-We export the backup partitions via NFS to the clients for easy restoring of files. The `get_autmount_paths` subroutine polls NIS for the list of automount paths, provided `path_ypcat` is defined. The paths are then displayed in the `/restore` route.
+We export the backup partitions via NFS to the clients for easy restoring of files. The `get_automount_paths` subroutine polls NIS for the list of automount paths, provided `path_ypcat` is defined. The paths are then displayed in the `/restore` route.
 
 
 Cronjobs
