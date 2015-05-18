@@ -15,7 +15,7 @@ apt-get install perl rsh-redone-server rsh-redone-client rsync starman \
 Note that `libforks-perl` must be version 0.35 or later. If your distribution ships an older version, you should install the module from cpan.
 
 ```sh
-git clone git@gitlab.phys.ethz.ch:dancer/bang.git /opt/BaNG
+git clone https://github.com/patschbo/BaNG.git /opt/BaNG
 cd /opt/BaNG
 chown www-data:www-data var/sessions
 cp config.yml.example config.yml
