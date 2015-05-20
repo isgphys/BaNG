@@ -13,7 +13,7 @@ use BaNG::Common;
 my $version = '0.1';
 my $add_arg;
 my $delete_arg;
-my $crontabonly;
+my $crontabcreate;
 my $setprop;
 my $verbose_arg;
 my $dryrun_arg;
@@ -29,7 +29,7 @@ parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
-if ($crontabonly) {
+if ($crontabcreate) {
     my $crontab = generated_crontab();
     if ( $serverconfig{dryrun} ) {
         print "$crontab\n";
@@ -141,21 +141,21 @@ if ($delete_arg) {
 sub parse_command_options {
 
     GetOptions(
-        'help'       => sub { usage('') },
-        'version'    => sub { usage("Current version number: $version") },
-        'v|verbose'  => \$verbose_arg,
-        'n|dry-run'  => \$dryrun_arg,
-        'add'        => \$add_arg,
-        'delete'     => \$delete_arg,
-        'g|group=s'  => \$group_arg,
-        'h|host=s'   => \$host_arg,
-        'crontab'    => \$crontabonly,
-        'p|prefix=s' => \$prefix_arg,
-        'showgroups' => \$showgroups,
-        'setprop=s'  => \$setprop,
+        'help'           => sub { usage('') },
+        'version'        => sub { usage("Current version number: $version") },
+        'v|verbose'      => \$verbose_arg,
+        'n|dry-run'      => \$dryrun_arg,
+        'add'            => \$add_arg,
+        'delete'         => \$delete_arg,
+        'g|group=s'      => \$group_arg,
+        'h|host=s'       => \$host_arg,
+        'crontab-create' => \$crontabcreate,
+        'p|prefix=s'     => \$prefix_arg,
+        'showgroups'     => \$showgroups,
+        'setprop=s'      => \$setprop,
     ) or usage('Invalid commmand line options.');
-    usage('Do not use together!') if ( $crontabonly && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabonly || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Do not use together!') if ( $crontabcreate && $showgroups );
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabcreate || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -194,7 +194,7 @@ sub usage {
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
-        $command --crontab                            # generated and write crontab
+        $command --crontab-create                     # generated and write crontab
         $command --showgroups                         # show available groups
         $command --help                               # show this help message
         $command --version                            # show version number and help
