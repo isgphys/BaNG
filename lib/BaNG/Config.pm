@@ -269,6 +269,8 @@ sub get_cronjob_config {
                 sprintf('%02d%02d', $unsortedcronjobs{$server}{$jobtype}{$a}{cron}->{HOUR}, $unsortedcronjobs{$server}{$jobtype}{$a}{cron}->{MIN})
                 <=>
                 sprintf('%02d%02d', $unsortedcronjobs{$server}{$jobtype}{$b}{cron}->{HOUR}, $unsortedcronjobs{$server}{$jobtype}{$b}{cron}->{MIN})
+                ||
+                $a cmp $b
                 } keys %{ $unsortedcronjobs{$server}{$jobtype} } ) {
 
                 my $PastMidnight = ( $unsortedcronjobs{$server}{$jobtype}{$cronjob}{cron}->{HOUR} >= 18 ) ? 0 : 1;
