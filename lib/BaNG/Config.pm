@@ -8,6 +8,7 @@ use File::Basename;
 use File::Find::Rule;
 use POSIX qw( strftime );
 use YAML::Tiny qw( LoadFile DumpFile );
+use Text::Diff;
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -27,6 +28,7 @@ our @EXPORT = qw(
     delete_config
     get_cronjob_config
     generated_crontab
+    status_crontab
 );
 
 our %hosts;
@@ -285,10 +287,8 @@ sub get_cronjob_config {
 
 sub generated_crontab {
     my $cronjobs = get_cronjob_config();
-    my $today    = `$serverconfig{path_date} +'%Y-%m-%d %H:%M:%S'`;
 
     my $crontab = "# Automatically generated; do not edit locally\n";
-    $crontab   .= "# created on $today";
 
     foreach my $headerkey (sort keys %{ $cronjobs->{$servername}->{header} } ) {
         $crontab .= "$headerkey=$cronjobs->{$servername}->{header}->{$headerkey}\n";
@@ -324,6 +324,16 @@ sub generated_crontab {
     }
 
     return $crontab;
+}
+
+sub status_crontab {
+    my $gen_crontab = generated_crontab();
+    open ( my $cur_crontab, "<",'/etc/cron.d/BaNG' ) or die ("Can't open /etc/cron.d/BaNG for reading");
+
+    my $diffs = diff \$gen_crontab, "/etc/cron.d/BaNG", { STYLE => "Table" };
+
+    close $gen_crontab;
+    print "$diffs\n" if $diffs;
 }
 
 sub _read_host_configfile {

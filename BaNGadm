@@ -14,6 +14,7 @@ my $version = '0.1';
 my $add_arg;
 my $delete_arg;
 my $crontabcreate;
+my $crontabcheck;
 my $setprop;
 my $verbose_arg;
 my $dryrun_arg;
@@ -28,6 +29,11 @@ my $showgroups;
 parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
+
+if ($crontabcheck) {
+    status_crontab();
+    exit 0;
+}
 
 if ($crontabcreate) {
     my $crontab = generated_crontab();
@@ -150,12 +156,13 @@ sub parse_command_options {
         'g|group=s'      => \$group_arg,
         'h|host=s'       => \$host_arg,
         'crontab-create' => \$crontabcreate,
+        'crontab-check'  => \$crontabcheck,
         'p|prefix=s'     => \$prefix_arg,
         'showgroups'     => \$showgroups,
         'setprop=s'      => \$setprop,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $crontabcreate && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabcreate || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabcreate || $crontabcheck || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -195,6 +202,7 @@ sub usage {
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
         $command --crontab-create                     # generated and write crontab
+        $command --crontab-check                      # check if crontab file actually
         $command --showgroups                         # show available groups
         $command --help                               # show this help message
         $command --version                            # show version number and help
