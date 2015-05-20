@@ -4,11 +4,10 @@ use 5.010;
 use Test::More;
 use File::Basename;
 
-my $bangcmd = dirname($0) . '/../BaNGadm --crontab -n -p t';
+my $bangcmd = dirname($0) . '/../BaNGadm --crontab-create -n -p t';
 my @crontab = `$bangcmd`;
 
 ok( grep( /# Automatically generated/                                            , @crontab ) , 'Crontab contains notice that it is generated'   );
-ok( grep( /# created on/                                                         , @crontab ) , 'Crontab contains notice when it was generated'  );
 ok( grep( /MAILTO=admin\@example\.com/                                           , @crontab ) , 'Crontab contains optional mailto header'        );
 ok( grep( /PATH=\/usr\/local\/bin:\/usr\/bin:\/bin/                              , @crontab ) , 'Crontab contains optional path header'          );
 ok( grep( /#--- backup ---/                                                      , @crontab ) , 'Crontab contains a section for backups'         );
