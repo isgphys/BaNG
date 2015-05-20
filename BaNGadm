@@ -191,7 +191,7 @@ sub usage {
         $command --delete -h <host> -g <group>        # delete a existing host config
         $command --delete -g <group>                  # delete a existing group config
 
-        $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snaphots
+        $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
         $command --crontab                            # generated and write crontab
