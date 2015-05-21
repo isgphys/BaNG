@@ -9,7 +9,7 @@ apt-get install perl rsh-redone-server rsh-redone-client rsync starman \
     libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl \
     liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl \
     libmime-lite-perl libmodule-refresh-perl libnet-ldap-perl \
-    libtemplate-perl libyaml-tiny-perl
+    libtemplate-perl libyaml-tiny-perl libtext-diff-perl
 ```
 
 Note that `libforks-perl` must be version 0.35 or later. If your distribution ships an older version, you should install the module from cpan.
