@@ -84,5 +84,5 @@ BaNG-Web: web front-end
 
 ```sh
 service BaNG-Web start|stop|status            # start/stop starman web server for production environment
-BaNG-Web.pl                                   # start dancer web front-end in development mode on port 3000
+BaNG-Web                                      # start dancer web front-end in development mode on port 3000
 ```
