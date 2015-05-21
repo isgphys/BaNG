@@ -73,7 +73,9 @@ BaNGadm --setprop list -h <host> -g <group>   # show Read-Write/Read-Only status
 BaNGadm --setprop rw|ro -h <host> -g <group>  # set all snapshots to Read-Write/Read-Only
 
 BaNGadm --showgroups                          # show all available groups
-BaNGadm --crontab                             # generate cron entry, use -n to only show the contents
+
+BaNGadm --crontab-create                      # generate cron entry, use -n to only show the contents
+BaNGadm --crontab-check                       # check if crontab file up-to-date
 ```
 
 
