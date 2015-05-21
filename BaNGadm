@@ -202,7 +202,8 @@ sub usage {
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
         $command --crontab-create                     # generated and write crontab
-        $command --crontab-check                      # check if crontab file actually
+        $command --crontab-check                      # check if crontab file up-to-date
+
         $command --showgroups                         # show available groups
         $command --help                               # show this help message
         $command --version                            # show version number and help
