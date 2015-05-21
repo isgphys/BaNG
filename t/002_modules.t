@@ -26,5 +26,6 @@ use_ok 'POSIX';
 use_ok 'Template';
 use_ok 'Thread::Queue';
 use_ok 'Net::LDAP';
+use_ok 'Text::Diff';
 
 done_testing();
