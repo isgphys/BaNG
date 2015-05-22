@@ -1,6 +1,18 @@
 <h2>Dashboard</h2>
 <form action="">
-    <input id="showwipe" type="checkbox" value="1">Show Wipe Report
+    <table>
+        <tr>
+            <td width=150><div><input id="showwipe" type="checkbox" value="1" style="vertical-align: middle;">Show Wipe Report</div></td>
+            <td width=150>
+                <div id="cronstatus">
+                    <div class="loading_message">
+                        <img src="/images/spinner.gif" width=25 alt="Loading animation">
+                        Loading Cronjob Status
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
 </form>
 <div id="fsinfo" class="float-left">
     <div class="loading_message">
@@ -36,6 +48,20 @@
             localStorage.setItem('showwipe', e.target.checked);
         });
 
+        $.ajax({
+            url: '/status_cronjob',
+            success: function(content) {
+            if (content == "" ) {
+            $('#cronstatus').html('<b>Cronjob File Status:</b> up-to-date');
+            } else {
+            $('#cronstatus').html('<b>Cronjob File Status:</b> <a class="alert_yellow" href="/status_cronjob">DIFF</a>');
+                }
+                initializeAll();
+            },
+            error: function() {
+                $('#cronstatus').html('An error occured while loading Cronjob status.');
+            }
+        });
         $.ajax({
             url: '/lockfile_report',
             success: function(content) {

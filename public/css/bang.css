@@ -198,3 +198,10 @@ nav ul.updated li:hover {
 pre {
     padding-left: 10px;
 }
+
+.hljs-addition {
+    color: green !important;
+}
+.hljs-deletion {
+    color: red !important;
+}

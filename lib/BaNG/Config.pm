@@ -330,10 +330,10 @@ sub status_crontab {
     my $gen_crontab = generated_crontab();
     open ( my $cur_crontab, "<",'/etc/cron.d/BaNG' ) or die ("Can't open /etc/cron.d/BaNG for reading");
 
-    my $diffs = diff \$gen_crontab, "/etc/cron.d/BaNG", { STYLE => "Table" };
+    my $diffs = diff  "/etc/cron.d/BaNG", \$gen_crontab, { STYLE => "Unified" };
 
     close $gen_crontab;
-    print "$diffs\n" if $diffs;
+    return $diffs;
 }
 
 sub _read_host_configfile {

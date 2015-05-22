@@ -32,6 +32,20 @@ get '/' => require_role config->{admin_role} => sub {
     };
 };
 
+get '/status_cronjob' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+    my $diff = status_crontab();
+    return '' unless $diff;
+
+    template 'status_cronjob' => {
+        section      => "dashboard",
+        servername   => $servername,
+        servers      => \%servers,
+        xymon_server => $serverconfig{xymon_server},
+        cronjob_diff => $diff,
+    },{ layout => 0 };
+};
+
 get '/fsinfo_report' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
