@@ -31,7 +31,8 @@ get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
 if ($crontabcheck) {
-    status_crontab();
+    my $diff = status_crontab();
+    print "$diff\n";
     exit 0;
 }
 
