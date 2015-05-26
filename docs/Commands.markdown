@@ -74,8 +74,8 @@ BaNGadm --setprop rw|ro -h <host> -g <group>  # set all snapshots to Read-Write/
 
 BaNGadm --showgroups                          # show all available groups
 
-BaNGadm --crontab-create                      # generate cron entry, use -n to only show the contents
-BaNGadm --crontab-check                       # check if crontab file up-to-date
+BaNGadm --cron-create                         # generate and write cronjob file or print crontab to standard out
+BaNGadm --cron-check                          # check if cronjob file / crontab up-to-date
 ```
 
 

@@ -34,7 +34,7 @@ get '/' => require_role config->{admin_role} => sub {
 
 get '/status_cronjob' => require_role config->{admin_role} => sub {
     get_serverconfig();
-    my $diff = status_crontab();
+    my $diff = status_cron();
     return '' unless $diff;
 
     template 'status_cronjob' => {

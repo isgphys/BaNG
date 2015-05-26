@@ -13,8 +13,8 @@ use BaNG::Common;
 my $version = '0.1';
 my $add_arg;
 my $delete_arg;
-my $crontabcreate;
-my $crontabcheck;
+my $croncreate;
+my $croncheck;
 my $setprop;
 my $verbose_arg;
 my $dryrun_arg;
@@ -30,22 +30,22 @@ parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
-if ($crontabcheck) {
-    my $diff = status_crontab();
+if ($croncheck) {
+    my $diff = status_cron();
     print "$diff\n";
     exit 0;
 }
 
-if ($crontabcreate) {
-    my $crontab = generated_crontab();
+if ($croncreate) {
+    my $cron = generate_cron();
     if ( $serverconfig{dryrun} || $serverconfig{cron_type} == 1 ) {
-        print "$crontab\n";
+        print "$cron\n";
     } else {
-        print "write crontab\n";
-        open CRONTAB, '>', '/etc/cron.d/BaNG'
+        print "write cronjob file to /etc/cron.d/BaNG\n";
+        open CRON, '>', '/etc/cron.d/BaNG'
             or die('Could not open /etc/cron.d/BaNG');
-        print CRONTAB $crontab;
-        close CRONTAB;
+        print CRON $cron;
+        close CRON;
     }
 
     exit 0;
@@ -148,22 +148,22 @@ if ($delete_arg) {
 sub parse_command_options {
 
     GetOptions(
-        'help'           => sub { usage('') },
-        'version'        => sub { usage("Current version number: $version") },
-        'v|verbose'      => \$verbose_arg,
-        'n|dry-run'      => \$dryrun_arg,
-        'add'            => \$add_arg,
-        'delete'         => \$delete_arg,
-        'g|group=s'      => \$group_arg,
-        'h|host=s'       => \$host_arg,
-        'crontab-create' => \$crontabcreate,
-        'crontab-check'  => \$crontabcheck,
-        'p|prefix=s'     => \$prefix_arg,
-        'showgroups'     => \$showgroups,
-        'setprop=s'      => \$setprop,
+        'help'        => sub { usage('') },
+        'version'     => sub { usage("Current version number: $version") },
+        'v|verbose'   => \$verbose_arg,
+        'n|dry-run'   => \$dryrun_arg,
+        'add'         => \$add_arg,
+        'delete'      => \$delete_arg,
+        'g|group=s'   => \$group_arg,
+        'h|host=s'    => \$host_arg,
+        'cron-create' => \$croncreate,
+        'cron-check'  => \$croncheck,
+        'p|prefix=s'  => \$prefix_arg,
+        'showgroups'  => \$showgroups,
+        'setprop=s'   => \$setprop,
     ) or usage('Invalid commmand line options.');
-    usage('Do not use together!') if ( $crontabcreate && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $crontabcreate || $crontabcheck || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Do not use together!') if ( $croncreate && $showgroups );
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -202,8 +202,8 @@ sub usage {
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
-        $command --crontab-create                     # generated and write crontab
-        $command --crontab-check                      # check if crontab file up-to-date
+        $command --cron-create                        # generate and write cronjob file or print crontab to standard out
+        $command --cron-check                         # check if cronjob file / crontab up-to-date
 
         $command --showgroups                         # show available groups
         $command --help                               # show this help message

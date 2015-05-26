@@ -27,8 +27,8 @@ our @EXPORT = qw(
     update_config
     delete_config
     get_cronjob_config
-    generated_crontab
-    status_crontab
+    generate_cron
+    status_cron
 );
 
 our %hosts;
@@ -285,55 +285,55 @@ sub get_cronjob_config {
     return \%sortedcronjobs;
 }
 
-sub generated_crontab {
+sub generate_cron {
     my $cronjobs = get_cronjob_config();
 
-    my $crontab = "# Automatically generated; do not edit locally\n";
+    my $crontask = "# Automatically generated; do not edit locally\n";
 
     foreach my $headerkey (sort keys %{ $cronjobs->{$servername}->{header} } ) {
-        $crontab .= "$headerkey=$cronjobs->{$servername}->{header}->{$headerkey}\n";
+        $crontask .= "$headerkey=$cronjobs->{$servername}->{header}->{$headerkey}\n";
     }
 
     foreach my $jobtype (qw( backup backup_missingonly wipe )) {
-        $crontab .= "#--- $jobtype ---\n";
+        $crontask .= "#--- $jobtype ---\n";
         foreach my $cronjob ( sort keys %{$cronjobs->{$servername}->{$jobtype}} ) {
             my %cron;
             foreach my $key (qw( MIN HOUR DOM MONTH DOW )) {
                 $cron{$key} = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{$key};
-                $crontab .= sprintf( '%2s ', $cron{$key} );
+                $crontask .= sprintf( '%2s ', $cron{$key} );
             }
-            $crontab .= "    root" if $serverconfig{cron_type} == 0;
-            $crontab .= "    $prefix/BaNG";
+            $crontask .= "    root" if $serverconfig{cron_type} == 0;
+            $crontask .= "    $prefix/BaNG";
 
             my $host = "$cronjobs->{$servername}->{$jobtype}->{$cronjob}->{host}";
-            $crontab .= " -h $host" unless $host eq 'BULK';
+            $crontask .= " -h $host" unless $host eq 'BULK';
 
             my $group = "$cronjobs->{$servername}->{$jobtype}->{$cronjob}->{group}";
-            $crontab .= " -g $group" unless $group eq 'BULK';
+            $crontask .= " -g $group" unless $group eq 'BULK';
 
             my $threads = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{THREADS};
-            $crontab .= " -t $threads" if $threads;
+            $crontask .= " -t $threads" if $threads;
 
             my $finallysnapshots = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{FINALLYSNAPSHOTS};
-            $crontab .= " --finallysnapshots" if $finallysnapshots;
+            $crontask .= " --finallysnapshots" if $finallysnapshots;
 
-            $crontab .= " --wipe"        if ( $jobtype eq 'wipe' );
-            $crontab .= " --missingonly" if ( $jobtype eq 'backup_missingonly' );
+            $crontask .= " --wipe"        if ( $jobtype eq 'wipe' );
+            $crontask .= " --missingonly" if ( $jobtype eq 'backup_missingonly' );
 
-            $crontab .= "\n";
+            $crontask .= "\n";
         }
     }
 
-    return $crontab;
+    return $crontask;
 }
 
-sub status_crontab {
-    my $gen_crontab = generated_crontab();
-    open ( my $cur_crontab, "<",'/etc/cron.d/BaNG' ) or die ("Can't open /etc/cron.d/BaNG for reading");
+sub status_cron {
+    my $gen_cron = generate_cron();
+    open ( my $cur_cron, "<",'/etc/cron.d/BaNG' ) or die ("Can't open /etc/cron.d/BaNG for reading");
 
-    my $diffs = diff  "/etc/cron.d/BaNG", \$gen_crontab, { STYLE => "Unified" };
+    my $diffs = diff  "/etc/cron.d/BaNG", \$gen_cron, { STYLE => "Unified" };
 
-    close $gen_crontab;
+    close $gen_cron;
     return $diffs;
 }
 

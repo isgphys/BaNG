@@ -30,6 +30,6 @@ Cronjobs
 Backup and wipe jobs have to be run on a regular basis, which is typically done using cron jobs. BaNG allows to configure the cronjobs in dedicated config files (see `etc.example/servers/bangserver_cronjobs.yaml`) and can create the corresponding file in `/etc/cron.d/`.
 
 ```sh
-BaNGadm --crontab -n    # show crontab for current server
-BaNGadm --crontab       # write cron file for current server to /etc/cron.d/
+BaNGadm --cron-create -n    # show cronjob file / crontab for current server
+BaNGadm --cron-create       # write cron file for current server to /etc/cron.d/
 ```
