@@ -302,7 +302,8 @@ sub generated_crontab {
                 $cron{$key} = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{$key};
                 $crontab .= sprintf( '%2s ', $cron{$key} );
             }
-            $crontab .= "    root    $prefix/BaNG";
+            $crontab .= "    root" if $serverconfig{cron_type} == 0;
+            $crontab .= "    $prefix/BaNG";
 
             my $host = "$cronjobs->{$servername}->{$jobtype}->{$cronjob}->{host}";
             $crontab .= " -h $host" unless $host eq 'BULK';
