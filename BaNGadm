@@ -38,7 +38,7 @@ if ($crontabcheck) {
 
 if ($crontabcreate) {
     my $crontab = generated_crontab();
-    if ( $serverconfig{dryrun} ) {
+    if ( $serverconfig{dryrun} || $serverconfig{cron_type} == 1 ) {
         print "$crontab\n";
     } else {
         print "write crontab\n";
