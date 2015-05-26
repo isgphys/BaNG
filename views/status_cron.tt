@@ -15,9 +15,9 @@
         <% INCLUDE header.tt %>
         <% INCLUDE navbar.tt %>
 
-        <h2>Cronjob Diff</h2>
+        <h2>Cron Diff</h2>
         <pre><code class="diff">
-            <%- cronjob_diff -%>
+            <%- cron_diff -%>
         </code>
         </pre>
 

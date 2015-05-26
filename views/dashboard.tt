@@ -7,7 +7,7 @@
                 <div id="cronstatus">
                     <div class="loading_message">
                         <img src="/images/spinner.gif" width=25 alt="Loading animation">
-                        Loading Cronjob Status
+                        Loading Cron Status
                     </div>
                 </div>
             </td>
@@ -49,17 +49,17 @@
         });
 
         $.ajax({
-            url: '/status_cronjob',
+            url: '/status_cron',
             success: function(content) {
             if (content == "" ) {
-            $('#cronstatus').html('<b>Cronjob File Status:</b> up-to-date');
+            $('#cronstatus').html('<b>Cronjob Status:</b> up-to-date');
             } else {
-            $('#cronstatus').html('<b>Cronjob File Status:</b> <a class="alert_yellow" href="/status_cronjob">DIFF</a>');
+            $('#cronstatus').html('<b>Cronjob Status:</b> <a class="alert_yellow" href="/status_cron">DIFF</a>');
                 }
                 initializeAll();
             },
             error: function() {
-                $('#cronstatus').html('An error occured while loading Cronjob status.');
+                $('#cronstatus').html('An error occured while loading Cron status.');
             }
         });
         $.ajax({

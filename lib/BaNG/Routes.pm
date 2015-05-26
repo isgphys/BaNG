@@ -32,17 +32,17 @@ get '/' => require_role config->{admin_role} => sub {
     };
 };
 
-get '/status_cronjob' => require_role config->{admin_role} => sub {
+get '/status_cron' => require_role config->{admin_role} => sub {
     get_serverconfig();
     my $diff = status_cron();
     return '' unless $diff;
 
-    template 'status_cronjob' => {
+    template 'status_cron' => {
         section      => "dashboard",
         servername   => $servername,
         servers      => \%servers,
         xymon_server => $serverconfig{xymon_server},
-        cronjob_diff => $diff,
+        cron_diff => $diff,
     },{ layout => 0 };
 };
 
