@@ -31,6 +31,8 @@ dryrun:                 0
 auto_wipe_limit:        5
 snapshot_wipe_limit:    3
 
+cron_type:              0
+
 remote_app:             ""
 remote_app_path:        ""
 
@@ -74,3 +76,7 @@ HELP:
                             1 = simulate real work
   auto_wipe_limit:          maximal number of backups to wipe automatically without warning
   snapshot_wipe_limit:      maximal number of snapshots to wipe
+
+  cron_type:                |
+                            0 = use cronjob file in /etc/cron.d/
+                            1 = use crontab
