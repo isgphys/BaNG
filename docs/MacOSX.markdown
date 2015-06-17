@@ -33,7 +33,7 @@ sudo port install rsync
 ### Server-side
 
 ```sh
-sudo port install rsync coreutils p5-timedate p5-file-find-rule p5-yaml-tiny p5-dbd-mysql p5-mime-lite p5-template-toolkit
+sudo port install rsync coreutils p5-timedate p5-file-find-rule p5-yaml-tiny p5-dbd-mysql p5-mime-lite p5-template-toolkit p5-text-diff
 ```
 
 The perl `forks` package is not available through MacPorts and has to be installed for instance with `cpanm`:
