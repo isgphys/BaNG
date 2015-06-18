@@ -38,6 +38,7 @@ BKP_RSYNC_WHOLEFILE:      0                         # (-W) copy files whole (w/o
 BKP_RSYNC_COMPRESS:       0                         # (-z) compress file data during the transfer
 BKP_RSYNC_RSHELL:         "rsh"                     # (-e) specify the remote shell to use
 BKP_RSYNC_RSHELL_PATH:    ""                        # (--rsync-path=PROGRAM) specify the rsync to run on remote machine
+BKP_RSYNC_REMOTE_OPT:     ""                        # (-M OPTIONS) specify rsync options on the remote machine
 BKP_RSYNC_DELETE:         1                         # (--delete) delete extraneous files from dest dir
 BKP_RSYNC_DELETE_FORCE:   0                         # (--force) force deletion of dirs even if not empty
 BKP_RSYNC_NUM_IDS:        0                         # (--numeric-ids) don't map uid/gid values by user/group name
@@ -104,6 +105,7 @@ HELP:
   BKP_RSYNC_COMPRESS:       (-z) compress file data during the transfer
   BKP_RSYNC_RSHELL:         (-e) specify the remote shell to use
   BKP_RSYNC_RSHELL_PATH:    (--rsync-path=PROGRAM) specify the rsync to run on remote machine
+  BKP_RSYNC_REMOTE_OPT:     (-M OPTIONS) specify rsync options on the remote machine
   BKP_RSYNC_DELETE:         (--delete) delete extraneous files from dest dir
   BKP_RSYNC_DELETE_FORCE:   (--force) force deletion of dirs even if not empty
   BKP_RSYNC_NUM_IDS:        (--numeric-ids) don't map uid/gid values by user/group name
