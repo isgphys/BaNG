@@ -412,6 +412,7 @@ sub eval_rsync_options {
     $rsync_options .= '--xattrs '      if $hostconfig->{BKP_RSYNC_XATTRS};
     $rsync_options .= '--no-D '        if $hostconfig->{BKP_RSYNC_NODEVICES};
     $rsync_options .= '-v '            if ( $serverconfig{verbose} && ( $serverconfig{verboselevel} == 3 ) );
+    $rsync_options .= "-M '$hostconfig->{BKP_RSYNC_REMOTE_OPT}' "          if $hostconfig->{BKP_RSYNC_REMOTE_OPT};
     $rsync_options .= "--rsync-path=$hostconfig->{BKP_RSYNC_RSHELL_PATH} " if $hostconfig->{BKP_RSYNC_RSHELL_PATH};
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
