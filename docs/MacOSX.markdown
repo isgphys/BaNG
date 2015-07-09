@@ -26,9 +26,41 @@ sudo port install rsync
 #### Enable rsh login
 
   * edit `/var/root/.rhosts` and allow root logins from your BaNG server by adding `mac-bang.example.com      root`
-  * edit `/System/Library/LaunchDaemons/shell.plist` and set disable to false
-  * `launchctl load /System/Library/LaunchDaemons/shell.plist`
-  * `launchctl start com.apple.rshd`
+  * create a file `/Library/LaunchDaemons/com.example.mac-bang.rshd.plist` with the following contents
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Disabled</key>
+	<false/>
+	<key>Label</key>
+	<string>com.example.mac-bang.rshd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/libexec/rshd</string>
+	</array>
+	<key>SessionCreate</key>
+	<true/>
+	<key>Sockets</key>
+	<dict>
+		<key>Listeners</key>
+		<dict>
+			<key>SockServiceName</key>
+			<string>shell</string>
+		</dict>
+	</dict>
+	<key>inetdCompatibility</key>
+	<dict>
+		<key>Wait</key>
+		<false/>
+	</dict>
+</dict>
+</plist>
+```
+
+  * start the rsh daemon with `launchctl load /Library/LaunchDaemons/com.example.mac-bang.rshd.plist`
 
 ### Server-side
 
