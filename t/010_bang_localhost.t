@@ -16,7 +16,7 @@ like(   $output,    qr|Exit because queue is empty|                             
 
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group`;
-like(   $output,    qr|because target_path does not exist|                       , 'Skip backup target_path does not exist'             );
+like(   $output,    qr|Skipping backup of localhost because target_path|         , 'Skip backup target_path does not exist'             );
 
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group --initial`;
