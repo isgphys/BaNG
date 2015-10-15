@@ -10,7 +10,7 @@ Total Jobs: <% taskjobs.Data.size %>
             <th>Target</th>
             <th>Path</th>
             <th colspan="2">ErrStatus</th>
-            <th>Star</th>
+            <th>Start</th>
             <th>Stop</th>
             <th>Runtime</th>
             <th>Last Backup</th>
