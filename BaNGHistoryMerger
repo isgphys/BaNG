@@ -86,17 +86,25 @@ if ( ! -e $btrfs_snapshot_source ) {
 # foreach day folder
 foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
     logit( $taskid, $host, $group, "Work on: $oldfolderpath" );
+    print "Work on: $oldfolderpath";
     my ($workfolder) = $oldfolderpath =~ /\/([\d._]*)$/;
 
     my $jobid = create_timeid( $host, $group );
 
+    print "Start queuing\n";
     queue_migration($jobid, $oldfolderpath);
+
+    print "Start threads\n";
     start_threads();
+
+    print "Remove generic excludefile\n";
     remove_generic_exclude_file($host, $group);
 
     ### do Snapshot Work
     if ( ! $rsync_err_check ) {
         my $btrfs_snapshot_dest = targetpath( $host, $group ) . "/$workfolder";
+
+        print"Create btrfs snapshot $oldfolderpath\n";
 
         $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
         $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
@@ -104,8 +112,10 @@ foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
         logit( $taskid, $host, $group, "Create btrfs snapshot $oldfolderpath using:\n\t$btrfs_snapshot_cmd" );
         system($btrfs_snapshot_cmd) and  print "ERROR: creating snapshot for $host-$group: $!\n";
         logit( $taskid, $host, $group, "FINISHED migration of $oldfolderpath" );
+        print "FINISHED migration of $oldfolderpath\nn";
     } else {
         logit( $taskid, $host, $group, "FINISHED migration, of $oldfolderpath but with RSYNC ERRORS, no SNAPSHOT done!" );
+        print "FINISHED migration, of $oldfolderpath but with RSYNC ERRORS, no SNAPSHOT done!\n\n";
     }
 }
 
@@ -184,7 +194,6 @@ sub eval_history_folders {
 sub queue_migration {
     my ( $jobid, $oldfolderpath ) = @_;
     undef @queue;
-    print "\nStart queuing for folder $oldfolderpath\n\n";
 
     # get list of source folders to back up
     my (@src_folders) = split( / /, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} );
