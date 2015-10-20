@@ -91,20 +91,20 @@ foreach my $oldfolderpath ( reverse sort @migrate_folders_history ) {
 
     my $jobid = create_timeid( $host, $group );
 
-    print "Start queuing\n";
+    print "\tSTART queuing\n";
     queue_migration($jobid, $oldfolderpath);
 
-    print "Start threads\n";
+    print "\tSTART threads\n";
     start_threads();
 
-    print "Remove generic excludefile\n";
+    print "\tREMOVE generic excludefile\n";
     remove_generic_exclude_file($host, $group);
 
     ### do Snapshot Work
     if ( ! $rsync_err_check ) {
         my $btrfs_snapshot_dest = targetpath( $host, $group ) . "/$workfolder";
 
-        print"Create btrfs snapshot $oldfolderpath\n";
+        print"\tCREATE btrfs snapshot $oldfolderpath\n";
 
         $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
         $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
