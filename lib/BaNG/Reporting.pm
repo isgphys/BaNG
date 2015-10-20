@@ -557,7 +557,6 @@ sub xymon_report {
         foreach my $code (@errorcodes) {
             next if $code eq '0';     # no errors
             next if $code eq '24';    # vanished source files
-            next if $code eq '99';    # no last_bkp
             if ( $code eq '23' ) {
                 $topcolor = 'yellow'; # partial transfer
                 next;
