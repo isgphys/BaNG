@@ -13,7 +13,7 @@
             <td colspan=3><b><% server %></b> (<% lockfiles.$server.size %>)</td>
         </tr>
         <%- FOREACH lockfile IN lockfiles.$server.keys.sort %>
-            <tr>
+        <tr <% IF lockfiles.$server.$lockfile.path.match('migration') %> class="migration" title="HistoryMerger@work"<% END %>>
                 <td class="center"><% lockfiles.$server.$lockfile.host %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.path %></td>

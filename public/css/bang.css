@@ -51,7 +51,7 @@ h3 {
 .wipe {
     background-color: #FFEAEA;
 }
-.backup {
+.backup, .migration {
     background-color: #CCFFFF;
 }
 .collapse table tr:nth-child(odd) {
