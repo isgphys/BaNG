@@ -38,6 +38,14 @@
                         zebra : ['even','odd'],
                     }
                 });
+                $('.configshosts').tablesorter({
+                    sortList: [[4,0],[0,0]],
+                    widgets: [ 'zebra', 'stickyHeaders' ],
+                    widgetOptions: {
+                        zebra : ['even','odd'],
+                        stickyHeaders : 'tablesorter-stickyHeader',
+                    }
+                });
                 $('.configslist').tablesorter({
                     sortList: [[0,0]],
                     widgets: [ 'zebra', 'stickyHeaders' ],

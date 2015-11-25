@@ -1,6 +1,6 @@
 <h2>Host configs</h2>
 <% INCLUDE 'doFilter.tt' %>
-<table class="configslist default-table border tablesorter tablefilter hidden">
+<table class="configshosts default-table border tablesorter tablefilter hidden">
     <thead>
         <tr>
             <th>Hostname</th>
