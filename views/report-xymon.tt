@@ -23,7 +23,7 @@
                         <td>
                             <% IF bkp.ErrStatus == 0 %>
                             <% xymoncolor = 'green' %>
-                            <% ELSIF ( bkp.ErrStatus.match('23') || bkp.ErrStatus.match('24') ) %>
+                            <% ELSIF ( bkp.ErrStatus.match('23') || bkp.ErrStatus.match('24') || bkp.ErrStatus.match('12') ) %>
                             <% xymoncolor = 'yellow' %>
                             <% ELSIF bkp.ErrStatus.match('99') %>
                             <% xymoncolor = 'purple' %>

@@ -558,7 +558,7 @@ sub xymon_report {
             next if $code eq '0';     # no errors
             next if $code eq '24';    # vanished source files
             next if $code eq '99';    # no last_bkp
-            if ( $code eq '23' ) {
+            if ( $code eq '23' || $code eq '12' ) {
                 $topcolor = 'yellow'; # partial transfer
                 next;
             }
