@@ -143,6 +143,7 @@
                 initializeEvents();
                 initializeTablesorter();
                 collapseDetails();
+                $('table.hidden').removeClass('hidden');
             }
 
             $(document).ready(function(){
