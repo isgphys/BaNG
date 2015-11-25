@@ -1,5 +1,5 @@
 <h2>Host Info</h2>
-<h3 id="hostname"><% host %></h3>
+<h3 id="hostname"><% host %> <img src=<% IF conn_status %>"/images/host_online.png"<% ELSE %>"/images/host_offline.png"<% END %> title="<% conn_msg %>"></h3>
 <div>
     <table class="default-table border">
         <thead>
