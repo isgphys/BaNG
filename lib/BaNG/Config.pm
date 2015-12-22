@@ -126,7 +126,7 @@ sub write_config {
             return ( 1, $ConfigFile );
         }
     } else {
-        return ( 2, 'Hostname or Group uses wrong character!' );
+        return ( 2, "Hostname ( $host ) or Group ( $group ) uses wrong character!" );
     }
 }
 
