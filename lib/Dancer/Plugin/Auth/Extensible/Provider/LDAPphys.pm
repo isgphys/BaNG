@@ -27,7 +27,7 @@ sub authenticate_user {
     my $user_dn = _user_dn($username);
     return 0 unless $user_dn;
 
-    my $ldap = Net::LDAP->new($config->{server});
+    my $ldap = Net::LDAP->new($config->{server}, scheme => 'ldaps');
     my $bind = $ldap->bind(
         $user_dn,
         password => $password,
@@ -45,7 +45,7 @@ sub authenticate_user {
 sub get_user_details {
     my ($self, $username) = @_;
 
-    my $ldap = Net::LDAP->new($config->{server});
+    my $ldap = Net::LDAP->new($config->{server}, scheme => 'ldaps');
     my $bind = $ldap->bind();
 
     my $ldap_result = $ldap->search(
@@ -91,7 +91,7 @@ sub _user_fullname {
 sub _user_groups {
     my ($username) = @_;
 
-    my $ldap = Net::LDAP->new($config->{server});
+    my $ldap = Net::LDAP->new($config->{server}, scheme => 'ldaps');
     my $bind = $ldap->bind();
 
     my $ldap_result = $ldap->search(
@@ -119,7 +119,7 @@ sub _user_groups {
 sub _group_members {
     my ($group) = @_;
 
-    my $ldap = Net::LDAP->new($config->{server});
+    my $ldap = Net::LDAP->new($config->{server}, scheme => 'ldaps');
     my $bind = $ldap->bind();
 
     my $ldap_result = $ldap->search(
