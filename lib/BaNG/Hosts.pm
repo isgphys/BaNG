@@ -168,15 +168,19 @@ sub create_lockfile {
     my $lockfile = lockfile( $host, $group, $path );
 
     if ( -e $lockfile ) {
-        logit( $taskid, $host, $group, "ERROR: lockfile $lockfile still exists" );
-        return 0;
-    } else {
-        unless ( $serverconfig{dryrun} ) {
-            system("echo $taskid > \"$lockfile\"") and logit( $taskid, $host, $group, "ERROR: could not create lockfile $lockfile" );
+        my @processes = `ps aux | grep -v grep | grep '$host' | grep '$path' | awk '{print \$2}'`;
+        if ( @processes ) {
+            logit( $taskid, $host, $group, "ERROR: lockfile $lockfile still exists" );
+            logit( $taskid, $host, $group, 'ERROR: Backup canceled, still running backup!' );
+            exit 0;
         }
-        logit( $taskid, $host, $group, "Created lockfile $lockfile" );
-        return 1;
     }
+
+    unless ( $serverconfig{dryrun} ) {
+        system("echo $taskid > \"$lockfile\"") and logit( $taskid, $host, $group, "ERROR: could not create lockfile $lockfile" );
+    }
+    logit( $taskid, $host, $group, "Created lockfile $lockfile" );
+    return 1;
 }
 
 sub remove_lockfile {
