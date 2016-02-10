@@ -27,7 +27,7 @@ GRANT USAGE
     IDENTIFIED BY 'secret-password';
 
 GRANT
-    SELECT,INSERT,UPDATE,DELETE
+    SELECT, INSERT, UPDATE, DELETE, LOCK TABLES
     ON `bangstat`.*
     TO 'bang'@'localhost';
 

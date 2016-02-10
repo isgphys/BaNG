@@ -5,6 +5,7 @@ use Cwd qw( abs_path );
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
 use POSIX qw( strftime );
+use YAML::Tiny;
 
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
@@ -13,6 +14,7 @@ use BaNG::Common;
 my $version = '0.1';
 my $add_arg;
 my $delete_arg;
+my $dump_arg;
 my $croncreate;
 my $croncheck;
 my $setprop;
@@ -142,6 +144,26 @@ if ($delete_arg) {
     exit 0;
 }
 
+if ($dump_arg) {
+    my $timestamp = strftime( '%Y%m%d_%H%M%S', localtime );
+    my $yaml       = YAML::Tiny->read( $serverconfig{config_bangstat} );
+    my $DBhostname = $yaml->[0]{DBhostname};
+    my $DBusername = $yaml->[0]{DBusername};
+    my $DBdatabase = $yaml->[0]{DBdatabase};
+    my $DBpassword = $yaml->[0]{DBpassword};
+
+    my $mysqldump = "mysqldump -h $DBhostname -u $DBusername -p$DBpassword $DBdatabase statistic";
+
+    if ( !-d $serverconfig{path_db_dumps}) {
+        print "Create missing folder $serverconfig{path_db_dumps}\n";
+        system("mkdir -p $serverconfig{path_db_dumps}") unless ($serverconfig{dryrun});
+    }
+    print "Create dump of table statistic to $serverconfig{path_db_dumps}/statistic_$timestamp.sql\n";
+    system("$mysqldump > $serverconfig{path_db_dumps}/$DBdatabase_statistic_$timestamp.sql") unless ($serverconfig{dryrun});
+
+    print "Dump done.\n";
+}
+
 #################################
 # Command line arguments
 #
@@ -154,6 +176,7 @@ sub parse_command_options {
         'n|dry-run'   => \$dryrun_arg,
         'add'         => \$add_arg,
         'delete'      => \$delete_arg,
+        'db_dump'     => \$dump_arg,
         'g|group=s'   => \$group_arg,
         'h|host=s'    => \$host_arg,
         'cron-create' => \$croncreate,
@@ -163,7 +186,7 @@ sub parse_command_options {
         'setprop=s'   => \$setprop,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $croncreate && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $showgroups ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $showgroups || $dump_arg ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -201,6 +224,8 @@ sub usage {
 
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
+
+        $command --db_dump                            # create database dump
 
         $command --cron-create                        # generate and write cronjob file or print crontab to standard out
         $command --cron-check                         # check if cronjob file / crontab up-to-date

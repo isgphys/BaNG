@@ -7,6 +7,7 @@ config_bangstat:        etc/bangstat_db.yaml
 path_groupconfig:       etc/groups
 path_hostconfig:        etc/hosts
 path_excludes:          etc/excludes
+path_db_dumps:          var/db_dumps
 path_lockfiles:         var/lockfiles
 path_logs:              var/log
 #
