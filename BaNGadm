@@ -158,8 +158,11 @@ if ($dump_arg) {
         print "Create missing folder $serverconfig{path_db_dumps}\n";
         system("mkdir -p $serverconfig{path_db_dumps}") unless ($serverconfig{dryrun});
     }
-    print "Create dump of table statistic to $serverconfig{path_db_dumps}/statistic_$timestamp.sql\n";
-    system("$mysqldump > $serverconfig{path_db_dumps}/$DBdatabase_statistic_$timestamp.sql") unless ($serverconfig{dryrun});
+
+    my $dumpfile = "$serverconfig{path_db_dumps}/${DBdatabase}_statistic_$timestamp.sql";
+
+    print "Create dump of table statistic to $dumpfile\n";
+    system("$mysqldump > $dumpfile") unless ($serverconfig{dryrun});
 
     print "Dump done.\n";
 }
