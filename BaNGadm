@@ -10,11 +10,13 @@ use YAML::Tiny;
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
 use BaNG::Common;
+use BaNG::Reporting;
 
 my $version = '0.1';
 my $add_arg;
 my $delete_arg;
 my $dump_arg;
+my $tidy_arg;
 my $croncreate;
 my $croncheck;
 my $setprop;
@@ -167,6 +169,40 @@ if ($dump_arg) {
     print "Dump done.\n";
 }
 
+if ($tidy_arg) {
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    return '' unless $conn;
+    my $sth;
+    my $rows = 0;
+
+    print "Transfer records older than 100 days to the archive.\n";
+    $sth = $bangstat_dbh->prepare("
+        INSERT INTO statistic_archive
+        SELECT *
+        FROM statistic
+        WHERE Start < date_sub(now(), interval 100 day);
+        ");
+    $sth->execute();
+    $rows = $sth->rows;
+    print "Total transfered records: $rows\n";
+    $sth->finish();
+
+
+    print "Delete records older than 100 days from table statistic.\n";
+    $sth = $bangstat_dbh->prepare("
+        DELETE
+        FROM statistic
+        WHERE Start < date_sub(now(), interval 100 day);
+        ");
+    $sth->execute();
+    $rows = $sth->rows;
+    print "Total deleted records: $rows\n";
+    $sth->finish();
+
+    print "tidy up done.\n";
+
+}
+
 #################################
 # Command line arguments
 #
@@ -179,6 +215,7 @@ sub parse_command_options {
         'n|dry-run'   => \$dryrun_arg,
         'add'         => \$add_arg,
         'delete'      => \$delete_arg,
+        'db_archive'  => \$tidy_arg,
         'db_dump'     => \$dump_arg,
         'g|group=s'   => \$group_arg,
         'h|host=s'    => \$host_arg,
@@ -189,7 +226,7 @@ sub parse_command_options {
         'setprop=s'   => \$setprop,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $croncreate && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $showgroups || $dump_arg ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $showgroups || $tidy_arg || $dump_arg ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -228,6 +265,7 @@ sub usage {
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
+        $command --db_archive                         # move records from table statistic to statistic_archive where older than 100 days
         $command --db_dump                            # create database dump
 
         $command --cron-create                        # generate and write cronjob file or print crontab to standard out

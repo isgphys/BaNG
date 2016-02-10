@@ -34,7 +34,7 @@ GRANT
 FLUSH PRIVILEGES;
 ```
 
-### Create table
+### Create tables
 
 ```sql
 CREATE TABLE statistic (
@@ -71,6 +71,8 @@ CREATE TABLE statistic (
     Speedup decimal(10,3) DEFAULT NULL,
     PRIMARY KEY (ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE statistic_archive LIKE statistic;
 ```
 
 ### Create indexes
