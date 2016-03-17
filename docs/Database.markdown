@@ -50,7 +50,6 @@ CREATE TABLE statistic (
     BkpFromPathRoot varchar(250) DEFAULT NULL,
     BkpToHost varchar(30) NOT NULL,
     BkpToPath varchar(250) DEFAULT NULL,
-    LastBkp varchar(30) DEFAULT NULL,
     isThread tinyint(1) DEFAULT NULL,
     ErrStatus bigint(20) DEFAULT '0',
     JobStatus tinyint(1) DEFAULT '0',
@@ -92,7 +91,7 @@ CREATE INDEX Start ON statistic (Start);
 CREATE OR REPLACE VIEW recent_backups AS
 SELECT
     TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
-    BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp, isThread, BkpGroup,
+    BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, isThread, BkpGroup,
     SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
     SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
@@ -105,7 +104,7 @@ CREATE OR REPLACE VIEW statistic_job_sum AS
 SELECT
     TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime,
     SUM(TIMESTAMPDIFF(Second, Start, Stop)) as RealRunTime, BkpFromHost,
-    IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp,
+    IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath,
     isThread = Null as isThread, JobStatus, BkpGroup,
     SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
     SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
@@ -118,7 +117,7 @@ CREATE OR REPLACE VIEW statistic_job_thread AS
 SELECT
     TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
     TIMESTAMPDIFF(Second, Start, Stop) as RealRunTime, BkpFromHost, BkpFromPath, BkpFromPathRoot,
-    BkpToHost, BkpToPath, LastBkp, isThread, JobStatus, BkpGroup,
+    BkpToHost, BkpToPath, isThread, JobStatus, BkpGroup,
     NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
 FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)

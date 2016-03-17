@@ -12,7 +12,6 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
             <th>Path</th>
             <th colspan="2">ErrStatus</th>
             <th>Starttime</th>
-            <th>Last Backup</th>
             <th>Runtime</th>
             <th class="sorter-metric" data-metric-name="$">FilesCreated</th>
             <th class="sorter-metric" data-metric-name="$">FilesDel</th>
@@ -45,7 +44,6 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
                 </td>
                 <td class="center"><% bkp.ErrStatus %></td>
                 <td style="white-space: nowrap;" class="center"><% bkp.Starttime %></td>
-                <td class="center"><% bkp.LastBkp %></td>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.FilesCreated %></td>
                 <td class="center"><% bkp.FilesDel %></td>

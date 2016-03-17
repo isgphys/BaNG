@@ -171,7 +171,8 @@ sub queue_backup {
         my $endstamp   = $startstamp;
         $jobid = create_timeid( $host, $group );
         logit( $taskid, $host, $group, "Error: host $host is offline" );
-        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), $lastbkp, '0', '-1', '' ) unless $noreport;
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER},
+                                  $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), '0', '-1', '' ) unless $noreport;
         return 1;
     }
 
@@ -196,7 +197,7 @@ sub queue_backup {
                 if ( $numFolder == 0 ) {
                     $dosnapshot = 1;
                 }
-                queue_remote_subfolders( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $folder );
+                queue_remote_subfolders( $jobid, $host, $group, $bkptimestamp, $dosnapshot, $folder );
             }
 
         } else {
@@ -219,7 +220,6 @@ sub queue_backup {
                     group        => $group,
                     path         => "$folder",
                     srcfolder    => "@src_folders",
-                    lastbkp      => $lastbkp,
                     bkptimestamp => $bkptimestamp,
                     dosnapshot   => $dosnapshot,
                 };
@@ -230,7 +230,6 @@ sub queue_backup {
                 jobid        => $jobid,
                 host         => $host,
                 group        => $group,
-                lastbkp      => $lastbkp,
                 bkptimestamp => $bkptimestamp,
                 dosnapshot   => $dosnapshot,
             };
@@ -246,7 +245,6 @@ sub queue_backup {
             group        => $group,
             path         => "@src_folders",
             srcfolder    => "@src_folders",
-            lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
             dosnapshot   => 1,
         };
@@ -260,7 +258,7 @@ sub queue_backup {
 }
 
 sub queue_remote_subfolders {
-    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $dosnapshot, $srcfolder ) = @_;
+    my ( $jobid, $host, $group, $bkptimestamp, $dosnapshot, $srcfolder ) = @_;
 
     $srcfolder =~ s/://;
     my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
@@ -289,7 +287,6 @@ sub queue_remote_subfolders {
             host         => $host,
             group        => $group,
             path         => ":'${remotesubfolder}'",
-            lastbkp      => $lastbkp,
             bkptimestamp => $bkptimestamp,
             srcfolder    => ":$srcfolder",
             dosnapshot   => 0,
@@ -308,7 +305,6 @@ sub queue_remote_subfolders {
         host           => $host,
         group          => $group,
         path           => ":'${srcfolder}'",
-        lastbkp        => $lastbkp,
         bkptimestamp   => $bkptimestamp,
         srcfolder      => ":$srcfolder",
         dosnapshot     => 0,
@@ -320,7 +316,6 @@ sub queue_remote_subfolders {
         jobid        => $jobid,
         host         => $host,
         group        => $group,
-        lastbkp      => $lastbkp,
         bkptimestamp => $bkptimestamp,
         dosnapshot   => $dosnapshot,
     };
@@ -368,7 +363,6 @@ sub thread_work {
         my $host           = $bkpjob->{host};
         my $group          = $bkpjob->{group};
         my $path           = $bkpjob->{path};
-        my $lastbkp        = $bkpjob->{lastbkp};
         my $bkptimestamp   = $bkpjob->{bkptimestamp};
         my $srcfolder      = $bkpjob->{srcfolder};
         my $dosnapshot     = $bkpjob->{'dosnapshot'};
@@ -382,7 +376,7 @@ sub thread_work {
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         my $rsync_err;
-        $rsync_err = execute_rsync( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
+        $rsync_err = execute_rsync( $jobid, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
         unless (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} && !$dosnapshot ) ||
                 ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) ||
@@ -391,7 +385,6 @@ sub thread_work {
                 jobid        => $jobid,
                 host         => $host,
                 group        => $group,
-                lastbkp      => $lastbkp,
                 bkptimestamp => $bkptimestamp,
                 rsync_err    => $rsync_err,
                 dosnapshot   => $dosnapshot,
@@ -408,7 +401,7 @@ sub thread_work {
 # Rsync
 #
 sub eval_rsync_options {
-    my ( $host, $group, $lastbkp ) = @_;
+    my ( $host, $group ) = @_;
     my $rsync_options = '';
     my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
 
@@ -505,7 +498,7 @@ sub eval_rsync_generic_exclude_cmd {
 }
 
 sub execute_rsync {
-    my ( $jobid, $host, $group, $lastbkp, $bkptimestamp, $path, $srcfolder, $exclsubfolders ) = @_;
+    my ( $jobid, $host, $group, $bkptimestamp, $path, $srcfolder, $exclsubfolders ) = @_;
 
     $bkptimestamp = eval_bkptimestamp( $host, $group ) unless $bkptimestamp;
     my $startstamp = time();
@@ -516,7 +509,7 @@ sub execute_rsync {
     $bkpfrompath =~ s/\/\//\//g;
 
     # report rsync start to DB, jobstatus => 0
-    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $bkpfrompath, $srcfolder, targetpath( $host, $group ), $lastbkp, '0', '0', '' ) unless $noreport;
+    bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, '', $bkpfrompath, $srcfolder, targetpath( $host, $group ), '0', '0', '' ) unless $noreport;
 
     my $taskset = '';
     if ( $hosts{"$host-$group"}->{hostconfig}->{TASKSET_OPTIONS} ) {
@@ -546,7 +539,7 @@ sub execute_rsync {
     }
 
     my $rsync_cmd     = $nocache . $ionice . $taskset . $serverconfig{path_rsync};
-    my $rsync_options = eval_rsync_options( $host, $group, $lastbkp );
+    my $rsync_options = eval_rsync_options( $host, $group );
     my $rsync_target  = eval_rsync_target( $host, $group, $bkptimestamp );
 
     my $rsync_generic_exclude = '';
@@ -591,7 +584,7 @@ sub execute_rsync {
     }
 
     #report finished rsync to DB, jobstatus => 1
-    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $bkpfrompath, targetpath( $host, $group ), $lastbkp, $errcode, '1', @outlines ) unless $noreport;
+    bangstat_update_backupjob( $taskid, $jobid, $host, $group, $endstamp, $bkpfrompath, targetpath( $host, $group ), $errcode, '1', @outlines ) unless $noreport;
 
     return $errcode;
 }
@@ -820,7 +813,6 @@ sub finish_backupjob {
     my $host         = $bkpjob->{'host'};
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
-    my $lastbkp      = $bkpjob->{'lastbkp'};
     my $rsync_err    = $bkpjob->{'rsync_err'};
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
 

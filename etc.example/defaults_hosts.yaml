@@ -27,8 +27,6 @@ BKP_THREAD_SRCFOLDERS:    0                         # Queue each BKP_SOURCE_FOLD
 BKP_THREAD_SUBFOLDERS:    0                         # Queue each subfolder of each BKP_SOURCE_FOLDER
 BKP_THREAD_SUBSUBFOLDERS: ""                        # Queue selected subsubfolders
 BKP_STORE_MODUS:          "snapshots"               # links (all Filesystems) / snapshots (only for BTRFS)
-BKP_LASTBKP_FILE:         "lastdst"                 # stores the foldername of last backup
-BKP_LASTBKP_SUFFIX:       ""                        # LASTBKP_FILE-[LASTBKP_SUFFIX]
 
 BKP_RSYNC_ARCHIV:         1                         # (-a) archive mode; equals -rlptgoD (no -H,-A,-X)
 BKP_RSYNC_RELATIV:        1                         # (-R) use relative path names
@@ -85,8 +83,6 @@ HELP:
                             1 = queue each subfolder of each BKP_SOURCE_FOLDER
   BKP_THREAD_SUBSUBFOLDERS: queue defined subsubfolders
   BKP_STORE_MODUS:          links (all Filesystems) / snapshots (only for BTRFS)
-  BKP_LASTBKP_FILE:         stores the foldername of last backup
-  BKP_LASTBKP_SUFFIX:       LASTBKP_FILE-[LASTBKP_SUFFIX]
   BKP_PRIORITY:             |
                             add priority as list (:path: Nr)
                             0 = default

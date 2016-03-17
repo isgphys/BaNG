@@ -27,14 +27,12 @@ like(   $output,    qr|End of queueing backup of host localhost group $group|   
 like(   $output,    qr|Thread \d+ working on|                                    , "Thread XX working on localhost $group"              );
 like(   $output,    qr|Created lockfile|                                         , "Created lockfile for localhost $group"              );
 like(   $output,    qr|Create btrfs subvolume|                                   , "Create btrfs subvolume for localhost $group"        );
-like(   $output,    qr|Found lastbkp = nolastbkp|                                , "No lastbkp found for localhost $group"              );
 like(   $output,    qr|Executing rsync for host localhost group $group path :/|  , "Executing rsync for localhost $group"               );
 unlike( $output,    qr|\-\-linkdest|                                             , "Rsync without --link-dest for localhost $group"     );
 like(   $output,    qr|\-\-exclude\-from=t/etc/excludes/excludelist_system |     , "Rsync with excludefile for localhost $group"        );
 like(   $output,    qr|Rsync successful for host localhost group $group|         , "Rsync successful for localhost $group"              );
 like(   $output,    qr|Touch current folder for host localhost group $group|     , "Touch current folder for localhost $group"          );
 like(   $output,    qr|Create btrfs snapshot for host localhost group $group|    , "Create btrfs snapshot for localhost $group"         );
-like(   $output,    qr|Write lastBkpFile:|                                       , "Write lastBkpFile for localhost $group"             );
 like(   $output,    qr|Set jobstatus to 1 for host localhost group $group|       , "Set bangstat jobstatus 1 for localhost $group"      );
 like(   $output,    qr|Set jobstatus to 2 for host localhost group $group|       , "Set bangstat jobstatus 2 for localhost $group"      );
 like(   $output,    qr|xymon report sent|                                        , "xymon report sent for localhost $group"             );

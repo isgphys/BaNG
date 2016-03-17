@@ -88,7 +88,6 @@ sub bangstat_recentbackups {
             BkpFromPath  => $BkpFromPath,
             BkpToPath    => $dbrow->{'BkpToPath'} ,
             isThread     => $dbrow->{'isThread'},
-            LastBkp      => $dbrow->{'LastBkp'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
             BkpGroup     => $BkpGroup,
@@ -158,7 +157,6 @@ sub bangstat_recentbackups {
                     BkpFromPath => $missingBkpFromPath,
                     BkpToPath   => $missingBkpToPath,
                     isThread    => '',
-                    LastBkp     => '',
                     ErrStatus   => 99,
                     BkpGroup    => $missingBkpGroup,
                 };
@@ -215,7 +213,6 @@ sub bangstat_recentbackups_all {
             BkpFromPath  => $BkpFromPath ,
             BkpToPath    => $dbrow->{'BkpToPath'},
             isThread     => $dbrow->{'isThread'},
-            LastBkp      => $dbrow->{'LastBkp'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
             BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
@@ -264,7 +261,6 @@ sub bangstat_recentbackups_last {
             BkpFromPath  => $BkpFromPath ,
             BkpToPath    => $dbrow->{'BkpToPath'},
             isThread     => $dbrow->{'isThread'},
-            LastBkp      => $dbrow->{'LastBkp'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
             BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
@@ -311,7 +307,6 @@ sub bangstat_task_jobs {
             BkpFromPath  => $BkpFromPath ,
             BkpToPath    => $dbrow->{'BkpToPath'},
             isThread     => $dbrow->{'isThread'},
-            LastBkp      => $dbrow->{'LastBkp'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
             BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
@@ -353,17 +348,17 @@ sub send_xymon_report {
 }
 
 sub bangstat_start_backupjob {
-    my ( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $srcfolder, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines ) = @_;
+    my ( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $path, $srcfolder, $targetpath, $errcode, $jobstatus, @outlines ) = @_;
 
     $path =~ s/'//g;    # rm quotes to avoid errors in sql syntax
     my $isSubfolderThread = $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ? 'true' : 'NULL';
 
     my $sql = qq(
         INSERT INTO statistic (
-            TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, LastBkp,
+            TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath,
             isThread, ErrStatus, JobStatus, Start, Stop
         ) VALUES (
-            '$taskid', '$jobid', '$host', '$group', '$path', '$srcfolder', '$servername', '$targetpath', '$lastbkp',
+            '$taskid', '$jobid', '$host', '$group', '$path', '$srcfolder', '$servername', '$targetpath',
             $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')
         )
     );
@@ -386,10 +381,9 @@ sub bangstat_start_backupjob {
 }
 
 sub bangstat_update_backupjob {
-    my ( $taskid, $jobid, $host, $group, $endstamp, $path, $targetpath, $lastbkp, $errcode, $jobstatus, @outlines ) = @_;
+    my ( $taskid, $jobid, $host, $group, $endstamp, $path, $targetpath, $errcode, $jobstatus, @outlines ) = @_;
 
     my %parse_log_keys = (
-        'last backup'                         => 'LastBkp',
         'Number of files'                     => 'NumOfFiles',
         'Number of regular files transferred' => 'NumOfFilesTrans',
         'Number of created files'             => 'NumOfFilesCreated',
@@ -429,7 +423,6 @@ sub bangstat_update_backupjob {
     my $SQL = qq(
         UPDATE statistic
         SET JobStatus         = '$jobstatus',
-            LastBkp           = '$lastbkp',
             ErrStatus         = '$errcode',
             Stop              = FROM_UNIXTIME('$endstamp'),
             NumOfFiles        = '$log_values{NumOfFiles}',

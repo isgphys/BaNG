@@ -12,7 +12,6 @@
                         <th>Starttime</th>
                         <th>Endtime</th>
                         <th>FromPath</th>
-                        <th>LastBkp</th>
                         <th>Threaded</th>
                     </tr>
                 </thead>
@@ -36,7 +35,6 @@
                         <td align="center"><% bkp.Starttime %></td>
                         <td align="center"><% bkp.Stoptime  %></td>
                         <td align="center"><% bkp.BkpFromPath %></td>
-                        <td align="center"><% bkp.LastBkp %></td>
                         <td align="center"><% IF bkp.isThread %><IMG SRC=/hobbit/gifs/daduke/green-tick.gif ALT="is Thread" HEIGHT=16 WIDTH=16><% END %></td>
                     </tr>
                     <%- END %>

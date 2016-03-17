@@ -13,7 +13,6 @@ Total Jobs: <% taskjobs.Data.size %>
             <th>Start</th>
             <th>Stop</th>
             <th>Runtime</th>
-            <th>Last Backup</th>
             <th class="sorter-metric" data-metric-name="$">FilesCreated</th>
             <th class="sorter-metric" data-metric-name="$">FilesDel</th>
             <th class="sorter-metric" data-metric-name="$">FilesTrans</th>
@@ -46,7 +45,6 @@ Total Jobs: <% taskjobs.Data.size %>
                 <td style="white-space: nowrap;" class="center"><% job.Starttime %></td>
                 <td style="white-space: nowrap;" class="center"><% job.Stoptime %></td>
                 <td class="center"><% job.Runtime %></td>
-                <td class="center"><% job.LastBkp %></td>
                 <td class="center"><% job.FilesCreated %></td>
                 <td class="center"><% job.FilesDel %></td>
                 <td class="center"><% job.FilesTrans %></td>
