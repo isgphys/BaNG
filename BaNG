@@ -138,6 +138,22 @@ sub queue_backup {
 
     my @backup_folders = reverse(get_backup_folders( $host, $group ));
 
+    #####################
+    # MIGRATION "lastdst"
+    if ( -f targetpath($host, $group ) . "/lastdst") {
+        logit( $taskid, $host, $group, "Found depricated lastdst file for host $host group $group" );
+        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq "links" ) {
+            if ( (!-d targetpath($host, $group ) . "/current") && ($#backup_folders >= 0)) {
+                my ($last_folder) = $backup_folders[0] =~ /([0-9._]*)$/;
+                create_link_current($host, $group, $last_folder);
+            }
+        }
+        unlink(targetpath($host, $group ) . "/lastdst") unless $serverconfig{dryrun};;
+        logit( $taskid, $host, $group, "Delete depricated lastdst file for host $host group $group" );
+    }
+    # MIGRATION "lastdst"
+    #####################
+
     # if missingonly, don't queue host if we had a backup within the last 20 hours
     if ( $missingonly && $backup_folders[0] =~ qr{ .*/(?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d)$ }x ) {
         my $lastbkpepoch = str2time("$+{date} $+{HH}:$+{MM}:$+{SS}");
