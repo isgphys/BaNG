@@ -773,45 +773,6 @@ sub delete_logfiles {
 }
 
 #################################
-# last_bkp_file
-#
-sub last_bkp_file {
-    my ( $host, $group ) = @_;
-
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $bkpdir      = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
-    my $lastBkpFile = "$bkpdir/$hostconfig->{BKP_LASTBKP_FILE}";
-
-    return $lastBkpFile;
-}
-
-sub check_last_bkp {
-    my ( $host, $group ) = @_;
-
-    my $lastbkp = 'nolastbkp';
-    my $lastBkpFile = last_bkp_file( $host, $group );
-
-    if ( -e $lastBkpFile ) {
-        $lastbkp = `cat $lastBkpFile`;
-        chomp($lastbkp);
-    }
-
-    logit( $taskid, $host, $group, "Found lastbkp = $lastbkp" );
-
-    return $lastbkp;
-}
-
-sub create_last_bkp_file {
-    my ( $host, $group, $bkptimestamp ) = @_;
-
-    my $lastBkpFile = last_bkp_file( $host, $group );
-    system("echo \"$bkptimestamp\" > $lastBkpFile") unless $serverconfig{dryrun};
-    logit( $taskid, $host, $group, "Write lastBkpFile: $bkptimestamp \-\> $lastBkpFile" );
-
-    return 1;
-}
-
-#################################
 # Helper subroutines
 #
 sub create_timeid {
