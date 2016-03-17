@@ -265,8 +265,10 @@ sub usage {
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
-        $command --db_archive                         # move records from table statistic to statistic_archive where older than 100 days
         $command --db_dump                            # create database dump
+
+        $command --db_archive                         # move records from table statistic to statistic_archive
+                                                       where older than 100 days
 
         $command --cron-create                        # generate and write cronjob file or print crontab to standard out
         $command --cron-check                         # check if cronjob file / crontab up-to-date
