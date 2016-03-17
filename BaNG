@@ -136,11 +136,10 @@ sub queue_backup {
         return 1;
     }
 
-    # check if last backup exists
-    my $lastbkp = check_last_bkp( $host, $group );
+    my @backup_folders = reverse(get_backup_folders( $host, $group ));
 
     # if missingonly, don't queue host if we had a backup within the last 20 hours
-    if ( $missingonly && $lastbkp =~ qr{ (?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d) }x ) {
+    if ( $missingonly && $backup_folders[0] =~ qr{ .*/(?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d)$ }x ) {
         my $lastbkpepoch = str2time("$+{date} $+{HH}:$+{MM}:$+{SS}");
         if ( ( time - $lastbkpepoch ) < 20 * 3600 ) {
             logit( $taskid, $host, $group, "Skipping because recent backup found for host $host group $group" );
@@ -424,9 +423,9 @@ sub eval_rsync_options {
         }
     }
 
-    # use links if told to and if lastbkp exists
-    if ( ( $hostconfig->{BKP_STORE_MODUS} eq 'links' ) && ( $lastbkp ne 'nolastbkp' ) ) {
-        $rsync_options .= '--link-dest ' . targetpath( $host, $group ) . "/$lastbkp ";
+    # use links if told to
+    if ( $hostconfig->{BKP_STORE_MODUS} eq 'links' ) {
+        $rsync_options .= '--link-dest ' . targetpath( $host, $group ) . "/current ";
     }
 
     if ( $hostconfig->{BKP_RSYNC_RSHELL} ) {
@@ -643,6 +642,29 @@ sub create_btrfs_snapshot {
 }
 
 #################################
+# Links
+#
+sub create_link_current {
+    my ( $host, $group, $bkptimestamp ) = @_;
+
+    my $link_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
+    my $link_dest    = targetpath( $host, $group ) . '/current';
+    my $ln_cmd       = "/bin/ln -s";
+
+    if (-d $link_dest ){
+        unlink $link_dest unless $serverconfig{dryrun};;
+        logit( $taskid, $host, $group, "Delete existing current symlink for host $host group $group" );
+    }
+
+    my $link_cmd = "$ln_cmd $link_source $link_dest >/dev/null 2>&1";
+    $link_cmd = "echo $link_cmd" if $serverconfig{dryrun};
+    logit( $taskid, $host, $group, "Create symlink for host $host group $group using $link_cmd" );
+    system($link_cmd) and logit( $taskid, $host, $group, "ERROR: creating symlink for $host-$group: $!" );
+
+    return 1;
+}
+
+#################################
 # Wipe old backups
 #
 sub wipe {
@@ -829,7 +851,9 @@ sub finish_backupjob {
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
             create_btrfs_snapshot( $host, $group, $bkptimestamp );
         }
-        create_last_bkp_file( $host, $group, $bkptimestamp );
+        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
+            create_link_current( $host, $group, $bkptimestamp );
+        }
 
         my %RecentBackups = bangstat_recentbackups($host);
         unless ($noreport) {
