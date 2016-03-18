@@ -232,6 +232,8 @@ sub queue_backup {
                 group        => $group,
                 bkptimestamp => $bkptimestamp,
                 dosnapshot   => $dosnapshot,
+                rsync_err    => 0,
+                has_failed   => 0,
             };
             push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
         }
@@ -247,6 +249,8 @@ sub queue_backup {
             srcfolder    => "@src_folders",
             bkptimestamp => $bkptimestamp,
             dosnapshot   => 1,
+            rsync_err    => 0,
+            has_failed   => 0,
         };
         push( @queue, $bkpjob );
         push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
@@ -318,6 +322,8 @@ sub queue_remote_subfolders {
         group        => $group,
         bkptimestamp => $bkptimestamp,
         dosnapshot   => $dosnapshot,
+        rsync_err    => 0,
+        has_failed   => 0,
     };
     push( @finally_snapshots, $bkpjob );
 
@@ -349,7 +355,16 @@ sub start_threads {
     my @threads = map { threads->create( \&thread_work, $Q ) } ( 1 .. $nthreads );
     $Q->enqueue($_) for @queue;
     $Q->enqueue( (undef) x $nthreads );
-    $_->join for @threads;
+
+    foreach my $thread (@threads) {
+        my ($tid,$jobid,$rsync_err) = $thread->join;
+        foreach my $i ( 0..$#finally_snapshots ) {
+            next unless $finally_snapshots[$i]->{jobid} == $jobid;
+            unless ($finally_snapshots[$i]{has_failed} == "1") {
+                $finally_snapshots[$i]{has_failed} = check_rsync_status( $rsync_err );
+            }
+        }
+    }
 
     return 1;
 }
@@ -388,13 +403,14 @@ sub thread_work {
                 bkptimestamp => $bkptimestamp,
                 rsync_err    => $rsync_err,
                 dosnapshot   => $dosnapshot,
+                has_failed   => check_rsync_status( $rsync_err ),
             };
             finish_backupjob($bkpjob);
         }
         remove_lockfile( $taskid, $host, $group, $path );
-    }
 
-    return 1;
+        return ($tid,$jobid,$rsync_err);
+    }
 }
 
 #################################
@@ -804,6 +820,17 @@ sub eval_bkptimestamp {
     return $bkptimestamp;
 }
 
+sub check_rsync_status {
+    my ( $rsync_err ) = @_;
+    my $status = 1;
+
+    if ( scalar grep $rsync_err eq $_, @{ $serverconfig{'rsync_err_ok'} }) {
+        $status = 0;
+    }
+
+    return $status;
+}
+
 sub rename_failed_backup {
     my ( $host, $group, $bkptimestamp ) = @_;
 
@@ -826,26 +853,27 @@ sub finish_backupjob {
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
-    my $rsync_err    = $bkpjob->{'rsync_err'} // 0; # *-threading need hands-on!
+    my $rsync_err    = $bkpjob->{'rsync_err'};
+    my $has_failed   = $bkpjob->{'has_failed'};
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
     if ($dosnapshot) {
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
             create_btrfs_snapshot( $host, $group, $bkptimestamp );
-            if ( scalar grep $rsync_err eq $_, @rsync_pass ) {
-                logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-            } else {
+            if ( $has_failed ) {
                 logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
                 rename_failed_backup( $host, $group, $bkptimestamp );
+            } else {
+                logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
             }
         }
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
-            if ( scalar grep $rsync_err eq $_, @rsync_pass ) {
-                logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-                create_link_current( $host, $group, $bkptimestamp );
-            } else {
+            if ( $has_failed ) {
                 logit( $taskid, $host, $group, "rsync in links-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
                 rename_failed_backup( $host, $group, $bkptimestamp );
+            } else {
+                logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
+                create_link_current( $host, $group, $bkptimestamp );
             }
         }
 
