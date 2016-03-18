@@ -31,6 +31,11 @@ verboselevel:           2
 dryrun:                 0
 auto_wipe_limit:        5
 snapshot_wipe_limit:    3
+#
+rsync_err_ok:
+              - 0
+              - 23
+              - 24
 
 cron_type:              0
 
@@ -81,3 +86,4 @@ HELP:
   cron_type:                |
                             0 = use cronjob file in /etc/cron.d/
                             1 = use crontab
+rsync_err_ok:               good rsync error codes (0, 23 , 24) other codes fail the backup

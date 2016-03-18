@@ -807,21 +807,49 @@ sub eval_bkptimestamp {
     return $bkptimestamp;
 }
 
+sub rename_failed_backup {
+    my ( $host, $group, $bkptimestamp ) = @_;
+
+    my $failed_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
+    my $failed_dest    = targetpath( $host, $group ) . '/' . $bkptimestamp . "_failed";
+    my $mv_cmd       = "/bin/mv";
+
+    my $rename_cmd = "$mv_cmd $failed_source $failed_dest >/dev/null 2>&1";
+    $rename_cmd = "echo $rename_cmd" if $serverconfig{dryrun};
+    logit( $taskid, $host, $group, "Rename failed folder for host $host group $group using $rename_cmd" );
+    system($rename_cmd) and logit( $taskid, $host, $group, "ERROR: renaming failed folder for $host-$group: $!" );
+
+    return 1;
+}
+
 sub finish_backupjob {
     my ($bkpjob)     = @_;
     my $jobid        = $bkpjob->{'jobid'};
     my $host         = $bkpjob->{'host'};
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
-    my $rsync_err    = $bkpjob->{'rsync_err'};
     my $dosnapshot   = $bkpjob->{'dosnapshot'};
+    my $rsync_err    = $bkpjob->{'rsync_err'} // 0; # *-threading need hands-on!
+    my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
     if ($dosnapshot) {
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
             create_btrfs_snapshot( $host, $group, $bkptimestamp );
+            if ( scalar grep $rsync_err eq $_, @rsync_pass ) {
+                logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
+            } else {
+                logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
+                rename_failed_backup( $host, $group, $bkptimestamp );
+            }
         }
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
-            create_link_current( $host, $group, $bkptimestamp );
+            if ( scalar grep $rsync_err eq $_, @rsync_pass ) {
+                logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
+                create_link_current( $host, $group, $bkptimestamp );
+            } else {
+                logit( $taskid, $host, $group, "rsync in links-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
+                rename_failed_backup( $host, $group, $bkptimestamp );
+            }
         }
 
         my %RecentBackups = bangstat_recentbackups($host);
