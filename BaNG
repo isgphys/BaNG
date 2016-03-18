@@ -651,29 +651,6 @@ sub create_btrfs_snapshot {
 }
 
 #################################
-# Links
-#
-sub create_link_current {
-    my ( $host, $group, $bkptimestamp ) = @_;
-
-    my $link_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
-    my $link_dest    = targetpath( $host, $group ) . '/current';
-    my $ln_cmd       = "/bin/ln -s";
-
-    if (-d $link_dest ){
-        unlink $link_dest unless $serverconfig{dryrun};;
-        logit( $taskid, $host, $group, "Delete existing current symlink for host $host group $group" );
-    }
-
-    my $link_cmd = "$ln_cmd $link_source $link_dest >/dev/null 2>&1";
-    $link_cmd = "echo $link_cmd" if $serverconfig{dryrun};
-    logit( $taskid, $host, $group, "Create symlink for host $host group $group using $link_cmd" );
-    system($link_cmd) and logit( $taskid, $host, $group, "ERROR: creating symlink for $host-$group: $!" );
-
-    return 1;
-}
-
-#################################
 # Wipe old backups
 #
 sub wipe {
@@ -796,6 +773,26 @@ sub create_timeid {
     logit( $taskid, $host, $group, "Created TimeID: $timeid" );
 
     return $timeid;
+}
+
+sub create_link_current {
+    my ( $host, $group, $bkptimestamp ) = @_;
+
+    my $link_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
+    my $link_dest    = targetpath( $host, $group ) . '/current';
+    my $ln_cmd       = "/bin/ln -s";
+
+    if (-d $link_dest ){
+        unlink $link_dest unless $serverconfig{dryrun};;
+        logit( $taskid, $host, $group, "Delete existing current symlink for host $host group $group" );
+    }
+
+    my $link_cmd = "$ln_cmd $link_source $link_dest >/dev/null 2>&1";
+    $link_cmd = "echo $link_cmd" if $serverconfig{dryrun};
+    logit( $taskid, $host, $group, "Create symlink for host $host group $group using $link_cmd" );
+    system($link_cmd) and logit( $taskid, $host, $group, "ERROR: creating symlink for $host-$group: $!" );
+
+    return 1;
 }
 
 sub eval_bkptimestamp {
