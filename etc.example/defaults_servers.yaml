@@ -86,4 +86,4 @@ HELP:
   cron_type:                |
                             0 = use cronjob file in /etc/cron.d/
                             1 = use crontab
-rsync_err_ok:               good rsync error codes (0, 23 , 24) other codes fail the backup
+  rsync_err_ok:             good rsync error codes (0, 23 , 24) other codes fail the backup
