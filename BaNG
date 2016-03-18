@@ -235,7 +235,7 @@ sub queue_backup {
                 rsync_err    => 0,
                 has_failed   => 0,
             };
-            push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
+            push( @finally_snapshots, $bkpjob );
         }
 
     } else {
