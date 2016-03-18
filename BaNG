@@ -235,7 +235,7 @@ sub queue_backup {
                 rsync_err    => 0,
                 has_failed   => 0,
             };
-            push( @finally_snapshots, $bkpjob );
+            push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
         }
 
     } else {
@@ -350,7 +350,6 @@ sub start_threads {
     } else {
         $nthreads = 1;
     }
-
     my $Q = Thread::Queue->new;
     my @threads = map { threads->create( \&thread_work, $Q ) } ( 1 .. $nthreads );
     $Q->enqueue($_) for @queue;
@@ -371,10 +370,15 @@ sub start_threads {
 
 sub thread_work {
     my ($Q) = @_;
+    my $helper_jobid;
+    my $helper_tid;
+    my $helper_rsync_err;
 
     while ( my $bkpjob = $Q->dequeue ) {
         my $tid            = threads->tid;
+        $helper_tid        = threads->tid;
         my $jobid          = $bkpjob->{jobid};
+        $helper_jobid      = $bkpjob->{jobid};
         my $host           = $bkpjob->{host};
         my $group          = $bkpjob->{group};
         my $path           = $bkpjob->{path};
@@ -392,6 +396,7 @@ sub thread_work {
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
         my $rsync_err;
         $rsync_err = execute_rsync( $jobid, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
+        $helper_rsync_err = $rsync_err;
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
         unless (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} && !$dosnapshot ) ||
                 ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) ||
@@ -408,9 +413,9 @@ sub thread_work {
             finish_backupjob($bkpjob);
         }
         remove_lockfile( $taskid, $host, $group, $path );
-
-        return ($tid,$jobid,$rsync_err);
+        return ($tid,$jobid,$rsync_err) if $finallysnapshots;
     }
+        return ($helper_tid,$helper_jobid,$helper_rsync_err);
 }
 
 #################################
