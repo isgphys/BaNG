@@ -32,7 +32,6 @@ Optional arguments:
 
 ```sh
 --initial                                     # needed for first backup to initially create the folder/subvolume
---finallysnapshots                            # make snapshots only after all the backups of this job have finished
 --missingonly                                 # backup only hosts without recent backup (e.g. machines that were offline)
 --noreport                                    # do not send any reports
 ```

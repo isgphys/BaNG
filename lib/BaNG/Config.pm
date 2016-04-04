@@ -314,9 +314,6 @@ sub generate_cron {
             my $threads = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{THREADS};
             $crontask .= " -t $threads" if $threads;
 
-            my $finallysnapshots = $cronjobs->{$servername}->{$jobtype}->{$cronjob}->{cron}->{FINALLYSNAPSHOTS};
-            $crontask .= " --finallysnapshots" if $finallysnapshots;
-
             $crontask .= " --wipe"        if ( $jobtype eq 'wipe' );
             $crontask .= " --missingonly" if ( $jobtype eq 'backup_missingonly' );
 
