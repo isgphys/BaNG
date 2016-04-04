@@ -852,7 +852,7 @@ sub finish_backupjob {
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
     my $has_failed   = $bkpjob->{'has_failed'};
-    my $rsync_err    = join(', ', @{ $bkpjob->{'rsync_errs'} });
+    my $rsync_err    = join(', ', sort @{ $bkpjob->{'rsync_errs'} });
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
