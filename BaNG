@@ -28,13 +28,12 @@ my $group_arg;
 my $host_arg;
 my $prefix_arg;
 my $nthreads_arg;
-my $finallysnapshots;
 my $verbose_arg;
 my $vv_arg;
 my $vvv_arg;
 my $dryrun_arg;
 my @queue;
-my @finally_snapshots;
+my %finishable_bkpjobs;
 my $taskid;
 
 #################################
@@ -67,8 +66,10 @@ if ( !@queue ) {
 }
 
 reorder_queue_by_priority( $host_arg, $group_arg );
-start_threads();
-finish_backupjob($_) foreach @finally_snapshots;
+run_threads();
+foreach my $finishable_bkpjob (keys %finishable_bkpjobs) {
+    finish_backupjob($finishable_bkpjobs{$finishable_bkpjob});
+}
 
 exit 0;
 
@@ -235,7 +236,6 @@ sub queue_backup {
                 rsync_err    => 0,
                 has_failed   => 0,
             };
-            push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
         }
 
     } else {
@@ -253,7 +253,6 @@ sub queue_backup {
             has_failed   => 0,
         };
         push( @queue, $bkpjob );
-        push( @finally_snapshots, $bkpjob ) if $finallysnapshots;
     }
 
     logit( $taskid, $host, $group, "End of queueing backup of host $host group $group" );
@@ -325,7 +324,6 @@ sub queue_remote_subfolders {
         rsync_err    => 0,
         has_failed   => 0,
     };
-    push( @finally_snapshots, $bkpjob );
 
     return 1;
 }
@@ -333,7 +331,7 @@ sub queue_remote_subfolders {
 #################################
 # Threading
 #
-sub start_threads {
+sub run_threads {
 
     # define number of threads
     my $nthreads;
@@ -356,11 +354,18 @@ sub start_threads {
     $Q->enqueue( (undef) x $nthreads );
 
     foreach my $thread (@threads) {
-        my ($tid,$jobid,$rsync_err) = $thread->join;
-        foreach my $i ( 0..$#finally_snapshots ) {
-            next unless $finally_snapshots[$i]->{jobid} == $jobid;
-            unless ($finally_snapshots[$i]{has_failed} == "1") {
-                $finally_snapshots[$i]{has_failed} = check_rsync_status( $rsync_err );
+        my (@finishable_bkpjobs_in_thread) = $thread->join;
+
+        # Merge bkpjobs returned by this thread with already known jobs
+        foreach my $bkpjob (@finishable_bkpjobs_in_thread) {
+            if ( exists $finishable_bkpjobs{$bkpjob->{jobid}} ) {
+                $finishable_bkpjobs{$bkpjob->{jobid}}->{has_failed} = 1 if $bkpjob->{has_failed};
+            } else {
+                $finishable_bkpjobs{$bkpjob->{jobid}} = $bkpjob;
+            }
+            # Push unique rsync errors to array
+            unless( grep { $_ == $bkpjob->{rsync_err} } @{ $finishable_bkpjobs{$bkpjob->{jobid}}->{rsync_errs} } ) {
+                push( @{ $finishable_bkpjobs{$bkpjob->{jobid}}->{rsync_errs} }, $bkpjob->{rsync_err} );
             }
         }
     }
@@ -370,15 +375,11 @@ sub start_threads {
 
 sub thread_work {
     my ($Q) = @_;
-    my $helper_jobid;
-    my $helper_tid;
-    my $helper_rsync_err;
+    my @finishable_bkpjobs_in_thread;
 
     while ( my $bkpjob = $Q->dequeue ) {
         my $tid            = threads->tid;
-        $helper_tid        = threads->tid;
         my $jobid          = $bkpjob->{jobid};
-        $helper_jobid      = $bkpjob->{jobid};
         my $host           = $bkpjob->{host};
         my $group          = $bkpjob->{group};
         my $path           = $bkpjob->{path};
@@ -394,28 +395,21 @@ sub thread_work {
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
-        my $rsync_err;
-        $rsync_err = execute_rsync( $jobid, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
-        $helper_rsync_err = $rsync_err;
+        my $rsync_err = execute_rsync( $jobid, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
-        unless (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} && !$dosnapshot ) ||
-                ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) ||
-                ( $finallysnapshots )) {
-            my $bkpjob = {
-                jobid        => $jobid,
-                host         => $host,
-                group        => $group,
-                bkptimestamp => $bkptimestamp,
-                rsync_err    => $rsync_err,
-                dosnapshot   => $dosnapshot,
-                has_failed   => check_rsync_status( $rsync_err ),
-            };
-            finish_backupjob($bkpjob);
-        }
+        my $bkpjob = {
+            jobid        => $jobid,
+            host         => $host,
+            group        => $group,
+            bkptimestamp => $bkptimestamp,
+            rsync_err    => $rsync_err,
+            has_failed   => check_rsync_status( $rsync_err ),
+        };
+        push(@finishable_bkpjobs_in_thread, $bkpjob);
         remove_lockfile( $taskid, $host, $group, $path );
-        return ($tid,$jobid,$rsync_err) if $finallysnapshots;
     }
-        return ($helper_tid,$helper_jobid,$helper_rsync_err);
+
+    return (@finishable_bkpjobs_in_thread);
 }
 
 #################################
@@ -857,38 +851,35 @@ sub finish_backupjob {
     my $host         = $bkpjob->{'host'};
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
-    my $dosnapshot   = $bkpjob->{'dosnapshot'};
-    my $rsync_err    = $bkpjob->{'rsync_err'};
     my $has_failed   = $bkpjob->{'has_failed'};
+    my $rsync_err    = join(', ', @{ $bkpjob->{'rsync_errs'} });
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
-    if ($dosnapshot) {
-        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-            create_btrfs_snapshot( $host, $group, $bkptimestamp );
-            if ( $has_failed ) {
-                logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
-                rename_failed_backup( $host, $group, $bkptimestamp );
-            } else {
-                logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-            }
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+        create_btrfs_snapshot( $host, $group, $bkptimestamp );
+        if ( $has_failed ) {
+            logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
+            rename_failed_backup( $host, $group, $bkptimestamp );
+        } else {
+            logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
         }
-        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
-            if ( $has_failed ) {
-                logit( $taskid, $host, $group, "rsync in links-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
-                rename_failed_backup( $host, $group, $bkptimestamp );
-            } else {
-                logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-                create_link_current( $host, $group, $bkptimestamp );
-            }
-        }
-
-        my %RecentBackups = bangstat_recentbackups($host);
-        unless ($noreport) {
-            xymon_report( $taskid, $host, $group, %RecentBackups );
-            mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
-        }
-        logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
     }
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
+        if ( $has_failed ) {
+            logit( $taskid, $host, $group, "rsync in links-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
+            rename_failed_backup( $host, $group, $bkptimestamp );
+        } else {
+            logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
+            create_link_current( $host, $group, $bkptimestamp );
+        }
+    }
+
+    my %RecentBackups = bangstat_recentbackups($host);
+    unless ($noreport) {
+        xymon_report( $taskid, $host, $group, %RecentBackups );
+        mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
+    }
+    logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
 
     # report finished job to DB, jobstatus => 2
     bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' ) unless $noreport;
@@ -960,7 +951,6 @@ sub parse_command_options {
         't|threads=i'      => \$nthreads_arg,
         'w|wipe'           => \$wipe,
         'initial'          => \$initial,
-        'finallysnapshots' => \$finallysnapshots,
         'force'            => \$force,
         'missingonly'      => \$missingonly,
         'xymon'            => \$xymononly,
@@ -1012,7 +1002,6 @@ sub usage {
         -w                 # wipe the backup
         -w --force         # forcing wipe the backup (override auto_wipe_limit)
         --initial          # create nonexisting backup targets
-        --finallysnapshots # make snapshots after the hole backup stuff
         --missingonly      # backup only hosts that were not backed up recently
         --xymon            # send only xymon report
         --noreport         # do not send any report
