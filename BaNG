@@ -99,8 +99,9 @@ sub reorder_queue_by_priority {
     }
 
     # reorder queue by priority
+    print "Final queue order: \n" if $serverconfig{verbose};
     foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue ) {
-        print "$bkpjob->{priority} $bkpjob->{path}\n" if $serverconfig{verbose};
+        print "$bkpjob->{priority} $bkpjob->{path} $bkpjob->{dosnapshot}\n" if $serverconfig{verbose};
         push( @prio_queue_sorted, $bkpjob );
     }
 
@@ -310,20 +311,10 @@ sub queue_remote_subfolders {
         path           => ":'${srcfolder}'",
         bkptimestamp   => $bkptimestamp,
         srcfolder      => ":$srcfolder",
-        dosnapshot     => 0,
+        dosnapshot     => $dosnapshot,
         exclsubfolders => 1,
     };
     push( @queue, $bkpjob );
-
-    $bkpjob = {
-        jobid        => $jobid,
-        host         => $host,
-        group        => $group,
-        bkptimestamp => $bkptimestamp,
-        dosnapshot   => $dosnapshot,
-        rsync_err    => 0,
-        has_failed   => 0,
-    };
 
     return 1;
 }
@@ -360,6 +351,7 @@ sub run_threads {
         foreach my $bkpjob (@finishable_bkpjobs_in_thread) {
             if ( exists $finishable_bkpjobs{$bkpjob->{jobid}} ) {
                 $finishable_bkpjobs{$bkpjob->{jobid}}->{has_failed} = 1 if $bkpjob->{has_failed};
+                $finishable_bkpjobs{$bkpjob->{jobid}}->{dosnapshot} = 1 if $bkpjob->{dosnapshot};
             } else {
                 $finishable_bkpjobs{$bkpjob->{jobid}} = $bkpjob;
             }
@@ -402,6 +394,7 @@ sub thread_work {
             host         => $host,
             group        => $group,
             bkptimestamp => $bkptimestamp,
+            dosnapshot   => $dosnapshot,
             rsync_err    => $rsync_err,
             has_failed   => check_rsync_status( $rsync_err ),
         };
@@ -851,9 +844,12 @@ sub finish_backupjob {
     my $host         = $bkpjob->{'host'};
     my $group        = $bkpjob->{'group'};
     my $bkptimestamp = $bkpjob->{'bkptimestamp'};
+    my $dosnapshot   = $bkpjob->{'dosnapshot'};
     my $has_failed   = $bkpjob->{'has_failed'};
     my $rsync_err    = join(', ', sort @{ $bkpjob->{'rsync_errs'} });
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
+
+    return unless $dosnapshot;
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         create_btrfs_snapshot( $host, $group, $bkptimestamp );
