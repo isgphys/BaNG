@@ -1,0 +1,11 @@
+---src_sub_threading
+BKP_ENABLED:            1
+BKP_BULK_ALLOW:         0
+WIPE_BULK_ALLOW:        0
+BKP_SOURCE_FOLDER:      ":/opt/BaNG/t/filesystem/src_sub_threading/folderA :/opt/BaNG/t/filesystem/src_sub_threading/folderB :/opt/BaNG/t/filesystem/src_sub_threading/folderC"
+BKP_PREFIX:             "system"
+BKP_THREADS_DEFAULT:    1
+BKP_THREAD_SRCFOLDERS:  1
+BKP_THREAD_SUBFOLDERS:  1
+BKP_STORE_MODUS:        'snapshots'
+BKP_EXCLUDE_FILE:       'excludelist_system'

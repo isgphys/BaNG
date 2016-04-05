@@ -58,6 +58,16 @@ like(   $output,    qr|Number of source folders: 1|i                            
 unlike( $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
 like(   $output,    qr|eval subfolders|                                          , "Eval subfolders for localhost $group"               );
 
+$group = 'snapshot-src-sub-folder-thread';
+$output = `$bangcmd -h localhost -g $group --initial`;
+like(   $output,    qr|Create generated exclude file|                            , "Create generated exclude file for localhost $group" );
+unlike( $output,    qr|Number of source folders: 1|i                             , "need more then 1 srcfolder for localhost $group"    );
+like(   $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
+like(   $output,    qr|Set jobstatus to 2 for host localhost|                    , "Set jobstatus to 2 for host localhost group $group" );
+like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
+unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
+unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+
 $group = 'differentserver';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Skipping .* for server doesnotexist instead of|           , "Skip backup to different server of localhost $group");
