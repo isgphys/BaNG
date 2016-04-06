@@ -67,7 +67,7 @@ if ( !@queue ) {
 
 reorder_queue_by_priority( $host_arg, $group_arg );
 run_threads();
-foreach my $finishable_bkpjob (keys %finishable_bkpjobs) {
+foreach my $finishable_bkpjob (sort keys %finishable_bkpjobs) {
     finish_backupjob($finishable_bkpjobs{$finishable_bkpjob});
 }
 
@@ -868,15 +868,15 @@ sub finish_backupjob {
         }
     }
 
+    # report finished job to DB, jobstatus => 2
+    bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' ) unless $noreport;
+
     my %RecentBackups = bangstat_recentbackups($host);
     unless ($noreport) {
         xymon_report( $taskid, $host, $group, %RecentBackups );
         mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
     }
     logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
-
-    # report finished job to DB, jobstatus => 2
-    bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' ) unless $noreport;
 
     remove_generic_exclude_file($host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
 
