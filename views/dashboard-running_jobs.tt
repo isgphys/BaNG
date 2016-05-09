@@ -5,6 +5,7 @@
         <th>Group</th>
         <th>Work on</th>
         <th>Run since</th>
+        <th>ShPID</th>
         <th>TaskID</th>
     </thead>
     <tbody>
@@ -18,6 +19,7 @@
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.path %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.timestamp %></td>
+                <td class="center"><% lockfiles.$server.$lockfile.shpid %></td>
                 <td class="center"><a href="/reporting/task/<% lockfiles.$server.$lockfile.taskid %>"><% lockfiles.$server.$lockfile.taskid.substr(8) %></a></td>
             </tr>
         <%- END %>

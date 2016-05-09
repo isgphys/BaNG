@@ -563,6 +563,8 @@ sub execute_rsync {
     $rsync_cmd = "echo $rsync_cmd" if $serverconfig{dryrun};
     my $rsyncpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$rsync_cmd $rsync_generic_exclude $rsync_options$path $rsync_target" );
 
+    writeto_lockfile( $taskid, $host, $group, $path, "shpid", $rsyncpid);
+
     logit( $taskid, $host, $group, "Rsync PID: $rsyncpid for host $host group $group path $path" );
 
     my @outlines = <HIS_OUT>;

@@ -7,6 +7,7 @@ use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;
 use Net::Ping;
+use YAML::Tiny qw( LoadFile );
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -16,7 +17,7 @@ our @EXPORT = qw(
     create_lockfile
     remove_lockfile
     check_lockfile
-    getlockfiles
+    writeto_lockfile
 );
 
 sub get_fsinfo {
@@ -91,28 +92,6 @@ sub get_fsinfo {
     return \%fsinfo;
 }
 
-sub get_lockfiles {
-    my %lockfiles;
-
-    foreach my $server ( keys %servers ) {
-        my @lockfiles = remote_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
-
-        foreach my $lockfile (@lockfiles) {
-            my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
-            my $taskid = `cat $serverconfig{path_lockfiles}/$file`;
-            $lockfiles{$server}{"$host-$group-$path"} = {
-                taskid    => $taskid,
-                host      => $host,
-                group     => $group,
-                path      => $path,
-                timestamp => $timestamp,
-            };
-        }
-    }
-
-    return \%lockfiles;
-}
-
 sub check_fill_level {
     my ($level) = @_;
     my $css_class = '';
@@ -176,10 +155,9 @@ sub create_lockfile {
         }
     }
 
-    unless ( $serverconfig{dryrun} ) {
-        system("echo $taskid > \"$lockfile\"") and logit( $taskid, $host, $group, "ERROR: could not create lockfile $lockfile" );
-    }
     logit( $taskid, $host, $group, "Created lockfile $lockfile" );
+    writeto_lockfile( $taskid, $host, $group, $path, "taskid", $taskid);
+
     return 1;
 }
 
@@ -197,7 +175,6 @@ sub split_lockfile_name {
     my ($lockfile) = @_;
     my ( $host, $group, $path, $timestamp ) = $lockfile =~ /^([\w\d\.-]+)_([\w\d-]+)_(.*)\.lock (.*)/;
     my $file = "${host}_${group}_${path}.lock";
-    $file =~ s/\'/\\'/g;
 
     $path =~ s/%/\//g;
     $path =~ s/\'//g;
@@ -229,6 +206,42 @@ sub check_lockfile {
     }
 
     return 1;
+}
+
+sub get_lockfiles {
+    my %lockfiles;
+
+    foreach my $server ( keys %servers ) {
+        my @lockfiles = remote_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
+
+        foreach my $lockfile (@lockfiles) {
+            my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
+            my $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
+            my $taskid = $ids->{taskid} || '';
+            my $shpid  = $ids->{shpid} || '';
+
+            $lockfiles{$server}{"$host-$group-$path"} = {
+                taskid    => $taskid,
+                host      => $host,
+                group     => $group,
+                path      => $path,
+                shpid     => $shpid,
+                timestamp => $timestamp,
+            };
+        }
+    }
+
+    return \%lockfiles;
+}
+
+sub writeto_lockfile {
+    my ( $taskid, $host, $group, $path, $key, $value ) = @_;
+    my $lockfile = lockfile( $host, $group, $path );
+
+    unless ( $serverconfig{dryrun} ) {
+        system("echo \"$key: $value\" >> \"$lockfile\"");
+    }
+    logit( $taskid, $host, $group, "Write to lockfile $lockfile -- $key: $value" ) if $serverconfig{verbose};
 }
 
 #################################
