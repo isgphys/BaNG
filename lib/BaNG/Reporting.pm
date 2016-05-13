@@ -545,17 +545,21 @@ sub xymon_report {
     my $topcolor = 'green';
     my $errcode;
     foreach my $key ( keys %RecentBackups ) {
-        $errcode = $RecentBackups{$key}[0]{ErrStatus};
-        my @errorcodes = split( ',', $errcode );
-        foreach my $code (@errorcodes) {
-            next if $code eq '0';     # no errors
-            next if $code eq '24';    # vanished source files
-            next if $code eq '99';    # no last_bkp
-            if ( $code eq '23' || $code eq '12' ) {
-                $topcolor = 'yellow'; # partial transfer
-                next;
+        if ( $RecentBackups{$key}[0]{JobStatus} == "-1" ) {
+            $topcolor = 'clear';
+        }else{
+            $errcode = $RecentBackups{$key}[0]{ErrStatus};
+            my @errorcodes = split( ',', $errcode );
+            foreach my $code (@errorcodes) {
+                next if $code eq '0';     # no errors
+                next if $code eq '24';    # vanished source files
+                next if $code eq '99';    # no last_bkp
+                if ( $code eq '23' || $code eq '12' ) {
+                    $topcolor = 'yellow'; # partial transfer
+                    next;
+                }
+                $topcolor = 'red';
             }
-            $topcolor = 'red';
         }
     }
     $topcolor = 'yellow' unless %RecentBackups;
@@ -584,6 +588,7 @@ sub xymon_report {
     $xymonreport .= $report;
 
     send_xymon_report($xymonreport) unless $serverconfig{dryrun};
+    print "Xymon Report: $xymonreport\n" if $serverconfig{dryrun};
     logit( $taskid, $host, $group, "xymon report sent." );
 
     return 1;
