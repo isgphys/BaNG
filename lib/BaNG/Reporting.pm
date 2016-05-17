@@ -156,6 +156,7 @@ sub bangstat_recentbackups {
                     Runtime     => '',
                     BkpFromPath => $missingBkpFromPath,
                     BkpToPath   => $missingBkpToPath,
+                    JobStatus   => '',
                     isThread    => '',
                     ErrStatus   => 99,
                     BkpGroup    => $missingBkpGroup,
@@ -544,8 +545,8 @@ sub xymon_report {
 
     my $topcolor = 'green';
     my $errcode;
-    foreach my $key ( keys %RecentBackups ) {
-        if ( $RecentBackups{$key}[0]{JobStatus} == "-1" ) {
+    foreach my $key ( sort keys %RecentBackups ) {
+        if ( $RecentBackups{$key}[0]{JobStatus} eq "-1" ) {
             $topcolor = 'clear';
         }else{
             $errcode = $RecentBackups{$key}[0]{ErrStatus};
