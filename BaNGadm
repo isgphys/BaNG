@@ -69,7 +69,7 @@ if ($showgroups) {
 
 if ($setprop) {
     get_host_config( $host_arg, $group_arg );
-    my @backup_folders = get_backup_folders( $host_arg, $group_arg );
+    my @backup_folders = get_backup_folders( $host_arg, $group_arg, 2);
 
     if ($setprop eq "list") {
         print "Snapshot property (rw/ro) of $host_arg - $group_arg\n";
