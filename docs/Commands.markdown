@@ -74,6 +74,9 @@ BaNGadm --failed -h <host> -g <group>         # show failed backups of defined h
 BaNGadm --setprop list -h <host> -g <group>   # show Read-Write/Read-Only status of all snaphots
 BaNGadm --setprop rw|ro -h <host> -g <group>  # set all snapshots to Read-Write/Read-Only
 
+BaNGadm --db_dump                             # create database dump
+BaNGadm --db_archive                          # move records from table statistic to statistic_archive where older than 100 days
+
 BaNGadm --showgroups                          # show all available groups
 
 BaNGadm --cron-create                         # generate and write cronjob file or print crontab to standard out
