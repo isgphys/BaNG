@@ -15,6 +15,7 @@ use BaNG::Reporting;
 my $version = '0.1';
 my $add_arg;
 my $delete_arg;
+my $failed_arg;
 my $dump_arg;
 my $tidy_arg;
 my $croncreate;
@@ -64,6 +65,25 @@ if ($showgroups) {
         print "$group \n";
     }
 
+    exit 0;
+}
+
+if ($failed_arg) {
+    my @failed_folders;
+    my $host  = $host_arg || '*';
+    my $group = $group_arg || '*';
+
+    get_host_config( $host, $group );
+
+    foreach my $hostgroup (sort keys %hosts ) {
+        unless ( $hosts{$hostgroup}->{hostconfig}->{BKP_TARGET_HOST} ne $servername ) {
+            @failed_folders = get_backup_folders($hosts{$hostgroup}->{hostname},$hosts{$hostgroup}->{group}, 1);
+            foreach my $failed_folder ( sort @failed_folders ) {
+                chomp $failed_folder;
+                print "$failed_folder\n";
+            }
+        }
+    }
     exit 0;
 }
 
@@ -215,6 +235,7 @@ sub parse_command_options {
         'n|dry-run'   => \$dryrun_arg,
         'add'         => \$add_arg,
         'delete'      => \$delete_arg,
+        'failed'      => \$failed_arg,
         'db_archive'  => \$tidy_arg,
         'db_dump'     => \$dump_arg,
         'g|group=s'   => \$group_arg,
@@ -226,7 +247,7 @@ sub parse_command_options {
         'setprop=s'   => \$setprop,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $croncreate && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $showgroups || $tidy_arg || $dump_arg ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $failed_arg || $showgroups || $tidy_arg || $dump_arg ) || ( $host_arg && $group_arg  && $setprop ));
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -262,13 +283,15 @@ sub usage {
         $command --delete -h <host> -g <group>        # delete a existing host config
         $command --delete -g <group>                  # delete a existing group config
 
+        $command --failed                             # show all failed backups
+        $command --failed -h <host> -g <group>        # show failed backups of defined hosts and/or group
+
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
 
         $command --db_dump                            # create database dump
-
         $command --db_archive                         # move records from table statistic to statistic_archive
-                                                       where older than 100 days
+                                                        where older than 100 days
 
         $command --cron-create                        # generate and write cronjob file or print crontab to standard out
         $command --cron-check                         # check if cronjob file / crontab up-to-date
