@@ -55,8 +55,8 @@ sub create_btrfs_snapshot {
 
     if ( -x $serverconfig{path_btrfs} ) {
         my $btrfs_cmd             = $serverconfig{path_btrfs};
-        my $btrfs_snapshot_source = targetpath( $host, $group ) . '/current';
-        my $btrfs_snapshot_dest   = targetpath( $host, $group ) . '/' . $bkptimestamp;
+        my $btrfs_snapshot_source = &BaNG::Common::targetpath( $host, $group ) . '/current';
+        my $btrfs_snapshot_dest   = &BaNG::Common::targetpath( $host, $group ) . '/' . $bkptimestamp;
 
         my $touch_current_cmd = "touch $btrfs_snapshot_source >/dev/null 2>&1";
         $touch_current_cmd = "echo $touch_current_cmd" if $serverconfig{dryrun};
