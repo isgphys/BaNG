@@ -663,7 +663,7 @@ sub wipe {
     }
 
     # remove subvolumes or folders
-    wipe_worker( $host, $group, @wipedirs, $taskid );
+    wipe_worker( $host, $group, ,$taskid, @wipedirs );
 
     logit( $taskid, $host, $group, "Wipe successful of host $host group $group" );
 

@@ -139,7 +139,7 @@ sub wipe_maxcount {
 }
 
 sub wipe_worker {
-    my ( $host, $group, @wipedirs, $taskid ) = @_;
+    my ( $host, $group, $taskid, @wipedirs ) = @_;
     $taskid ||= 0;
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
@@ -150,7 +150,7 @@ sub wipe_worker {
         }
         @wipedirs = splice( @wipedirs, 0, $serverconfig{snapshot_wipe_limit} );
 
-        delete_btrfs_subvolume( $host, $group, join( ' ', @wipedirs ), $taskid );
+        delete_btrfs_subvolume( $host, $group, $taskid, join( ' ', @wipedirs ) );
         delete_logfiles( $host, $group, @wipedirs );
     } else {
         my $rmcmd = 'rm -Rf';

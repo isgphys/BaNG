@@ -32,7 +32,7 @@ sub create_btrfs_subvolume {
 }
 
 sub delete_btrfs_subvolume {
-    my ( $host, $group, $path, $taskid ) = @_;
+    my ( $host, $group, $taskid, $path ) = @_;
     $taskid ||= 0;
 
     if ( -x $serverconfig{path_btrfs} ) {
