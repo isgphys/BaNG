@@ -26,6 +26,10 @@ Main Features
     * multiple forked processes for faster transfers
     * wipe based on daily/weekly/monthly backup rotation scheme
     * generate cron entry for scheduled backups and wipes
+  * Configurability
+    * Easy and extensive configuration options
+    * Configurable at several levels (host, group, server, default)
+    * Based on text files in the YAML format
   * Reporting
     * Report detailed statistics to MySQL database
     * Report via socket to Xymon monitoring server
@@ -44,10 +48,6 @@ Main Features
     * Bar charts of largest backup jobs
     * Customizable menu entry for additional links
     * Documentation rendered from markdown files
-  * Configurability
-    * Easy and extensive configuration options
-    * Configurable at several levels (host, group, server, default)
-    * Based on text files in the YAML format
 
 
 License
