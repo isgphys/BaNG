@@ -30,6 +30,7 @@ our @EXPORT = qw(
     logit
     read_log
     read_global_log
+    delete_logfiles
     error404
 );
 
@@ -739,6 +740,29 @@ sub read_global_log {
     }
 
     return \%parsed_logdata;
+}
+
+sub delete_logfiles {
+    my ( $host, $group, @wipedirs, $taskid ) = @_;
+    $taskid ||= 0;
+
+    foreach my $dir (@wipedirs) {
+        my ($logdate) = $dir =~ /.*\/(\d{4}\.\d{2}\.\d{2})/;
+        $logdate =~ s/\./\-/g;
+        my $today = `$serverconfig{path_date} +"%Y-%m-%d"`;
+        chomp $today;
+        unless ( $logdate eq $today ) {
+            my $logfolder = "$serverconfig{path_logs}/${host}_${group}";
+            my $logfile   = "$logfolder/$logdate.log";
+            my $rmcmd     = 'rm -f';
+            $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
+
+            logit( $taskid, $host, $group, "Delete logfile $logfile" );
+            system("$rmcmd $logfile") and logit( $taskid, $host, $group, "ERROR: deleting logfile $logfile: $!" );
+        }
+    }
+
+    return 1;
 }
 
 sub error404 {
