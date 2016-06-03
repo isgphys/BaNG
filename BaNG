@@ -18,7 +18,7 @@ use BaNG::Reporting;
 use BaNG::BTRFS;
 use BaNG::Wipe;
 
-my $version = '3.4';
+my $version = '3.5';
 my $force;
 my $wipe;
 my $initial;
