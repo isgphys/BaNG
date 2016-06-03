@@ -15,6 +15,7 @@ use BaNG::Hosts;
 use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;
+use BaNG::BTRFS;
 use BaNG::Wipe;
 
 my $version = '3.4';
@@ -488,7 +489,7 @@ sub eval_rsync_target {
         $rsync_target .= '/current';
 
         if ( !-d $rsync_target ) {
-            create_btrfs_subvolume( $host, $group, $rsync_target );
+            create_btrfs_subvolume( $host, $group, $rsync_target, $taskid );
         }
     } else {
         $rsync_target .= "/$bkptimestamp";
@@ -599,66 +600,6 @@ sub execute_rsync {
     return $errcode;
 }
 
-#################################
-# Btrfs
-#
-sub create_btrfs_subvolume {
-    my ( $host, $group, $path ) = @_;
-
-    if ( -x $serverconfig{path_btrfs} ) {
-        my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume create $path >/dev/null 2>&1";
-        $btrfs_subvolume_cmd = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
-
-        logit( $taskid, $host, $group, "Create btrfs subvolume: $btrfs_subvolume_cmd" );
-        system($btrfs_subvolume_cmd) and logit( $taskid, $host, $group, "ERROR: creating subvolume for $host-$group: $!" );
-
-    } else {
-        logit( $taskid, $host, $group, "ERROR: could not create subvolumes, btrfs command not found, check path" );
-    }
-    return 1;
-}
-
-sub delete_btrfs_subvolume {
-    my ( $host, $group, $path ) = @_;
-
-    if ( -x $serverconfig{path_btrfs} ) {
-        my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume delete $path >/dev/null 2>&1";
-        $btrfs_subvolume_cmd = "echo $btrfs_subvolume_cmd" if $serverconfig{dryrun};
-
-        logit( $taskid, $host, $group, "Delete btrfs subvolume: $btrfs_subvolume_cmd" );
-        system($btrfs_subvolume_cmd) and logit( $taskid, $host, $group, "ERROR: deleting subvolume for $host-$group: $!" );
-
-    } else {
-        logit( $taskid, $host, $group, "ERROR: could not delete subfolders, btrfs command not found, check path" );
-    }
-
-    return 1;
-}
-
-sub create_btrfs_snapshot {
-    my ( $host, $group, $bkptimestamp ) = @_;
-
-    if ( -x $serverconfig{path_btrfs} ) {
-        my $btrfs_cmd             = $serverconfig{path_btrfs};
-        my $btrfs_snapshot_source = targetpath( $host, $group ) . '/current';
-        my $btrfs_snapshot_dest   = targetpath( $host, $group ) . '/' . $bkptimestamp;
-
-        my $touch_current_cmd = "touch $btrfs_snapshot_source >/dev/null 2>&1";
-        $touch_current_cmd = "echo $touch_current_cmd" if $serverconfig{dryrun};
-        logit( $taskid, $host, $group, "Touch current folder for host $host group $group" );
-        system($touch_current_cmd) and logit( $taskid, $host, $group, "ERROR: touching current folder for $host-$group: $!" );
-
-        my $btrfs_snapshot_cmd = "$btrfs_cmd subvolume snapshot -r $btrfs_snapshot_source $btrfs_snapshot_dest >/dev/null 2>&1";
-        $btrfs_snapshot_cmd = "echo $btrfs_snapshot_cmd" if $serverconfig{dryrun};
-        logit( $taskid, $host, $group, "Create btrfs snapshot for host $host group $group using $btrfs_snapshot_cmd" );
-        system($btrfs_snapshot_cmd) and logit( $taskid, $host, $group, "ERROR: creating snapshot for $host-$group: $!" );
-
-    } else {
-        logit( $taskid, $host, $group, "ERROR: could not create snapshot, btrfs command not found, check path" );
-    }
-
-    return 1;
-}
 
 #################################
 # Wipe old backups
@@ -730,7 +671,7 @@ sub wipe {
         }
         @wipedirs = splice( @wipedirs, 0, $serverconfig{snapshot_wipe_limit} );
 
-        delete_btrfs_subvolume( $host, $group, join( ' ', @wipedirs ) );
+        delete_btrfs_subvolume( $host, $group, join( ' ', @wipedirs ), $taskid );
         delete_logfiles( $host, $group, @wipedirs );
     } else {
         my $rmcmd = 'rm -Rf';
@@ -852,7 +793,7 @@ sub finish_backupjob {
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
     if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) &&  ( $dosnapshot )) {
-        create_btrfs_snapshot( $host, $group, $bkptimestamp );
+        create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid);
         if ( $has_failed ) {
             logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
             rename_failed_backup( $host, $group, $bkptimestamp );
