@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use BaNG::Config;
 use BaNG::Reporting;
+use BaNG::BTRFS;
 use Date::Parse;
 
 use Exporter 'import';
@@ -12,6 +13,7 @@ our @EXPORT = qw(
     list_folders_to_wipe
     wipe_maxcount
     fill_stacks
+    wipe_worker
 );
 
 sub list_folders_to_wipe {
@@ -134,6 +136,31 @@ sub wipe_maxcount {
     );
 
     return \%maxcount;
+}
+
+sub wipe_worker {
+    my ( $host, $group, @wipedirs, $taskid ) = @_;
+    $taskid ||= 0;
+
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+
+        # Limit snapshot wipe to the last x days -> performance issues
+        if ( scalar( @wipedirs ) > $serverconfig{snapshot_wipe_limit} ) {
+            logit( $taskid, $host, $group, "Wipe WARNING: snapshot limit reached, wipe only oldest $serverconfig{snapshot_wipe_limit} snapshots." );
+        }
+        @wipedirs = splice( @wipedirs, 0, $serverconfig{snapshot_wipe_limit} );
+
+        delete_btrfs_subvolume( $host, $group, join( ' ', @wipedirs ), $taskid );
+        delete_logfiles( $host, $group, @wipedirs );
+    } else {
+        my $rmcmd = 'rm -Rf';
+        $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
+        foreach my $dir (@wipedirs) {
+            logit( $taskid, $host, $group, "Wipe $rmcmd $dir for host $host group $group" );
+            system("$rmcmd $dir") and logit( $taskid, $host, $group, "ERROR: removing folder $dir for $host-$group: $!" );
+        }
+    }
+    return 1;
 }
 
 1;
