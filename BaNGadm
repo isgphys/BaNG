@@ -11,6 +11,7 @@ use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
 use BaNG::Common;
 use BaNG::Reporting;
+use BaNG::Wipe;
 
 my $version = '0.1';
 my $add_arg;
@@ -78,9 +79,15 @@ if ($failed_arg) {
     foreach my $hostgroup (sort keys %hosts ) {
         unless ( $hosts{$hostgroup}->{hostconfig}->{BKP_TARGET_HOST} ne $servername ) {
             @failed_folders = get_backup_folders($hosts{$hostgroup}->{hostname},$hosts{$hostgroup}->{group}, 1);
-            foreach my $failed_folder ( sort @failed_folders ) {
-                chomp $failed_folder;
-                print "$failed_folder\n";
+            if ( scalar( @failed_folders ) > 0 ) {
+                print "\n$hosts{$hostgroup}->{hostname} - $hosts{$hostgroup}->{group}\n";
+                foreach my $failed_folder ( sort @failed_folders ) {
+                    print "\t$failed_folder";
+                }
+                print "\n";
+                if ( $delete_arg ) {
+                    wipe_worker( $hosts{$hostgroup}->{hostname}, $hosts{$hostgroup}->{group}, @failed_folders );
+                }
             }
         }
     }
