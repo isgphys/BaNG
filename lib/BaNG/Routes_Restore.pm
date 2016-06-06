@@ -7,6 +7,7 @@ use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
 use BaNG::Common;
+use BaNG::Wipe;
 
 prefix '/restore';
 
