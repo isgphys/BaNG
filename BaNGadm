@@ -9,9 +9,9 @@ use YAML::Tiny;
 
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
-use BaNG::Common;
-use BaNG::Reporting;
+use BaNG::Hosts;
 use BaNG::Wipe;
+use BaNG::Reporting;
 
 my $version = '0.1';
 my $add_arg;
