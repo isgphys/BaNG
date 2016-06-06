@@ -4,14 +4,11 @@ use 5.010;
 use strict;
 use warnings;
 use BaNG::Config;
-use BaNG::Wipe;
 use Date::Parse;
 use POSIX qw( floor );
 
 use Exporter 'import';
 our @EXPORT = qw(
-    backup_folders_stack
-    get_backup_folders
     list_groups
     list_groupmembers
     get_automount_paths
@@ -27,25 +24,6 @@ sub targetpath {
     my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
 
     return $target_path;
-}
-
-sub get_backup_folders {
-    my ( $host, $group, $folder_type ) = @_;
-    $folder_type ||= 0;
-    my $bkpdir = targetpath( $host, $group );
-    my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
-    my @backup_folders;
-
-    my $REGEX = "[0-9\./_]*";                                           # default, show all good folders
-    $REGEX    = ".*_failed" if $folder_type == 1;                       # show all *_failed folders
-    $REGEX    = "\\([0-9\./_]*\\|.*_failed\$\\)" if $folder_type == 2;  # show all folders, except "current" folder
-
-    if ( $server eq $servername ) {
-        @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}/$REGEX' 2>/dev/null`;
-    } else {
-        @backup_folders = &BaNG::Hosts::remote_command( $server, 'BaNG/bang_getBackupFolders', $bkpdir );
-    }
-    return @backup_folders;
 }
 
 sub list_groups {
@@ -72,19 +50,6 @@ sub list_groupmembers {
     }
 
     return \@groupmembers;
-}
-
-sub backup_folders_stack {
-    my ($host) = @_;
-
-    my %backup_folders_stack;
-    foreach my $group ( list_groups($host) ) {
-        my @available_backup_folders = get_backup_folders( $host, $group );
-        my %stack = &BaNG::Wipe::list_folders_to_wipe( $host, $group, @available_backup_folders );
-        $backup_folders_stack{$group} = \%stack;
-    }
-
-    return \%backup_folders_stack;
 }
 
 sub get_automount_paths {

@@ -13,6 +13,7 @@ use Exporter 'import';
 our @EXPORT = qw(
     get_fsinfo
     get_lockfiles
+    get_backup_folders
     check_client_connection
     create_lockfile
     remove_lockfile
@@ -124,6 +125,25 @@ sub check_client_connection {
     $p->close();
 
     return $state, $msg;
+}
+
+sub get_backup_folders {
+    my ( $host, $group, $folder_type ) = @_;
+    $folder_type ||= 0;
+    my $bkpdir = targetpath( $host, $group );
+    my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
+    my @backup_folders;
+
+    my $REGEX = "[0-9\./_]*";                                           # default, show all good folders
+    $REGEX    = ".*_failed" if $folder_type == 1;                       # show all *_failed folders
+    $REGEX    = "\\([0-9\./_]*\\|.*_failed\$\\)" if $folder_type == 2;  # show all folders, except "current" folder
+
+    if ( $server eq $servername ) {
+        @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}/$REGEX' 2>/dev/null`;
+    } else {
+        @backup_folders = remote_command( $server, 'BaNG/bang_getBackupFolders', $bkpdir );
+    }
+    return @backup_folders;
 }
 
 #################################

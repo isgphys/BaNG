@@ -11,6 +11,7 @@ use Date::Parse;
 use Exporter 'import';
 our @EXPORT = qw(
     list_folders_to_wipe
+    backup_folders_stack
     wipe_maxcount
     fill_stacks
     wipe_worker
@@ -74,6 +75,19 @@ sub list_folders_to_wipe {
     push( @{$stack{wipe}}, @folders_to_wipe );
 
     return %stack;
+}
+
+sub backup_folders_stack {
+    my ($host) = @_;
+
+    my %backup_folders_stack;
+    foreach my $group ( list_groups($host) ) {
+        my @available_backup_folders = get_backup_folders( $host, $group );
+        my %stack = list_folders_to_wipe( $host, $group, @available_backup_folders );
+        $backup_folders_stack{$group} = \%stack;
+    }
+
+    return \%backup_folders_stack;
 }
 
 sub fill_stacks {
