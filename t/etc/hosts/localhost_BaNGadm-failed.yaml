@@ -1,0 +1,11 @@
+---
+BKP_ENABLED:            1
+BKP_BULK_ALLOW:         0
+WIPE_BULK_ALLOW:        0
+BKP_SOURCE_FOLDER:      ":/opt/Dev-BaNG/t/filesystem/simple"
+BKP_TARGET_PATH:        "/opt/Dev-BaNG/t/filesystem"
+BKP_PREFIX:             "target"
+BKP_THREADS_DEFAULT:    1
+BKP_THREAD_SUBFOLDERS:  0
+BKP_STORE_MODUS:        'snapshots'
+BKP_EXCLUDE_FILE:       'excludelist_system'
