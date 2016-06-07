@@ -151,7 +151,7 @@ sub queue_backup {
                 create_link_current($host, $group, $last_folder);
             }
         }
-        unlink(targetpath($host, $group ) . "/lastdst") unless $serverconfig{dryrun};;
+        unlink(targetpath($host, $group ) . "/lastdst") unless $serverconfig{dryrun};
         logit( $taskid, $host, $group, "Delete depricated lastdst file for host $host group $group" );
     }
     # MIGRATION "lastdst"
