@@ -78,14 +78,16 @@ if ($failed_arg) {
 
     foreach my $hostgroup (sort keys %hosts ) {
         unless ( $hosts{$hostgroup}->{hostconfig}->{BKP_TARGET_HOST} ne $servername ) {
+            print "Check $hostgroup for failed backups\n" if $serverconfig{verbose};
             @failed_folders = get_backup_folders($hosts{$hostgroup}->{hostname},$hosts{$hostgroup}->{group}, 1);
             if ( scalar( @failed_folders ) > 0 ) {
-                print "\n$hosts{$hostgroup}->{hostname} - $hosts{$hostgroup}->{group}\n";
+                print "\nFound following folders for $hosts{$hostgroup}->{hostname} - $hosts{$hostgroup}->{group}\n";
                 foreach my $failed_folder ( sort @failed_folders ) {
                     print "\t$failed_folder";
                 }
                 print "\n";
                 if ( $delete_arg ) {
+                    print "Delete failed backup folders for $hostgroup\n" if $serverconfig{verbose};
                     wipe_worker( $hosts{$hostgroup}->{hostname}, $hosts{$hostgroup}->{group}, @failed_folders );
                 }
             }
