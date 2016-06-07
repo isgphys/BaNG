@@ -88,7 +88,7 @@ if ($failed_arg) {
                 print "\n";
                 if ( $delete_arg ) {
                     print "Delete failed backup folders for $hostgroup\n" if $serverconfig{verbose};
-                    wipe_worker( $hosts{$hostgroup}->{hostname}, $hosts{$hostgroup}->{group}, @failed_folders );
+                    wipe_worker( $hosts{$hostgroup}->{hostname}, $hosts{$hostgroup}->{group}, 0 , @failed_folders );
                 }
             }
         }
