@@ -4,6 +4,8 @@ use 5.010;
 use strict;
 use warnings;
 use BaNG::Config;
+use BaNG::Reporting;
+use BaNG::BTRFS;
 use Date::Parse;
 use POSIX qw( floor );
 
@@ -14,6 +16,7 @@ our @EXPORT = qw(
     get_automount_paths
     num2human
     targetpath
+    check_target_exists
     time2human
 );
 
@@ -24,6 +27,36 @@ sub targetpath {
     my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
 
     return $target_path;
+}
+
+sub check_target_exists {
+    my ( $host, $group, $taskid, $create ) = @_;
+    my $return_code = 0;
+    $taskid ||= 0;
+    $create ||= 0;
+
+    my $rsync_target = targetpath( $host, $group );
+
+    if ( !-d $rsync_target ) {
+        $return_code = 1;
+        if ( $create ) {
+            system("mkdir -p $rsync_target") unless $serverconfig{dryrun};
+            $return_code = 0;
+        }
+    }
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+        $rsync_target .= '/current';
+
+        if ( !-d $rsync_target ) {
+            $return_code = 1;
+            if ( $create ) {
+                create_btrfs_subvolume( $host, $group, $rsync_target, $taskid );
+                $return_code = 0;
+            }
+        }
+    }
+
+    return $return_code;
 }
 
 sub list_groups {

@@ -131,8 +131,9 @@ sub queue_backup {
     return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
     # check for existing target_path folder
-    my ($check_rsync_target_code) = check_rsync_target( $host, $group );
-    if ( $check_rsync_target_code > 0 && !$initial ) {
+    my $create = $initial ? 1 : 0;
+    my ($check_target_code) = check_target_exists( $host, $group, $taskid, $create );
+    if ( $check_target_code > 0 && !$initial ) {
         logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
         print "Skipping backup of $host because target_path (" . targetpath($host, $group ) .") does not exist!\n";
         print "use --initial for the first backup run, otherwise check availability of mount!\n";
@@ -459,38 +460,12 @@ sub eval_rsync_options {
     return $rsync_options;
 }
 
-sub check_rsync_target {
-    my ( $host, $group ) = @_;
-    my $return_code = 0;
-
-    my $rsync_target = targetpath( $host, $group );
-
-    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-        $rsync_target .= '/current';
-    }
-
-    if ( !-d $rsync_target ) {
-        $return_code = 1;
-    }
-
-    return $return_code;
-}
-
 sub eval_rsync_target {
     my ( $host, $group, $bkptimestamp ) = @_;
-
     my $rsync_target = targetpath( $host, $group );
-
-    if ( !-d $rsync_target ) {
-        system("mkdir -p $rsync_target") unless $serverconfig{dryrun};
-    }
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         $rsync_target .= '/current';
-
-        if ( !-d $rsync_target ) {
-            create_btrfs_subvolume( $host, $group, $rsync_target, $taskid );
-        }
     } else {
         $rsync_target .= "/$bkptimestamp";
     }
