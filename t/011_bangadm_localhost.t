@@ -25,8 +25,8 @@ subtest 'Check all available configs for failed backups' => sub {
         }
     }
     like(   $output,  qr|Found following folders for localhost - BaNGadm-failed|, 'Found folders for localhost-BaNGadm-failed'                  );
-    like(   $output,  qr|01.01.2016_000001_failed|                              , 'Found 01.01.2016_000001_failed for localhost-BaNGadm-failed' );
-    unlike( $output,  qr|01.02.2016_000002|                                     , 'no other folders found' );
+    like(   $output,  qr|2016.01.01_000001_failed|                              , 'Found 2016.01.01_000001_failed for localhost-BaNGadm-failed' );
+    unlike( $output,  qr|2016.02.01_000002|                                     , 'no other folders found' );
 };
 
 
@@ -35,8 +35,8 @@ subtest 'Check localhost-BaNGadm-failed for failed backups' => sub {
 
     like(   $output,  qr|Check localhost-BaNGadm-failed for failed backups|     , 'Check localhost-BaNGadm-failed for failed backups'           );
     like(   $output,  qr|Found following folders for localhost - BaNGadm-failed|, 'Found folders for localhost-BaNGadm-failed'                  );
-    like(   $output,  qr|01.01.2016_000001_failed|                              , 'Found 01.01.2016_000001_failed for localhost-BaNGadm-failed' );
-    unlike( $output,  qr|01.02.2016_000002|                                     , 'not found 01.02.2016_000002 for localhost-BaNGadm-failed'    );
+    like(   $output,  qr|2016.01.01_000001_failed|                              , 'Found 2016.01.01_000001_failed for localhost-BaNGadm-failed' );
+    unlike( $output,  qr|2016.02.01_000002|                                     , 'not found 2016.02.01_000002 for localhost-BaNGadm-failed'    );
 };
 
 
@@ -44,7 +44,7 @@ subtest 'Delete failed folders for localhost-BaNGadm-failed' => sub {
     $output = `$bangadmcmd --failed --delete -h localhost -g BaNGadm-failed`;
 
     like(   $output, qr|Check localhost-BaNGadm-failed for failed backups| , 'Delete - check localhost-BaNGadm-failed for failed backups'  );
-    like(   $output, qr|01.01.2016_000001_failed|                          , 'Delete - found 01.01.2016_000001_failed for localhost-BaNGadm-failed' );
+    like(   $output, qr|2016.01.01_000001_failed|                          , 'Delete - found 01.01.2016_000001_failed for localhost-BaNGadm-failed' );
     like(   $output, qr|Delete failed backup folders for|                  , 'Delete failed backup folders for localhost-BaNGadm-failed'   );
 };
 
