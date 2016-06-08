@@ -17,6 +17,7 @@ like(   $output,    qr|Exit because queue is empty|                             
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group`;
 like(   $output,    qr|Skipping backup of localhost because target_path|         , 'Skip backup target_path does not exist'             );
+unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group --initial`;
@@ -40,6 +41,7 @@ like(   $output,    qr|Backup successful for host localhost group $group|       
 like(   $output,    qr|Removed lockfile|                                         , "Removed lockfile for localhost $group"              );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
 $group = 'snapshot-srcfolder-thread';
 $output = `$bangcmd -h localhost -g $group --initial`;
@@ -48,12 +50,14 @@ unlike( $output,    qr|Number of source folders: 1|i                            
 like(   $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
 $group = 'snapshot-subfolders';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 like(   $output,    qr|Number of source folders: 1|i                             , "Only 1 srcfolder for localhost $group"              );
 unlike( $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
 like(   $output,    qr|eval subfolders|                                          , "Eval subfolders for localhost $group"               );
@@ -67,6 +71,7 @@ like(   $output,    qr|Set jobstatus to 2 for host localhost|                   
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
+unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
 $group = 'differentserver';
 $output = `$bangcmd -h localhost -g $group --initial`;
@@ -77,6 +82,7 @@ $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Warning: could not find excludefile|                      , "Warn about missing excludefile for localhost $group");
 
 $output = `$bangcmd  --xymon -h localhost -g snapshot-simple --initial`;
-like(   $output,    qr|xymon report sent\.\s*Exit because queue is empty|        , "xymon only command argument sends report"          );
+like(   $output,    qr|xymon report sent\.\s*Exit because queue is empty|        , "xymon only command argument sends report"           );
+unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found"                      );
 
 done_testing();
