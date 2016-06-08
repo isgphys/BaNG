@@ -4,7 +4,6 @@ use 5.010;
 use strict;
 use warnings;
 use BaNG::Config;
-use BaNG::Common;
 use BaNG::Reporting;
 
 use Exporter 'import';
@@ -50,13 +49,13 @@ sub delete_btrfs_subvolume {
 }
 
 sub create_btrfs_snapshot {
-    my ( $host, $group, $bkptimestamp, $taskid ) = @_;
+    my ( $host, $group, $bkptimestamp, $taskid, $targetpath ) = @_;
     $taskid ||= 0;
 
     if ( -x $serverconfig{path_btrfs} ) {
         my $btrfs_cmd             = $serverconfig{path_btrfs};
-        my $btrfs_snapshot_source = targetpath( $host, $group ) . '/current';
-        my $btrfs_snapshot_dest   = targetpath( $host, $group ) . '/' . $bkptimestamp;
+        my $btrfs_snapshot_source = "$targetpath/current";
+        my $btrfs_snapshot_dest   = "$targetpath/$bkptimestamp";
 
         my $touch_current_cmd = "touch $btrfs_snapshot_source >/dev/null 2>&1";
         $touch_current_cmd = "echo $touch_current_cmd" if $serverconfig{dryrun};

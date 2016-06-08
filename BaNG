@@ -754,7 +754,8 @@ sub finish_backupjob {
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
     if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) &&  ( $dosnapshot )) {
-        create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid);
+        my $rsync_target = targetpath( $host, $group );
+        create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid, $rsync_target);
         if ( $has_failed ) {
             logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
             rename_failed_backup( $host, $group, $bkptimestamp );
