@@ -4,6 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 use BaNG::Common;
+use BaNG::Converter;
 use BaNG::Config;
 use BaNG::Reporting;
 use Net::Ping;
