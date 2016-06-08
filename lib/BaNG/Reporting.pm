@@ -743,7 +743,7 @@ sub read_global_log {
 }
 
 sub delete_logfiles {
-    my ( $host, $group, @wipedirs, $taskid ) = @_;
+    my ( $host, $group, $taskid, @wipedirs ) = @_;
     $taskid ||= 0;
 
     foreach my $dir (@wipedirs) {

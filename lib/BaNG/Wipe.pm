@@ -167,7 +167,7 @@ sub wipe_worker {
         @wipedirs = splice( @wipedirs, 0, $serverconfig{snapshot_wipe_limit} );
 
         delete_btrfs_subvolume( $host, $group, $taskid, join( ' ', @wipedirs ) );
-        delete_logfiles( $host, $group, @wipedirs );
+        delete_logfiles( $host, $group, $taskid, @wipedirs );
     } else {
         my $rmcmd = 'rm -Rf';
         $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
