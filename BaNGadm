@@ -17,6 +17,7 @@ my $version = '0.1';
 my $add_arg;
 my $delete_arg;
 my $failed_arg;
+my $initial_arg;
 my $dump_arg;
 my $tidy_arg;
 my $croncreate;
@@ -245,6 +246,7 @@ sub parse_command_options {
         'add'         => \$add_arg,
         'delete'      => \$delete_arg,
         'failed'      => \$failed_arg,
+        'initialize'  => \$initial_arg,
         'db_archive'  => \$tidy_arg,
         'db_dump'     => \$dump_arg,
         'g|group=s'   => \$group_arg,
@@ -256,7 +258,12 @@ sub parse_command_options {
         'setprop=s'   => \$setprop,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $croncreate && $showgroups );
-    usage('Check the arguments!') unless ( ( $add_arg || $delete_arg ) && ( ( $host_arg && $group_arg ) || $group_arg ) || ( $croncreate || $croncheck || $failed_arg || $showgroups || $tidy_arg || $dump_arg ) || ( $host_arg && $group_arg  && $setprop ));
+    usage('Check the arguments!') unless (
+            ( $add_arg || $delete_arg ) && (( $host_arg && $group_arg ) || $group_arg ) ||
+            ( $initial_arg && ( $host_arg && $group_arg ) ) ||
+            ( $croncreate || $croncheck || $failed_arg || $showgroups || $tidy_arg || $dump_arg ) ||
+            ( $host_arg && $group_arg && $setprop )
+        );
 
     $verbose_arg = 1 if $dryrun_arg;
 
@@ -291,6 +298,8 @@ sub usage {
 
         $command --delete -h <host> -g <group>        # delete a existing host config
         $command --delete -g <group>                  # delete a existing group config
+
+        $command --initialize -h <host> -g <group>    # create target folder structure for defined host
 
         $command --failed                             # show all failed backups
         $command --failed -h <host> -g <group>        # show failed backups of defined hosts and/or group
