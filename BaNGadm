@@ -24,6 +24,7 @@ my $croncreate;
 my $croncheck;
 my $setprop;
 my $verbose_arg;
+my $vvv_arg,
 my $dryrun_arg;
 my $group_arg;
 my $host_arg;
@@ -242,6 +243,7 @@ sub parse_command_options {
         'help'        => sub { usage('') },
         'version'     => sub { usage("Current version number: $version") },
         'v|verbose'   => \$verbose_arg,
+        'vvv'         => \$vvv_arg,
         'n|dry-run'   => \$dryrun_arg,
         'add'         => \$add_arg,
         'delete'      => \$delete_arg,
@@ -265,15 +267,16 @@ sub parse_command_options {
             ( $host_arg && $group_arg && $setprop )
         );
 
-    $verbose_arg = 1 if $dryrun_arg;
+    $verbose_arg = 1 if ( $dryrun_arg || $vvv_arg );
 
     return 1;
 }
 
 sub cli_args_override_global_config {
 
-    $serverconfig{verbose} = $verbose_arg if $verbose_arg;
-    $serverconfig{dryrun}  = $dryrun_arg  if $dryrun_arg;
+    $serverconfig{verbose}      = $verbose_arg if $verbose_arg;
+    $serverconfig{dryrun}       = $dryrun_arg  if $dryrun_arg;
+    $serverconfig{verboselevel} = 3            if $vvv_arg;
 
     return 1;
 }
