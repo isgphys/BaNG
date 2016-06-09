@@ -124,6 +124,12 @@ sub queue_backup {
     # make sure we are on the correct backup server
     return unless bkp_to_current_server( $host, $group );
 
+    # make sure BKP_SOURCE_FOLDER is set
+    unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} ) {
+        logit( $taskid, $host, $group, "BKP_SOURCE_FOLDER not defined for host $host group $group" );
+        return;
+    };
+
     # make sure backup is enabled
     return unless $hosts{"$host-$group"}->{hostconfig}->{BKP_ENABLED};
 
