@@ -879,7 +879,7 @@ sub usage {
 
         -t <nr>            # number of threads, default: 1
         -p <path>          # override path to folder containing etc/
-        -w                 # wipe the backup
+        -w | --wipe        # wipe the backup
         -w --force         # forcing wipe the backup (override auto_wipe_limit)
         --initial          # create nonexisting backup targets
         --missingonly      # backup only hosts that were not backed up recently
