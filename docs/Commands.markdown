@@ -9,23 +9,15 @@ BaNG: backup and wipe
 
 ```sh
 BaNG --help                                   # display help with some usage examples
-```
-
-Optional arguments:
-
-```sh
--v | -vv | -vvv                               # verbose mode to include debugging messages of level 1-3
--n                                            # dry-run mode to simulate a backup (implies verbose)
--t <integer>                                  # number of threads to use (default: 1)
--p <path>                                     # override path to folder containing etc/
+BaNG --version                                # show version number and help
 ```
 
 ### Start backups
 
 ```sh
+BaNG -h <host> -g <group>                     # start backup of given host and group
 BaNG -g <group>                               # start backup of all hosts of given group (provided BulkAllow is set)
 BaNG -h <host>                                # start backup of all groups of given host (provided BulkAllow is set)
-BaNG -h <host> -g <group>                     # start backup of given group and host
 ```
 
 Optional arguments:
@@ -34,20 +26,26 @@ Optional arguments:
 --initial                                     # needed for first backup to initially create the folder/subvolume
 --missingonly                                 # backup only hosts without recent backup (e.g. machines that were offline)
 --noreport                                    # do not send any reports
+-t <integer>                                  # number of threads to use (default: 1)
+-p <path>                                     # override path to folder containing etc/
+-v | -vv | -vvv                               # verbose mode to include debugging messages of level 1-3
+-n                                            # dry-run mode to simulate a backup (implies verbose)
 ```
 
 ### Wipe old backups
 
 ```sh
+BaNG -h <host> -g <group> --wipe              # start wipe of given group and host
 BaNG -g <group> --wipe                        # start wipe of all hosts of given group (provided BulkAllow is set)
 BaNG -h <host> --wipe                         # start wipe of all groups of given host (provided BulkAllow is set)
-BaNG -h <host> -g <group> --wipe              # start wipe of given group and host
 ```
 
 Optional argument:
 
 ```sh
 --force                                       # force wipe of too many backups (override auto_wipe_limit)
+-v | -vv | -vvv                               # verbose mode to include debugging messages of level 1-3
+-n                                            # dry-run mode to simulate a backup (implies verbose)
 ```
 
 ### Generate Xymon reports
@@ -57,9 +55,20 @@ BaNG -h <host> -g <group> --xymon             # generate and send Xymon report f
 BaNG --xymon                                  # generate and send all Xymon reports (without making backups)
 ```
 
+Optional argument:
+
+```sh
+-v | -vv | -vvv                               # verbose mode to include debugging messages of level 1-3
+-n                                            # dry-run mode to simulate a backup (implies verbose)
+```
 
 BaNGadm: admin tasks
 --------------------
+
+```sh
+BaNGadm --help                               # show this help message
+BaNGadm --version                            # show version number and help
+```
 
 ```sh
 BaNGadm --add -h <host> -g <group>            # create a new host config
@@ -67,6 +76,8 @@ BaNGadm --add -g <group>                      # create a new group config
 
 BaNGadm --delete -h <host> -g <group>         # delete an existing host config
 BaNGadm --delete -g <group>                   # delete an existing group config
+
+BaNGadm --initialize -h <host> -g <group>     # create target folder structure for defined host
 
 BaNGadm --failed                              # show all failed backups
 BaNGadm --failed -h <host> -g <group>         # show failed backups of defined hosts and/or group
@@ -83,6 +94,12 @@ BaNGadm --cron-create                         # generate and write cronjob file 
 BaNGadm --cron-check                          # check if cronjob file / crontab up-to-date
 ```
 
+Optional arguments:
+
+```sh
+-v | -vvv                                     # verbose mode to include debugging messages of level 1 and 3
+-n                                            # dry-run mode to simulate a backup (implies verbose)
+```
 
 BaNG-Web: web front-end
 -----------------------
