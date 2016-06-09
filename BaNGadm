@@ -333,7 +333,7 @@ sub usage {
 
         Optional Arguments:
 
-        -v              # verbose mode to include debugging messages
+        -v | -vvv       # verbose mode to include debugging messages of level 1 and 3
         -n              # dry-run without making changes (implies verbose)
 
 EOF
