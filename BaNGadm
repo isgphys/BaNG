@@ -9,6 +9,7 @@ use YAML::Tiny;
 
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
+use BaNG::Common;
 use BaNG::Hosts;
 use BaNG::Wipe;
 use BaNG::Reporting;
@@ -67,6 +68,15 @@ if ($showgroups) {
     foreach my $group ( sort keys %groups ) {
         print "$group \n";
     }
+
+    exit 0;
+}
+
+if ( $initial_arg ) {
+    print "Initialize target structure for $host_arg $group_arg\n";
+    get_host_config( $host_arg, $group_arg );
+    check_target_exists( $host_arg, $group_arg, 0, 1 );
+    print "Target structure for $host_arg\_$group_arg is now ready for use!\n";
 
     exit 0;
 }
