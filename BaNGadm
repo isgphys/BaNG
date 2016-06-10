@@ -160,8 +160,12 @@ if ($add_arg) {
 
     my ( $return_code, $return_msg ) = write_config( $configtype, 'add', $host_arg, $group_arg, $settings );
 
+
     if ( $return_code eq '1' ) {
         print "Configfile $return_msg created\n";
+        get_host_config( $host_arg, $group_arg );
+        check_target_exists( $host_arg, $group_arg, 0, 1 );
+        print "Target structure for $host_arg\_$group_arg is ready for use!\n";
     } else {
         print "$return_msg\n";
     }
