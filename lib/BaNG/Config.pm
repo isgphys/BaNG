@@ -120,6 +120,7 @@ sub write_config {
         if ( -f $ConfigFile && $modtype eq 'add' ) {
             return ( 3, "You try to override $ConfigFile!" );
         } else {
+            print "DEBUG: write config and set correct permissions\n" if $serverconfig{verbose};
             DumpFile( $ConfigFile, $settings );
             chmod( 0664, $ConfigFile );
             chown( 0, 33, $ConfigFile );
