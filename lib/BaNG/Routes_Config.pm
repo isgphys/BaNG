@@ -7,6 +7,7 @@ use POSIX qw( strftime );
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
+use BaNG::Common;
 
 prefix '/config';
 
@@ -113,6 +114,8 @@ post '/new/:configtype' => require_role config->{admin_role} => sub {
     if ( $return_code eq '1' ) {
         info "Configfile $return_msg created by $createdby";
         if ( $configtype eq 'host' ) {
+            get_host_config( $hostname, $bkpgroup );
+            check_target_exists( $hostname, $bkpgroup, 0, 1 );
             redirect "/host/$hostname";
         } elsif ( $configtype eq 'group' ) {
             redirect '/config/allgroups';
