@@ -379,8 +379,12 @@ sub _override_config {
             my $settings_override = LoadFile( $configfile->{$config_override} );
 
             foreach my $key ( keys %{$settings_override} ) {
-                $settings->{$key}       = $settings_override->{$key};
                 $settingshelper->{$key} = $config_override;
+                if ( defined $settings->{$key} && ($settings->{$key} eq $settings_override->{$key}) ) {
+                    $settingshelper->{$key} = 'same';
+                    $settingshelper->{warning} = 1;
+                }
+                $settings->{$key}       = $settings_override->{$key};
             }
         }
     }
