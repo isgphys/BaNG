@@ -598,7 +598,8 @@ sub xymon_report {
 
 sub logit {
     my ( $taskid, $host, $group, $msg ) = @_;
-
+    $host  ||= '*';
+    $group ||= '*';
     my $timestamp     = strftime '%b %d %H:%M:%S', localtime;
     my $logmonth      = strftime '%Y-%m',          localtime;
     my $logdate       = strftime $serverconfig{global_log_date}, localtime;

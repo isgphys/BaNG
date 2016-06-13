@@ -71,6 +71,7 @@ run_threads();
 foreach my $finishable_bkpjob (sort keys %finishable_bkpjobs) {
     finish_backupjob($finishable_bkpjobs{$finishable_bkpjob});
 }
+logit( $taskid, $host_arg, $group_arg, "Task $taskid finished!" );
 
 exit 0;
 
