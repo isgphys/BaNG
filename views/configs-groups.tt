@@ -14,13 +14,13 @@
     <tbody>
       <% FOREACH group IN groups.keys.sort %>
         <tr <% IF groups.$group.css_class %> class="<% groups.$group.css_class %>"<% END %>>
-            <td class="center">
+            <td nowrap <% if groups.$group.confighelper.warning %>class="sameConfigWarning"<% END %>>
                 <a href="/group/<% group %>"><% group %></a>
             </td>
             <td class="center">
               <% groups.$group.groupconfig.BKP_TARGET_HOST %>
             </td>
-            <td class="expander">
+            <td nowrap class="expander">
               <% groups.$group.configfile %>
                 <div class="collapse">
                   <table class="default-config">

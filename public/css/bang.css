@@ -69,6 +69,20 @@ h3 {
 .check_red {
     background-color: #FA5858;
 }
+.sameConfigWarning {
+    background: url("/images/warning.png") no-repeat transparent;
+    background-size: 15px 15px;
+    background-position: 96% 4px;
+    padding-right: 25px !important;
+}
+
+.invalidConfig{
+    background-color: #FFA4A4 !important;
+}
+.sameConfig{
+    background-color: #FFFF86 !important;
+}
+
 .groupConfig{
     background-color: #33bbdd !important;
 }

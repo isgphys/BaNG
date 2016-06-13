@@ -14,7 +14,7 @@
     <tbody>
       <% FOREACH hostname IN hosts.keys.sort %>
         <tr <% IF hosts.$hostname.css_class %> class="<% hosts.$hostname.css_class %>"<% END %>>
-            <td>
+            <td <% if hosts.$hostname.confighelper.warning %>class="sameConfigWarning"<% END %>>
               <a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a>
             </td>
             <td class="center">
