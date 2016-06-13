@@ -188,6 +188,11 @@ sub get_host_config {
         my $css_class        = $isEnabled ? 'active ' : '';
         my $nobulk_css_class = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? 'nobulk ' : '';
 
+        unless ( $hostconfig->{BKP_SOURCE_FOLDER} ) {
+            $css_class                         = 'invalidConfig';
+            $confighelper->{BKP_SOURCE_FOLDER} = 'invalid';
+        }
+
         $hosts{"$hostname-$groupname"} = {
             hostname         => $hostname,
             group            => $groupname,
