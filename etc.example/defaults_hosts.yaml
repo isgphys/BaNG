@@ -16,7 +16,7 @@ BKP_EXCLUDE_FILE:         ""                        # define an excludelist-file
 BKP_GWHOST:               ""                        # Gateway-Host for backups of privat lan computers
 BKP_PRIORITY:                                       # add priority list (:path: Nr)
 
-TIMEOUT_DURATION:         0                         # number with an optional suffix: 's' (default), 'm', 'h', 'd', 0=disabled
+TIMEOUT_DURATION:         0                         # number with an optional suffix 's' (default), 'm', 'h', 'd', 0=disabled
 TIMEOUT_KILL_AFTER:       "120"                     # send a KILL signal if COMMAND is still running after the initial signal was sent
 TIMEOUT_SIGNAL:           "12"                      # specify the signal to be sent on timeout
 NOCACHE_ENABLED:          0                         # 0 = dont use nocache, 1 = use nocache
