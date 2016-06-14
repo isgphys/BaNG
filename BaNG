@@ -529,7 +529,19 @@ sub execute_rsync {
         }
     }
 
-    my $rsync_cmd     = $nocache . $ionice . $taskset . $serverconfig{path_rsync};
+    my $timeout = '';
+    if ( $hosts{"$host-$group"}->{hostconfig}->{TIMEOUT_DURATION} ne "0" ) {
+        if ( -e $serverconfig{path_timeout} ) {
+            $timeout  = $serverconfig{path_timeout} . ' --foreground ';
+            $timeout .= '-k ' . $hosts{"$host-$group"}->{hostconfig}->{TIMEOUT_KILL_AFTER} . ' ';
+            $timeout .= '-s ' . $hosts{"$host-$group"}->{hostconfig}->{TIMEOUT_SIGNAL} . ' ';
+            $timeout .= $hosts{"$host-$group"}->{hostconfig}->{TIMEOUT_DURATION} . ' ';
+        } else {
+            logit( $taskid, $host, $group, "TIMEOUT selected but command $serverconfig{path_timeout} not found!" );
+        }
+    }
+
+    my $rsync_cmd     = $nocache . $ionice . $taskset . $timeout . $serverconfig{path_rsync};
     my $rsync_options = eval_rsync_options( $host, $group );
     my $rsync_target  = eval_rsync_target( $host, $group, $bkptimestamp );
 
