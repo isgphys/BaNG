@@ -2,4 +2,25 @@
     <input name="filter" id="filter" value="<% filtervalue %>" maxlength="30" size="30" type="text" autofocus >
     <img alt="Clear" src="/images/clear.png" border="0" onClick="$('#filter').val(''); updateFilter();">
     (<span id="countVisible"></span> of <span id="countAll"></span> )
+    <span class="ToggleConfig" style="padding-left: 10px;">
+        <input name="options" type="checkbox" onClick="ToggleDisabledConfig();"/>
+            <label>Disabled config: <span id="countDisabledConfig"></span></label>
+        <input name="options" type="checkbox" onClick="ToggleInvalidConfig();"/>
+            <label>Invalid config: <span id="countInvalidConfig"></span></label>
+        <input name="options" type="checkbox" onClick="ToggleSameConfig();"/>
+            <label>Over configured: <span id="countSameConfig"></span></label>
+    </span>
 </form>
+<script>
+    function ToggleDisabledConfig() {
+        $('table.configshosts > tbody > tr.active').toggle();
+    }
+
+    function ToggleInvalidConfig() {
+        $('table.configshosts > tbody > tr').not('.invalidConfig').toggle();
+    }
+
+    function ToggleSameConfig() {
+        $("table.configshosts > tbody > tr:not(:has('.sameConfigWarning'))").toggle();
+    }
+</script>

@@ -17,10 +17,21 @@
         <script>
             function updateFilter() {
                 $.uiTableFilter( $('.tablefilter'), $("#filter").val() );
-                var countVisible = $('.tablefilter > tbody > tr:visible').length;
+                var countVisible        = $('.tablefilter > tbody > tr:visible').length;
+                var countAll            = $('.tablefilter > tbody > tr').length;
                 $('#countVisible').html(countVisible);
-                var countAll = $('.tablefilter > tbody > tr').length;
                 $('#countAll').html(countAll);
+                if ( $('h2').is($(':contains(Host)')) || $('h2').is($(':contains(Group)'))  ){
+                    var countDisabledConfig = $('.tablefilter > tbody > tr:not(.active)').length;
+                    var countInvalidConfig  = $('.configshosts > tbody > tr:has(.invalidConfig)').length;
+                    var countSameConfig     = $('.configshosts > tbody > tr:has(.sameConfigWarning)').length;
+                    $('#countDisabledConfig').html(countDisabledConfig);
+                    $('#countInvalidConfig').html(countInvalidConfig);
+                    $('#countSameConfig').html(countSameConfig);
+                    $('span.ToggleConfig').show();
+                } else{
+                    $('span.ToggleConfig').hide();
+                };
             }
 
             function initializeTablesorter() {
@@ -147,11 +158,11 @@
             }
 
             function initializeAll() {
-                updateFilter();
                 initializeEvents();
                 initializeTablesorter();
                 collapseDetails();
                 $('table.hidden').removeClass('hidden');
+                updateFilter();
             }
 
             $(document).ready(function(){
