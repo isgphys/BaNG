@@ -48,7 +48,7 @@ sub get_fsinfo {
                 freediff   => '',
                 rwstatus   => '',
                 used_per   => $+{usedper},
-                css_class  => check_fill_level( $+{usedper} ),
+                css_class  => _check_fill_level( $+{usedper} ),
             };
         }
 
@@ -94,7 +94,7 @@ sub get_fsinfo {
     return \%fsinfo;
 }
 
-sub check_fill_level {
+sub _check_fill_level {
     my ($level) = @_;
     my $css_class = '';
 
