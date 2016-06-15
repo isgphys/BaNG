@@ -9,7 +9,6 @@ use YAML::Tiny;
 
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Config;
-use BaNG::Common;
 use BaNG::Hosts;
 use BaNG::Wipe;
 use BaNG::Reporting;

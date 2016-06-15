@@ -12,7 +12,6 @@ use Thread::Queue;
 
 use lib dirname( abs_path($0) ) . '/lib';
 use BaNG::Hosts;
-use BaNG::Common;
 use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::BTRFS;
