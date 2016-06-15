@@ -29,6 +29,7 @@ our @EXPORT = qw(
     get_cronjob_config
     generate_cron
     status_cron
+    targetpath
 );
 
 our %hosts;
@@ -338,6 +339,15 @@ sub status_cron {
 
     close $gen_cron;
     return $diffs;
+}
+
+sub targetpath {
+    my ( $host, $group ) = @_;
+
+    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
+
+    return $target_path;
 }
 
 sub _read_host_configfile {

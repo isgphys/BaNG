@@ -13,18 +13,8 @@ our @EXPORT = qw(
     list_groups
     list_groupmembers
     get_automount_paths
-    targetpath
     check_target_exists
 );
-
-sub targetpath {
-    my ( $host, $group ) = @_;
-
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
-    my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
-
-    return $target_path;
-}
 
 sub check_target_exists {
     my ( $host, $group, $taskid, $create ) = @_;
