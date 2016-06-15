@@ -3,9 +3,9 @@ package BaNG::Hosts;
 use 5.010;
 use strict;
 use warnings;
-use BaNG::Common;
-use BaNG::Converter;
 use BaNG::Config;
+use BaNG::Converter;
+use BaNG::RemoteCommand;
 use BaNG::Reporting;
 use Net::Ping;
 use YAML::Tiny qw( LoadFile );
@@ -263,22 +263,6 @@ sub writeto_lockfile {
         system("echo \"$key: $value\" >> \"$lockfile\"");
     }
     logit( $taskid, $host, $group, "Write to lockfile $lockfile -- $key: $value" ) if $serverconfig{verbose};
-}
-
-#################################
-# Remote_Command
-#
-sub remote_command {
-    my ( $remoteHost, $remoteCommand, $remoteArgument ) = @_;
-    $remoteArgument ||= '';
-
-    my $remote_app_path = $serverconfig{remote_app} ? '' : $serverconfig{remote_app_path};
-    $remote_app_path .= '/' if $remote_app_path !~ /.*\/$/;
-
-    my $results = `ssh -x -o IdentitiesOnly=yes -o ConnectTimeout=2 -i /var/www/.ssh/remotesshwrapper root\@$remoteHost $serverconfig{remote_app} ${remote_app_path}$remoteCommand $remoteArgument 2>/dev/null`;
-    my @results = split( "\n", $results );
-
-    return @results;
 }
 
 1;
