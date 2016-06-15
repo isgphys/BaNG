@@ -19,7 +19,7 @@
     </tr>
     <tr>
         <td>Build Version:</td>
-        <td><% serverconfig.build_vers %></td>
+        <td><% serverconfig.build_version %></td>
     </tr>
 </table>
 
