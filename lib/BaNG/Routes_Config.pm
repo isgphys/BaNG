@@ -7,7 +7,7 @@ use POSIX qw( strftime );
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
-use BaNG::Common;
+use BaNG::Hosts;
 
 prefix '/config';
 

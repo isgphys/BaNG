@@ -6,7 +6,7 @@ use warnings;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
-use BaNG::Common;
+use BaNG::Hosts;
 use BaNG::Wipe;
 
 prefix '/restore';
