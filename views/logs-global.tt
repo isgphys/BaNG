@@ -1,5 +1,5 @@
 <div>
-    <h3>Backup Logfile Report of <% host %>_<% group %></h3>
+    <h3>Global backup logfile report</h3>
     <% INCLUDE 'doFilter.tt' %>
     <table class="default-table border">
     <%- FOREACH date IN logdata.keys.sort.reverse %>
