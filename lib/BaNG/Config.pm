@@ -503,7 +503,7 @@ sub _get_build_version {
     chomp $git_cmd;
 
     if ( $git_cmd ){
-        if ( $tag=`git describe --tags 2>/dev/null` ) {
+        if ( $tag=`cd $prefix; $git_cmd describe --tags 2>/dev/null` ) {
             chomp $tag;
             $v="$tag";
         }
