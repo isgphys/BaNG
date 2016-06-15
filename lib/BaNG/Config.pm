@@ -55,6 +55,7 @@ sub get_serverconfig {
     $serverconfig{path_configs}            = "$prefix/etc";
     $serverconfig{config_defaults_servers} = "$serverconfig{path_configs}/defaults_servers.yaml";
     $serverconfig{path_serverconfig}       = "$serverconfig{path_configs}/servers";
+    $serverconfig{build_version}           = _get_build_version();
 
     # get info about all backup servers
     my @serverconfigs = _find_configs( "*_defaults\.yaml", $serverconfig{path_serverconfig} );
@@ -494,3 +495,20 @@ sub _split_cron_configname {
 
     return $server;
 }
+
+sub _get_build_version {
+    my $tag;
+    my $v = "0.0";
+    my $git_cmd = `which git &> /dev/null`;
+    chomp $git_cmd;
+
+    if ( $git_cmd ){
+        if ( $tag=`git describe --tags 2>/dev/null` ) {
+            chomp $tag;
+            $v="$tag";
+        }
+    }
+    return $v;
+}
+
+1;
