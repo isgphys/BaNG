@@ -10,8 +10,6 @@ use POSIX qw( floor );
 
 use Exporter 'import';
 our @EXPORT = qw(
-    list_groups
-    list_groupmembers
     get_automount_paths
     check_target_exists
 );
@@ -50,32 +48,6 @@ sub check_target_exists {
 
     print "DEBUG: Target $rsync_target available!\n" if $serverconfig{verboselevel} == 3 and $return_code == 0;
     return $return_code;
-}
-
-sub list_groups {
-    my ($host) = @_;
-
-    my @groups;
-    foreach my $hostgroup ( keys %hosts ) {
-        if ( $hosts{$hostgroup}->{hostname} eq $host ) {
-            push( @groups, $hosts{$hostgroup}->{group} );
-        }
-    }
-
-    return @groups;
-}
-
-sub list_groupmembers {
-    my ($group) = @_;
-
-    my @groupmembers;
-    foreach my $hostgroup ( keys %hosts ) {
-        if ( $hosts{$hostgroup}->{group} eq $group ) {
-            push( @groupmembers, $hosts{$hostgroup}->{hostname} );
-        }
-    }
-
-    return \@groupmembers;
 }
 
 sub get_automount_paths {

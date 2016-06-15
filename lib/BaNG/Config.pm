@@ -30,6 +30,8 @@ our @EXPORT = qw(
     generate_cron
     status_cron
     targetpath
+    list_groups
+    list_groupmembers
 );
 
 our %hosts;
@@ -348,6 +350,32 @@ sub targetpath {
     my $target_path = "$hostconfig->{BKP_TARGET_PATH}/$hostconfig->{BKP_PREFIX}/$host";
 
     return $target_path;
+}
+
+sub list_groups {
+    my ($host) = @_;
+
+    my @groups;
+    foreach my $hostgroup ( keys %hosts ) {
+        if ( $hosts{$hostgroup}->{hostname} eq $host ) {
+            push( @groups, $hosts{$hostgroup}->{group} );
+        }
+    }
+
+    return @groups;
+}
+
+sub list_groupmembers {
+    my ($group) = @_;
+
+    my @groupmembers;
+    foreach my $hostgroup ( keys %hosts ) {
+        if ( $hosts{$hostgroup}->{group} eq $group ) {
+            push( @groupmembers, $hosts{$hostgroup}->{hostname} );
+        }
+    }
+
+    return \@groupmembers;
 }
 
 sub _read_host_configfile {
