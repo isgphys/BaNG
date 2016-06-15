@@ -1,4 +1,4 @@
-package BaNG::Hosts;
+package BaNG::BackupServer;
 
 use 5.010;
 use strict;

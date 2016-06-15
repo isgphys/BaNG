@@ -6,7 +6,7 @@ use warnings;
 use Dancer ':syntax';
 use Dancer::Plugin::Auth::Extensible;
 use BaNG::Config;
-use BaNG::Hosts;
+use BaNG::BackupServer;
 use BaNG::Wipe;
 use BaNG::Reporting;
 
