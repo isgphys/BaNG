@@ -13,7 +13,7 @@ Authorization is controlled at the level of the routes by adding `require_login`
 Multiple servers
 ----------------
 
-BaNG can be run on multiple backup servers for load distribution or to support backing up OS X clients with a dedicated server. One master server can poll information from the others and display the backup status of all servers in a single BaNG web front-end. For this to work, the master must be able to connect to the other nodes via ssh. This may require adapting the `remote_command` subroutine in the `Hosts.pm` module.
+BaNG can be run on multiple backup servers for load distribution or to support backing up OS X clients with a dedicated server. One master server can poll information from the others and display the backup status of all servers in a single BaNG web front-end. For this to work, the master must be able to connect to the other nodes via ssh. This may require adapting the `remote_command` subroutine in the `RemoteCommand.pm` module.
 
 Note that every backup server has its own config files and cron scheduling. This independence prevents the BaNG master to become a single point of failure.
 
