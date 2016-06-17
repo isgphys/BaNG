@@ -18,6 +18,10 @@
         <td><% serverconfig.path_configs %></td>
     </tr>
     <tr>
+        <td>Remote App Folder:</td>
+        <td><% serverconfig.remote_app_path _ '/' _ serverconfig.remote_app_folder %></td>
+    </tr>
+    <tr>
         <td>Build Version:</td>
         <td><% serverconfig.build_version %></td>
     </tr>
