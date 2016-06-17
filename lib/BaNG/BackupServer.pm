@@ -30,7 +30,7 @@ our @EXPORT = qw(
 sub get_fsinfo {
     my %fsinfo;
     foreach my $server ( keys %servers ) {
-        my @mounts = remote_command( $server, 'BaNG/bang_df' );
+        my @mounts = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_df" );
 
         foreach my $mount (@mounts) {
             $mount =~ qr{
@@ -57,7 +57,7 @@ sub get_fsinfo {
             };
         }
 
-        @mounts = remote_command( $server, 'BaNG/procmounts' );
+        @mounts = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/procmounts" );
         foreach my $mount (@mounts) {
             $mount =~ qr{
                 ^(?<device>[\/\w\d-]+)
@@ -75,7 +75,7 @@ sub get_fsinfo {
         }
 
         if ( $server eq $servername ) {
-            @mounts = remote_command( $server, 'BaNG/bang_di' );
+            @mounts = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_di" );
             foreach my $mount (@mounts) {
                 $mount =~ qr{
                     ^(?<filesystem> [\/\w\d-]+)
@@ -147,7 +147,7 @@ sub get_backup_folders {
     if ( $server eq $servername ) {
         @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}/$REGEX' 2>/dev/null`;
     } else {
-        @backup_folders = remote_command( $server, 'BaNG/bang_getBackupFolders', $bkpdir );
+        @backup_folders = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getBackupFolders", $bkpdir );
     }
     return @backup_folders;
 }
@@ -321,7 +321,7 @@ sub get_lockfiles {
     my %lockfiles;
 
     foreach my $server ( keys %servers ) {
-        my @lockfiles = remote_command( $server, 'BaNG/bang_getLockFile', $serverconfig{path_lockfiles} );
+        my @lockfiles = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getLockFile", $serverconfig{path_lockfiles} );
 
         foreach my $lockfile (@lockfiles) {
             my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
