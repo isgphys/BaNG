@@ -19,6 +19,7 @@ our @EXPORT = qw(
 sub remote_command {
     my ( $remoteHost, $remoteCommand, $remoteArgument ) = @_;
     $remoteArgument ||= '';
+    $remoteHost = "localhost" if $remoteHost eq 'bangtestserver';
 
     my $remote_app_path = $serverconfig{remote_app} ? '' : $serverconfig{remote_app_path};
     $remote_app_path .= '/' if $remote_app_path !~ /.*\/$/;
