@@ -39,7 +39,7 @@ like(   $output,    qr|Set jobstatus to 2 for host localhost group $group|      
 like(   $output,    qr|xymon report sent|                                        , "xymon report sent for localhost $group"             );
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 like(   $output,    qr|Removed lockfile|                                         , "Removed lockfile for localhost $group"              );
-unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
+unlike( $output,    qr|Error:|i                                                  , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
@@ -48,14 +48,14 @@ $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
 unlike( $output,    qr|Number of source folders: 1|i                             , "need more then 1 srcfolder for localhost $group"    );
 like(   $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
-unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
+unlike( $output,    qr|Error:|i                                                  , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
 $group = 'snapshot-subfolders';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
-unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
+unlike( $output,    qr|Error:|i                                                  , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 like(   $output,    qr|Number of source folders: 1|i                             , "Only 1 srcfolder for localhost $group"              );
@@ -69,7 +69,7 @@ unlike( $output,    qr|Number of source folders: 1|i                            
 like(   $output,    qr|Status source folder threading: 1|i                       , "Srcfolder threading activated for localhost $group" );
 like(   $output,    qr|Set jobstatus to 2 for host localhost|                    , "Set jobstatus to 2 for host localhost group $group" );
 like(   $output,    qr|Backup successful for host localhost group $group|        , "Backup successful for localhost $group"             );
-unlike( $output,    qr|Error|i                                                   , "No error messages for localhost $group"             );
+unlike( $output,    qr|Error:|i                                                  , "No error messages for localhost $group"             );
 unlike( $output,    qr|Warning|i                                                 , "No warning messages for localhost $group"           );
 unlike( $output,    qr|Undefined|i                                               , "No undefined subroutins found for localhost $group" );
 
