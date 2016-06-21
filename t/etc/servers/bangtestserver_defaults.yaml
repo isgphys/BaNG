@@ -1,1 +1,4 @@
-path_btrfs: /usr/bin/btrfs
+path_btrfs:        /usr/bin/btrfs
+remote_app:        "/usr/local/bin/remotesshwrapper"
+remote_app_path:   "/opt/remotesshwrapper"
+remote_app_folder: "BaNG"
