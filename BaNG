@@ -138,7 +138,10 @@ sub queue_backup {
 
     # check for existing target_path folder
     my $create = $initial ? 1 : 0;
-    my ($check_target_code) = check_target_exists( $host, $group, $taskid, $create );
+
+    my ($check_target_code, $check_target_msg) = check_target_exists( $host, $group, $taskid, $create, $serverconfig{dryrun} );
+    logit( $taskid, $host, $group, "$check_target_msg for host $host group $group" );
+
     if ( $check_target_code > 0 && !$initial ) {
         logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
         print "Skipping backup of $host because target_path (" . targetpath($host, $group ) .") does not exist!\n";

@@ -74,7 +74,8 @@ if ($showgroups) {
 if ( $initial_arg ) {
     print "Initialize target structure for $host_arg $group_arg\n";
     get_host_config( $host_arg, $group_arg );
-    check_target_exists( $host_arg, $group_arg, 0, 1 );
+    my ($check_target_code, $check_target_msg) = check_target_exists( $host_arg, $group_arg, 0, 1, $serverconfig{dryrun} );
+    print "$check_target_msg for host $host_arg group $group_arg\n";
     print "Target structure for $host_arg\_$group_arg is ready for use!\n";
 
     exit 0;
@@ -276,6 +277,7 @@ sub parse_command_options {
     usage('Check the arguments!') unless (
             ( $add_arg || $delete_arg ) && (( $host_arg && $group_arg ) || $group_arg ) ||
             ( $initial_arg && ( $host_arg && $group_arg ) ) ||
+            ( $initial_arg && ( $host_arg && $group_arg && ( $prefix_arg || $dryrun_arg  ))) ||
             ( $croncreate || $croncheck || $failed_arg || $showgroups || $tidy_arg || $dump_arg ) ||
             ( $host_arg && $group_arg && $setprop )
         );

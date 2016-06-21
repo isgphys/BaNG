@@ -12,6 +12,7 @@ use Date::Parse;
 use POSIX qw( floor );
 use Net::Ping;
 use YAML::Tiny qw( LoadFile );
+use JSON;
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -153,39 +154,34 @@ sub get_backup_folders {
 }
 
 sub check_target_exists {
-    my ( $host, $group, $taskid, $create ) = @_;
-    my $return_code = 0;
+    my ( $host, $group, $taskid, $create, $dryrun ) = @_;
+    my $snapshot = 0;
+    my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
     $taskid ||= 0;
     $create ||= 0;
+    $dryrun ||= 0;
 
     my $rsync_target = targetpath( $host, $group );
 
-    print "DEBUG: Check if target $rsync_target available...\n" if $serverconfig{verboselevel} == 3;
-    if ( !-d $rsync_target ) {
-        $return_code = 1;
-        print "DEBUG: Target folder $rsync_target does not exists!\n" if $serverconfig{verboselevel} == 3;
-        if ( $create ) {
-            print "DEBUG: Creating target folder $rsync_target!\n" if $serverconfig{verboselevel} == 3;
-            system("mkdir -p $rsync_target") unless $serverconfig{dryrun};
-            $return_code = 0;
-        }
-    }
-    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-        $rsync_target .= '/current';
+    $snapshot = 1 if $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots';
 
-        if ( !-d $rsync_target ) {
-            print "DEBUG: Target subvolume $rsync_target does not exists!\n" if $serverconfig{verboselevel} == 3;
-            $return_code = 1;
-            if ( $create ) {
-                print "DEBUG: Creating target subvolume $rsync_target!\n" if $serverconfig{verboselevel} == 3;
-                create_btrfs_subvolume( $host, $group, $rsync_target, $taskid );
-                $return_code = 0;
-            }
-        }
-    }
+    my $data = {
+        "dryrun"   => $dryrun,
+        "create"   => $create,
+        "snapshot" => $snapshot,
+        "target"   => $rsync_target,
+    };
 
-    print "DEBUG: Target $rsync_target available!\n" if $serverconfig{verboselevel} == 3 and $return_code == 0;
-    return $return_code;
+    my $json_text = to_json($data, { pretty => 0 });
+    $json_text    =~ s/"/\\"/g; # needed for correct remotesshwrapper transfer
+
+    my ( $feedback ) = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_worker", $json_text );
+
+    my $feedback_ref = from_json( $feedback );
+    my $return_code = $feedback_ref->{'return_code'};
+    my $return_msg  = $feedback_ref->{'return_msg'};
+
+    return ($return_code, $return_msg);
 }
 
 sub get_automount_paths {
