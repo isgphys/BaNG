@@ -161,13 +161,13 @@ sub check_target_exists {
     my $target      = targetpath( $host, $group );
     my $return_code = 0; # 0 = not available, 1 = available
 
-    if (-e $target ) {
+    if ( -e $target ) {
         $return_code = 1;
     }
     if ( $snapshot ) {
         $target .= '/current';
 
-        if (-e $target ) {
+        if ( -e $target ) {
             $return_code = 1;
         }
     }
