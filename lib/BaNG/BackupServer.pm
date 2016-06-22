@@ -182,7 +182,7 @@ sub create_target {
     my $return_code = 0;
     my $return_msg  = 'Folder still exists';
 
-    print "Running as root!!\n" if ( $< == 0 ) and $serverconfig{verbose};
+#    Running as root!!
     if ( $< == 0 ) {
         unless ( -e $target ) {
             system("mkdir -p $target") unless $serverconfig{dryrun};
@@ -205,7 +205,7 @@ sub create_target {
         my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
         my $data   = {
             "dryrun"   => $serverconfig{dryrun},
-            "mode   "  => "create",
+            "mode"     => "create",
             "snapshot" => $snapshot,
             "target"   => $target,
             };
