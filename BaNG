@@ -137,6 +137,7 @@ sub queue_backup {
     return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
     # check for existing target_path folder
+    logit( $taskid, $host, $group, "check for existing target_path for host $host group $group" );
     my $create = $initial ? 1 : 0;
 
     my ($check_target_code, $check_target_msg) = check_target_exists( $host, $group, $taskid, $create, $serverconfig{dryrun} );
