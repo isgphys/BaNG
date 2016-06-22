@@ -22,6 +22,7 @@ our @EXPORT = qw(
     check_client_connection
     get_automount_paths
     check_target_exists
+    create_target
     create_lockfile
     remove_lockfile
     check_lockfile
@@ -154,33 +155,50 @@ sub get_backup_folders {
 }
 
 sub check_target_exists {
-    my ( $host, $group, $taskid, $create, $dryrun ) = @_;
-    my $snapshot = 0;
-    my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
-    $taskid ||= 0;
-    $create ||= 0;
-    $dryrun ||= 0;
+    my ( $host, $group, $taskid ) = @_;
+    $taskid       ||= 0;
+    my $snapshot    = ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) ? 1 : 0 ;
+    my $target      = targetpath( $host, $group );
+    my $return_code = 0; # 0 = not available, 1 = available
 
-    my $rsync_target = targetpath( $host, $group );
+    if ( -e $target ) {
+        $return_code = 1;
+    }
+    if ( $snapshot ) {
+        $target .= '/current';
 
-    $snapshot = 1 if $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots';
+        if ( -e $target ) {
+            $return_code = 1;
+        }
+    }
+    return $return_code;
+}
 
-    my $data = {
-        "dryrun"   => $dryrun,
-        "create"   => $create,
-        "snapshot" => $snapshot,
-        "target"   => $rsync_target,
-    };
+sub create_target {
+    my ( $host, $group, $taskid ) = @_;
+    $taskid       ||= 0;
+    my $snapshot    = ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) ? 1 : 0 ;
+    my $target      = targetpath( $host, $group );
+    my $return_code = 0;
+    my $return_msg  = 'Folder still exists';
 
-    my $json_text = to_json($data, { pretty => 0 });
-    $json_text    =~ s/"/\\"/g; # needed for correct remotesshwrapper transfer
+    unless ( -e $target ) {
+        system("mkdir -p $target") unless $serverconfig{dryrun};
+        $return_code = 1;
+        $return_msg  = 'Created folder';
+    }
 
-    my ( $feedback ) = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_worker", $json_text );
+    if ( $snapshot ) {
+        if ( -x $serverconfig{path_btrfs} ) {
+            $target .= '/current';
 
-    my $feedback_ref = from_json( $feedback );
-    my $return_code = $feedback_ref->{'return_code'};
-    my $return_msg  = $feedback_ref->{'return_msg'};
-
+            unless ( -e $target ) {
+                system("$serverconfig{path_btrfs} subvolume create $target >/dev/null 2>&1") unless $serverconfig{dryrun};
+                $return_code = 1;
+                $return_msg = 'Created btrfs subvolume';
+            }
+        }
+    }
     return ($return_code, $return_msg);
 }
 

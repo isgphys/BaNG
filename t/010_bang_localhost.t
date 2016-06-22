@@ -22,12 +22,12 @@ unlike( $output,    qr|Undefined|i                                              
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Queueing backup for host localhost group $group|          , "Queueing backup for localhost $group"               );
+like(   $output,    qr|Created btrfs subvolume for host localhost group $group|  , "Created btrfs subvolume for localhost $group"       );
 like(   $output,    qr|check_client_connection|                                  , "Check online status of localhost $group"            );
 like(   $output,    qr|Number of source folders: 1|                              , "Correct source folders for localhost $group"        );
 like(   $output,    qr|End of queueing backup of host localhost group $group|    , "End of queueing backup of localhost $group"         );
 like(   $output,    qr|Thread \d+ working on|                                    , "Thread XX working on localhost $group"              );
 like(   $output,    qr|Created lockfile|                                         , "Created lockfile for localhost $group"              );
-like(   $output,    qr|Create btrfs subvolume|                                   , "Create btrfs subvolume for localhost $group"        );
 like(   $output,    qr|Executing rsync for host localhost group $group path :/|  , "Executing rsync for localhost $group"               );
 unlike( $output,    qr|\-\-linkdest|                                             , "Rsync without --link-dest for localhost $group"     );
 like(   $output,    qr|\-\-exclude\-from=t/etc/excludes/excludelist_system |     , "Rsync with excludefile for localhost $group"        );
