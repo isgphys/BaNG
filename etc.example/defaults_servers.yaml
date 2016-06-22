@@ -43,6 +43,7 @@ cron_type:              0
 remote_app:             ""
 remote_app_path:        ""
 remote_app_folder:      "BaNG"
+remote_ssh_key:         ""
 
 #*************************
 # Description of variables
