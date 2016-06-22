@@ -182,23 +182,44 @@ sub create_target {
     my $return_code = 0;
     my $return_msg  = 'Folder still exists';
 
-    unless ( -e $target ) {
-        system("mkdir -p $target") unless $serverconfig{dryrun};
-        $return_code = 1;
-        $return_msg  = 'Created folder';
-    }
+    print "Running as root!!\n" if ( $< == 0 ) and $serverconfig{verbose};
+    if ( $< == 0 ) {
+        unless ( -e $target ) {
+            system("mkdir -p $target") unless $serverconfig{dryrun};
+            $return_code = 1;
+            $return_msg  = 'Created folder';
+        }
 
-    if ( $snapshot ) {
-        if ( -x $serverconfig{path_btrfs} ) {
-            $target .= '/current';
+        if ( $snapshot ) {
+            if ( -x $serverconfig{path_btrfs} ) {
+                $target .= '/current';
 
-            unless ( -e $target ) {
-                system("$serverconfig{path_btrfs} subvolume create $target >/dev/null 2>&1") unless $serverconfig{dryrun};
-                $return_code = 1;
-                $return_msg = 'Created btrfs subvolume';
+                unless ( -e $target ) {
+                    system("$serverconfig{path_btrfs} subvolume create $target >/dev/null 2>&1") unless $serverconfig{dryrun};
+                    $return_code = 1;
+                    $return_msg = 'Created btrfs subvolume';
+                }
             }
         }
+    } else {
+        my $server = $hosts{"$host-$group"}{hostconfig}{BKP_TARGET_HOST};
+        my $data   = {
+            "dryrun"   => $serverconfig{dryrun},
+            "mode   "  => "create",
+            "snapshot" => $snapshot,
+            "target"   => $target,
+            };
+
+        my $json_text = to_json($data, { pretty => 0 });
+        $json_text    =~ s/"/\\"/g; # needed for correct remotesshwrapper transfer
+
+        my ( $feedback ) = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_worker", $json_text );
+
+        my $feedback_ref = from_json( $feedback );
+        my $return_code  = $feedback_ref->{'return_code'};
+        my $return_msg   = $feedback_ref->{'return_msg'};
     }
+
     return ($return_code, $return_msg);
 }
 
