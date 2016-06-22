@@ -74,8 +74,12 @@ if ($showgroups) {
 if ( $initial_arg ) {
     print "Initialize target structure for $host_arg $group_arg\n";
     get_host_config( $host_arg, $group_arg );
-    my ($check_target_code, $check_target_msg) = check_target_exists( $host_arg, $group_arg, 0, 1, $serverconfig{dryrun} );
-    print "$check_target_msg for host $host_arg group $group_arg\n";
+
+    unless ( check_target_exists( $host_arg, $group_arg, 0 ) ){
+        my ($create_return_code, $create_return_msg) = create_target( $host_arg, $group_arg, 0 );
+        print "$create_return_msg for host $host_arg group $group_arg\n";
+    }
+
     print "Target structure for $host_arg\_$group_arg is ready for use!\n";
 
     exit 0;
@@ -164,7 +168,12 @@ if ($add_arg) {
     if ( $return_code eq '1' ) {
         print "Configfile $return_msg created\n";
         get_host_config( $host_arg, $group_arg );
-        check_target_exists( $host_arg, $group_arg, 0, 1 );
+
+        unless ( check_target_exists( $host_arg, $group_arg, 0 ) ){
+            my ($create_return_code, $create_return_msg) = create_target( $host_arg, $group_arg, 0 );
+            print "$create_return_msg for host $host_arg group $group_arg\n";
+        }
+
         print "Target structure for $host_arg\_$group_arg is ready for use!\n";
     } else {
         print "$return_msg\n";

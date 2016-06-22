@@ -137,13 +137,13 @@ sub queue_backup {
     return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
     # check for existing target_path folder
-    logit( $taskid, $host, $group, "check for existing target_path for host $host group $group" );
-    my $create = $initial ? 1 : 0;
+    logit( $taskid, $host, $group, "Check for existing target_path for host $host group $group" );
+    my $check_target_code = check_target_exists( $host, $group, $taskid );
 
-    my ($check_target_code, $check_target_msg) = check_target_exists( $host, $group, $taskid, $create, $serverconfig{dryrun} );
-    logit( $taskid, $host, $group, "$check_target_msg for host $host group $group" );
-
-    if ( $check_target_code > 0 && !$initial ) {
+    if ( $check_target_code == 0 && $initial ) {
+        my ($return_code, $return_msg) = create_target($host, $group, $taskid );
+        logit( $taskid, $host, $group, "$return_msg for host $host group $group" );
+    } else {
         logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
         print "Skipping backup of $host because target_path (" . targetpath($host, $group ) .") does not exist!\n";
         print "use --initial for the first backup run, otherwise check availability of mount!\n";
