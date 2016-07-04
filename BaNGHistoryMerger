@@ -354,7 +354,7 @@ sub execute_rsync {
 
     my $rsync_cmd     = $serverconfig{path_rsync};
     my $del_excl      = $exclsubfolders ? '' : "--delete-excluded";
-    my $rsync_options = "--stats -a -H --delete $del_excl --acls -e rsh ";
+    my $rsync_options = "--stats -a -H --inplace --delete $del_excl --acls -e rsh ";
     my $rsync_target  = targetpath( $host, $group ) . "/migrate$folder";
 
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
