@@ -27,6 +27,8 @@ path_taskset:
 report_to:              admin@example.com
 xymon_server:
 #
+perf_mon_url:           ""
+#
 verbose:                0
 verboselevel:           2
 dryrun:                 0
