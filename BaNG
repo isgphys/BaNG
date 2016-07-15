@@ -297,6 +297,7 @@ sub queue_remote_subfolders {
     foreach my $remotesubfolder (@remotesubfolders) {
         chomp $remotesubfolder;
         $remotesubfolder =~ s| |\\ |g;
+        $remotesubfolder =~ s|\&|\\&|g;
         $remotesubfolder =~ s|\(|\\\(|g;
         $remotesubfolder =~ s|\)|\\\)|g;
 
