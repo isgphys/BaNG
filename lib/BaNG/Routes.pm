@@ -29,6 +29,7 @@ get '/' => require_role config->{admin_role} => sub {
         servername   => $servername,
         servers      => \%servers,
         xymon_server => $serverconfig{xymon_server},
+        perf_mon_url => $serverconfig{perf_mon_url},
     };
 };
 
