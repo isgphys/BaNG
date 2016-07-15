@@ -1,23 +1,35 @@
 <div id="performance" style="float: right;">
     <div>
         <h3>Performance Monitoring</h3>
-        <table class="border">
+        <table class="border" width="230px">
             <tr>
                 <td>
-                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.load&dimensions=load1&value_color=yellow"></img>
-                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.cpu&value_color=yellow"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.load&label=Load&dimensions=load1&value_color=yellow"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.cpu&label=CPU&value_color=yellow"></img>
                 </td>
             </tr>
             <tr>
-                <td width="140px">
-                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.ipv4&dimensions=system.ipv4%7Creceived"></img>
-                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.ipv4&dimensions=system.ipv4%7Csent&value_color=red"></img>
+                <td>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&label=Total IO - read&dimensions=system.io%7Cin"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&label=Total IO - write&dimensions=system.io%7Cout&value_color=red"></img>
                 </td>
             </tr>
             <tr>
-                <td width="140px">
-                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&dimensions=system.io%7Cin"></img>
-                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&dimensions=system.io%7Cout&value_color=red"></img>
+                <td>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.ipv4&label=Total Traffic - in&dimensions=system.ipv4%7Creceived"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.ipv4&label=Total Traffic - out&dimensions=system.ipv4%7Csent&value_color=red"></img>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=net.bond0&label=Data Traffic - read&dimensions=bond0%7Creceived&divide=8192&units=MB%5Cs"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=net.bond0&label=Data Traffic - write&dimensions=bond0%7Csent&divide=8192&units=MB%5Cs&value_color=red"></img>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=net.p801p2&label=Gateway Traffic - in&dimensions=p801p2%7Creceived&divide=8192&units=MB%5Cs"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=net.p801p2&label=Gateway Traffic - out&dimensions=p801p2%7Csent&divide=8192&units=MB%5Cs&value_color=red"></img>
                 </td>
             </tr>
         </table>
