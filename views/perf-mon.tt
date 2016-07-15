@@ -4,20 +4,20 @@
         <table class="border">
             <tr>
                 <td>
-                    <img class="netdata-badge" src="https://realtimemon.phys.ethz.ch/netdata/bkp-gw/api/v1/badge.svg?chart=system.load&dimensions=load1&value_color=yellow"></img>
-                    <img class="netdata-badge" src="https://realtimemon.phys.ethz.ch/netdata/bkp-gw/api/v1/badge.svg?chart=system.cpu&value_color=yellow"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.load&dimensions=load1&value_color=yellow"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.cpu&value_color=yellow"></img>
                 </td>
             </tr>
             <tr>
                 <td width="140px">
-                    <img class="netdata-badge" src="https://realtimemon.phys.ethz.ch/netdata/bkp-gw/api/v1/badge.svg?chart=system.ipv4&dimensions=system.ipv4%7Creceived"></img>
-                    <img class="netdata-badge" src="https://realtimemon.phys.ethz.ch/netdata/bkp-gw/api/v1/badge.svg?chart=system.ipv4&dimensions=system.ipv4%7Csent&value_color=red"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.ipv4&dimensions=system.ipv4%7Creceived"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.ipv4&dimensions=system.ipv4%7Csent&value_color=red"></img>
                 </td>
             </tr>
             <tr>
                 <td width="140px">
-                    <img class="netdata-badge" src="https://realtimemon.phys.ethz.ch/netdata/bkp-gw/api/v1/badge.svg?chart=system.io&dimensions=system.io%7Cin"></img>
-                    <img class="netdata-badge" src="https://realtimemon.phys.ethz.ch/netdata/bkp-gw/api/v1/badge.svg?chart=system.io&dimensions=system.io%7Cout&value_color=red"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&dimensions=system.io%7Cin"></img>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&dimensions=system.io%7Cout&value_color=red"></img>
                 </td>
             </tr>
         </table>
