@@ -1,6 +1,6 @@
 <div id="performance" style="float: right;">
     <div>
-        <h3>Performance Monitoring</h3>
+        <h3>Performance Monitoring of <% servername %></h3>
         <table class="border" width="230px">
             <tr>
                 <td>
