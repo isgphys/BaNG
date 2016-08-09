@@ -53,7 +53,6 @@ BKP_RSYNC_NODEVICES:      0                         # (--no-D) don't copy device
 # Description of variables
 #
 HELP:
-  HELP:                     This Hash includes this HELP content
   COMMENT:                  self-explanatory
   BKP_ENABLED:              |
                             0 = don't make backup

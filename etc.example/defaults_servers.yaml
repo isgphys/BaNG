@@ -55,7 +55,6 @@ HELP:
   config_defaults_hosts:    The filename of hosts default file, located in $prefix/etc
   defaults_host:            Hash of config_defaults_hosts
   config_bangstat:          The filename of database credetial file, located in $prefix/etc
-  HELP:                     This Hash includes this HELP content
   path_configs:             Hardcoded in lib/BaNG/Config.pm
   path_serverconfig:
   path_groupconfig:
