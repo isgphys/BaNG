@@ -10,6 +10,11 @@
             </tr>
             <tr>
                 <td>
+                    <img class="netdata-badge" src="<% perf_mon_url %>chart=system.cpu&label=IOwait&dimensions=iowait&value_color=green"></img>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&label=Total IO - read&dimensions=system.io%7Cin"></img>
                     <img class="netdata-badge" src="<% perf_mon_url %>chart=system.io&label=Total IO - write&dimensions=system.io%7Cout&value_color=red"></img>
                 </td>
