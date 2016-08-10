@@ -735,8 +735,6 @@ sub read_global_log {
                     message   => $msg,
                 });
             }
-        } else {
-            $parsed_logdata{(sort keys %parsed_logdata)[-1]}[-1]->{message} .= "<br />$logline";
         }
     }
 
