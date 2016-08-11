@@ -5,6 +5,7 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
     <thead>
         <tr>
             <th>TaskID</th>
+            <th>JobID</th>
             <th>JobStatus</th>
             <th>Host</th>
             <th>Group</th>
@@ -26,6 +27,7 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
         <%- FOREACH bkp IN RecentBackupsLast.Data %>
             <tr>
                 <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
+                <td class="center" title="<% bkp.JobID %>"><% bkp.JobID.substr(12) %></a></td>
                 <td <%- IF bkp.JobStatus == 2 AND bkp.isThread %>class="hook3" title="forked Job done">
                     <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">

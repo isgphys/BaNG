@@ -20,6 +20,7 @@ our @EXPORT = qw(
     bangstat_recentbackups
     bangstat_recentbackups_all
     bangstat_recentbackups_last
+    bangstat_recent_tasks
     bangstat_task_jobs
     bangstat_start_backupjob
     bangstat_update_backupjob
@@ -279,6 +280,58 @@ sub bangstat_recentbackups_last {
     $sth->finish();
 
     return \%RecentBackupsLast;
+}
+
+sub bangstat_recent_tasks {
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT
+            TaskID, COUNT(JobID) as Jobs, MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, BkpFromHost, BkpGroup, BkpFromPathRoot,
+            BkpToHost, isThread, MIN(JobStatus) as JobStatus,
+            GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+            SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+            SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
+        FROM statistic
+        WHERE Start > date_sub(NOW(), INTERVAL 24 HOUR)
+        GROUP BY TaskID
+        ORDER BY TaskID DESC
+    ");
+    $sth->execute();
+
+    my %RecentTasks;
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
+        $BkpFromPath    =~ s/^:$/:\//g;
+        push( @{$RecentTasks{'Data'}}, {
+            TaskID       => $dbrow->{'TaskID'},
+            Jobs         => $dbrow->{'Jobs'},
+            Starttime    => $dbrow->{'Start'},
+            Stoptime     => $dbrow->{'Stop'},
+            Runtime      => time2human($Runtime),
+            BkpFromPath  => $BkpFromPath ,
+            isThread     => $dbrow->{'isThread'},
+            ErrStatus    => $dbrow->{'ErrStatus'},
+            JobStatus    => $dbrow->{'JobStatus'},
+            BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
+            BkpHost      => $dbrow->{'BkpFromHost'},
+            BkpToHost    => $dbrow->{'BkpToHost'},
+            FilesCreated => num2human($dbrow->{'NumOfFilesCreated'}),
+            FilesDel     => num2human($dbrow->{'NumOfFilesDel'}),
+            FilesTrans   => num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans    => num2human($dbrow->{'TotFileSizeTrans'},1024),
+            TotFileSize  => num2human($dbrow->{'TotFileSize'},1024),
+            NumOfFiles   => num2human($dbrow->{'NumOfFiles'}),
+        });
+    }
+    $sth->finish();
+
+    return \%RecentTasks;
 }
 
 sub bangstat_task_jobs {

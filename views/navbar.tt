@@ -19,7 +19,13 @@
             </ul>
         </li>
         <% END %>
-        <% IF session.logged_in_admin %><li><a href="/reporting" <% IF section == 'reporting' %>class="activetab"<% END %>>Reporting</a></li><% END %>
+        <% IF session.logged_in_admin %><li><a href="#" <% IF section == 'reporting' %>class="activetab"<% END %>>Reporting</a>
+            <ul>
+                <li><a href="/reporting">by Tasks</a></li>
+                <li><a href="/reporting/jobs">by Jobs</a></li>
+            </ul>
+        </li>
+        <% END %>
         <% IF session.logged_in_admin %><li><a href="#" <% IF section == 'logs' %>class="activetab"<% END %>>Logs</a>
             <ul>
                 <li><a href="/logs/global">Global Logs (Errors only)</a></li>

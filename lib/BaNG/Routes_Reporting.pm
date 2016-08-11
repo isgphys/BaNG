@@ -13,12 +13,12 @@ prefix '/reporting';
 get '/' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
-    template 'reporting-bkpreport' => {
-        section           => 'reporting',
-        servername        => $servername,
-        servers           => \%servers,
-        RecentBackupsLast => bangstat_recentbackups_last(),
-        xymon_server      => $serverconfig{xymon_server},
+    template 'reporting-tasks' => {
+        section      => 'reporting',
+        servername   => $servername,
+        servers      => \%servers,
+        RecentTasks  => bangstat_recent_tasks(),
+        xymon_server => $serverconfig{xymon_server},
     };
 };
 
@@ -32,6 +32,18 @@ get '/task/:taskid' => require_role config->{admin_role} => sub {
         taskid       => param('taskid'),
         taskjobs     => bangstat_task_jobs( param('taskid') ),
         xymon_server => $serverconfig{xymon_server},
+    };
+};
+
+get '/jobs' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+
+    template 'reporting-jobs' => {
+        section           => 'reporting',
+        servername        => $servername,
+        servers           => \%servers,
+        RecentBackupsLast => bangstat_recentbackups_last(),
+        xymon_server      => $serverconfig{xymon_server},
     };
 };
 
