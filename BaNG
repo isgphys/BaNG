@@ -18,6 +18,7 @@ use BaNG::BTRFS;
 use BaNG::Wipe;
 
 my $version = '3.6';
+my $cron;
 my $force;
 my $wipe;
 my $initial;
@@ -42,6 +43,9 @@ my $taskid;
 parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
+
+$cron = $ENV{'BaNG_Cron'} || "0";
+print "Run as Cron: $cron\n" if $serverconfig{verbose};
 
 $taskid = create_timeid( $host_arg, $group_arg );
 
@@ -399,6 +403,7 @@ sub thread_work {
         $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
 
         return unless create_lockfile( $taskid, $host, $group, $path );
+        writeto_lockfile( $taskid, $host, $group, $path, "cron", $cron);
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );

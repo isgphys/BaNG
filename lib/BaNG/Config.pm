@@ -299,6 +299,7 @@ sub generate_cron {
     my $cronjobs = get_cronjob_config();
 
     my $crontask = "# Automatically generated; do not edit locally\n";
+       $crontask .= "BaNG_Cron=1\n";
 
     foreach my $headerkey (sort keys %{ $cronjobs->{$servername}->{header} } ) {
         $crontask .= "$headerkey=$cronjobs->{$servername}->{header}->{$headerkey}\n";
