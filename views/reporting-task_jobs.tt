@@ -29,6 +29,7 @@ Total Jobs: <% taskjobs.Data.size %>
                 <td <%- IF job.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF job.JobStatus == 1 %>class="hook_box" title="Rsync done">
                     <% ELSIF job.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% job.jobHost %>&SERVICE=conn' title="Host offline">
+                    <% ELSIF bkp.JobStatus == -2 %>class="notallow" title="Remote Shell not working">
                     <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
                 <td class="center"><a href="/host/<% job.BkpHost %>"><% job.BkpHost %></a></td>
                 <td class="center"><a href="/config/allhosts/<% job.BkpGroup %>"><% job.BkpGroup %></a></td>
