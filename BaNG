@@ -756,10 +756,14 @@ sub rename_failed_backup {
     my $failed_dest    = targetpath( $host, $group ) . '/' . $bkptimestamp . "_failed";
     my $mv_cmd       = "/bin/mv";
 
-    my $rename_cmd = "$mv_cmd $failed_source $failed_dest >/dev/null 2>&1";
-    $rename_cmd = "echo $rename_cmd" if $serverconfig{dryrun};
-    logit( $taskid, $host, $group, "Rename failed folder for host $host group $group using $rename_cmd" );
-    system($rename_cmd) and logit( $taskid, $host, $group, "ERROR: renaming failed folder for $host-$group: $!" );
+    if ( -e $failed_source ) {
+        my $rename_cmd = "$mv_cmd $failed_source $failed_dest >/dev/null 2>&1";
+        $rename_cmd = "echo $rename_cmd" if $serverconfig{dryrun};
+        logit( $taskid, $host, $group, "Rename failed folder for host $host group $group using $rename_cmd" );
+        system($rename_cmd) and logit( $taskid, $host, $group, "ERROR: renaming failed folder for $host-$group: $!" );
+    } else {
+        logit( $taskid, $host, $group, "ERROR: $failed_source not exists, skip renaming failed folder for host $host group $group" );
+    }
 
     return 1;
 }
