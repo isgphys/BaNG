@@ -363,6 +363,7 @@ sub get_lockfiles {
             my $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
             my $taskid = $ids->{taskid} || '';
             my $shpid  = $ids->{shpid} || '';
+            my $cron   = $ids->{cron} || '';
 
             $lockfiles{$server}{"$host-$group-$path"} = {
                 taskid    => $taskid,
@@ -370,6 +371,7 @@ sub get_lockfiles {
                 group     => $group,
                 path      => $path,
                 shpid     => $shpid,
+                cron      => $cron,
                 timestamp => $timestamp,
             };
         }
