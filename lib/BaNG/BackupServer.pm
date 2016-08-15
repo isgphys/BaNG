@@ -20,6 +20,7 @@ our @EXPORT = qw(
     get_lockfiles
     get_backup_folders
     check_client_connection
+    check_client_rshell_connection
     get_automount_paths
     check_target_exists
     create_target
@@ -131,6 +132,25 @@ sub check_client_connection {
         $msg   = 'Host not pingable because behind a Gateway-Host';
     }
     $p->close();
+
+    return $state, $msg;
+}
+
+sub check_client_rshell_connection {
+    my ( $host, $rshell, $gwhost ) = @_;
+
+    my $state = 0;
+    my $msg   = "$rshell not working correctly";
+    my $result = `$rshell $host uname -a`;
+    print "rshell output: $result\n" if $serverconfig{verbose};
+
+    if ( $result =~ /(Linux|Darwin) $host/ ) {
+        $state = 1;
+        $msg   = "$rshell ok";
+    } elsif ($gwhost) {
+        $state = 1;
+        $msg   = 'Host not pingable because behind a Gateway-Host';
+    }
 
     return $state, $msg;
 }
