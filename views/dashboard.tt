@@ -44,8 +44,14 @@
         Loading Backup Report Overview
     </div>
 </div>
+
 <script>
     $(window).load(function() {
+        load_cron_status();
+        load_lockfile_report();
+        load_fsinfo_report();
+        load_error_report();
+
         var showwipe_state = localStorage.getItem('showwipe') || "true";
         showwipe_state = (showwipe_state === "true"); // convert to boolean
         $('#showwipe').prop('checked', showwipe_state);
@@ -54,50 +60,6 @@
             localStorage.setItem('showwipe', e.target.checked);
         });
 
-        $.ajax({
-            url: '/status_cron',
-            success: function(content) {
-            if (content == "" ) {
-            $('#cronstatus').html('<b>Cronjob Status:</b> up-to-date');
-            } else {
-            $('#cronstatus').html('<b>Cronjob Status:</b> <a class="alert_yellow" href="/status_cron">DIFF</a>');
-                }
-                initializeAll();
-            },
-            error: function() {
-                $('#cronstatus').html('An error occured while loading Cron status.');
-            }
-        });
-        $.ajax({
-            url: '/lockfile_report',
-            success: function(content) {
-                $('#lockinfo').html(content);
-                initializeAll();
-            },
-            error: function() {
-                $('#lockinfo').html('An error occured while loading the Running Jobs Report.');
-            }
-        });
-        $.ajax({
-            url: '/fsinfo_report',
-            success: function(content) {
-                $('#fsinfo').html(content);
-                initializeAll();
-            },
-            error: function() {
-                $('#fsinfo').html('An error occured while loading the Filesystem Usage Report.');
-            }
-        });
-        $.ajax({
-            url: '/error_report',
-            success: function(content) {
-                $('#error_report').html(content);
-                initializeAll();
-            },
-            error: function() {
-                $('#error_report').html('An error occured while loading the Error Report.');
-            }
-        });
         if ( $('#showwipe').is(':checked') ) {
             $.ajax({
                 url: '/wipe_status',
@@ -116,4 +78,61 @@
             $('#wipeinfo').html('');
         };
     });
+
+    function load_cron_status() {
+        $.ajax({
+            url: '/status_cron',
+            success: function(content) {
+            if (content == "" ) {
+            $('#cronstatus').html('<b>Cronjob Status:</b> up-to-date');
+            } else {
+            $('#cronstatus').html('<b>Cronjob Status:</b> <a class="alert_yellow" href="/status_cron">DIFF</a>');
+                }
+                initializeAll();
+            },
+            error: function() {
+                $('#cronstatus').html('An error occured while loading Cron status.');
+            }
+        });
+    }
+
+    function load_lockfile_report() {
+        $.ajax({
+            url: '/lockfile_report',
+            success: function(content) {
+                $('#lockinfo').html(content);
+                initializeAll();
+            },
+            error: function() {
+                $('#lockinfo').html('An error occured while loading the Running Jobs Report.');
+            }
+        });
+    }
+
+    function load_fsinfo_report() {
+        $.ajax({
+            url: '/fsinfo_report',
+            success: function(content) {
+                $('#fsinfo').html(content);
+                initializeAll();
+            },
+            error: function() {
+                $('#fsinfo').html('An error occured while loading the Filesystem Usage Report.');
+            }
+        });
+    }
+
+    function load_error_report() {
+        $.ajax({
+            url: '/error_report',
+            success: function(content) {
+                $('#error_report').html(content);
+                initializeAll();
+            },
+            error: function() {
+                $('#error_report').html('An error occured while loading the Error Report.');
+            }
+        });
+    }
+
 </script>
