@@ -1,4 +1,4 @@
-<h3>Currently Running Tasks</h3>
+<h3>Currently Running Tasks <img id="lockinfo_img" src="/images/reload.png" width="15" title="Force reload"></h3>
 <table class="border">
     <thead>
         <th>Host</th>
@@ -29,3 +29,10 @@
     </tbody>
     <tfoot><tr><td>Working servers: <% lockfiles.size %></td></tr></tfoot>
 </table>
+
+<script>
+    $('#lockinfo_img').click(function(){
+        $('#lockinfo').html('<div class="loading_message"><img src="/images/spinner.gif" width=25 alt="Loading animation">Loading Running Jobs Report</div>');
+        load_lockfile_report();
+        });
+</script>
