@@ -10,17 +10,22 @@
             <legend>Create <% configtype %> Config</legend>
             <div class="hostview">
                 <label>Hostname:</label>
-                <input type="text" name="hostname" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$" autofocus>
+                <input type="text" id="hostname" name="hostname" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$" autofocus>
             </div>
             <div>
                 <label>Backup-Group:</label>
                 <input type="text" name="newgroup" placeholder="a-z\-0-9" pattern="^[a-z\-0-9]+$">
                 <span class="hostview">or</span>
-                <select name="bkpgroup" class="hostview">
+                <select id="bkpgroup" name="bkpgroup" class="hostview" onchange="getBkpFolder();">
                   <% FOREACH group IN groups.keys.sort %>
                   <option value="<% group %>"><% group %></option>
                   <% END %>
                 </select>
+            </div>
+            <div class="hostview">
+                <label>Backup-Folders:</label>
+                <input type="text" id="bkpsourcefolder" name="bkpsrcfolder" placeholder=":/ :/var :/home" pattern="^:[:a-z0-9\-\/\s]+$" onkeyup="checkInput();">
+                <span id="group_default_folder"></span>
             </div>
             <div>
                 <input class="submit" type="submit" value="Create it!">
@@ -29,11 +34,45 @@
     </form>
 </div>
 <script>
+    var default_bkpFolders = [];
+    <% FOREACH group IN groups.keys.sort -%>
+    default_bkpFolders.push("<% groups.$group.groupconfig.BKP_SOURCE_FOLDER %>");
+    <% END -%>
+
+
     $(document).ready(function(){
+        getBkpFolder();
         $(".msg_error").fadeOut(4000);
 
         if ( $("legend:contains('group')").length > 0 ) {
             $('.hostview').remove();
         };
     });
+
+    function getBkpFolder() {
+        if ( default_bkpFolders[$('#bkpgroup').prop('selectedIndex')].length == 0 ) {
+            $('#group_default_folder').html("Multiple folders separated by :");
+            $('#bkpsourcefolder').addClass("highlight");
+            $('#bkpsourcefolder').focus();
+            $('.submit').prop("disabled",true);
+        }else{
+            $('#group_default_folder').html("Group default: " + default_bkpFolders[$('#bkpgroup').prop('selectedIndex')]);
+            $('#bkpsourcefolder').removeClass("highlight");
+            $('.submit').prop("disabled",false);
+        };
+    }
+
+    function checkInput() {
+        var bkpfolderinput =  $('#bkpsourcefolder').val();
+        var checkRegex = /^:\/[:a-z0-9\-\/\s]*$/;
+
+        if ( checkRegex.test(bkpfolderinput) ) {
+            $('.submit').prop("disabled",false);
+        }else{
+            $('.submit').prop("disabled",true);
+        }
+        if (bkpfolderinput.length == 0  && default_bkpFolders[$('#bkpgroup').prop('selectedIndex')].length > 0) {
+            $('.submit').prop("disabled",false);
+        }
+    }
 </script>

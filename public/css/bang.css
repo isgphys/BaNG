@@ -228,3 +228,9 @@ pre {
 .hidden {
     display: none;
 }
+
+.highlight {
+    border-color: red;
+    background: yellow;
+}
+

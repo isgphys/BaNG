@@ -103,10 +103,12 @@ post '/new/:configtype' => require_role config->{admin_role} => sub {
     my $hostname   = param('hostname') || '';
     my $bkpgroup   = param('newgroup') ? param('newgroup') : param('bkpgroup');
     my $configtype = param('configtype');
+    my $bkpfolders = param('bkpsrcfolder') || '';
     my $createdby  = session('logged_in_user');
     my $timestamp  = strftime( '%Y/%m/%d %H:%M:%S', localtime );
 
     my $settings;
+    $settings->{'BKP_SOURCE_FOLDER'} = $bkpfolders unless $bkpfolders eq '';
     $settings->{'COMMENT'} = "Created by $createdby at $timestamp";
 
     my ( $return_code, $return_msg ) = write_config( $configtype, 'add', $hostname, $bkpgroup, $settings );
