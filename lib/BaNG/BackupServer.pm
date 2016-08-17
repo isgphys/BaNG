@@ -139,17 +139,21 @@ sub check_client_connection {
 sub check_client_rshell_connection {
     my ( $host, $rshell, $gwhost ) = @_;
 
+    my $result;
     my $state = 0;
     my $msg   = "$rshell not working correctly";
-    my $result = `$rshell $host uname -a`;
-    print "rshell output: $result\n" if $serverconfig{verbose};
 
-    if ( $result =~ /(Linux|Darwin) $host/ ) {
+    if ( $gwhost || $host eq "localhost" ) {
         $state = 1;
-        $msg   = "$rshell ok";
-    } elsif ($gwhost) {
-        $state = 1;
-        $msg   = 'Host not pingable because behind a Gateway-Host';
+        $msg   = 'Could not test RemoteShell because Host is behind a Gateway-Host';
+    } else {
+        $result = `$rshell $host uname -a`;
+        print "rshell output: $result\n" if $serverconfig{verbose};
+
+        if ( $result =~ /(Linux|Darwin) $host/ ) {
+            $state = 1;
+            $msg   = "$rshell ok";
+        }
     }
 
     return $state, $msg;
