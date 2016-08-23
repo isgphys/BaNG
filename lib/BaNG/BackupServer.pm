@@ -319,7 +319,7 @@ sub create_lockfile {
         if ( @processes ) {
             logit( $taskid, $host, $group, "ERROR: lockfile $lockfile still exists" );
             logit( $taskid, $host, $group, 'ERROR: Backup canceled, still running backup!' );
-            exit 0;
+            return 0;
         }
     }
 
