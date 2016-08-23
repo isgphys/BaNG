@@ -15,7 +15,7 @@
         </tr>
         <%- FOREACH lockfile IN lockfiles.$server.keys.sort %>
         <tr <% IF lockfiles.$server.$lockfile.path.match('migration') %> class="migration" title="HistoryMerger@work"<% END %>
-            <% IF lockfiles.$server.$lockfile.path.match('cron') == '' %> class="byhand" title="Task started on CLI"<% END %>
+            <% IF lockfiles.$server.$lockfile.path.match('cron') == '0' %> class="byhand" title="Task started manually"<% END %>
             >
                 <td class="center"><% lockfiles.$server.$lockfile.host %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
