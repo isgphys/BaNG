@@ -301,7 +301,7 @@ sub queue_remote_subfolders {
 
     $srcfolder =~ s/://;
     my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 | sort`;
+    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 -not -empty | sort`;
 
     # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
     if ( $#remotesubfolders == -1 ) {
