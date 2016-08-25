@@ -17,7 +17,7 @@
         <tr <% IF lockfiles.$server.$lockfile.path.match('migration') %> class="migration" title="HistoryMerger@work"<% END %>
             <% IF lockfiles.$server.$lockfile.path.match('cron') == '0' %> class="byhand" title="Task started manually"<% END %>
             >
-                <td class="center"><% lockfiles.$server.$lockfile.host %></td>
+                <td class="center"><a href="/host/<% lockfiles.$server.$lockfile.host %>"><% lockfiles.$server.$lockfile.host %></a></td>
                 <td class="center"><% lockfiles.$server.$lockfile.group %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.path %></td>
                 <td class="center"><% lockfiles.$server.$lockfile.timestamp %></td>
