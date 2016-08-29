@@ -78,6 +78,7 @@ CREATE TABLE statistic_task_meta (
     TaskID varchar(24) DEFAULT NULL,
     TaskName varchar(24) DEFAULT NULL,
     Description varchar(250) DEFAULT NULL,
+    Cron tinyint(1) DEFAULT NULL,
     PRIMARY KEY (ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```

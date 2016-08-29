@@ -7,6 +7,7 @@ Total Backup Tasks last 24H: <% RecentTasks.Data.size %>
             <th>TaskID</th>
             <th>Task-Name</th>
             <th>Description</th>
+            <th>Started by</th>
             <th>JobStatus</th>
             <th>Jobs</th>
             <th>Target</th>
@@ -28,13 +29,13 @@ Total Backup Tasks last 24H: <% RecentTasks.Data.size %>
                 <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
                 <td class="center"><% bkp.Taskname %></td>
                 <td class="center"><% bkp.Description %></td>
+                <td class="center"><% IF bkp.Cron == 1 %>CRON<% ELSIF bkp.Cron == 0 %>CLI<% END %></td>
                 <td <%- IF bkp.JobStatus == 2 AND bkp.isThread %>class="hook3" title="forked Job done">
                     <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
                     <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
                     <% ELSIF bkp.JobStatus == -2 %>class="notallow" title="Remote Shell not working">
                     <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
-                <td class="center"><% bkp.Jobs %></td>
                 <td class="center"><% bkp.BkpToHost %></td>
                 <td width="25" title="Rsync Error Status: <% bkp.ErrStatus %>"
                     <%- IF bkp.ErrStatus == 0 %> class="ok"

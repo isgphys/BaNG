@@ -291,7 +291,7 @@ sub bangstat_recent_tasks {
     my $sth = $bangstat_dbh->prepare("
         SELECT
             statistic.TaskID, COUNT(JobID) as Jobs, MIN(Start) as Start, MAX(Stop) as Stop,
-            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, TaskName, Description,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, TaskName, Description, Cron,
             BkpToHost, isThread, MAX(JobStatus) as JobStatus,
             GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
             SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
@@ -314,6 +314,7 @@ sub bangstat_recent_tasks {
             Jobs         => $dbrow->{'Jobs'},
             Taskname     => $dbrow->{'TaskName'},
             Description  => $dbrow->{'Description'},
+            Cron         => $dbrow->{'Cron'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
             Runtime      => time2human($Runtime),
@@ -436,7 +437,7 @@ sub bangstat_start_backupjob {
 }
 
 sub bangstat_set_taskmeta {
-    my ( $taskid, $host, $group, $override ) = @_;
+    my ( $taskid, $host, $group, $cron, $override ) = @_;
     $host  ||= 'BULK';
     $group ||= '*';
 
@@ -445,13 +446,13 @@ sub bangstat_set_taskmeta {
 
     $description = get_taskmeta($host, $group) unless $override;
 
-    print "TaskID: $taskid Taskname: $taskName Description: $description\n" if $serverconfig{verbose};
+    print "TaskID: $taskid Taskname: $taskName Description: $description Cron: $cron\n" if $serverconfig{verbose};
 
     my $sql = qq(
         INSERT INTO statistic_task_meta (
-            TaskID, TaskName, Description
+            TaskID, TaskName, Description, Cron
         ) VALUES (
-            '$taskid', '$taskName', '$description')
+            '$taskid', '$taskName', '$description', '$cron')
     );
 
     logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );

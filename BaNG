@@ -63,7 +63,7 @@ foreach my $config ( sort keys %hosts ) {
         my %RecentBackups = bangstat_recentbackups($host);
         xymon_report( $taskid, $host, $group, %RecentBackups );
     } else {
-        bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $taskmeta);
+        bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta);
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
 }
