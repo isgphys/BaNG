@@ -290,7 +290,7 @@ sub bangstat_recent_tasks {
 
     my $sth = $bangstat_dbh->prepare("
         SELECT
-            statistic.TaskID, COUNT(JobID) as Jobs, MIN(Start) as Start, MAX(Stop) as Stop,
+            statistic.TaskID, COUNT(DISTINCT JobID) as Jobs, MIN(Start) as Start, MAX(Stop) as Stop,
             TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, TaskName, Description, Cron,
             BkpToHost, isThread, MAX(JobStatus) as JobStatus,
             GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
