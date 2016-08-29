@@ -247,7 +247,7 @@ sub get_group_config {
 
 sub get_taskmeta {
     my ( $host, $group ) = @_;
-    my $description = "no task info available";
+    my $description = "---";
     my $cronjobs    = get_cronjob_config();
 
     foreach my $job ( sort keys %{ $cronjobs->{$servername}->{backup} } ){
