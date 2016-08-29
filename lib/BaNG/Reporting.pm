@@ -292,7 +292,7 @@ sub bangstat_recent_tasks {
         SELECT
             statistic.TaskID, COUNT(JobID) as Jobs, MIN(Start) as Start, MAX(Stop) as Stop,
             TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, TaskName, Description,
-            BkpToHost, isThread, MIN(JobStatus) as JobStatus,
+            BkpToHost, isThread, MAX(JobStatus) as JobStatus,
             GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
             SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
             SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
