@@ -25,6 +25,7 @@ Optional arguments:
 ```sh
 --initial                                     # needed for first backup to initially create the folder/subvolume
 --missingonly                                 # backup only hosts without recent backup (e.g. machines that were offline)
+--label <string>                              # set a label for this task
 --noreport                                    # do not send any reports
 -t <integer>                                  # number of threads to use (default: 1)
 -p <path>                                     # override path to folder containing etc/

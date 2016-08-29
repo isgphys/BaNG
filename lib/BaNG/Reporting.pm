@@ -23,6 +23,7 @@ our @EXPORT = qw(
     bangstat_recent_tasks
     bangstat_task_jobs
     bangstat_start_backupjob
+    bangstat_set_taskmeta
     bangstat_update_backupjob
     bangstat_finish_backupjob
     send_xymon_report
@@ -431,6 +432,43 @@ sub bangstat_start_backupjob {
     $bangstat_dbh->disconnect;
 
     logit( $taskid, $host, $group, "Bangstat start_backup sent." );
+
+    return 1;
+}
+
+sub bangstat_set_taskmeta {
+    my ( $taskid, $host, $group, $override ) = @_;
+    $host  ||= 'BULK';
+    $group ||= '*';
+
+    my $taskName    = $host ."_". $group;
+    my $description = $override || "" ;
+
+    $description = get_taskmeta($host, $group) unless $override;
+
+    print "TaskID: $taskid Taskname: $taskName Description: $description\n" if $serverconfig{verbose};
+
+    my $sql = qq(
+        INSERT INTO statistic_task_meta (
+            TaskID, TaskName, Description
+        ) VALUES (
+            '$taskid', '$taskName', '$description')
+    );
+
+    logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    if ( !$conn ) {
+        logit( $taskid, $host, $group, "ERROR: Could not connect to DB to send bangstat report." );
+        return 1;
+    }
+
+    my $sth = $bangstat_dbh->prepare($sql);
+    $sth->execute() unless $serverconfig{dryrun};
+    $sth->finish();
+    $bangstat_dbh->disconnect;
+
+    logit( $taskid, $host, $group, "Bangstat task_meta sent." );
 
     return 1;
 }

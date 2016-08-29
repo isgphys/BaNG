@@ -26,6 +26,7 @@ our @EXPORT = qw(
     write_config
     update_config
     delete_config
+    get_taskmeta
     get_cronjob_config
     generate_cron
     status_cron
@@ -244,6 +245,20 @@ sub get_group_config {
     return 1;
 }
 
+sub get_taskmeta {
+    my ( $host, $group ) = @_;
+    my $description = "no task info available";
+    my $cronjobs    = get_cronjob_config();
+
+    foreach my $job ( sort keys $cronjobs->{$servername}->{backup} ){
+        if ( $cronjobs->{$servername}->{backup}->{$job}->{ident} eq "$host-$group" ) {
+            $description = $cronjobs->{$servername}->{backup}->{$job}->{description} || "---" ;
+        }
+    }
+
+    return ("$host-$group", $description);
+}
+
 sub get_cronjob_config {
     my %unsortedcronjobs;
     my %sortedcronjobs;
@@ -263,10 +278,11 @@ sub get_cronjob_config {
                 my ( $host, $group ) = split( /_/, $cronjob );
 
                 $unsortedcronjobs{$server}{$jobtype}{$cronjob} = {
-                    host  => $host,
-                    group => $group,
-                    ident => "$host-$group",
-                    cron  => $cronjobslist->{$jobtype}->{$cronjob},
+                    host        => $host,
+                    group       => $group,
+                    ident       => "$host-$group",
+                    cron        => $cronjobslist->{$jobtype}->{$cronjob},
+                    description => $cronjobslist->{$jobtype}->{$cronjob}->{DESCRIPTION},
                 };
 
                 # We mostly specify the time of the cronjob and therefore the other values default to '*'

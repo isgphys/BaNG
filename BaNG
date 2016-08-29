@@ -36,6 +36,7 @@ my $dryrun_arg;
 my @queue;
 my %finishable_bkpjobs;
 my $taskid;
+my $taskmeta;
 my $startstamp;
 my $endstamp;
 
@@ -62,6 +63,7 @@ foreach my $config ( sort keys %hosts ) {
         my %RecentBackups = bangstat_recentbackups($host);
         xymon_report( $taskid, $host, $group, %RecentBackups );
     } else {
+        bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $taskmeta);
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
 }
@@ -878,6 +880,7 @@ sub parse_command_options {
         'initial'          => \$initial,
         'force'            => \$force,
         'missingonly'      => \$missingonly,
+        'label=s'          => \$taskmeta,
         'xymon'            => \$xymononly,
         'noreport'         => \$noreport,
     ) or usage('Invalid commmand line options.');
@@ -928,6 +931,7 @@ sub usage {
         -w --force         # forcing wipe the backup (override auto_wipe_limit)
         --initial          # create nonexisting backup targets
         --missingonly      # backup only hosts that were not backed up recently
+        --label <string>   # set a label for this task
         --xymon            # send only xymon report
         --noreport         # do not send any report
         -v | -vv | -vvv    # verbose mode to include debugging messages of level 1-3

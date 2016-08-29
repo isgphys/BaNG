@@ -72,6 +72,14 @@ CREATE TABLE statistic (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE statistic_archive LIKE statistic;
+
+CREATE TABLE statistic_task_meta (
+    ID int(11) NOT NULL AUTO_INCREMENT,
+    TaskID varchar(24) DEFAULT NULL,
+    TaskName varchar(24) DEFAULT NULL,
+    Description varchar(250) DEFAULT NULL,
+    PRIMARY KEY (ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
 ### Create indexes
