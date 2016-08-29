@@ -250,7 +250,7 @@ sub get_taskmeta {
     my $description = "no task info available";
     my $cronjobs    = get_cronjob_config();
 
-    foreach my $job ( sort keys $cronjobs->{$servername}->{backup} ){
+    foreach my $job ( sort keys %{ $cronjobs->{$servername}->{backup} } ){
         if ( $cronjobs->{$servername}->{backup}->{$job}->{ident} eq "$host-$group" ) {
             $description = $cronjobs->{$servername}->{backup}->{$job}->{description} || "---" ;
         }
