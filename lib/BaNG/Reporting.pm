@@ -412,10 +412,10 @@ sub bangstat_start_backupjob {
     my $sql = qq(
         INSERT INTO statistic (
             TaskID, JobID, BkpFromHost, BkpGroup, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath,
-            isThread, ErrStatus, JobStatus, Start, Stop
+            isThread, ErrStatus, JobStatus, Start
         ) VALUES (
             '$taskid', '$jobid', '$host', '$group', '$path', '$srcfolder', '$servername', '$targetpath',
-            $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp'), FROM_UNIXTIME('$endstamp')
+            $isSubfolderThread , '$errcode', '$jobstatus', FROM_UNIXTIME('$startstamp')
         )
     );
     logit( $taskid, $host, $group, "DB Report SQL command: $sql" ) if ( $serverconfig{verboselevel} >= 2 );
