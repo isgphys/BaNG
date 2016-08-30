@@ -39,7 +39,7 @@ sub time2human {
     } else {
         if ( $minutes < 60 ) {
             if ( $minutes < 1 ) {
-                return sprintf( '< 1 min', $minutes );
+                return '< 1 min';
             } else {
                 return sprintf( '%d min', $minutes );
             }
