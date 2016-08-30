@@ -36,7 +36,6 @@ Total Backup Tasks last 24H: <% RecentTasks.Data.size %>
                     <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
                     <% ELSIF bkp.JobStatus == -2 %>class="notallow" title="Remote Shell not working">
                     <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
-                <td class="center"><% bkp.Jobs %></td>
                 <td class="center"><% bkp.BkpToHost %></td>
                 <td width="25" title="Rsync Error Status: <% bkp.ErrStatus %>"
                     <%- IF bkp.ErrStatus == 0 %> class="ok"
