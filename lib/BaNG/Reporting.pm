@@ -495,7 +495,7 @@ sub bangstat_update_backupjob {
 
     my %log_values;
     foreach my $logkey ( keys %parse_log_keys ) {
-        $log_values{$parse_log_keys{$logkey}} = 'NULL';
+        $log_values{$parse_log_keys{$logkey}} = '0';
     }
 
     foreach my $outline (@outlines) {
