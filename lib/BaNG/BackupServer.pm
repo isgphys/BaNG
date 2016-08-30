@@ -150,7 +150,7 @@ sub check_client_rshell_connection {
         $result = `$rshell $host uname -a`;
         print "rshell output: $result\n" if $serverconfig{verbose};
 
-        if ( $result =~ /(Linux|Darwin) $host/ ) {
+        if ( $result =~ /^(Linux|Darwin)/) {
             $state = 1;
             $msg   = "$rshell ok";
         }
