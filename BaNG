@@ -52,6 +52,8 @@ print "Run as Cron: $cron\n" if $serverconfig{verbose};
 
 $taskid = create_timeid( $host_arg, $group_arg );
 
+bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
+
 get_host_config( $host_arg, $group_arg );
 
 foreach my $config ( sort keys %hosts ) {
@@ -63,7 +65,6 @@ foreach my $config ( sort keys %hosts ) {
         my %RecentBackups = bangstat_recentbackups($host);
         xymon_report( $taskid, $host, $group, %RecentBackups );
     } else {
-        bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta);
         queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
 }

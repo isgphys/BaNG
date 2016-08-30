@@ -76,7 +76,7 @@ CREATE TABLE statistic_archive LIKE statistic;
 CREATE TABLE statistic_task_meta (
     ID int(11) NOT NULL AUTO_INCREMENT,
     TaskID varchar(24) DEFAULT NULL,
-    TaskName varchar(24) DEFAULT NULL,
+    TaskName varchar(120) DEFAULT NULL,
     Description varchar(250) DEFAULT NULL,
     Cron tinyint(1) DEFAULT NULL,
     PRIMARY KEY (ID)
