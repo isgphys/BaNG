@@ -65,12 +65,22 @@
         var showwipe_state = localStorage.getItem('showwipe') || "true";
         showwipe_state = (showwipe_state === "true"); // convert to boolean
         $('#showwipe').prop('checked', showwipe_state);
+        ToggleWipe();
 
         $('#showwipe').change(function (e) {
             localStorage.setItem('showwipe', e.target.checked);
+            ToggleWipe();
         });
 
+    });
+
+    function ToggleWipe(){
         if ( $('#showwipe').is(':checked') ) {
+            if ( $('#wipeinfo').is(':empty') ) {
+                $('#wipeinfo').append("<div class='loading_message'>");
+                $('#wipeinfo').append("<img src='/images/spinner.gif' width=25 alt='Loading animation'> ");
+                $('#wipeinfo').append(" Loading Wipe Status Overview</div>");
+            };
             $.ajax({
                 url: '/wipe_status',
                 timeout: 45000,
@@ -87,7 +97,7 @@
         } else {
             $('#wipeinfo').html('');
         };
-    });
+    };
 
     function load_cron_status() {
         $.ajax({
