@@ -42,27 +42,23 @@
 </div>
 
 <script>
-    var showperf_state = localStorage.getItem('showperf') || "true";
-    showperf_state = (showperf_state === "true"); // convert to boolean
-    $('#showperf').prop('checked', showperf_state);
-
     $('#showperf').change(function (e) {
-        localStorage.setItem('showperf', e.target.checked);
+        PerfMon();
     });
 
-    $('#showperf').change(function (e) {
+    function PerfMon() {
         if ( $('#showperf').is(':checked') ) {
             $('#performance').show();
             $("embed").each(function () {
                 $(this).attr("src",$(this).attr("src").replace('refresh=0','refresh=2'))
-                });
+            });
             $("#performance").html($("#performance").html())
         }else{
             $("embed").each(function () {
                 $(this).attr("src",$(this).attr("src").replace('refresh=2','refresh=0'))
-                });
+            });
             $("#performance").html($("#performance").html())
             $('#performance').hide();
             };
-        });
+    };
 </script>
