@@ -17,16 +17,20 @@ sub num2human {
     my ( $num, $base ) = @_;
     $base ||= 1000.;
 
-    # convert large numbers to K, M, G, T notation
-    foreach my $unit ( '', qw(k M G T P) ) {
-        if ( $num < $base ) {
-            if ( $num < 10 && $num > 0 ) {
-                return sprintf( '%.2f %s', $num, $unit );    # print small values with 1 decimal
-            } else {
-                return sprintf( '%.1f %s', $num, $unit );    # print larger values without decimals
+    if ( $num ) {
+        # convert large numbers to K, M, G, T notation
+        foreach my $unit ( '', qw(k M G T P) ) {
+            if ( $num < $base ) {
+                if ( $num < 10 && $num > 0 ) {
+                    return sprintf( '%.2f %s', $num, $unit );    # print small values with 1 decimal
+                } else {
+                    return sprintf( '%.1f %s', $num, $unit );    # print larger values without decimals
+                }
             }
+            $num = $num / $base;
         }
-        $num = $num / $base;
+    } else {
+        return "-";
     }
 }
 
