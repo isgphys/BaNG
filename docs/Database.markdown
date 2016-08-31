@@ -48,26 +48,26 @@ CREATE TABLE statistic (
     BkpGroup varchar(30) DEFAULT NULL,
     BkpFromPath varchar(250) DEFAULT NULL,
     BkpFromPathRoot varchar(250) DEFAULT NULL,
-    BkpToHost varchar(30) NOT NULL,
+    BkpToHost varchar(30) DEFAULT NULL,
     BkpToPath varchar(250) DEFAULT NULL,
-    isThread tinyint(1) DEFAULT '0',
+    isThread tinyint(1) DEFAULT NULL,
     ErrStatus bigint(20) DEFAULT '0',
     JobStatus tinyint(1) DEFAULT '0',
-    NumOfFiles bigint(20) DEFAULT '0',
-    NumOfFilesTrans bigint(20) DEFAULT '0',
-    NumOfFilesCreated bigint(20) DEFAULT '0',
-    NumOfFilesDel bigint(20) DEFAULT '0',
-    TotFileSize bigint(20) DEFAULT '0' COMMENT 'in bytes',
-    TotFileSizeTrans bigint(20) DEFAULT '0',
-    LitData bigint(20) DEFAULT '0' COMMENT 'in bytes',
-    MatchData bigint(20) DEFAULT '0' COMMENT 'in bytes',
-    FileListSize bigint(20) DEFAULT '0' COMMENT 'in bytes',
-    FileListGenTime decimal(10,3) DEFAULT '0' COMMENT 'in sec',
-    FileListTransTime decimal(10,3) DEFAULT '0' COMMENT 'in sec',
-    TotBytesSent bigint(20) DEFAULT '0' COMMENT 'in bytes',
-    TotBytesRcv bigint(20) DEFAULT '0' COMMENT 'in bytes',
-    BytesPerSec decimal(10,3) DEFAULT '0' COMMENT 'in bytes',
-    Speedup decimal(10,3) DEFAULT '0',
+    NumOfFiles bigint(20) DEFAULT NULL,
+    NumOfFilesTrans bigint(20) DEFAULT NULL,
+    NumOfFilesCreated bigint(20) DEFAULT NULL,
+    NumOfFilesDel bigint(20) DEFAULT NULL,
+    TotFileSize bigint(20) DEFAULT NULL COMMENT 'in bytes',
+    TotFileSizeTrans bigint(20) DEFAULT NULL,
+    LitData bigint(20) DEFAULT NULL COMMENT 'in bytes',
+    MatchData bigint(20) DEFAULT NULL COMMENT 'in bytes',
+    FileListSize bigint(20) DEFAULT NULL COMMENT 'in bytes',
+    FileListGenTime decimal(10,3) DEFAULT NULL COMMENT 'in sec',
+    FileListTransTime decimal(10,3) DEFAULT NULL COMMENT 'in sec',
+    TotBytesSent bigint(20) DEFAULT NULL COMMENT 'in bytes',
+    TotBytesRcv bigint(20) DEFAULT NULL COMMENT 'in bytes',
+    BytesPerSec decimal(10,3) DEFAULT NULL COMMENT 'in bytes',
+    Speedup decimal(10,3) DEFAULT NULL,
     PRIMARY KEY (ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -107,7 +107,7 @@ SELECT
     GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, MIN(JobStatus) as JobStatus
 FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-GROUP BY JobID;
+GROUP BY JobID, TaskID, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, isThread, BkpGroup;
 
 CREATE OR REPLACE VIEW statistic_job_sum AS
 SELECT
@@ -120,7 +120,7 @@ SELECT
     SUM(TotFileSizeTrans) as TotFileSizeTrans
 FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-GROUP BY JobID;
+GROUP BY JobID, TaskID, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, isThread, JobStatus, BkpGroup;
 
 CREATE OR REPLACE VIEW statistic_job_thread AS
 SELECT
