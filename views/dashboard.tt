@@ -3,6 +3,7 @@
     <table>
         <tr>
             <td width=150><div><input id="showwipe" type="checkbox" value="1" style="vertical-align: middle;">Show Wipe Report</div></td>
+            <td width=180><div><input id="showperf" type="checkbox" value="1" style="vertical-align: middle;">Enable Performance Monitoring</div></td>
             <td width=150>
                 <div id="cronstatus">
                     <div class="loading_message">
