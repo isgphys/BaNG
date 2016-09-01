@@ -199,7 +199,7 @@ sub bangstat_recentbackups_hours {
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
-    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpToHost, isThread;
+    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, isThread;
     ");
     $sth->execute();
 
@@ -350,7 +350,7 @@ sub bangstat_task_jobs {
             SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
         FROM statistic
         WHERE TaskID = '$taskid'
-        GROUP BY JobID, TaskID, BkpFromHost, BkpGroup, BkpFromPathRoot
+        GROUP BY JobID, TaskID, BkpFromHost, BkpGroup, BkpToHost, BkpFromPathRoot, BkpFromPath, isThread
         ORDER BY JobStatus, Start;
 
     ");
