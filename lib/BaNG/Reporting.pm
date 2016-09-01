@@ -189,7 +189,7 @@ sub bangstat_recentbackups_hours {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-    SELECT JobID, BkpGroup, MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+    SELECT TaskID, JobID, BkpGroup, MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
         BkpFromHost, BkpToHost, isThread,
         SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
         SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
@@ -198,7 +198,7 @@ sub bangstat_recentbackups_hours {
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
-    GROUP BY JobID, BkpGroup, BkpFromHost, BkpToHost, isThread;
+    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpToHost, isThread;
     ");
     $sth->execute();
 
@@ -206,6 +206,7 @@ sub bangstat_recentbackups_hours {
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
         push( @{$RecentBackupsAll{'Data'}}, {
+            TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             JobStatus    => $dbrow->{'JobStatus'},
             isThread     => $dbrow->{'isThread'},

@@ -42,7 +42,7 @@ get '/jobs' => require_role config->{admin_role} => sub {
         section           => 'reporting',
         servername        => $servername,
         servers           => \%servers,
-        RecentBackupsLast => bangstat_recentbackups_last(),
+        RecentBackupsLast => bangstat_recentbackups_hours(),
         xymon_server      => $serverconfig{xymon_server},
     };
 };
