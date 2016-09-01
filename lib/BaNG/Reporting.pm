@@ -336,10 +336,23 @@ sub bangstat_task_jobs {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *, TIMESTAMPDIFF(Second, Start , Stop) as Runtime
+        SELECT
+            TaskID, JobID, BkpFromHost, BkpGroup, BkpToHost,
+            IF(STRCMP(bkpFromPath,BkpFromPathRoot), BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+            IF(STRCMP(bkpFromPath,BkpFromPathRoot),'2',isThread) as isThread,
+            MAX(JobStatus) as JobStatus,
+            COUNT(JobID) as Jobs,
+            GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+            SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+            SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+            SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
         FROM statistic
         WHERE TaskID = '$taskid'
+        GROUP BY JobID, TaskID, BkpFromHost, BkpGroup, BkpFromPathRoot
         ORDER BY JobStatus, Start;
+
     ");
     $sth->execute();
 
