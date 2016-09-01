@@ -283,17 +283,19 @@ sub bangstat_recent_tasks {
 
     my $sth = $bangstat_dbh->prepare("
         SELECT
-            statistic.TaskID, COUNT(JobID) as Jobs, MIN(Start) as Start, MAX(Stop) as Stop,
-            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime, TaskName, Description, Cron,
-            BkpToHost, isThread, MAX(JobStatus) as JobStatus,
+            TaskID, TaskName, Description, Cron,
+            BkpToHost, isThread, MAX(JobStatus) as JobStatus, isThread, BkpToHost,
+            COUNT(JobID) as Jobs,
             GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
             SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
             SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
             SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
         FROM statistic
         LEFT JOIN statistic_task_meta USING (TaskID)
         WHERE Start > date_sub(NOW(), INTERVAL 24 HOUR)
-        GROUP BY TaskID
+        GROUP BY TaskID, TaskName, Description, Cron, BkpToHost, isThread
         ORDER BY TaskID DESC
     ");
     $sth->execute();
@@ -304,17 +306,16 @@ sub bangstat_recent_tasks {
         my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         push( @{$RecentTasks{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
-            Jobs         => $dbrow->{'Jobs'},
             Taskname     => $dbrow->{'TaskName'},
             Description  => $dbrow->{'Description'},
             Cron         => $dbrow->{'Cron'},
-            Starttime    => $dbrow->{'Start'},
-            Stoptime     => $dbrow->{'Stop'},
-            Runtime      => time2human($Runtime),
             isThread     => $dbrow->{'isThread'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
+            Jobs         => $dbrow->{'Jobs'},
             BkpToHost    => $dbrow->{'BkpToHost'},
+            Starttime    => $dbrow->{'Start'},
+            Runtime      => time2human($Runtime),
             FilesCreated => num2human($dbrow->{'NumOfFilesCreated'}),
             FilesDel     => num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => num2human($dbrow->{'NumOfFilesTrans'}),
