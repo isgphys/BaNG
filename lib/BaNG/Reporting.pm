@@ -190,7 +190,8 @@ sub bangstat_recentbackups_hours {
 
     my $sth = $bangstat_dbh->prepare("
     SELECT TaskID, JobID, BkpGroup, MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
-        BkpFromHost, BkpToHost, isThread,
+        BkpFromHost, BkpToHost,
+        IF(STRCMP(bkpFromPath,BkpFromPathRoot),'2',isThread) as isThread,
         SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
         SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
         SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
