@@ -19,7 +19,7 @@ our @EXPORT = qw(
     bangstat_db_connect
     bangstat_recentbackups
     bangstat_recentbackups_hours
-    bangstat_recentbackups_last
+    bangstat_recentbackups_job_details
     bangstat_recent_tasks
     bangstat_task_jobs
     bangstat_start_backupjob
@@ -228,28 +228,26 @@ sub bangstat_recentbackups_hours {
     return \%RecentBackupsAll;
 }
 
-sub bangstat_recentbackups_last {
-    my ($lastXhours) = @_;
-    $lastXhours ||= 24;
+sub bangstat_recentbackups_job_details {
+    my ($jobid) = @_;
 
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
         SELECT *
-        FROM recent_backups
-        WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
-        AND BkpFromHost like '%'
+        FROM statistic
+        WHERE JobID = '$jobid'
         ORDER BY Start DESC;
     ");
     $sth->execute();
 
-    my %RecentBackupsLast;
+    my %RecentBackupsJobDetails;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
+        my $BkpFromPath = $dbrow->{'BkpFromPath'};
         $BkpFromPath    =~ s/^:$/:\//g;
-        push( @{$RecentBackupsLast{'Data'}}, {
+        push( @{$RecentBackupsJobDetails{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             Starttime    => $dbrow->{'Start'},
@@ -273,7 +271,7 @@ sub bangstat_recentbackups_last {
     }
     $sth->finish();
 
-    return \%RecentBackupsLast;
+    return \%RecentBackupsJobDetails;
 }
 
 sub bangstat_recent_tasks {

@@ -1,5 +1,9 @@
+<% IF taskid %>
 <h3>Backup Report - Jobs of Task <% taskid %></h3>
-Total Jobs: <% taskjobs.Data.size %>
+<% ELSIF jobid %>
+<h3>Backup Report - Jobs (threaded source folders)</h3>
+<% END %>
+Total Jobs: <% jobs.Data.size %>
 <table class="reporting default-table border tablesorter tablefilter">
     <thead>
         <tr>
@@ -23,9 +27,10 @@ Total Jobs: <% taskjobs.Data.size %>
         </tr>
     </thead>
     <tbody>
-        <%- FOREACH job IN taskjobs.Data %>
+        <%- FOREACH job IN jobs.Data %>
             <tr>
-                <td><% job.JobID.substr(12) %></td>
+                <td><% IF job.isThread == 2 %><a href="/reporting/job/<% job.JobID %>"><% job.JobID.substr(12) %></a>
+                    <% ELSE %><% job.JobID.substr(12) %><% END%></td>
                 <td <%- IF job.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF job.JobStatus == 1 %>class="hook_box" title="Rsync done">
                     <% ELSIF job.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% job.jobHost %>&SERVICE=conn' title="Host offline">
