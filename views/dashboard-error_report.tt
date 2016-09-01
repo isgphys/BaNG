@@ -1,5 +1,5 @@
 <h3>Backup Report</h3>
-Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
+Total Backup Jobs last 24H: <% RecentBackups24h.Data.size %>
 <table class="border">
     <thead>
         <tr>
@@ -19,7 +19,7 @@ Total Backup Jobs last 24H: <% RecentBackupsAll.Data.size %>
         </tr>
     </thead>
     <tbody>
-        <%- FOREACH bkp IN RecentBackupsAll.Data %>
+        <%- FOREACH bkp IN RecentBackups24h.Data %>
             <% NEXT IF ( bkp.JobStatus == 2 AND bkp.ErrStatus == 0 ) OR ( bkp.JobStatus == -1 AND bkp.BkpGroup == 'mac-workstation' ) OR ( bkp.JobStatus == 2 AND ( bkp.ErrStatus == 24 OR bkp.ErrStatus == "0,24" ) ) %>
             <tr height="20">
                 <td <%- IF bkp.JobStatus == 2 AND bkp.isThread %>class="hook3" title="forked Job done">

@@ -18,7 +18,7 @@ our @EXPORT = qw(
     $bangstat_dbh
     bangstat_db_connect
     bangstat_recentbackups
-    bangstat_recentbackups_all
+    bangstat_recentbackups_hours
     bangstat_recentbackups_last
     bangstat_recent_tasks
     bangstat_task_jobs
@@ -181,7 +181,7 @@ sub bangstat_recentbackups {
     return %RecentBackups;
 }
 
-sub bangstat_recentbackups_all {
+sub bangstat_recentbackups_hours {
     my ($lastXhours) = @_;
     $lastXhours ||= 24;
 
@@ -189,45 +189,38 @@ sub bangstat_recentbackups_all {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
-        FROM recent_backups
-        WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
+    SELECT JobID, BkpGroup, MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+        BkpFromHost, BkpToHost, isThread,
+        SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+        SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+        SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
+        GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, MIN(JobStatus) as JobStatus
+    FROM statistic
+    WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
-        AND JobID IN (
-            SELECT MAX(JobID)
-            FROM recent_backups AS G
-            WHERE G.bkpfromhost = recent_backups.bkpfromhost
-            AND Start > DATE_SUB(NOW(), INTERVAL $lastXhours HOUR)
-            GROUP BY G.bkpfromhost, G.bkpgroup)
-        ORDER BY JobStatus, Start DESC;
+    GROUP BY JobID, BkpGroup, BkpFromHost, BkpToHost, isThread;
     ");
     $sth->execute();
 
     my %RecentBackupsAll;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
-        $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackupsAll{'Data'}}, {
-            TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
-            Starttime    => $dbrow->{'Start'},
-            Stoptime     => $dbrow->{'Stop'},
-            Runtime      => time2human($Runtime),
-            BkpFromPath  => $BkpFromPath ,
-            BkpToPath    => $dbrow->{'BkpToPath'},
-            isThread     => $dbrow->{'isThread'},
-            ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
-            BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
+            isThread     => $dbrow->{'isThread'},
             BkpHost      => $dbrow->{'BkpFromHost'},
+            BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
             BkpToHost    => $dbrow->{'BkpToHost'},
+            ErrStatus    => $dbrow->{'ErrStatus'},
+            Starttime    => $dbrow->{'Start'},
+            Runtime      => time2human($Runtime),
             FilesCreated => num2human($dbrow->{'NumOfFilesCreated'}),
             FilesDel     => num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => num2human($dbrow->{'NumOfFilesTrans'}),
             SizeTrans    => num2human($dbrow->{'TotFileSizeTrans'},1024),
-            TotFileSize  => num2human($dbrow->{'TotFileSize'},1024),
             NumOfFiles   => num2human($dbrow->{'NumOfFiles'}),
+            TotFileSize  => num2human($dbrow->{'TotFileSize'},1024),
         });
     }
     $sth->finish();

@@ -68,7 +68,7 @@ get '/error_report' => require_role config->{admin_role} => sub {
     get_serverconfig();
 
     template 'dashboard-error_report' => {
-        RecentBackupsAll => bangstat_recentbackups_all(),
+        RecentBackups24h => bangstat_recentbackups_hours(),
         xymon_server     => $serverconfig{xymon_server},
     },{ layout => 0 };
 };
