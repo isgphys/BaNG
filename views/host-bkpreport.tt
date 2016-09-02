@@ -6,7 +6,9 @@
                 <table class="default-table border">
                     <thead>
                         <tr>
-                            <th colspan="14">Group: <% RecentBackups.$hostgroup.0.BkpGroup %> -- (<% RecentBackups.$hostgroup.0.BkpToPath %>)</th>
+                            <th colspan="14">Group: <% RecentBackups.$hostgroup.0.BkpGroup %>
+                        </br>
+                            Source: <% hosts.$hostgroup.hostconfig.BKP_SOURCE_FOLDER.replace(':','')%>
                         </tr>
                         <tr>
                             <th width="50">TaskID</th>
