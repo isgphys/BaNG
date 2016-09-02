@@ -339,9 +339,7 @@ sub bangstat_task_jobs {
 
     my $sth = $bangstat_dbh->prepare("
         SELECT
-            TaskID, JobID, BkpFromHost, BkpGroup, BkpToHost,
-            IF(STRCMP(bkpFromPath,BkpFromPathRoot), BkpFromPathRoot, BkpFromPath) as BkpFromPath,
-            IF(STRCMP(bkpFromPath,BkpFromPathRoot),'2',isThread) as isThread,
+            TaskID, JobID, BkpFromHost, BkpGroup, BkpToHost, BkpFromPathRoot, isThread,
             MAX(JobStatus) as JobStatus,
             COUNT(JobID) as Jobs,
             GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
@@ -352,7 +350,7 @@ sub bangstat_task_jobs {
             SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
         FROM statistic
         WHERE TaskID = '$taskid'
-        GROUP BY JobID, TaskID, BkpFromHost, BkpGroup, BkpToHost, BkpFromPathRoot, BkpFromPath, isThread
+        GROUP BY JobID, TaskID, BkpFromHost, BkpGroup, BkpFromPathRoot, isThread
         ORDER BY JobStatus, Start;
 
     ");
@@ -361,11 +359,12 @@ sub bangstat_task_jobs {
     my %TaskJobs;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$TaskJobs{'Data'}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
+            Jobs         => $dbrow->{'Jobs'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
             Runtime      => time2human($Runtime),
