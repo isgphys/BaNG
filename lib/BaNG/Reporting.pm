@@ -351,7 +351,7 @@ sub bangstat_task_jobs {
             SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
         FROM statistic
         WHERE TaskID = '$taskid'
-        GROUP BY JobID, TaskID, BkpFromHost, BkpGroup, BkpFromPathRoot, isThread
+        GROUP BY JobID, TaskID, BkpToHost, BkpFromHost, BkpGroup, BkpFromPathRoot, isThread
         ORDER BY JobStatus, Start;
 
     ");
