@@ -191,7 +191,6 @@ sub bangstat_recentbackups_hours {
     my $sth = $bangstat_dbh->prepare("
     SELECT TaskID, JobID, BkpGroup, MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
         BkpFromHost, BkpToHost,
-        IF(STRCMP(bkpFromPath,BkpFromPathRoot),'2',isThread) as isThread,
         SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
         SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
         SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
@@ -199,7 +198,7 @@ sub bangstat_recentbackups_hours {
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
-    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, isThread;
+    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpToHost;
     ");
     $sth->execute();
 
