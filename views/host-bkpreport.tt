@@ -10,7 +10,7 @@
                         </tr>
                         <tr>
                             <th width="50">TaskID</th>
-                            <th width="50">JobID</th>
+                            <th width="50">RunAs</th>
                             <th width="50">JobStatus</th>
                             <th width="50">ErrStatus</th>
                             <th width="100">Starttime</th>
@@ -21,14 +21,13 @@
                             <th width="50">SizeTrans</th>
                             <th width="50">TotalFiles</th>
                             <th width="50">TotalSize</th>
-                            <th width="130">FromPath</th>
                         </tr>
                     </thead>
                     <tbody>
                         <%- FOREACH bkp IN RecentBackups.$hostgroup %>
                         <tr>
                             <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
-                            <td class="center" title="<% bkp.JobID %>"><% bkp.JobID.substr(12) %></td>
+                            <td class="center"><% IF bkp.Cron == 1 %>CRON<% ELSIF bkp.Cron == 0 %>CLI<% END %></td>
                             <td <%- IF bkp.JobStatus == 2  AND bkp.isThread %>class="hook3" title="forked Job done">
                                 <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
                                 <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
@@ -51,7 +50,6 @@
                             <td class="center"><% bkp.SizeTrans %></td>
                             <td class="center"><% bkp.NumOfFiles %></td>
                             <td class="center"><% bkp.TotFileSize %></td>
-                            <td class="center"><% bkp.BkpFromPath %></td>
                         </tr>
                         <%- END %>
                     </tbody>
