@@ -1,6 +1,8 @@
 Backup Report
 *************
-Group <% RecentBackups.$Group.0.BkpGroup %> -- (<% RecentBackups.${Group}.0.BkpToPath %>)
+Group <% RecentBackups.$Group.0.BkpGroup %>
+Source
+    <% Hosts.$hostgroup.hostconfig.BKP_SOURCE_FOLDER.replace(':','').replace(' ','\n')%>
 
 Starttime <% RecentBackups.${Group}.0.Starttime %>
 Stoptime <% RecentBackups.${Group}.0.Stoptime %>

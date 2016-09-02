@@ -604,6 +604,7 @@ sub mail_report {
     unless ( $status eq 'success' ) {
         my $RecentBackups = {
             RecentBackups => \%RecentBackups,
+            Hosts         => \%hosts,
             Group         => "$host-$group",
             Errormsg      => $hosts{"$host-$group"}->{errormsg},
         };
@@ -647,6 +648,8 @@ sub mail_report {
 sub xymon_report {
     my ( $taskid, $host, $group, %RecentBackups ) = @_;
 
+    get_host_config( $host );
+
     my $topcolor = 'green';
     my $errcode;
     foreach my $key ( sort keys %RecentBackups ) {
@@ -671,6 +674,7 @@ sub xymon_report {
 
     my $RecentBackups = {
         RecentBackups => \%RecentBackups,
+        Hosts         => \%hosts,
         Group         => "$host-$group",
         xymonTopColor => $topcolor,
         Errormsg      => $hosts{"$host-$group"}->{errormsg},
