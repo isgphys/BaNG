@@ -285,9 +285,9 @@ sub bangstat_recent_tasks {
 
     my $sth = $bangstat_dbh->prepare("
         SELECT
-            TaskID, TaskName, Description, Cron,
-            BkpToHost, isThread, MAX(JobStatus) as JobStatus, isThread, BkpToHost,
+            TaskID, TaskName, Description, Cron, BkpToHost, isThread,
             COUNT(JobID) as Jobs,
+            MAX(JobStatus) as JobStatus,
             GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
             MIN(Start) as Start, MAX(Stop) as Stop,
             TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
@@ -298,7 +298,7 @@ sub bangstat_recent_tasks {
         LEFT JOIN statistic_task_meta USING (TaskID)
         WHERE Start > date_sub(NOW(), INTERVAL 24 HOUR)
         GROUP BY TaskID, TaskName, Description, Cron, BkpToHost, isThread
-        ORDER BY TaskID DESC
+        ORDER BY TaskID DESC;
     ");
     $sth->execute();
 
