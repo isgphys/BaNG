@@ -26,9 +26,9 @@ Total Backup Jobs last 24H: <% RecentBackupsLast.Data.size %>
         <%- FOREACH bkp IN RecentBackupsLast.Data %>
             <tr>
                 <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
-                <td><% IF bkp.isThread == 2 %><a href="/reporting/job/<% bkp.JobID %>"><% bkp.JobID.substr(12) %></a>
+                <td><% IF bkp.Jobs >= 2 %><a href="/reporting/job/<% bkp.JobID %>"><% bkp.JobID.substr(12) %></a>
                     <% ELSE %><% bkp.JobID.substr(12) %><% END%></td>
-                <td <%- IF bkp.JobStatus == 2 AND bkp.isThread %>class="hook3" title="forked Job done">
+                <td <%- IF bkp.JobStatus == 2 AND bkp.Jobs >= 2 %>class="hook3" title="forked Job done">
                     <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
                     <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
