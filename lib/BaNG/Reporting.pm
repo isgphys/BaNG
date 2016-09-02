@@ -502,7 +502,7 @@ sub bangstat_update_backupjob {
 
     my %log_values;
     foreach my $logkey ( keys %parse_log_keys ) {
-        $log_values{$parse_log_keys{$logkey}} = 'NULL';
+        $log_values{$parse_log_keys{$logkey}} = "NULL";
     }
 
     foreach my $outline (@outlines) {
@@ -525,19 +525,19 @@ sub bangstat_update_backupjob {
         SET JobStatus         = '$jobstatus',
             ErrStatus         = '$errcode',
             Stop              = FROM_UNIXTIME('$endstamp'),
-            NumOfFiles        = '$log_values{NumOfFiles}',
-            NumOfFilesTrans   = '$log_values{NumOfFilesTrans}',
-            NumOfFilesCreated = '$log_values{NumOfFilesCreated}',
-            NumOfFilesDel     = '$log_values{NumOfFilesDel}',
-            TotFileSize       = '$log_values{TotFileSize}',
-            TotFileSizeTrans  = '$log_values{TotFileSizeTrans}',
-            LitData           = '$log_values{LitData}',
-            MatchData         = '$log_values{MatchData}',
-            FileListSize      = '$log_values{FileListSize}',
-            FileListGenTime   = '$log_values{FileListGenTime}',
-            FileListTransTime = '$log_values{FileListTransTime}',
-            TotBytesSent      = '$log_values{TotBytesSent}',
-            TotBytesRcv       = '$log_values{TotBytesRcv}'
+            NumOfFiles        = $log_values{NumOfFiles},
+            NumOfFilesTrans   = $log_values{NumOfFilesTrans},
+            NumOfFilesCreated = $log_values{NumOfFilesCreated},
+            NumOfFilesDel     = $log_values{NumOfFilesDel},
+            TotFileSize       = $log_values{TotFileSize},
+            TotFileSizeTrans  = $log_values{TotFileSizeTrans},
+            LitData           = $log_values{LitData},
+            MatchData         = $log_values{MatchData},
+            FileListSize      = $log_values{FileListSize},
+            FileListGenTime   = $log_values{FileListGenTime},
+            FileListTransTime = $log_values{FileListTransTime},
+            TotBytesSent      = $log_values{TotBytesSent},
+            TotBytesRcv       = $log_values{TotBytesRcv}
         WHERE TaskID          = '$taskid'
             AND JobID         = '$jobid'
             AND BkpFromHost   = '$host'
