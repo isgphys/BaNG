@@ -22,8 +22,7 @@ Total Backup Jobs last 24H: <% RecentBackups24h.Data.size %>
         <%- FOREACH bkp IN RecentBackups24h.Data %>
             <% NEXT IF ( bkp.JobStatus == 2 AND bkp.ErrStatus == 0 ) OR ( bkp.JobStatus == -1 AND bkp.BkpGroup == 'mac-workstation' ) OR ( bkp.JobStatus == 2 AND ( bkp.ErrStatus == 24 OR bkp.ErrStatus == "0,24" ) ) %>
             <tr height="20">
-                <td <%- IF bkp.JobStatus == 2 AND bkp.isThread %>class="hook3" title="forked Job done">
-                    <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
+                <td <% IF bkp.JobStatus == 2 %>class="hook" title="Job done">
                     <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
                     <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
                     <% ELSIF bkp.JobStatus == -2 %>class="notallow" title="Remote Shell not working">
