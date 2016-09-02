@@ -237,7 +237,8 @@ sub bangstat_recentbackups_job_details {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
+        SELECT *,
+            TIMESTAMPDIFF(Second, Start, Stop) as Runtime
         FROM statistic
         WHERE JobID = '$jobid'
         ORDER BY Start DESC;
@@ -260,6 +261,7 @@ sub bangstat_recentbackups_job_details {
             isThread     => $dbrow->{'isThread'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
+            Jobs         => 1,
             BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
             BkpHost      => $dbrow->{'BkpFromHost'},
             BkpToHost    => $dbrow->{'BkpToHost'},
