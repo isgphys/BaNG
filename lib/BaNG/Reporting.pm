@@ -199,7 +199,7 @@ sub bangstat_recentbackups_hours {
     FROM statistic
     WHERE Start > date_sub(NOW(), INTERVAL $lastXhours HOUR)
         AND BkpFromHost like '%'
-    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, isThread;
+    GROUP BY JobID, TaskID, BkpGroup, BkpFromHost, BkpToHost, isThread;
     ");
     $sth->execute();
 
