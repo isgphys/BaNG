@@ -67,11 +67,22 @@ sub bangstat_recentbackups {
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
-        FROM recent_backups
+        SELECT
+            TaskID, BkpGroup, TaskName, Description, Cron, BkpToHost, isThread,
+            COUNT(JobID) as Jobs,
+            MAX(JobStatus) as JobStatus,
+            GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+            SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+            SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+            SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
+        FROM statistic
+        LEFT JOIN statistic_task_meta USING (TaskID)
         WHERE Start > date_sub(concat(curdate(),' $BkpStartHour:00:00'), interval $lastXdays day)
-        AND BkpFromHost like '$host'
-        ORDER BY BkpGroup, Start DESC;
+            AND BkpFromHost like '$host'
+        GROUP BY TaskID, BkpGroup, TaskName, Description, Cron, BkpToHost, isThread
+        ORDER BY Start DESC;
     ");
     $sth->execute();
 
@@ -80,19 +91,17 @@ sub bangstat_recentbackups {
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $BkpGroup    = $dbrow->{'BkpGroup'} || 'NA';
         my $Runtime     = $dbrow->{'Runtime'} ? $dbrow->{'Runtime'} / 60 : '-';
-        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
-        $BkpFromPath    =~ s/^:$/:\//g;
         push( @{$RecentBackups{"$host-$BkpGroup"}}, {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             Starttime    => $dbrow->{'Start'},
             Stoptime     => $dbrow->{'Stop'},
             Runtime      => time2human($Runtime),
-            BkpFromPath  => $BkpFromPath,
-            BkpToPath    => $dbrow->{'BkpToPath'} ,
             isThread     => $dbrow->{'isThread'},
             ErrStatus    => $dbrow->{'ErrStatus'},
             JobStatus    => $dbrow->{'JobStatus'},
+            Jobs         => $dbrow->{'Jobs'},
+            Cron         => $dbrow->{'Cron'},
             BkpGroup     => $BkpGroup,
             BkpHost      => $dbrow->{'BkpFromHost'},
             FilesCreated => num2human($dbrow->{'NumOfFilesCreated'}),
@@ -102,12 +111,10 @@ sub bangstat_recentbackups {
             TotFileSize  => num2human($dbrow->{'TotFileSize'},1024),
             NumOfFiles   => num2human($dbrow->{'NumOfFiles'}),
         });
-        push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpFromPathRoot'}"}}, {
+        push( @{$RecentBackupTimes{"$host-$dbrow->{'BkpGroup'}"}}, {
             TaskID      => $dbrow->{'TaskID'},
             JobID       => $dbrow->{'JobID'},
             Starttime   => $dbrow->{'Start'},
-            BkpFromPath => $dbrow->{'BkpFromPathRoot'},
-            BkpToPath   => $dbrow->{'BkpToPath'},
             Host        => $host,
             BkpGroup    => $BkpGroup,
         });
@@ -122,13 +129,11 @@ sub bangstat_recentbackups {
     $next_bkp += $one_day if ( $next_bkp < $now );
 
     # scan for missing backups
-    foreach my $hostpath ( keys %RecentBackupTimes ) {
+    foreach my $bkpgroup ( keys %RecentBackupTimes ) {
         my $nextBkpStart = $next_bkp;
         my $prevBkpStart = $nextBkpStart - $one_day;
 
-        my @bkp                = @{$RecentBackupTimes{$hostpath}};
-        my $missingBkpFromPath = $bkp[0]->{BkpFromPathRoot} || 'NA';
-        my $missingBkpToPath   = $bkp[0]->{BkpToPath}   || 'NA';
+        my @bkp                = @{$RecentBackupTimes{$bkpgroup}};
         my $missingBkpGroup    = $bkp[0]->{BkpGroup}    || 'NA';
         my $missingHost        = $bkp[0]->{Host}        || 'NA';
 
@@ -157,8 +162,6 @@ sub bangstat_recentbackups {
                     Starttime   => $missingday,
                     Stoptime    => '',
                     Runtime     => '',
-                    BkpFromPath => $missingBkpFromPath,
-                    BkpToPath   => $missingBkpToPath,
                     JobStatus   => '',
                     isThread    => '',
                     ErrStatus   => 99,
