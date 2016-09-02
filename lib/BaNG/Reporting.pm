@@ -189,9 +189,9 @@ sub bangstat_recentbackups_hours {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-    SELECT TaskID, JobID, BkpGroup, MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
-        BkpFromHost, BkpToHost,
-        IF(STRCMP(bkpFromPath,BkpFromPathRoot),'2',isThread) as isThread,
+    SELECT TaskID, JobID, BkpGroup, BkpFromHost, BkpToHost, isThread,
+        MIN(Start) as Start, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+        COUNT(JobID) as Jobs,
         SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
         SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
         SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
@@ -210,6 +210,7 @@ sub bangstat_recentbackups_hours {
             TaskID       => $dbrow->{'TaskID'},
             JobID        => $dbrow->{'JobID'},
             JobStatus    => $dbrow->{'JobStatus'},
+            Jobs         => $dbrow->{'Jobs'},
             isThread     => $dbrow->{'isThread'},
             BkpHost      => $dbrow->{'BkpFromHost'},
             BkpGroup     => $dbrow->{'BkpGroup'} || 'NA',
