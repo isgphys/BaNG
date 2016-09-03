@@ -648,8 +648,6 @@ sub mail_report {
 sub xymon_report {
     my ( $taskid, $host, $group, %RecentBackups ) = @_;
 
-    get_host_config( $host );
-
     my $topcolor = 'green';
     my $errcode;
     foreach my $key ( sort keys %RecentBackups ) {
