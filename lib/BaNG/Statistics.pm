@@ -436,11 +436,21 @@ sub statistics_schedule {
     return () unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
-        FROM statistic_all
+        SELECT
+            TaskID, BkpFromHost, BkpGroup, BkpToHost, TaskName, Description, Cron,
+            MAX(JobStatus) as JobStatus,
+            COUNT(JobID) as Jobs,
+            GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+            SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+            SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+            SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
+        FROM statistic
+        LEFT JOIN statistic_task_meta USING (TaskID)
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
-        AND isThread is Null
         AND BkpToHost LIKE '$servername'
+        GROUP BY TaskID, BkpToHost, BkpFromHost, BkpGroup, TaskName, Description, Cron
         ORDER BY Start;
     ");
     $sth->execute();
@@ -448,13 +458,12 @@ sub statistics_schedule {
     my %datahash;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
-        ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
-        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
-        $BkpFromPath =~ s/://g;    # remove colon separators
+        ( my $time_stop  = $dbrow->{'Stop'} || $dbrow->{'Start'} )  =~ s/\-/\//g;
+        my $BkpGroup = $dbrow->{'BkpGroup'};
 
         # flag system backups
         my $systemBkp = 0;
-        $systemBkp    = 1 if ( $BkpFromPath !~ m%/(export|var/imap)% );
+        $systemBkp    = 1 if ( $BkpGroup =~ m%/(system)% );
 
         # hash constructed by host or time
         my $sortKey = $dbrow->{'BkpFromHost'};
@@ -463,7 +472,9 @@ sub statistics_schedule {
         push( @{$datahash{$sortKey}}, {
             time_start       => $time_start,
             time_stop        => $time_stop,
-            BkpFromPath      => $BkpFromPath,
+            BkpGroup         => $dbrow->{'BkpGroup'} || 'NoBkpGroup',
+            TaskName         => $dbrow->{'TaskName'},
+            Description      => $dbrow->{'Description'},
             BkpToPath        => $dbrow->{'BkpToPath'},
             BkpFromHost      => $dbrow->{'BkpFromHost'},
             BkpToHost        => $dbrow->{'BkpToHost'},
@@ -474,7 +485,6 @@ sub statistics_schedule {
             NumOfFilesDel    => num2human($dbrow->{'NumOfFilesDel'}),
             AvgFileSize      => $dbrow->{'NumOfFiles'} ? num2human($dbrow->{'TotFileSize'}/$dbrow->{'NumOfFiles'},1024) : 0,
             SystemBkp        => $systemBkp,
-            BkpGroup         => $dbrow->{'BkpGroup'} || 'NoBkpGroup',
         });
     }
     $sth->finish();

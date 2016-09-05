@@ -116,7 +116,8 @@ function parseLaneData(backups) {
                         NumOfFilesTrans  : bkp.NumOfFilesTrans,
                         NumOfFilesDel    : bkp.NumOfFilesDel,
                         AvgFileSize      : bkp.AvgFileSize,
-                        BkpFromPath      : bkp.BkpFromPath,
+                        TaskName         : bkp.TaskName,
+                        Description      : bkp.Description,
                         BkpFromHost      : bkp.BkpFromHost,
                         BkpToPath        : bkp.BkpToPath,
                         BkpToHost        : bkp.BkpToHost,
@@ -487,12 +488,16 @@ function DrawSwimlanes() {
             .html( ""
                 + "<table>"
                 + "  <tr>"
+                + "    <th>Taskname:</th>"
+                + "    <td>" + d.info.TaskName + "</td>"
+                + "  </tr>"
+                + "  <tr>"
                 + "    <th>Group:</th>"
                 + "    <td>" + d.info.BkpGroup + "</td>"
                 + "  </tr>"
                 + "  <tr>"
-                + "    <th>Path:</th>"
-                + "    <td>" + d.info.BkpFromPath + "</td>"
+                + "    <th>Description:</th>"
+                + "    <td>" + d.info.Description + "</td>"
                 + "  </tr>"
                 + "  <tr>"
                 + "    <th>Size:</th>"
