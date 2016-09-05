@@ -95,11 +95,21 @@ sub statistics_cumulated_json {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
-        FROM statistic_all
+        SELECT
+            TaskID, BkpFromHost, BkpGroup, BkpToHost,
+            MAX(JobStatus) as JobStatus,
+            COUNT(JobID) as Jobs,
+            GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+            SUM(TIMESTAMPDIFF(Second, Start, Stop)) as RealRunTime,
+            SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+            SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+            SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
+        FROM statistic
         WHERE Start > date_sub(now(), interval $lastXdays day)
         AND BkpToHost LIKE '$BkpServer'
-        AND isThread is NULL
+        GROUP BY TaskID, BkpToHost, BkpFromHost, BkpGroup
         ORDER BY Start;
     ");
     $sth->execute();
@@ -113,10 +123,8 @@ sub statistics_cumulated_json {
 
         # reformat timestamp as "YYYY/MM/DD HH:MM:SS" for cross-browser compatibility
         ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
-        ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
-        my $hostname    = $dbrow->{'BkpFromHost'};
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g;    # remove colon separators
+        ( my $time_stop  = $dbrow->{'Stop'} || $dbrow->{'Start'} )  =~ s/\-/\//g;
+
 
         # backups started in the evening belong to next day
         # use epoch as hash key for fast date incrementation
@@ -157,12 +165,12 @@ sub statistics_cumulated_json {
 
         # store cumulated statistics for each day
         $CumulateByDate{$epoch}{time_coord}        = $epoch;
-        $CumulateByDate{$epoch}{TotRuntime}       += $dbrow->{'RealRunTime'} / 60.;
-        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'};
-        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'};
-        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'};
-        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'};
-        $CumulateByDate{$epoch}{NumOfFilesDel}    += $dbrow->{'NumOfFilesDel'};
+        $CumulateByDate{$epoch}{TotRuntime}       += ( $dbrow->{'RealRunTime'} || 0) / 60.;
+        $CumulateByDate{$epoch}{TotFileSize}      += $dbrow->{'TotFileSize'} || 0;
+        $CumulateByDate{$epoch}{TotFileSizeTrans} += $dbrow->{'TotFileSizeTrans'} || 0;
+        $CumulateByDate{$epoch}{NumOfFiles}       += $dbrow->{'NumOfFiles'} || 0;
+        $CumulateByDate{$epoch}{NumOfFilesTrans}  += $dbrow->{'NumOfFilesTrans'} || 0;
+        $CumulateByDate{$epoch}{NumOfFilesDel}    += $dbrow->{'NumOfFilesDel'} || 0;
     }
     $sth->finish();
 
