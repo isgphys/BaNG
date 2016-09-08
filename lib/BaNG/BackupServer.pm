@@ -148,11 +148,12 @@ sub check_client_rshell_connection {
         $msg   = 'Could not test RemoteShell because Host is behind a Gateway-Host';
     } else {
         $result = `$rshell $host uname -a`;
-        print "rshell output: $result\n" if $serverconfig{verbose};
 
         if ( $result =~ /^(Linux|Darwin)/) {
             $state = 1;
             $msg   = "$rshell ok";
+        }else{
+            $msg  .= " - $result";
         }
     }
 
