@@ -30,7 +30,7 @@ my $BackupStartHour      = 18;  # backups started after X o'clock belong to next
 sub statistics_decode_path {
     my ($path) = @_;
 
-    $path =~ s|_|/|g;                           # decode underscores to slashes
+    $path =~ s|\+|/|g;                          # decode underscores to slashes
     $path = '/' . $path unless $path =~ m|^/|;  # should always start with slash
 
     return $path;
@@ -45,11 +45,22 @@ sub statistics_json {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT *
-        FROM statistic_all
+        SELECT
+            TaskID, BkpFromHost, BkpGroup, BkpToHost,
+            MAX(JobStatus) as JobStatus,
+            COUNT(JobID) as Jobs,
+            GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus,
+            MIN(Start) as Start, MAX(Stop) as Stop,
+            TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
+            SUM(TIMESTAMPDIFF(Second, Start, Stop)) as RealRunTime,
+            SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
+            SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
+            SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans
+        FROM statistic
         WHERE Start > date_sub(now(), interval $lastXdays day)
-        AND BkpFromHost = '$host'
-        AND BkpFromPath LIKE '\%$share'
+            AND BkpFromHost = '$host'
+            AND BkpFromPathRoot LIKE '\%$share'
+        GROUP BY TaskID, BkpToHost, BkpFromHost, BkpGroup
         ORDER BY Start;
     ");
     $sth->execute();
@@ -60,16 +71,11 @@ sub statistics_json {
 
         # reformat timestamp as 'YYYY/MM/DD HH:MM:SS' for cross-browser compatibility
         ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
-        ( my $time_stop  = $dbrow->{'Stop'} )  =~ s/\-/\//g;
-        my $hostname    = $dbrow->{'BkpFromHost'};
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
-        $BkpFromPath =~ s/://g;    # remove colon separators
 
-        push( @{$BackupsByPath{$BkpFromPath}}, {
+        push( @{$BackupsByPath{$share}}, {
             time_coord       => str2time($time_start),
             RealRuntime      => sprintf( "%.2f", $dbrow->{'Runtime'} / 60. ),
             TotRuntime       => $dbrow->{'RealRunTime'}/60.,
-            BkpFromPath      => $BkpFromPath,
             BkpToPath        => $dbrow->{'BkpToPath'},
             BkpFromHost      => $dbrow->{'BkpFromHost'},
             BkpToHost        => $dbrow->{'BkpToHost'},
@@ -208,7 +214,7 @@ sub statistics_hosts_shares {
 
     my $sth = $bangstat_dbh->prepare("
         SELECT
-        DISTINCT BkpFromHost, BkpFromPath
+        DISTINCT BkpFromHost, BkpFromPathRoot
         FROM statistic
         WHERE Start > date_sub(now(), interval $lastXdays_default day)
         AND BkpToHost LIKE '$BkpServer'
@@ -219,7 +225,7 @@ sub statistics_hosts_shares {
     my %hosts_shares;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         my $hostname    = $dbrow->{'BkpFromHost'};
-        my $BkpFromPath = $dbrow->{'BkpFromPath'};
+        my $BkpFromPath = $dbrow->{'BkpFromPathRoot'};
         $BkpFromPath =~ s/\s//g;    # remove whitespace
         my ( $empty, @shares ) = split( /:/, $BkpFromPath );
 

@@ -60,7 +60,7 @@
                         <option value="">&lt;share&gt;</option>
                       <%- FOREACH hostavail IN hosts_shares.$sharetype.keys.sort %>
                        <%- FOR shareavail = hosts_shares.$sharetype.$hostavail %>
-                        <option value="/statistics/<%hostavail%>/<%shareavail.replace('/','_')%>" class="<%hostavail%>"><%shareavail%></option>
+                        <option value="/statistics/<%hostavail%>/<%shareavail.replace('/','+')%>" class="<%hostavail%>"><%shareavail%></option>
                        <%- END %>
                       <%- END %>
                     </select>
