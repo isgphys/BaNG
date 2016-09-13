@@ -94,50 +94,6 @@ CREATE INDEX BkpToHost ON statistic (BkpToHost);
 CREATE INDEX Start ON statistic (Start);
 ```
 
-### Create views
-
-```sql
-CREATE OR REPLACE VIEW recent_backups AS
-SELECT
-    TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), MAX(Stop)) as Runtime,
-    BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, isThread, BkpGroup,
-    SUM(NumOfFiles) as NumOfFiles, SUM(TotFileSize) as TotFileSize,
-    SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
-    SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSizeTrans) as TotFileSizeTrans,
-    GROUP_CONCAT(DISTINCT ErrStatus order by ErrStatus) as ErrStatus, MIN(JobStatus) as JobStatus
-FROM statistic
-    WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-GROUP BY JobID, TaskID, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, isThread, BkpGroup;
-
-CREATE OR REPLACE VIEW statistic_job_sum AS
-SELECT
-    TaskID, JobID, MIN(Start) as Start, MAX(Stop) as Stop, TIMESTAMPDIFF(Second, MIN(Start), Max(Stop)) as Runtime,
-    SUM(TIMESTAMPDIFF(Second, Start, Stop)) as RealRunTime, BkpFromHost,
-    IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath,
-    isThread = Null as isThread, JobStatus, BkpGroup,
-    SUM(NumOfFilesCreated) as NumOfFilesCreated, SUM(NumOfFilesDel) as NumOfFilesDel,
-    SUM(NumOfFiles) as NumOfFiles, SUM(NumOfFilesTrans) as NumOfFilesTrans, SUM(TotFileSize) as TotFileSize,
-    SUM(TotFileSizeTrans) as TotFileSizeTrans
-FROM statistic
-    WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-GROUP BY JobID, TaskID, BkpFromHost, BkpFromPath, BkpFromPathRoot, BkpToHost, BkpToPath, isThread, JobStatus, BkpGroup;
-
-CREATE OR REPLACE VIEW statistic_job_thread AS
-SELECT
-    TaskID, JobID, Start, Stop, TIMESTAMPDIFF(Second, Start, Stop) as Runtime,
-    TIMESTAMPDIFF(Second, Start, Stop) as RealRunTime, BkpFromHost, BkpFromPath, BkpFromPathRoot,
-    BkpToHost, BkpToPath, isThread, JobStatus, BkpGroup,
-    NumOfFilesCreated, NumOfFilesDel, NumOfFiles, NumOfFilesTrans, TotFileSize, TotFileSizeTrans
-FROM statistic
-    WHERE Start > date_sub(NOW(), INTERVAL 100 DAY)
-AND isThread = 1;
-
-CREATE OR REPLACE VIEW statistic_all AS
-SELECT * FROM statistic_job_sum
-UNION
-SELECT * FROM statistic_job_thread;
-```
-
 Misc commands
 -------------
 
