@@ -255,18 +255,18 @@ sub statistics_work_duration {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT  TaskID, BkpFromHost, BkpGroup,
-            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+        SELECT  TaskID, BkpFromHost, BkpGroup, BkpFromPathRoot,
             TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
         FROM statistic
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
-        GROUP BY TaskID
+        GROUP BY TaskID, BkpFromHost, BkpGroup, BkpFromPathRoot
         ORDER BY Runtime DESC;
     ");
     $sth->execute();
 
     my @top_time;
     while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
+        next unless $runtime;
         next if $runtime < 2;
         $bkppath =~ s/\://g;
         $bkppath =~ s/\//_/g;
