@@ -290,7 +290,7 @@ sub statistics_work_duration_details {
 
     $sth = $bangstat_dbh->prepare("
         SELECT bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot,
-            TIMESTAMPDIFF(Second, Start , Stop) as Runtime
+            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
         FROM statistic
         WHERE TaskID = '$taskid'
         GROUP BY bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot
