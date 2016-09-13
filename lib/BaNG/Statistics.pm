@@ -30,7 +30,8 @@ my $BackupStartHour      = 18;  # backups started after X o'clock belong to next
 sub statistics_decode_path {
     my ($path) = @_;
 
-    $path =~ s|\+|/|g;                          # decode underscores to slashes
+    $path =~ s|\+|/|g;                          # decode plus to slashes
+    $path =~ s|\_|/|g;                          # decode underscores to slashes
     $path = '/' . $path unless $path =~ m|^/|;  # should always start with slash
 
     return $path;
@@ -283,32 +284,43 @@ sub statistics_work_duration {
 
 sub statistics_work_duration_details {
     my ($taskid) = @_;
-    my ( @top_size, $sth, $sqltranstype, $sqlbkpgroup );
+    my ( @top_size, $sth, $sqltranstype, $sqlbkpgroup, $bkpurl, $labeltext );
 
     get_serverconfig();
     my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
     return '' unless $conn;
 
     $sth = $bangstat_dbh->prepare("
-        SELECT bkpfromhost, bkpgroup,
-            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+        SELECT bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot,
             TIMESTAMPDIFF(Second, Start , Stop) as Runtime
         FROM statistic
         WHERE TaskID = '$taskid'
-        GROUP BY JobID
+        GROUP BY bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot
         ORDER BY Runtime DESC
     ");
     $sth->execute();
 
-    while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $bkppathroot, $runtime ) = $sth->fetchrow_array() ) {
         $sqlbkpgroup = $bkpgroup;
-        $bkppath =~ s/\://g;
-        $bkppath =~ s/\//_/g;
+        $bkpurl      = ( $bkppath eq $bkppathroot ) ? $bkppath : $bkppathroot;
+        my $c = $bkpurl =~ tr/://;
+
+        $labeltext   = $bkphost ." - ". $bkppath;
+        $labeltext   =~ s/\://g;
+        $bkpurl      =~ s/\://g;
+        $bkpurl      =~ s/\//_/g;
+
+        if ( $c > 1 ) {
+            $bkpurl = "#";
+        } else {
+            $bkpurl = "/statistics/$bkphost/$bkpurl";
+        }
+
         push( @top_size, {
-            name  => $bkphost,
+            name  => $labeltext,
             value => max( $runtime, 59 ),               # display all values smaller than 1 minute as 59 seconds
             label => time2human( $runtime / 60 ),
-            url   => "/statistics/$bkphost/$bkppath",
+            url   => $bkpurl,
         });
     }
 
@@ -324,10 +336,10 @@ sub statistics_work_duration_details {
         $sth->execute();
 
         while ( my ( $bkphost, $bkpgroup, $bkppath, $runtime ) = $sth->fetchrow_array() ) {
-            $bkppath =~ s/\://g;
-            $bkppath =~ s/^.*\/(.*)$/$1/;
+            $labeltext   = $bkphost ." - ". $bkppath;
+            $labeltext   =~ s/\://g;
             push( @top_size, {
-                name  => $bkppath,
+                name  => $labeltext,
                 value => max( $runtime, 59 ),           # display all values smaller than 1 minute as 59 seconds
                 label => time2human( $runtime / 60 ),
                 url   => '#',
@@ -341,7 +353,7 @@ sub statistics_work_duration_details {
 
 sub statistics_top_trans {
     my ($transtype) = @_;
-    my $sqltranstype;
+    my ( $sqltranstype, $labeltext );
     if ( $transtype eq 'files' ) {
         $sqltranstype = 'NumOfFilesTrans';
     } elsif ( $transtype eq 'size' ) {
@@ -366,9 +378,10 @@ sub statistics_top_trans {
     while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
         next if $size < 2;
         $bkppath =~ s/\://g;
+        $labeltext = $bkpgroup;
         $bkppath =~ s/\//_/g;
         push( @top_size, {
-            name  => $bkpgroup,
+            name  => $labeltext,
             value => $size,
             label => num2human( $size, 1024 ),
             url   => "/statistics/barchart/toptrans$transtype/$taskid",
@@ -381,7 +394,7 @@ sub statistics_top_trans {
 
 sub statistics_top_trans_details {
     my ( $transtype, $taskid ) = @_;
-    my ( @top_size, $sth, $sqltranstype, $sqlbkpgroup );
+    my ( @top_size, $sth, $sqltranstype, $sqlbkpgroup, $bkpurl, $labeltext );
 
     if ( $transtype eq 'files' ) {
         $sqltranstype = 'NumOfFilesTrans';
@@ -393,25 +406,36 @@ sub statistics_top_trans_details {
     return '' unless $conn;
 
     $sth = $bangstat_dbh->prepare("
-        SELECT bkpfromhost, bkpgroup,
-            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+        SELECT bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot,
             SUM($sqltranstype) AS $sqltranstype
         FROM statistic
         WHERE TaskID = '$taskid'
-        GROUP BY JobID
+        GROUP BY JobID, bkpfromhost, bkpgroup,BkpFromPath, BkpFromPathRoot
         ORDER BY $sqltranstype DESC;
     ");
     $sth->execute();
 
-    while ( my ( $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $bkppathroot, $size ) = $sth->fetchrow_array() ) {
         $sqlbkpgroup = $bkpgroup;
-        $bkppath =~ s/\://g;
-        $bkppath =~ s/\//_/g;
+        $bkpurl      = ( $bkppath eq $bkppathroot ) ? $bkppath : $bkppathroot;
+        my $c = $bkpurl =~ tr/://;
+
+        $labeltext   = $bkphost ." - ". $bkppath;
+        $labeltext   =~ s/\://g;
+        $bkpurl      =~ s/\://g;
+        $bkpurl      =~ s/\//_/g;
+
+        if ( $c > 1 ) {
+            $bkpurl = "#";
+        } else {
+            $bkpurl = "/statistics/$bkphost/$bkpurl";
+        }
+
         push( @top_size, {
-            name  => $bkphost,
+            name  => $labeltext,
             value => max( $size, 10 ),
             label => num2human( $size, 1024 ),
-            url   => "/statistics/$bkphost/$bkppath",
+            url   => $bkpurl,
         });
     }
 
@@ -427,9 +451,10 @@ sub statistics_top_trans_details {
 
         while ( my ( $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
             $bkppath =~ s/\://g;
+            $labeltext = $bkphost ." - ". $bkppath;
             $bkppath =~ s/^.*\/(.*)$/$1/;
             push( @top_size, {
-                name  => $bkppath,
+                name  => $labeltext,
                 value => max( $size, 10 ),
                 label => num2human( $size, 1024 ),
                 url   => '#',
