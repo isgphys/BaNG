@@ -1,7 +1,7 @@
 function drawBarchart(data) {
-    var w = $( window ).width() - 300;
+    var w = $( window ).width() - 500;
     var h = 30 * data.length;
-    var yaxis_offset = 200;
+    var yaxis_offset = 350;
     var MaxValue = d3.max(data, function(d){ return parseFloat(d.value); });
 
     var x = d3.scale.log()
