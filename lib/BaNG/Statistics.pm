@@ -362,24 +362,21 @@ sub statistics_top_trans {
     return '' unless $conn;
 
     my $sth = $bangstat_dbh->prepare("
-        SELECT  TaskID, BkpFromHost, BkpGroup,
-            IF(isThread, BkpFromPathRoot, BkpFromPath) as BkpFromPath,
+        SELECT  TaskID, BkpGroup,
             SUM($sqltranstype) as $sqltranstype
         FROM statistic
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
-        GROUP BY TaskID
+        GROUP BY TaskID, BkpGroup
         ORDER BY $sqltranstype DESC;
     ");
     $sth->execute();
 
     my @top_size;
-    while ( my ( $taskid, $bkphost, $bkpgroup, $bkppath, $size ) = $sth->fetchrow_array() ) {
+    while ( my ( $taskid, $bkpgroup, $size ) = $sth->fetchrow_array() ) {
+        next unless $size;
         next if $size < 2;
-        $bkppath =~ s/\://g;
-        $labeltext = $bkpgroup;
-        $bkppath =~ s/\//_/g;
         push( @top_size, {
-            name  => $labeltext,
+            name  => $bkpgroup,
             value => $size,
             label => num2human( $size, 1024 ),
             url   => "/statistics/barchart/toptrans$transtype/$taskid",
