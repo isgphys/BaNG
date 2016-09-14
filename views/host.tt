@@ -8,6 +8,7 @@
                 <th colspan="2" align="center">Enabled</th>
                 <th colspan="2" class="center">Bulk allow</th>
                 <th rowspan="2" class="center" style="vertical-align: bottom;">SubFolder</th>
+                <th rowspan="2" class="center" style="vertical-align: bottom;">R-Shell</th>
                 <th rowspan="2" class="center" style="vertical-align: bottom;">Forks</th>
                 <th rowspan="2" class="center" style="vertical-align: bottom;">Mode</th>
                 <th colspan="3" class="center">Backup Count</th>
@@ -53,6 +54,7 @@
                 <td data-toggleoption="BKP_THREAD_SUBFOLDERS" data-togglegroup='<% hosts.$hostname.group %>' data-configtype="host"
                     <%- IF hosts.$hostname.hostconfig.BKP_THREAD_SUBFOLDERS %> class="center pointer hook"<%- ELSE %> class="center pointer notallow"<%- END %>>
                 </td>
+                <td class="center"><%- hosts.$hostname.hostconfig.BKP_RSYNC_RSHELL %></td>
                 <td class="center"><%- hosts.$hostname.hostconfig.BKP_THREADS_DEFAULT %></td>
                 <td class="center"><%- hosts.$hostname.hostconfig.BKP_STORE_MODUS %></td>
                 <td class="center"><a href="/restore">
