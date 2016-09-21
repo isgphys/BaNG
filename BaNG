@@ -489,7 +489,7 @@ sub eval_rsync_options {
         if ( $hostconfig->{BKP_GWHOST} ) {
             $rsync_options .= "-e '$hostconfig->{BKP_RSYNC_RSHELL} $hostconfig->{BKP_GWHOST}' 'rsh $host'";
         } else {
-            $rsync_options .= "-e $hostconfig->{BKP_RSYNC_RSHELL} $host";
+            $rsync_options .= "-e '$hostconfig->{BKP_RSYNC_RSHELL}' $host";
         }
     }
 
