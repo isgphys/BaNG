@@ -43,3 +43,19 @@ BaNGadm --cron-create       # write cron file for current server to /etc/cron.d/
     DOM          day of month  1-31
     MONTH        month         1-12 (or names, see below)
     DOW          day of week   0-7 (0 or 7 is Sun, or use names)
+
+
+Setting up SSH keys
+-------------------
+
+If you want to do the backups using ssh, you need to first generate passwordless keys,
+
+```sh
+ssh-keygen -t rsa -b 4096 -f BaNG_rsa
+```
+
+append the public `BaNG_rsa.pub` to the `authorized_keys` on the client, and include the following in the BaNG host config:
+
+```yaml
+BKP_RSYNC_RSHELL:    '/usr/bin/ssh -i /root/.ssh/BaNG_rsa'
+```
