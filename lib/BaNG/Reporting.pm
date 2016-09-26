@@ -649,10 +649,13 @@ sub xymon_report {
     my ( $taskid, $host, $group, %RecentBackups ) = @_;
 
     my $topcolor = 'green';
+    my $tc_helper = 0;
     my $errcode;
     foreach my $key ( sort keys %RecentBackups ) {
         if ( $RecentBackups{$key}[0]{JobStatus} eq "-1" ) {
             $topcolor = 'clear';
+        } elsif ( $RecentBackups{$key}[0]{JobStatus} eq "-2" ) {
+            $tc_helper = 1;
         }else{
             $errcode = $RecentBackups{$key}[0]{ErrStatus};
             my @errorcodes = split( ',', $errcode );
@@ -669,6 +672,7 @@ sub xymon_report {
         }
     }
     $topcolor = 'yellow' unless %RecentBackups;
+    $topcolor = 'red' if $tc_helper;
 
     my $RecentBackups = {
         RecentBackups => \%RecentBackups,

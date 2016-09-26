@@ -27,6 +27,12 @@
                             <% IF bkp.JobStatus == -1 %>
                             <% xymoncolor = 'clear' %>
                             <% titlemsg = 'Host offline' %>
+                            <% ELSIF bkp.JobStatus == -2 %>
+                            <% xymoncolor = 'red' %>
+                            <% titlemsg = 'Remote Shell not working!' %>
+                            <% ELSIF bkp.JobStatus == 0 || bkp.JobStatus == 1 %>
+                            <% xymoncolor = 'green' %>
+                            <% titlemsg = 'Backup currently running...' %>
                             <% ELSIF bkp.ErrStatus == 0 %>
                             <% xymoncolor = 'green' %>
                             <% ELSIF ( bkp.ErrStatus.match('23') || bkp.ErrStatus.match('24') || bkp.ErrStatus.match('12') ) %>
