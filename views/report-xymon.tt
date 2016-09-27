@@ -30,6 +30,9 @@
                             <% ELSIF bkp.JobStatus == -2 %>
                             <% xymoncolor = 'red' %>
                             <% titlemsg = 'Remote Shell not working!' %>
+                            <% ELSIF bkp.JobStatus == -5 %>
+                            <% xymoncolor = 'red' %>
+                            <% titlemsg = 'Rsync command not found!' %>
                             <% ELSIF bkp.JobStatus == 0 || bkp.JobStatus == 1 %>
                             <% xymoncolor = 'green' %>
                             <% titlemsg = 'Backup currently running...' %>
