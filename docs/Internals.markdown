@@ -10,8 +10,9 @@ These are BaNG internally used code numbers.
 
 | Code  | Name      | Note      |
 | :---: | :---      | :---      |
-| -2    | *Remote Shell not working* | evaluated by check_client_rshell_connection() |
 | -1    | *Host offline* | evaluated by check_client_connection() |
+| -2    | *Remote Shell not working* | evaluated by check_client_rshell_connection() |
+| -5    | *Rsync command not found* |  |
 
 ### Post Queuing
 
