@@ -216,6 +216,16 @@ sub queue_backup {
         return 1;
     }
 
+    if ( !-e $serverconfig{path_rsync} ) {
+        $startstamp = time();
+        $endstamp   = $startstamp;
+        $jobid = create_timeid( $host, $group );
+        logit( $taskid, $host, $group, "RSYNC command $serverconfig{path_rsync} not found!" );
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER},
+                                  $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), '0', '-5', '' ) unless $noreport;
+        return 1;
+    }
+
     my $bkptimestamp = eval_bkptimestamp( $host, $group );
 
     # get list of source folders to back up
