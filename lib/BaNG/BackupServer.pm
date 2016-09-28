@@ -384,25 +384,21 @@ sub get_lockfiles {
         my @lockfiles = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getLockFile", "$prefix/$servers{$server}{serverconfig}{path_lockfiles}/" );
 
         foreach my $lockfile (@lockfiles) {
-            my $ids;
-            my $taskid;
-            my $shpid;
-            my $cron;
             my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
-            if ( -e "$serverconfig{path_lockfiles}/$file") {
-                $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
-                $taskid = $ids->{taskid} || '';
-                $shpid  = $ids->{shpid} || '';
-                $cron   = $ids->{cron} || '';
-            }
+            my ($lockfile_data) = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_readLockFile", "$prefix/$servers{$server}{serverconfig}{path_lockfiles}/$lockfile" );
+
+            print "$lockfile_data\n";
+
+            chomp $lockfile_data;
+            my ($taskid, $shpid, $cron) = split('-', $lockfile_data);
 
             $lockfiles{$server}{"$host-$group-$path"} = {
                 taskid    => $taskid,
                 host      => $host,
                 group     => $group,
                 path      => $path,
-                shpid     => $shpid,
-                cron      => $cron,
+                shpid     => $shpid || '',
+                cron      => $cron || '',
                 timestamp => $timestamp,
             };
         }
