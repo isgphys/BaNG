@@ -381,26 +381,30 @@ sub get_lockfiles {
     my %lockfiles;
 
     foreach my $server ( keys %servers ) {
-        my @lockfiles = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getLockFile", "$prefix/$servers{$server}{serverconfig}{path_lockfiles}" );
+        my @lockfiles = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getLockFile", "$prefix/$servers{$server}{serverconfig}{path_lockfiles}/" );
 
         foreach my $lockfile (@lockfiles) {
+            my $ids;
+            my $taskid;
+            my $shpid;
+            my $cron;
             my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
             if ( -e "$serverconfig{path_lockfiles}/$file") {
-                my $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
-                my $taskid = $ids->{taskid} || '';
-                my $shpid  = $ids->{shpid} || '';
-                my $cron   = $ids->{cron} || '';
-
-                $lockfiles{$server}{"$host-$group-$path"} = {
-                    taskid    => $taskid,
-                    host      => $host,
-                    group     => $group,
-                    path      => $path,
-                    shpid     => $shpid,
-                    cron      => $cron,
-                    timestamp => $timestamp,
-                };
+                $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
+                $taskid = $ids->{taskid} || '';
+                $shpid  = $ids->{shpid} || '';
+                $cron   = $ids->{cron} || '';
             }
+
+            $lockfiles{$server}{"$host-$group-$path"} = {
+                taskid    => $taskid,
+                host      => $host,
+                group     => $group,
+                path      => $path,
+                shpid     => $shpid,
+                cron      => $cron,
+                timestamp => $timestamp,
+            };
         }
     }
 
