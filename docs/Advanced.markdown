@@ -36,13 +36,14 @@ BaNGadm --cron-create       # write cron file for current server to /etc/cron.d/
 
 #### Cron config
 
-    yaml-field   cron-field    allowed values
-    ----------   ----------    --------------
-    MIN          minute        0-59
-    HOUR         hour          0-23
-    DOM          day of month  1-31
-    MONTH        month         1-12 (or names, see below)
-    DOW          day of week   0-7 (0 or 7 is Sun, or use names)
+    yaml-field   cron-field     allowed values
+    ----------   ----------     --------------
+    MIN          minute         0-59
+    HOUR         hour           0-23
+    DOM          day of month   1-31
+    MONTH        month          1-12 (or names, see below)
+    DOW          day of week    0-7 (0 or 7 is Sun, or use names)
+    DESCRITPION                 Add some meta information which will shown later in the reports
 
 
 Setting up SSH keys
