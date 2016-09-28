@@ -9,7 +9,7 @@
         <th>TaskID</th>
     </thead>
     <tbody>
-      <%- FOREACH server IN lockfiles.keys %>
+      <%- FOREACH server IN lockfiles.keys.sort %>
         <tr>
             <td colspan=3><b><% server %></b> (<% lockfiles.$server.size %>)</td>
         </tr>
