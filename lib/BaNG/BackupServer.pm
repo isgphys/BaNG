@@ -381,7 +381,7 @@ sub get_lockfiles {
     my %lockfiles;
 
     foreach my $server ( keys %servers ) {
-        my @lockfiles = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getLockFile", $serverconfig{path_lockfiles} );
+        my @lockfiles = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getLockFile", "$prefix/$servers{$server}{serverconfig}{path_lockfiles}" );
 
         foreach my $lockfile (@lockfiles) {
             my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
