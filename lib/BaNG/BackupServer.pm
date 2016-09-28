@@ -385,20 +385,22 @@ sub get_lockfiles {
 
         foreach my $lockfile (@lockfiles) {
             my ( $host, $group, $path, $timestamp, $file ) = split_lockfile_name($lockfile);
-            my $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
-            my $taskid = $ids->{taskid} || '';
-            my $shpid  = $ids->{shpid} || '';
-            my $cron   = $ids->{cron} || '';
+            if ( -e "$serverconfig{path_lockfiles}/$file") {
+                my $ids    = LoadFile( "$serverconfig{path_lockfiles}/$file" );
+                my $taskid = $ids->{taskid} || '';
+                my $shpid  = $ids->{shpid} || '';
+                my $cron   = $ids->{cron} || '';
 
-            $lockfiles{$server}{"$host-$group-$path"} = {
-                taskid    => $taskid,
-                host      => $host,
-                group     => $group,
-                path      => $path,
-                shpid     => $shpid,
-                cron      => $cron,
-                timestamp => $timestamp,
-            };
+                $lockfiles{$server}{"$host-$group-$path"} = {
+                    taskid    => $taskid,
+                    host      => $host,
+                    group     => $group,
+                    path      => $path,
+                    shpid     => $shpid,
+                    cron      => $cron,
+                    timestamp => $timestamp,
+                };
+            }
         }
     }
 
