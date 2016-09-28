@@ -60,3 +60,10 @@ append the public `BaNG_rsa.pub` to the `authorized_keys` on the client, and inc
 ```yaml
 BKP_RSYNC_RSHELL:    '/usr/bin/ssh -i /root/.ssh/BaNG_rsa'
 ```
+
+to prevent the `The authenticity of host 'xyz (xxx.xx.xx.xx)' can't be established` warnings add StrictHostKeyChecking=yes to your BKP_RSYNC_RSHELL option like
+
+```yaml
+BKP_RSYNC_RSHELL:    '/usr/bin/ssh -i /root/.ssh/BaNG_rsa -o StrictHostKeyChecking=yes'
+```
+
