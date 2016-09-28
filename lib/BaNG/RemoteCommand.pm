@@ -24,7 +24,7 @@ sub remote_command {
     my $remote_app_path = $serverconfig{remote_app} ? '' : $serverconfig{remote_app_path};
     $remote_app_path .= '/' if $remote_app_path !~ /.*\/$/;
 
-    my $results = `ssh -x -o IdentitiesOnly=yes -o ConnectTimeout=2 -i $serverconfig{remote_ssh_key} root\@$remoteHost $serverconfig{remote_app} ${remote_app_path}$remoteCommand $remoteArgument 2>/dev/null`;
+    my $results = `ssh -x -o IdentitiesOnly=yes -o ConnectTimeout=2 -i $serverconfig{remote_ssh_key} root\@$remoteHost $serverconfig{remote_app} ${remote_app_path}$remoteCommand "$remoteArgument" 2>/dev/null`;
     my @results = split( "\n", $results );
 
     return @results;
