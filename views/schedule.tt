@@ -8,6 +8,7 @@
                     <th colspan="8"></th>
                     <th colspan="2">Bulk</th>
                     <th colspan="2">Enabled</th>
+                    <th></th>
                 </tr>
                 <tr>
                     <th class="left">Host</th>
@@ -22,6 +23,7 @@
                     <th width=30>Wipe</th>
                     <th width=30>Bkp</th>
                     <th width=30>Wipe</th>
+                    <th class="left">Description</th>
                 </tr>
             </thead>
 
@@ -50,6 +52,7 @@
                                     <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.BKP_ENABLED %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
                                 <td <% IF cronjobs.$server.$jobtype.$cronjob.host != "BULK" %>
                                     <%- IF hosts.${cronjobs.$server.$jobtype.$cronjob.ident}.hostconfig.WIPE_ENABLED %> class="hook"<%- ELSE %> class="notallow"<%- END %><% End %>></td>
+                                <td class="left"><% cronjobs.$server.$jobtype.$cronjob.cron.DESCRIPTION %></td>
                             </tr>
                         <% END %>
                     <% END %>
