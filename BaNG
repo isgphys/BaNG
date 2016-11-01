@@ -733,8 +733,8 @@ sub create_link_current {
     my $link_dest    = targetpath( $host, $group ) . '/current';
     my $ln_cmd       = "/bin/ln -s";
 
-    if (-e $link_dest ){
-        unlink $link_dest unless $serverconfig{dryrun};;
+    if ( -l $link_dest ){
+        unlink $link_dest unless $serverconfig{dryrun};
         logit( $taskid, $host, $group, "Delete existing current symlink for host $host group $group" );
     }
 
