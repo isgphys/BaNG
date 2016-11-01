@@ -492,7 +492,11 @@ sub eval_rsync_options {
 
     # use links if told to
     if ( $hostconfig->{BKP_STORE_MODUS} eq 'links' ) {
-        $rsync_options .= '--link-dest ' . targetpath( $host, $group ) . "/current ";
+        if ( -e targetpath( $host, $group ) . "/current" ) {
+            $rsync_options .= '--link-dest ' . targetpath( $host, $group ) . "/current ";
+        } else {
+            logit( $taskid, $host, $group, "Warning: --link-dest not ok, make full backup!");
+        }
     }
 
     if ( $hostconfig->{BKP_RSYNC_RSHELL} ) {
