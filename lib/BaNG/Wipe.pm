@@ -13,85 +13,10 @@ use Exporter 'import';
 our @EXPORT = qw(
     list_folders_to_wipe
     backup_folders_stack
-    wipe_maxcount
-    fill_stacks
     wipe_worker
 );
 
-sub list_folders_to_wipe {
-    my ( $host, $group, @available_backup_folders ) = @_;
-    my @folders_to_wipe;
-
-    return ( wipe => [] ) if $#available_backup_folders == 0;
-
-    # prepare list of available backups
-    my %available_backups;
-    foreach my $folder (@available_backup_folders) {
-        chomp $folder;
-        if ( $folder =~ qr{ .*/(?<date>[^_]*) _ (?<time>\d*) }x ) {
-
-            # only keep latest backup of each date, wipe the rest
-            if ( exists $available_backups{$+{date}} ) {
-                if ( $available_backups{$+{date}}{time} < $+{time} ) {
-                    push( @folders_to_wipe, $available_backups{$+{date}}{folder} );
-                } else {
-                    push( @folders_to_wipe, $folder );
-                }
-            }
-            if ( ( !exists $available_backups{$+{date}} )
-              || ( $available_backups{$+{date}}{time} < $+{time} ) ) {
-                # store by date to force same time (midnight) for all
-                $available_backups{$+{date}} = {
-                    folder => $folder,
-                    epoch  => str2time( $+{date} ),
-                    time   => $+{time},
-                };
-            }
-        }
-    }
-
-    # remaining, single backups per day, define list of available epochs
-    my @available;
-    foreach my $date ( keys %available_backups ) {
-        push( @available, $available_backups{$date}{epoch} );
-    }
-
-    # determine daily, weekly, monthly and wipe stacks
-    my %stack = fill_stacks( \@available, wipe_maxcount( $host, $group ) );
-
-    # map dates inside stack to corresponding folders
-    foreach my $type ( keys %stack ) {
-        my @folders;
-        foreach my $epoch ( sort @{$stack{$type}} ) {
-            foreach my $date ( keys %available_backups ) {
-                if ( $epoch == $available_backups{$date}{epoch} ) {
-                    push( @folders, $available_backups{$date}{folder} );
-                }
-            }
-        }
-        @{$stack{$type}} = @folders;
-    }
-
-    # add folders we already marked to be wiped
-    push( @{$stack{wipe}}, @folders_to_wipe );
-
-    return %stack;
-}
-
-sub backup_folders_stack {
-    my ($host) = @_;
-
-    my %backup_folders_stack;
-    foreach my $group ( list_groups($host) ) {
-        my @available_backup_folders = get_backup_folders( $host, $group );
-        my %stack = list_folders_to_wipe( $host, $group, @available_backup_folders );
-        $backup_folders_stack{$group} = \%stack;
-    }
-
-    return \%backup_folders_stack;
-}
-
-sub fill_stacks {
+sub _fill_stacks {
     my ( $available_ref, $maxcount_ref ) = @_;
     my @available = @{$available_ref};
     my %maxcount  = %{$maxcount_ref};
@@ -141,7 +66,7 @@ sub fill_stacks {
     return %stack;
 }
 
-sub wipe_maxcount {
+sub _wipe_maxcount {
     my ( $host, $group ) = @_;
 
     my %maxcount = (
@@ -151,6 +76,79 @@ sub wipe_maxcount {
     );
 
     return \%maxcount;
+}
+
+sub list_folders_to_wipe {
+    my ( $host, $group, @available_backup_folders ) = @_;
+    my @folders_to_wipe;
+
+    return ( wipe => [] ) if $#available_backup_folders == 0;
+
+    # prepare list of available backups
+    my %available_backups;
+    foreach my $folder (@available_backup_folders) {
+        chomp $folder;
+        if ( $folder =~ qr{ .*/(?<date>[^_]*) _ (?<time>\d*) }x ) {
+
+            # only keep latest backup of each date, wipe the rest
+            if ( exists $available_backups{$+{date}} ) {
+                if ( $available_backups{$+{date}}{time} < $+{time} ) {
+                    push( @folders_to_wipe, $available_backups{$+{date}}{folder} );
+                } else {
+                    push( @folders_to_wipe, $folder );
+                }
+            }
+            if ( ( !exists $available_backups{$+{date}} )
+              || ( $available_backups{$+{date}}{time} < $+{time} ) ) {
+                # store by date to force same time (midnight) for all
+                $available_backups{$+{date}} = {
+                    folder => $folder,
+                    epoch  => str2time( $+{date} ),
+                    time   => $+{time},
+                };
+            }
+        }
+    }
+
+    # remaining, single backups per day, define list of available epochs
+    my @available;
+    foreach my $date ( keys %available_backups ) {
+        push( @available, $available_backups{$date}{epoch} );
+    }
+
+    # determine daily, weekly, monthly and wipe stacks
+    my %stack = _fill_stacks( \@available, _wipe_maxcount( $host, $group ) );
+
+    # map dates inside stack to corresponding folders
+    foreach my $type ( keys %stack ) {
+        my @folders;
+        foreach my $epoch ( sort @{$stack{$type}} ) {
+            foreach my $date ( keys %available_backups ) {
+                if ( $epoch == $available_backups{$date}{epoch} ) {
+                    push( @folders, $available_backups{$date}{folder} );
+                }
+            }
+        }
+        @{$stack{$type}} = @folders;
+    }
+
+    # add folders we already marked to be wiped
+    push( @{$stack{wipe}}, @folders_to_wipe );
+
+    return %stack;
+}
+
+sub backup_folders_stack {
+    my ($host) = @_;
+
+    my %backup_folders_stack;
+    foreach my $group ( list_groups($host) ) {
+        my @available_backup_folders = get_backup_folders( $host, $group );
+        my %stack = list_folders_to_wipe( $host, $group, @available_backup_folders );
+        $backup_folders_stack{$group} = \%stack;
+    }
+
+    return \%backup_folders_stack;
 }
 
 sub wipe_worker {
