@@ -11,9 +11,6 @@ use IPC::Open3;
 
 use Exporter 'import';
 our @EXPORT = qw(
-    _eval_rsync_options
-    _eval_rsync_target
-    _eval_rsync_generic_exclude_cmd
     execute_rsync
 );
 
