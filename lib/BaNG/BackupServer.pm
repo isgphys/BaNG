@@ -16,6 +16,7 @@ use JSON;
 
 use Exporter 'import';
 our @EXPORT = qw(
+    bkp_to_current_server
     get_fsinfo
     get_lockfiles
     get_backup_folders
@@ -29,6 +30,19 @@ our @EXPORT = qw(
     check_lockfile
     writeto_lockfile
 );
+
+sub bkp_to_current_server {
+    my ( $host, $group, $taskid ) = @_;
+
+    # make sure backup's target host matches local hostname
+    my $bkp_target_host = $hosts{"$host-$group"}->{hostconfig}->{BKP_TARGET_HOST};
+    if ( $bkp_target_host ne $servername && $bkp_target_host ne '*' ) {
+        logit( $taskid, $host, $group, "Skipping host $host group $group for server $bkp_target_host instead of $servername" ) if $serverconfig{verbose};
+        return 0;
+    }
+
+    return 1;
+}
 
 sub get_fsinfo {
     my %fsinfo;
