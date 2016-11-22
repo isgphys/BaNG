@@ -18,27 +18,16 @@ use BaNG::BTRFS;
 use BaNG::Wipe;
 
 my $version = '3.6';
-my $cron;
-my $force;
-my $wipe;
-my $initial;
-my $xymononly;
-my $noreport;
-my $missingonly;
-my $group_arg;
-my $host_arg;
 my $prefix_arg;
-my $nthreads_arg;
-my $verbose_arg;
-my $vv_arg;
-my $vvv_arg;
+my ($host_arg, $group_arg, $nthreads_arg);
+my ($cron, $wipe, $xymononly);
+my ($initial, $force, $noreport, $missingonly);
+my ($startstamp,$endstamp);
+my ($taskid, $taskmeta);
+my ($verbose_arg, $vv_arg, $vvv_arg);
 my $dryrun_arg;
 my @queue;
 my %finishable_bkpjobs;
-my $taskid;
-my $taskmeta;
-my $startstamp;
-my $endstamp;
 
 #################################
 # Main
