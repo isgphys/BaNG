@@ -1,4 +1,3 @@
-
 package BaNG::TM_rsync;
 
 use 5.010;
