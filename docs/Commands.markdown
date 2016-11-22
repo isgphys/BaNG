@@ -82,6 +82,7 @@ BaNGadm --initialize -h <host> -g <group>     # create target folder structure f
 
 BaNGadm --failed                              # show all failed backups
 BaNGadm --failed -h <host> -g <group>         # show failed backups of defined hosts and/or group
+BaNGadm --failed --cleanup                    # purge failed backups
 
 BaNGadm --setprop list -h <host> -g <group>   # show Read-Write/Read-Only status of all snaphots
 BaNGadm --setprop rw|ro -h <host> -g <group>  # set all snapshots to Read-Write/Read-Only
