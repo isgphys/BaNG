@@ -33,6 +33,7 @@ sub create_btrfs_subvolume {
 sub delete_btrfs_subvolume {
     my ( $host, $group, $taskid, $path ) = @_;
     $taskid ||= 0;
+    $path =~ s/\n//g;
 
     if ( -x $serverconfig{path_btrfs} ) {
         my $btrfs_subvolume_cmd = "$serverconfig{path_btrfs} subvolume delete $path >/dev/null 2>&1";
