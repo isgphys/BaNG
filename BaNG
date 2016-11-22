@@ -481,15 +481,6 @@ sub create_link_current {
     return 1;
 }
 
-sub eval_bkptimestamp {
-    my ( $host, $group ) = @_;
-
-    my $bkptimestamp = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
-    chomp($bkptimestamp);
-
-    return $bkptimestamp;
-}
-
 sub rename_failed_backup {
     my ( $host, $group, $bkptimestamp ) = @_;
 

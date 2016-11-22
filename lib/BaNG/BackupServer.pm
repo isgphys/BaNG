@@ -29,6 +29,7 @@ our @EXPORT = qw(
     remove_lockfile
     check_lockfile
     writeto_lockfile
+    eval_bkptimestamp
 );
 
 sub _check_fill_level {
@@ -307,6 +308,15 @@ sub get_automount_paths {
     }
 
     return \%automnt;
+}
+
+sub eval_bkptimestamp {
+    my ( $host, $group ) = @_;
+
+    my $bkptimestamp = eval( $hosts{"$host-$group"}->{hostconfig}->{BKP_FOLDER} );
+    chomp($bkptimestamp);
+
+    return $bkptimestamp;
 }
 
 #################################
