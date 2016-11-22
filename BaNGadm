@@ -17,6 +17,7 @@ my $version = '0.1';
 my $add_arg;
 my $delete_arg;
 my $failed_arg;
+my $cleanup_arg;
 my $initial_arg;
 my $dump_arg;
 my $tidy_arg;
@@ -102,8 +103,8 @@ if ($failed_arg) {
                     print "\t$failed_folder";
                 }
                 print "\n";
-                if ( $delete_arg ) {
-                    print "Delete failed backup folders for $hostgroup\n" if $serverconfig{verbose};
+                if ( $cleanup_arg ) {
+                    print "Purge failed backup folders for $hostgroup\n" if $serverconfig{verbose};
                     wipe_worker( $hosts{$hostgroup}->{hostname}, $hosts{$hostgroup}->{group}, 0 , @failed_folders );
                 }
             }
@@ -270,6 +271,7 @@ sub parse_command_options {
         'n|dry-run'   => \$dryrun_arg,
         'add'         => \$add_arg,
         'delete'      => \$delete_arg,
+        'cleanup'     => \$cleanup_arg,
         'failed'      => \$failed_arg,
         'initialize'  => \$initial_arg,
         'db_archive'  => \$tidy_arg,
@@ -330,6 +332,7 @@ sub usage {
 
         $command --failed                             # show all failed backups
         $command --failed -h <host> -g <group>        # show failed backups of defined hosts and/or group
+        $command --failed --cleanup                   # purge failed backup folders
 
         $command --setprop list -h <host> -g <group>  # show Read-Write/Read-Only status of all snapshots
         $command --setprop rw|ro -h <host> -g <group> # set all snapshots to Read-Write/Read-Only
