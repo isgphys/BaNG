@@ -41,11 +41,11 @@ subtest 'Check localhost-BaNGadm-failed for failed backups' => sub {
 
 
 subtest 'Delete failed folders for localhost-BaNGadm-failed' => sub {
-    $output = `$bangadmcmd --failed --delete -h localhost -g BaNGadm-failed`;
+    $output = `$bangadmcmd --failed --cleanup -h localhost -g BaNGadm-failed`;
 
     like(   $output, qr|Check localhost-BaNGadm-failed for failed backups| , 'Delete - check localhost-BaNGadm-failed for failed backups'  );
     like(   $output, qr|2016.01.01_000001_failed|                          , 'Delete - found 01.01.2016_000001_failed for localhost-BaNGadm-failed' );
-    like(   $output, qr|Delete failed backup folders for|                  , 'Delete failed backup folders for localhost-BaNGadm-failed'   );
+    like(   $output, qr|Purge failed backup folders for|                   , 'Delete failed backup folders for localhost-BaNGadm-failed'   );
 };
 
 done_testing();
