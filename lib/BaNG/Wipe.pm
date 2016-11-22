@@ -15,6 +15,7 @@ our @EXPORT = qw(
     backup_folders_stack
     fill_stacks
     wipe_worker
+    wipe
 );
 
 sub fill_stacks {
