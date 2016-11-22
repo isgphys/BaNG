@@ -12,6 +12,7 @@ use IPC::Open3;
 use Exporter 'import';
 our @EXPORT = qw(
     execute_rsync
+    check_rsync_status
 );
 
 
@@ -88,6 +89,17 @@ sub _eval_rsync_generic_exclude_cmd {
     my $exclsubfolderopt      = "--exclude-from=$serverconfig{path_excludes}/$exclsubfolderfilename";
 
     return $exclsubfolderopt;
+}
+
+sub check_rsync_status {
+    my ( $rsync_err ) = @_;
+    my $status = 1;
+
+    if ( scalar grep $rsync_err eq $_, @{ $serverconfig{'rsync_err_ok'} }) {
+        $status = 0;
+    }
+
+    return $status;
 }
 
 sub execute_rsync {

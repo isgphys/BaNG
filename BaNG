@@ -501,17 +501,6 @@ sub eval_bkptimestamp {
     return $bkptimestamp;
 }
 
-sub check_rsync_status {
-    my ( $rsync_err ) = @_;
-    my $status = 1;
-
-    if ( scalar grep $rsync_err eq $_, @{ $serverconfig{'rsync_err_ok'} }) {
-        $status = 0;
-    }
-
-    return $status;
-}
-
 sub rename_failed_backup {
     my ( $host, $group, $bkptimestamp ) = @_;
 
