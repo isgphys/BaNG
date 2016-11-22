@@ -13,10 +13,11 @@ use Exporter 'import';
 our @EXPORT = qw(
     list_folders_to_wipe
     backup_folders_stack
+    fill_stacks
     wipe_worker
 );
 
-sub _fill_stacks {
+sub fill_stacks {
     my ( $available_ref, $maxcount_ref ) = @_;
     my @available = @{$available_ref};
     my %maxcount  = %{$maxcount_ref};
@@ -117,7 +118,7 @@ sub list_folders_to_wipe {
     }
 
     # determine daily, weekly, monthly and wipe stacks
-    my %stack = _fill_stacks( \@available, _wipe_maxcount( $host, $group ) );
+    my %stack = fill_stacks( \@available, _wipe_maxcount( $host, $group ) );
 
     # map dates inside stack to corresponding folders
     foreach my $type ( keys %stack ) {
