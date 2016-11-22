@@ -176,4 +176,71 @@ sub wipe_worker {
     return 1;
 }
 
+sub wipe {
+    my ( $host, $group, $taskid, $force ) = @_;
+
+    # make sure we are on the correct backup server
+    return unless bkp_to_current_server( $host, $group, $taskid );
+
+    # make sure wipe is enabled
+    return unless $hosts{"$host-$group"}->{hostconfig}->{WIPE_ENABLED};
+
+    # stop if trying to do bulk wipe if it's not allowed
+    #return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{WIPE_BULK_ALLOW} );
+    return unless ( ( $group && $host ) || $hosts{"$host-$group"}->{hostconfig}->{WIPE_BULK_ALLOW} );
+
+    # check for still running backups
+    return unless check_lockfile( $taskid, $host, $group );
+
+    logit( $taskid, $host, $group, "Wipe host $host group $group" );
+
+    my @backup_folders = get_backup_folders( $host, $group );
+
+    # count existing backups
+    my $bkpkeep = 0;
+    foreach my $type (qw( DAILY WEEKLY MONTHLY )) {
+        $bkpkeep += $hosts{"$host-$group"}->{hostconfig}->{"WIPE_KEEP_$type"};
+    }
+    my $bkpcount = $#backup_folders + 1;
+
+    # get list of folders to wipe
+    my %stack = list_folders_to_wipe( $host, $group, @backup_folders );
+    my @wipedirs = @{$stack{wipe}};
+
+    logit( $taskid, $host, $group, "Wipe existing: $bkpcount, to wipe: " . ( $#{$stack{wipe}} + 1 ) . ", keeping: $bkpkeep for host $host group $group" );
+
+    # generate wipe report with content of stacks
+    if ( $serverconfig{verboselevel} >= 2 ) {
+        my $wipe_report = "Wipe report\n";
+        foreach my $type ( sort keys %stack ) {
+            $wipe_report .= "\t" . uc($type) . " : " . ( $#{$stack{$type}} + 1 ) . "\n";
+            foreach my $folder ( @{$stack{$type}} ) {
+                $wipe_report .= "\t$folder\n";
+            }
+        }
+        logit( $taskid, $host, $group, $wipe_report );
+    }
+
+    # don't automatically wipe too many backups
+    if ($force) {
+        logit( $taskid, $host, $group, 'Wipe WARNING: forced to wipe, namely ' . ( $#{$stack{wipe}} + 1 ) . '.' );
+    } elsif ( $#{$stack{wipe}} >= $serverconfig{auto_wipe_limit} ) {
+        logit( $taskid, $host, $group, 'Wipe WARNING: too many folders to wipe, namely ' . ( $#{$stack{wipe}} + 1 ) . '. Wipe manually or use --force.' );
+        return ();
+    }
+
+    # make sure list contains at least one folder
+    if ( !@wipedirs ) {
+        logit( $taskid, $host, $group, "Wipe no folder to wipe for host $host group $group" );
+        return 1;
+    }
+
+    # remove subvolumes or folders
+    wipe_worker( $host, $group, ,$taskid, @wipedirs );
+
+    logit( $taskid, $host, $group, "Wipe successful of host $host group $group" );
+
+    return 1;
+}
+
 1;
