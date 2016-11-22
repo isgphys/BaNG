@@ -31,6 +31,21 @@ our @EXPORT = qw(
     writeto_lockfile
 );
 
+sub _check_fill_level {
+    my ($level) = @_;
+    my $css_class = '';
+
+    if ( $level > 98 ) {
+        $css_class = 'alert_red';
+    } elsif ( $level > 90 ) {
+        $css_class = 'alert_orange';
+    } elsif ( $level > 80 ) {
+        $css_class = 'alert_yellow';
+    }
+
+    return $css_class;
+}
+
 sub bkp_to_current_server {
     my ( $host, $group, $taskid ) = @_;
 
@@ -114,21 +129,6 @@ sub get_fsinfo {
     }
 
     return \%fsinfo;
-}
-
-sub _check_fill_level {
-    my ($level) = @_;
-    my $css_class = '';
-
-    if ( $level > 98 ) {
-        $css_class = 'alert_red';
-    } elsif ( $level > 90 ) {
-        $css_class = 'alert_orange';
-    } elsif ( $level > 80 ) {
-        $css_class = 'alert_yellow';
-    }
-
-    return $css_class;
 }
 
 sub check_client_connection {
