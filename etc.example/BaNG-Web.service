@@ -1,0 +1,11 @@
+[Unit]
+Description=BaNG web service
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/starman -D --listen 127.0.0.1:8030 --error-log /opt/BaNG/var/log/production.log --group www-data --user www-data -E production --pid /var/run/BaNG-Web.pid /opt/BaNG/BaNG-Web
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
