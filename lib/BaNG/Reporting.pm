@@ -857,16 +857,22 @@ sub delete_logfiles {
     foreach my $dir (@wipedirs) {
         my ($logdate) = $dir =~ /.*\/(\d{4}\.\d{2}\.\d{2})/;
         $logdate =~ s/\./\-/g;
-        my $today = `$serverconfig{path_date} +"%Y-%m-%d"`;
-        chomp $today;
-        unless ( $logdate eq $today ) {
-            my $logfolder = "$serverconfig{path_logs}/${host}_${group}";
-            my $logfile   = "$logfolder/$logdate.log";
-            my $rmcmd     = 'rm -f';
-            $rmcmd = "echo $rmcmd" if $serverconfig{dryrun};
+
+        my $logfolder = "$serverconfig{path_logs}/${host}_${group}";
+        my $logfile   = "$logfolder/$logdate.log";
+
+        my ($dirtest) = $dir =~ /(.*\/\d{4}\.\d{2}\.\d{2})/;
+        $dirtest .= "_*";
+        my @bkpfolderexists = glob($dirtest);
+
+        if (scalar @bkpfolderexists == 0) {
+            my $rmcmd = 'rm -f';
+            $rmcmd    = "echo $rmcmd" if $serverconfig{dryrun};
 
             logit( $taskid, $host, $group, "Delete logfile $logfile" );
             system("$rmcmd $logfile") and logit( $taskid, $host, $group, "ERROR: deleting logfile $logfile: $!" );
+        } else {
+            logit( $taskid, $host, $group, "Delete logfile $logfile aborted, $dirtest still exist!" );
         }
     }
 
