@@ -31,5 +31,6 @@ use_ok 'Template';
 use_ok 'Text::Diff';
 use_ok 'Thread::Queue';
 use_ok 'Time::HiRes';
+use_ok 'Dancer::Plugin::Auth::Extensible';
 
 done_testing();
