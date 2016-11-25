@@ -3,6 +3,7 @@
 # ---------------
 config_defaults_hosts:  etc/defaults_hosts.yaml
 config_bangstat:        etc/bangstat_db.yaml
+db_support:             0
 #
 path_groupconfig:       etc/groups
 path_hostconfig:        etc/hosts
