@@ -6,7 +6,7 @@ After=syslog.target
 Type=forking
 User=www-data
 Group=www-data
-ExecStart=/usr/bin/starman -D --listen 127.0.0.1:8030 --error-log /opt/BaNG/var/log/production.log -E production --pid /var/run/BaNG-Web.pid /opt/BaNG/BaNG-Web
+ExecStart=/usr/bin/starman -D --listen 127.0.0.1:8030 --error-log /opt/BaNG/var/log/production.log -E production /opt/BaNG/BaNG-Web
 Restart=always
 
 [Install]
