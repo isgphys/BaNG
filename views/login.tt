@@ -1,7 +1,7 @@
 <div id="login">
     <form action="/login" method=post>
         <fieldset>
-            <Legend> Please log in with your D-PHYS account</legend>
+            <Legend> Please log in</legend>
             <div>
                 <label>Username:</label>
                 <input type="text" name="username" autofocus>
