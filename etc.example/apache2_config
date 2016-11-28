@@ -16,8 +16,8 @@
     ProxyPassReverse / http://localhost:8030/
 
     SSLEngine on
-    SSLCertificateFile /etc/apache2/cert/bang.crt
-    SSLCertificateKeyFile /etc/apache2/cert/bang.key
+    SSLCertificateFile  /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
     logLevel  warn
     ErrorLog  /var/log/apache2/bang_ssl_error_log
