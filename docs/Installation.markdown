@@ -1,6 +1,14 @@
 Installation
 ============
 
+Automated setup
+---------------
+
+Use the [Ansible](https://www.ansible.com) playbooks of [ansible-BaNG](https://github.com/patschbo/ansible-BaNG) to install BaNG.
+
+Manual setup
+------------
+
 Install dependencies:
 
 ```sh
