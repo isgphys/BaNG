@@ -1,5 +1,3 @@
 run_env:            'production'
 log:                'debug'
-daemon:             0
-behind_proxy:       0
 auto_reload:        0
