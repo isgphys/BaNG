@@ -19,7 +19,7 @@ use BaNG::Wipe;
 
 my $version = '3.6';
 my $prefix_arg;
-my ($host_arg, $group_arg, $nthreads_arg);
+my ($host_arg, $group_arg, $nthreads_arg, $bkpmode_arg);
 my ($cron, $wipe, $xymononly);
 my ($initial, $force, $noreport, $missingonly);
 my ($startstamp,$endstamp);
@@ -36,6 +36,8 @@ parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
 
+print "BaNG run in $serverconfig{bkpmode} mode!\n" if $serverconfig{verbose};
+
 $cron = $ENV{'BaNG_Cron'} || "0";
 print "Run as Cron: $cron\n" if $serverconfig{verbose};
 
@@ -46,15 +48,19 @@ bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless 
 get_host_config( $host_arg, $group_arg );
 
 foreach my $config ( sort keys %hosts ) {
-    if ($wipe) {
-        wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group}, $taskid, $force );
-    } elsif ($xymononly) {
-        my $host          = $hosts{$config}->{hostname};
-        my $group         = $hosts{$config}->{group};
-        my %RecentBackups = bangstat_recentbackups($host);
-        xymon_report( $taskid, $host, $group, %RecentBackups );
-    } else {
-        queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+    if ( $serverconfig{bkpmode} eq "rsync" ){
+        if ($wipe) {
+            wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group}, $taskid, $force );
+        } elsif ($xymononly) {
+            my $host          = $hosts{$config}->{hostname};
+            my $group         = $hosts{$config}->{group};
+            my %RecentBackups = bangstat_recentbackups($host);
+            xymon_report( $taskid, $host, $group, %RecentBackups );
+        } else {
+            queue_backup( $hosts{$config}->{hostname}, $hosts{$config}->{group} );
+        }
+    } elsif ( $serverconfig{bkpmode} eq "tar" ) {
+        print "TAR mode work\n" if $serverconfig{verbose};
     }
 }
 
@@ -588,6 +594,7 @@ sub parse_command_options {
         'v|verbose'        => \$verbose_arg,
         'vv'               => \$vv_arg,
         'vvv'              => \$vvv_arg,
+        'bkpmode=s'        => \$bkpmode_arg,
         'n|dry-run'        => \$dryrun_arg,
         'g|group=s'        => \$group_arg,
         'h|host=s'         => \$host_arg,
@@ -603,6 +610,7 @@ sub parse_command_options {
     ) or usage('Invalid commmand line options.');
     usage('You must provide some arguments') unless ( $host_arg || $group_arg );
     usage('Number of threads must be positive') if ( $nthreads_arg && $nthreads_arg <= 0 );
+    usage('Wrong Backup Mode, please use rsync or tar') unless ( !defined $bkpmode_arg  || ($bkpmode_arg eq "rsync" || $bkpmode_arg eq "tar" ));
 
     $verbose_arg = 1 if ( $dryrun_arg || $vv_arg || $vvv_arg );
 
@@ -611,6 +619,7 @@ sub parse_command_options {
 
 sub cli_args_override_global_config {
 
+    $serverconfig{bkpmode}      = $bkpmode_arg if $bkpmode_arg;
     $serverconfig{verbose}      = $verbose_arg if $verbose_arg;
     $serverconfig{dryrun}       = $dryrun_arg  if $dryrun_arg;
     $serverconfig{verboselevel} = 2            if $vv_arg;
@@ -642,17 +651,18 @@ sub usage {
 
         Optional Arguments:
 
-        -t <nr>            # number of threads, default: 1
-        -p <path>          # override path to folder containing etc/
-        -w | --wipe        # wipe the backup
-        -w --force         # forcing wipe the backup (override auto_wipe_limit)
-        --initial          # create nonexisting backup targets
-        --missingonly      # backup only hosts that were not backed up recently
-        --label <string>   # set a label for this task
-        --xymon            # send only xymon report
-        --noreport         # do not send any report
-        -v | -vv | -vvv    # verbose mode to include debugging messages of level 1-3
-        -n                 # dry-run without making changes (implies verbose)
+        -t <nr>               # number of threads, default: 1
+        -p <path>             # override path to folder containing etc/
+        -w | --wipe           # wipe the backup
+        -w --force            # forcing wipe the backup (override auto_wipe_limit)
+        --bkpmode <rsync|tar> # select backup mode (rsync / tar), default: rsync
+        --initial             # create nonexisting backup targets
+        --missingonly         # backup only hosts that were not backed up recently
+        --label <string>      # set a label for this task
+        --xymon               # send only xymon report
+        --noreport            # do not send any report
+        -v | -vv | -vvv       # verbose mode to include debugging messages of level 1-3
+        -n                    # dry-run without making changes (implies verbose)
 
 EOF
 
