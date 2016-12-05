@@ -1,3 +1,4 @@
+db_support:        1
 path_btrfs:        /usr/bin/btrfs
 remote_app:        "/usr/local/bin/remotesshwrapper"
 remote_app_path:   "/opt/remotesshwrapper"
