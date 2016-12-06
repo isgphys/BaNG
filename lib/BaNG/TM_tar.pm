@@ -48,7 +48,24 @@ sub _create_tar_helper {
 
     my $tar_helper = "$tar_helper_path/tar_helper.sh";
 
-    print "Create tar helper script $tar_helper\n";
+    my $script_content = <<"EOF";
+
+#!/bin/bash
+# BaNG tar_helper script
+# Created by BaNG, do not manually edit this script!
+
+echo \$TAR_VERSION \$TAR_ARCHIVE \$TAR_VOLUME \$TAR_BLOCKING_FACTOR \$TAR_FD \$TAR_SUBCOMMAND \$TAR_FORMAT
+
+echo "Rotate to \$TAR_VOLUME"
+mv "\$TAR_ARCHIVE" "\$TAR_ARCHIVE-\$TAR_VOLUME"
+# tar_helper end
+EOF
+    unless ( $serverconfig{dryrun} ) {
+        open HELPERFILE, '>', $tar_helper;
+        print HELPERFILE $script_content;
+        close HELPERFILE;
+    }
+    print "Create tar helper script $tar_helper\n$script_content\n" if $serverconfig{verbose};
 
     return $tar_helper;
 }
