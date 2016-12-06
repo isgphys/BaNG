@@ -18,6 +18,7 @@ sub _eval_tar_options {
 #   my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
 
     my $tar_helper = _create_tar_helper();
+    logit( $taskid, $host, $group, "tar helper script $tar_helper created" );
 
     $tar_options .= "-ML 25G -b 1024 -F $tar_helper";
 
@@ -41,7 +42,7 @@ sub _create_tar_helper {
 
     my $tar_helper_path = "$prefix/var/tmp";
     if ( ! -e $tar_helper_path ) {
-        print "Create Tmp folder: $tar_helper_path\n" if $serverconfig{verbose};
+        print "Create missing tmp folder: $tar_helper_path\n" if $serverconfig{verbose};
         mkdir -p $tar_helper_path unless $serverconfig{dryrun};
     }
 
