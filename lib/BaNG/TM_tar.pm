@@ -22,7 +22,7 @@ sub _eval_tar_options {
 
     $tar_options .= "-ML 25G -b 1024 -F $tar_helper";
 
-    return $tar_options;
+    return ($tar_options, $tar_helper);
 }
 
 sub _eval_tar_target {
@@ -87,8 +87,8 @@ sub execute_tar {
 
     my $startstamp = time();
 
-    my $tar_options = _eval_tar_options( $host, $group, $taskid );
-    my $tar_target  = _eval_tar_target( $host, $group);
+    my ($tar_options, $tar_helper) = _eval_tar_options( $host, $group, $taskid );
+    my $tar_target                 = _eval_tar_target( $host, $group);
 
     my $tar_cmd  = $serverconfig{path_tar};
 
