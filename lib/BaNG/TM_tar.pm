@@ -70,6 +70,17 @@ EOF
     return $tar_helper;
 }
 
+sub _delete_tar_helper {
+    my ($tar_helper) = @_;
+
+    print "check if tar helper script $tar_helper exists\n" if $serverconfig{verbose};
+
+    if ( -e "$tar_helper" ){
+        unlink  "$tar_helper";
+        print "Deleted tar helper script $tar_helper\n" if $serverconfig{verbose};
+    }
+}
+
 sub execute_tar {
     my ( $taskid, $host, $group ) = @_;
     my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
@@ -86,6 +97,8 @@ sub execute_tar {
 
     print "$taskid, $host, $group, Tar Command: $tar_cmd $tar_options -cf $path $tar_target\n" ;
     print "$taskid, $host, $group, Executing tar for host $host group $group\n";
+
+    _delete_tar_helper($tar_helper);
 }
 
 1;
