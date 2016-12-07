@@ -1,5 +1,6 @@
 db_support:        1
 path_btrfs:        /usr/bin/btrfs
+path_tar:          /bin/tar
 remote_app:        "/usr/local/bin/remotesshwrapper"
 remote_app_path:   "/opt/remotesshwrapper"
 remote_app_folder: "BaNG"

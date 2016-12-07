@@ -20,6 +20,7 @@ path_btrfs:             '/usr/bin/env btrfs'
 path_date:              /bin/date
 path_rsh:               /usr/bin/rsh
 path_rsync:             /usr/bin/rsync
+path_tar:
 path_timeout:
 path_ypcat:
 path_nocache:
