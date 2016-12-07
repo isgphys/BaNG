@@ -65,7 +65,7 @@ EOF
         print HELPERFILE $script_content;
         close HELPERFILE;
     }
-    print "Create tar helper script $tar_helper\n$script_content\n" if $serverconfig{verbose};
+    print "Create tar helper script: $tar_helper\n$script_content\n" if $serverconfig{verbose};
 
     return $tar_helper;
 }
