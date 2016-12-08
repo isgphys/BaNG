@@ -169,7 +169,7 @@ function DrawSwimlanes() {
     var mainLaneHeight = 20;
     var miniLaneHeight = PlotMiniChart ? 12 : 0;
 
-    var margin = {top: 20, right: 15, bottom: 15, left: 120}
+    var margin = {top: 20, right: 15, bottom: 15, left: 240}
       , width  = 1100 - margin.left - margin.right
       , height = lanes.length * (mainLaneHeight+miniLaneHeight) - margin.top - margin.bottom
       , miniHeight = lanes.length * miniLaneHeight + 50
@@ -398,7 +398,7 @@ function DrawSwimlanes() {
             x1MonthAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%b - Week %W'))
         }
         else {
-            x1DateAxis.ticks(d3.time.hours, 4).tickFormat(d3.time.format('%H:%M'))
+            x1DateAxis.ticks(d3.time.hours, 2).tickFormat(d3.time.format('%H:%M'))
             x1MonthAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%b %e'))
         }
 
