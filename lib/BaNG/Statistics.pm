@@ -490,6 +490,8 @@ sub statistics_schedule {
     $sth->execute();
 
     my %datahash;
+    my $start_time_last = '';
+    my $i = 0;
     while ( my $dbrow = $sth->fetchrow_hashref() ) {
         ( my $time_start = $dbrow->{'Start'} ) =~ s/\-/\//g;
         ( my $time_stop  = $dbrow->{'Stop'} || $dbrow->{'Start'} )  =~ s/\-/\//g;
@@ -501,8 +503,17 @@ sub statistics_schedule {
 
         # hash constructed by host or time
         my $sortKey = $dbrow->{'BkpFromHost'};
-        $sortKey    = $time_start if $sortBy =~ /time/;
 
+        if ($sortBy =~ /time/ ) {
+            if ( $start_time_last eq $time_start ){
+                $i++;
+                $sortKey  = $time_start ."_". $i;
+            } else {
+                $sortKey         = $time_start;
+                $i = 0;
+                $start_time_last = $time_start;
+            }
+        }
         push( @{$datahash{$sortKey}}, {
             time_start       => $time_start,
             time_stop        => $time_stop,

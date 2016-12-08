@@ -38,7 +38,7 @@
               <% ELSE %>
                 var PlotMiniChart   = 0;
                 var PlotTodaysLine  = 0;
-                var CustomLaneLabel = 'subLane[0].info.BkpFromHost';
+                var CustomLaneLabel = 'subLane[0].info.BkpFromHost +" -- "+ subLane[0].info.BkpGroup';
                 var CustomInterval  = '[new Date(now.getFullYear(), now.getMonth(), now.getDate()-1, 16, 0, 0, 0),'
                                     + ' new Date(now.getFullYear(), now.getMonth(), now.getDate()  , 16, 0, 0, 0)]';
               <% END %>
