@@ -22,6 +22,7 @@ our @EXPORT = qw(
     bangstat_recentbackups_job_details
     bangstat_recent_tasks
     bangstat_task_jobs
+    bangstat_task_delete
     bangstat_start_backupjob
     bangstat_set_taskmeta
     bangstat_update_backupjob
@@ -333,6 +334,22 @@ sub bangstat_recent_tasks {
     $sth->finish();
 
     return \%RecentTasks;
+}
+
+sub bangstat_task_delete {
+    my ($taskid) = @_;
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        DELETE FROM statistic WHERE taskid LIKE '$taskid';
+    ");
+    $sth->execute();
+
+    $sth->finish();
+
+    return 1;
 }
 
 sub bangstat_task_jobs {

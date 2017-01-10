@@ -129,6 +129,15 @@
                     };
                 });
 
+                $('[data-deletedbtask]').click(function() {
+                    var TaskID = $(this).data('deletedbtask');
+                    if ( confirm('Do you really want delete ' + TaskID  + ' from DB?') ) {
+                        $.post('/reporting/task/' + TaskID, function(data) {
+                            alert( data + " " + TaskID + ' has been deleted!');
+                        });
+                    };
+                });
+
                 $('[data-toggleoption]').click(function() {
                     var toggleOption = $(this).data('toggleoption');
                     var toggleNewValue;
