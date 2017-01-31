@@ -715,7 +715,7 @@ sub xymon_report {
         Errormsg      => $hosts{"$host-$group"}->{errormsg},
     };
 
-    my $STATUSTTL = 1440;     # (1440=>1d, 2160=>1.5d) Time in min until page becomes purple
+    my $STATUSTTL = 2160;     # (2160=>1.5d) Time in min until page becomes purple
     my $DATE      = `$serverconfig{path_date}`;
     chomp $DATE;
 
