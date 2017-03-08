@@ -42,13 +42,27 @@
 </div>
 
 <script>
-    var NETDATA_BADGES_AUTOREFRESH_SECONDS = 2;
-        function refreshNetdataBadges() {
-            var now = new Date().getTime().toString();
-            $('.netdata-badge').each(function() {
-                this.src = this.src.replace(/\&_=\d*/, '') + '&_=' + now;
-            });
-            setTimeout(refreshNetdataBadges, NETDATA_BADGES_AUTOREFRESH_SECONDS * 1000);
-         }
-    setTimeout(refreshNetdataBadges, NETDATA_BADGES_AUTOREFRESH_SECONDS * 1000);
+    var showperf_state = localStorage.getItem('showperf') || "true";
+    showperf_state = (showperf_state === "true"); // convert to boolean
+    $('#showperf').prop('checked', showperf_state);
+
+    $('#showperf').change(function (e) {
+        localStorage.setItem('showperf', e.target.checked);
+    });
+
+    $('#showperf').change(function (e) {
+        if ( $('#showperf').is(':checked') ) {
+            $('#performance').show();
+            $("embed").each(function () {
+                $(this).attr("src",$(this).attr("src").replace('refresh=0','refresh=2'))
+                });
+            $("#performance").html($("#performance").html())
+        }else{
+            $("embed").each(function () {
+                $(this).attr("src",$(this).attr("src").replace('refresh=2','refresh=0'))
+                });
+            $("#performance").html($("#performance").html())
+            $('#performance').hide();
+            };
+        });
 </script>

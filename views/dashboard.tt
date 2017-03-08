@@ -53,15 +53,6 @@
         load_fsinfo_report();
         load_error_report();
 
-        var showperf_state = localStorage.getItem('showperf') || "true";
-        showperf_state = (showperf_state === "true"); // convert to boolean
-        $('#showperf').prop('checked', showperf_state);
-        PerfMon();
-
-        $('#showperf').change(function (e) {
-            localStorage.setItem('showperf', e.target.checked);
-        });
-
         var showwipe_state = localStorage.getItem('showwipe') || "true";
         showwipe_state = (showwipe_state === "true"); // convert to boolean
         $('#showwipe').prop('checked', showwipe_state);
