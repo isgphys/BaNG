@@ -24,17 +24,17 @@ sub _eval_tar_options {
     return ($tar_options, $tar_helper);
 }
 
-sub _eval_tar_target {
+sub _eval_tar_source {
     my ( $host, $group ) = @_;
-    my $tar_target = targetpath( $host, $group );
+    my $tar_source = targetpath( $host, $group );
 
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
-        $tar_target .= '/current';
+        $tar_source .= '/current';
     } else {
-        $tar_target .= "/snap_LTS";
+        $tar_source .= "/snap_LTS";
     }
 
-    return $tar_target;
+    return $tar_source;
 }
 
 sub _create_tar_helper {
