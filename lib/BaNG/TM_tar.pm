@@ -80,21 +80,44 @@ sub _delete_tar_helper {
     }
 }
 
+sub _setup_tar_target {
+    my ( $host, $group, $hostconfig, $taskid ) = @_;
+
+    my $nfs_share         = "lts11.ethz.ch:/shares/phys_lts_nfs";
+    my $nfs_mount_options = "noauto,hard,intr,retrans=10,timeo=300,rsize=65536,wsize=1048576,vers=3,proto=tcp,sync";
+    my $tar_target        = "/mnt/LTS/lts-11";
+
+    if (`cat /proc/mounts | grep $tar_target`) {
+        print "$taskid, $host, $group, $tar_target is mounted \n" if $serverconfig{verbose};
+    } else {
+        print "$taskid, $host, $group, $tar_target is not mounted \n" if $serverconfig{verbose};
+        my $result = system("mount -t nfs -o $nfs_mount_options $nfs_share $tar_target");
+        if ($result == 0) {
+            print "$taskid, $host, $group, $tar_target is now mounted \n" if $serverconfig{verbose};
+        } else {
+            print "$taskid, $host, $group, Mount error for $tar_target: $result\n";
+            return;
+        }
+    }
+
+    $tar_target .= "/$hostconfig->{BKP_PREFIX}/$host";
+
+    return $tar_target;
+}
+
 sub execute_tar {
-    my ( $taskid, $host, $group ) = @_;
+    my ( $taskid, $host, $group, $srcfolder ) = @_;
     my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
 
     my $startstamp = time();
 
-    my ($tar_options, $tar_helper) = _eval_tar_options( $host, $group, $taskid );
-    my $tar_target                 = _eval_tar_target( $host, $group);
+    my ($tar_options, $tar_helper) = _eval_tar_options($host, $group, $taskid);
+    my $tar_source                 = _eval_tar_source($host, $group);
+    my $tar_target                 = _setup_tar_target($host, $group, $hostconfig, $taskid);
 
     my $tar_cmd  = $serverconfig{path_tar};
 
-    my $DESTPATH="/Folder_X.tar";
-    my $path = "kommt noch";
-
-    print "$taskid, $host, $group, Tar Command: $tar_cmd $tar_options -cf $path $tar_target\n" ;
+    print "$taskid, $host, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target $tar_source\n" ;
     print "$taskid, $host, $group, Executing tar for host $host group $group\n";
 
     _delete_tar_helper($tar_helper);
