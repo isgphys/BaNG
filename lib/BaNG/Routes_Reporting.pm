@@ -35,6 +35,15 @@ get '/task/:taskid' => require_role config->{admin_role} => sub {
     };
 };
 
+post '/task/:taskid' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+    my $taskid = param('taskid');
+    my $deletedby  = session('logged_in_user');
+
+    bangstat_task_delete( param('taskid'));
+    warning "Task $taskid deleted by $deletedby!";
+};
+
 get '/jobs' => require_role config->{admin_role} => sub {
     get_serverconfig();
 

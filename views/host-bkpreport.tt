@@ -6,7 +6,7 @@
                 <table class="default-table border">
                     <thead>
                         <tr>
-                            <th colspan="14">Group: <% RecentBackups.$hostgroup.0.BkpGroup %>
+                            <th colspan="13">Group: <% RecentBackups.$hostgroup.0.BkpGroup %>
                         </br>
                             Source: <% hosts.$hostgroup.hostconfig.BKP_SOURCE_FOLDER.replace(':','')%>
                         </tr>
@@ -23,6 +23,7 @@
                             <th width="50">SizeTrans</th>
                             <th width="50">TotalFiles</th>
                             <th width="50">TotalSize</th>
+                            <th width="30">Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,6 +53,9 @@
                             <td class="center"><% bkp.SizeTrans %></td>
                             <td class="center"><% bkp.NumOfFiles %></td>
                             <td class="center"><% bkp.TotFileSize %></td>
+                            <% IF bkp.TaskID %>
+                            <td align="center" title="Delete Task from DB"><img class="delete pointer" src="/images/delete.png" data-deletedbtask="<% bkp.TaskID %>"></td>
+                            <% END %>
                         </tr>
                         <%- END %>
                     </tbody>
