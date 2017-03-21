@@ -27,7 +27,6 @@ my ($startstamp,$endstamp);
 my ($taskid, $taskmeta);
 my ($verbose_arg, $vv_arg, $vvv_arg);
 my $dryrun_arg;
-my @queue;
 my %finishable_bkpjobs;
 
 #################################

@@ -16,6 +16,7 @@ our @EXPORT = qw(
     %groups
     %servers
     %serverconfig
+    @queue
     $prefix
     $servername
     get_server_config_defaults
@@ -37,6 +38,7 @@ our @EXPORT = qw(
 
 our %hosts;
 our %groups;
+our @queue;
 our %servers;
 our %serverconfig;
 our $prefix     = dirname( abs_path($0) );
