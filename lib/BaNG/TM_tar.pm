@@ -83,19 +83,21 @@ sub _delete_tar_helper {
 sub _setup_tar_target {
     my ( $host, $group, $hostconfig, $taskid ) = @_;
 
-    my $nfs_share         = "lts11.ethz.ch:/shares/phys_lts_nfs";
-    my $nfs_mount_options = "noauto,hard,intr,retrans=10,timeo=300,rsize=65536,wsize=1048576,vers=3,proto=tcp,sync";
-    my $tar_target        = "/mnt/LTS/lts-11";
+    my $nfs_share         = $serverconfig{lts_nfs_share};
+    my $nfs_mount_options = $serverconfig{lts_nfs_mount_options};
+    my $tar_target        = $serverconfig{lts_target_mnt};
 
     if (`cat /proc/mounts | grep $tar_target`) {
         print "$taskid, $host, $group, $tar_target is mounted \n" if $serverconfig{verbose};
     } else {
         print "$taskid, $host, $group, $tar_target is not mounted \n" if $serverconfig{verbose};
-        my $result = system("mount -t nfs -o $nfs_mount_options $nfs_share $tar_target");
-        if ($result == 0) {
+        my $mount_cmd = "mount -t nfs -o $nfs_mount_options $nfs_share $tar_target";
+        $mount_cmd = "echo $mount_cmd" if $serverconfig{dryrun};
+        my $mount_result = system($mount_cmd);
+        if ($mount_result == 0) {
             print "$taskid, $host, $group, $tar_target is now mounted \n" if $serverconfig{verbose};
         } else {
-            print "$taskid, $host, $group, Mount error for $tar_target: $result\n";
+            print "$taskid, $host, $group, Mount error for $tar_target: $mount_result\n";
             return;
         }
     }

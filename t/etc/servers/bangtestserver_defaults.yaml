@@ -4,3 +4,6 @@ path_tar:          /bin/tar
 remote_app:        "/usr/local/bin/remotesshwrapper"
 remote_app_path:   "/opt/remotesshwrapper"
 remote_app_folder: "BaNG"
+lts_nfs_share:         "test.foo.bar:/shares/test_lts_nfs"
+lts_nfs_mount_options: "noauto,hard,vers=3,proto=tcp,sync"
+lts_target_mnt:        "/mnt/LTS/lts-test"
