@@ -36,6 +36,8 @@ lts_nfs_share:          ""
 lts_nfs_mount_options:  ""
 lts_target_mnt:         ""
 #
+tar_options:            ''
+#
 verbose:                0
 verboselevel:           2
 dryrun:                 0

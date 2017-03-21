@@ -14,12 +14,12 @@ our @EXPORT = qw(
 
 sub _eval_tar_options {
     my ($host, $group, $taskid) = @_;
-    my $tar_options = '';
+    my $tar_options = $serverconfig{tar_options};
     my $tar_helper  = _create_tar_helper();
 
     logit( $taskid, $host, $group, "tar helper script $tar_helper created" );
 
-    $tar_options .= "-ML 25G -b 1024 -F $tar_helper";
+    $tar_options .= " -F $tar_helper";
 
     return ($tar_options, $tar_helper);
 }
