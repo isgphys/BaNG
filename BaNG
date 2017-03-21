@@ -68,7 +68,7 @@ if ( !@queue ) {
     exit 0;
 }
 
-reorder_queue_by_priority( $host_arg, $group_arg );
+reorder_queue_by_priority( $taskid, $host_arg, $group_arg );
 run_threads();
 foreach my $finishable_bkpjob (sort keys %finishable_bkpjobs) {
     finish_backupjob($finishable_bkpjobs{$finishable_bkpjob});
@@ -78,44 +78,6 @@ logit( $taskid, $host_arg, $group_arg, "Task $taskid finished!" );
 exit 0;
 
 #################################
-sub reorder_queue_by_priority {
-    my ( $host, $group ) = @_;
-    my @prio_queue;
-    my @prio_queue_sorted;
-    $host  ||= 'SERVER';
-    $group ||= 'GLOBAL';
-
-    logit( $taskid, $host, $group, "reorder queue by priority!" );
-
-    # add priority information to all queued backup jobs
-    foreach my $bkpjob (@queue) {
-        my $host  = $bkpjob->{host};
-        my $group = $bkpjob->{group};
-        my $path  = $bkpjob->{path};
-        $path =~ s/'//g;
-
-        my $prio = $hosts{"$host-$group"}->{hostconfig}->{BKP_PRIORITY}->{"$path"} || 0;
-        $bkpjob->{priority} = $prio;
-        print "$path set priority to $prio\n" if $serverconfig{verbose};
-        push( @prio_queue, $bkpjob );
-    }
-
-    # reorder queue by priority
-    print "Final queue order: \n" if $serverconfig{verbose};
-    foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue ) {
-        print "$bkpjob->{priority} $bkpjob->{path} $bkpjob->{dosnapshot}\n" if $serverconfig{verbose};
-        push( @prio_queue_sorted, $bkpjob );
-    }
-
-    if ( $#queue == $#prio_queue_sorted ) {
-        @queue = @prio_queue_sorted;
-    } else {
-        logit( $taskid, $host, $group, "ERROR: reorder_queue_by_priority queue lengths don't match!" );
-    }
-
-    return 1;
-}
-
 # Threading
 #
 sub run_threads {

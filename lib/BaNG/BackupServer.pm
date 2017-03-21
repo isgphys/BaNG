@@ -36,6 +36,7 @@ our @EXPORT = qw(
     rename_failed_backup
     create_generic_exclude_file
     remove_generic_exclude_file
+    reorder_queue_by_priority
 );
 
 sub _check_fill_level {
@@ -530,6 +531,44 @@ sub remove_generic_exclude_file {
         unlink "$exclsubfolderfile";
     }
     logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
+
+    return 1;
+}
+
+sub reorder_queue_by_priority {
+    my ( $taskid, $host, $group ) = @_;
+    my @prio_queue;
+    my @prio_queue_sorted;
+    $host  ||= 'SERVER';
+    $group ||= 'GLOBAL';
+
+    logit( $taskid, $host, $group, "reorder queue by priority!" );
+
+    # add priority information to all queued backup jobs
+    foreach my $bkpjob (@queue) {
+        my $host  = $bkpjob->{host};
+        my $group = $bkpjob->{group};
+        my $path  = $bkpjob->{path};
+        $path =~ s/'//g;
+
+        my $prio = $hosts{"$host-$group"}->{hostconfig}->{BKP_PRIORITY}->{"$path"} || 0;
+        $bkpjob->{priority} = $prio;
+        print "$path set priority to $prio\n" if $serverconfig{verbose};
+        push( @prio_queue, $bkpjob );
+    }
+
+    # reorder queue by priority
+    print "Final queue order: \n" if $serverconfig{verbose};
+    foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue ) {
+        print "$bkpjob->{priority} $bkpjob->{path} $bkpjob->{dosnapshot}\n" if $serverconfig{verbose};
+        push( @prio_queue_sorted, $bkpjob );
+    }
+
+    if ( $#queue == $#prio_queue_sorted ) {
+        @queue = @prio_queue_sorted;
+    } else {
+        logit( $taskid, $host, $group, "ERROR: reorder_queue_by_priority queue lengths don't match!" );
+    }
 
     return 1;
 }
