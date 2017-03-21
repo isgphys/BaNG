@@ -32,6 +32,10 @@ xymon_server:
 #
 perf_mon_url:           ""
 #
+lts_nfs_share:          ""
+lts_nfs_mount_options:  ""
+lts_target_mnt:         ""
+#
 verbose:                0
 verboselevel:           2
 dryrun:                 0
