@@ -6,7 +6,6 @@ use Cwd qw( abs_path );
 use Date::Parse;
 use File::Basename;
 use Getopt::Long qw( :config no_auto_abbrev );
-use Time::HiRes qw( gettimeofday );
 use Thread::Queue;
 
 use lib dirname( abs_path($0) ) . '/lib';
@@ -206,59 +205,6 @@ sub thread_work {
 #################################
 # Helper subroutines
 #
-sub create_timeid {
-    my ( $host, $group ) = @_;
-
-    my ( $s, $usec ) = gettimeofday;
-    my $timeid = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
-    $timeid =~ s/\n//g;
-    $host   ||= "SERVER";
-    $group  ||= "GLOBAL";
-    $taskid ||= $timeid;
-    logit( $taskid, $host, $group, "Created TimeID: $timeid" );
-
-    return $timeid;
-}
-
-sub create_link_current {
-    my ( $host, $group, $bkptimestamp ) = @_;
-
-    my $link_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
-    my $link_dest    = targetpath( $host, $group ) . '/current';
-    my $ln_cmd       = "/bin/ln -s";
-
-    if ( -l $link_dest ){
-        unlink $link_dest unless $serverconfig{dryrun};
-        logit( $taskid, $host, $group, "Delete existing current symlink for host $host group $group" );
-    }
-
-    my $link_cmd = "$ln_cmd $link_source $link_dest >/dev/null 2>&1";
-    $link_cmd = "echo $link_cmd" if $serverconfig{dryrun};
-    logit( $taskid, $host, $group, "Create symlink for host $host group $group using $link_cmd" );
-    system($link_cmd) and logit( $taskid, $host, $group, "ERROR: creating symlink for $host-$group: $!" );
-
-    return 1;
-}
-
-sub rename_failed_backup {
-    my ( $host, $group, $bkptimestamp ) = @_;
-
-    my $failed_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
-    my $failed_dest    = targetpath( $host, $group ) . '/' . $bkptimestamp . "_failed";
-    my $mv_cmd       = "/bin/mv";
-
-    if ( -e $failed_source ) {
-        my $rename_cmd = "$mv_cmd $failed_source $failed_dest >/dev/null 2>&1";
-        $rename_cmd = "echo $rename_cmd" if $serverconfig{dryrun};
-        logit( $taskid, $host, $group, "Rename failed folder for host $host group $group using $rename_cmd" );
-        system($rename_cmd) and logit( $taskid, $host, $group, "ERROR: renaming failed folder for $host-$group: $!" );
-    } else {
-        logit( $taskid, $host, $group, "ERROR: $failed_source not exists, skip renaming failed folder for host $host group $group" );
-    }
-
-    return 1;
-}
-
 sub finish_backupjob {
     my ($bkpjob)     = @_;
     my $jobid        = $bkpjob->{'jobid'};
@@ -275,7 +221,7 @@ sub finish_backupjob {
         create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid, $rsync_target);
         if ( $has_failed ) {
             logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
-            rename_failed_backup( $host, $group, $bkptimestamp );
+            rename_failed_backup( $taskid, $host, $group, $bkptimestamp );
         } else {
             logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
         }
@@ -283,7 +229,7 @@ sub finish_backupjob {
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
         if ( $has_failed ) {
             logit( $taskid, $host, $group, "rsync in links-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
-            rename_failed_backup( $host, $group, $bkptimestamp );
+            rename_failed_backup( $taskid, $host, $group, $bkptimestamp );
         } else {
             logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
             create_link_current( $host, $group, $bkptimestamp );
@@ -300,38 +246,7 @@ sub finish_backupjob {
     }
     logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
 
-    remove_generic_exclude_file($host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
-
-    return 1;
-}
-
-sub generic_exclude_file {
-    my ( $host, $group, $jobid ) = @_;
-    my $exclsubfolderfilename = "generated.${host}_${group}_${jobid}";
-    my $exclsubfolderfile     = "$serverconfig{path_excludes}/$exclsubfolderfilename";
-
-    return $exclsubfolderfile;
-}
-
-sub create_generic_exclude_file {
-    my ( $host, $group, $jobid ) = @_;
-    my $exclsubfolderfile        = generic_exclude_file( $host, $group, $jobid );
-
-    unless ( $serverconfig{dryrun} ) {
-        system("touch \"$exclsubfolderfile\"") and logit( $taskid, $host, $group, "ERROR: could not create generated excludefile $exclsubfolderfile" );
-    }
-    logit( $taskid, $host, $group, "Create generated exclude file $exclsubfolderfile" );
-    return $exclsubfolderfile;
-}
-
-sub remove_generic_exclude_file {
-    my ( $host, $group, $jobid ) = @_;
-    my $exclsubfolderfile        = generic_exclude_file( $host, $group, $jobid );
-
-    if ( -e $exclsubfolderfile ) {
-        unlink "$exclsubfolderfile";
-    }
-    logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
+    remove_generic_exclude_file($taskid, $host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
 
     return 1;
 }

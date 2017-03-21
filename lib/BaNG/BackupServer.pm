@@ -10,6 +10,7 @@ use BaNG::Reporting;
 use BaNG::BTRFS;
 use Date::Parse;
 use POSIX qw( floor );
+use Time::HiRes qw( gettimeofday );
 use Net::Ping;
 use YAML::Tiny qw( LoadFile );
 use JSON;
@@ -30,6 +31,11 @@ our @EXPORT = qw(
     check_lockfile
     writeto_lockfile
     eval_bkptimestamp
+    create_timeid
+    create_link_current
+    rename_failed_backup
+    create_generic_exclude_file
+    remove_generic_exclude_file
 );
 
 sub _check_fill_level {
@@ -439,6 +445,93 @@ sub writeto_lockfile {
         system("echo \"$key: $value\" >> \"$lockfile\"");
     }
     logit( $taskid, $host, $group, "Write to lockfile $lockfile -- $key: $value" ) if $serverconfig{verbose};
+}
+
+#################################
+# Helper subroutines
+#
+sub create_timeid {
+    my ( $taskid, $host, $group ) = @_;
+
+    my ( $s, $usec ) = gettimeofday;
+    my $timeid = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
+    $timeid =~ s/\n//g;
+    $host   ||= "SERVER";
+    $group  ||= "GLOBAL";
+    $taskid ||= $timeid;
+    logit( $taskid, $host, $group, "Created TimeID: $timeid" );
+
+    return $timeid;
+}
+
+sub create_link_current {
+    my ( $taskid, $host, $group, $bkptimestamp ) = @_;
+
+    my $link_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
+    my $link_dest    = targetpath( $host, $group ) . '/current';
+    my $ln_cmd       = "/bin/ln -s";
+
+    if ( -l $link_dest ){
+        unlink $link_dest unless $serverconfig{dryrun};
+        logit( $taskid, $host, $group, "Delete existing current symlink for host $host group $group" );
+    }
+
+    my $link_cmd = "$ln_cmd $link_source $link_dest >/dev/null 2>&1";
+    $link_cmd = "echo $link_cmd" if $serverconfig{dryrun};
+    logit( $taskid, $host, $group, "Create symlink for host $host group $group using $link_cmd" );
+    system($link_cmd) and logit( $taskid, $host, $group, "ERROR: creating symlink for $host-$group: $!" );
+
+    return 1;
+}
+
+sub rename_failed_backup {
+    my ( $taskid, $host, $group, $bkptimestamp ) = @_;
+
+    my $failed_source  = targetpath( $host, $group ) . '/' . $bkptimestamp;
+    my $failed_dest    = targetpath( $host, $group ) . '/' . $bkptimestamp . "_failed";
+    my $mv_cmd       = "/bin/mv";
+
+    if ( -e $failed_source ) {
+        my $rename_cmd = "$mv_cmd $failed_source $failed_dest >/dev/null 2>&1";
+        $rename_cmd = "echo $rename_cmd" if $serverconfig{dryrun};
+        logit( $taskid, $host, $group, "Rename failed folder for host $host group $group using $rename_cmd" );
+        system($rename_cmd) and logit( $taskid, $host, $group, "ERROR: renaming failed folder for $host-$group: $!" );
+    } else {
+        logit( $taskid, $host, $group, "ERROR: $failed_source not exists, skip renaming failed folder for host $host group $group" );
+    }
+
+    return 1;
+}
+
+sub _generic_exclude_file {
+    my ( $host, $group, $jobid ) = @_;
+    my $exclsubfolderfilename = "generated.${host}_${group}_${jobid}";
+    my $exclsubfolderfile     = "$serverconfig{path_excludes}/$exclsubfolderfilename";
+
+    return $exclsubfolderfile;
+}
+
+sub create_generic_exclude_file {
+    my ( $taskid, $host, $group, $jobid ) = @_;
+    my $exclsubfolderfile        = _generic_exclude_file( $host, $group, $jobid );
+
+    unless ( $serverconfig{dryrun} ) {
+        system("touch \"$exclsubfolderfile\"") and logit( $taskid, $host, $group, "ERROR: could not create generated excludefile $exclsubfolderfile" );
+    }
+    logit( $taskid, $host, $group, "Create generated exclude file $exclsubfolderfile" );
+    return $exclsubfolderfile;
+}
+
+sub remove_generic_exclude_file {
+    my ( $taskid, $host, $group, $jobid ) = @_;
+    my $exclsubfolderfile        = _generic_exclude_file( $host, $group, $jobid );
+
+    if ( -e $exclsubfolderfile ) {
+        unlink "$exclsubfolderfile";
+    }
+    logit( $taskid, $host, $group, "Remove generated exclude file $exclsubfolderfile" );
+
+    return 1;
 }
 
 1;
