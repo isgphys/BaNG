@@ -2,6 +2,7 @@
 # Global settings
 # ---------------
 config_defaults_hosts:  etc/defaults_hosts.yaml
+config_defaults_lts:    etc/defaults_lts.yaml
 config_bangstat:        etc/bangstat_db.yaml
 bkpmode:                "rsync"
 db_support:             0
