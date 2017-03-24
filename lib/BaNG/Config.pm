@@ -16,6 +16,7 @@ our @EXPORT = qw(
     %groups
     %servers
     %serverconfig
+    %ltsjobs
     @queue
     $prefix
     $servername
@@ -24,6 +25,8 @@ our @EXPORT = qw(
     get_host_config_defaults
     get_host_config
     get_group_config
+    get_lts_config
+    get_lts_config_defaults
     write_config
     update_config
     delete_config
@@ -41,6 +44,7 @@ our %groups;
 our @queue;
 our %servers;
 our %serverconfig;
+our %ltsjobs;
 our $prefix     = dirname( abs_path($0) );
 our $servername = `hostname -s`;
 chomp $servername;
@@ -80,7 +84,7 @@ sub get_serverconfig {
     }
 
     # preprend full path where needed
-    foreach my $key (qw( config_defaults_hosts config_bangstat path_groupconfig path_hostconfig path_excludes path_db_dumps path_logs path_lockfiles )) {
+    foreach my $key (qw( config_defaults_hosts config_defaults_lts config_bangstat path_groupconfig path_hostconfig path_excludes path_db_dumps path_logs path_lockfiles )) {
         $serverconfig{$key} = "$prefix/$serverconfig{$key}";
     }
 
@@ -102,6 +106,16 @@ sub get_host_config_defaults {
     my $settings;
     if ( _sanityfilecheck($defaults_hosts_file) ) {
         $settings = LoadFile($defaults_hosts_file);
+    }
+
+    return $settings;
+}
+
+sub get_lts_config_defaults {
+    my $defaults_lts_file = $serverconfig{config_defaults_lts};
+    my $settings;
+    if ( _sanityfilecheck($defaults_lts_file) ) {
+        $settings = LoadFile($defaults_lts_file);
     }
 
     return $settings;
@@ -208,6 +222,43 @@ sub get_host_config {
             css_class        => $css_class,
             nobulk_css_class => $nobulk_css_class,
             hostconfig       => $hostconfig,
+            confighelper     => $confighelper,
+        };
+    }
+
+    return 1;
+}
+
+sub get_lts_config {
+    my ( $group, $subgroup ) = @_;
+
+    $group    ||= '*';
+    $subgroup ||= '*';
+    undef %ltsjobs;
+    my @ltsconfigs = _find_configs( "$group\_$subgroup\.yaml", "$serverconfig{path_ltsconfig}" );
+
+    foreach my $ltsconfigfile (@ltsconfigs) {
+        my ( $groupname, $subgroupname ) = _split_configname($ltsconfigfile);
+        my ( $ltsconfig, $confighelper ) = _read_lts_configfile( $groupname, $subgroupname );
+        my $isEnabled        = $ltsconfig->{LTS_ENABLED};
+        my $isBulkbkp        = $ltsconfig->{LTS_BULK_ALLOW} || 0;
+        my $status           = $isEnabled ? 'enabled' : 'disabled';
+        my $css_class        = $isEnabled ? 'active ' : '';
+        my $nobulk_css_class = ( $isBulkbkp == 0 ) ? 'nobulk ' : '';
+
+        unless ( $ltsconfig->{LTS_SOURCE_FOLDER} ) {
+            $css_class                         = 'invalidConfig';
+            $confighelper->{LTS_SOURCE_FOLDER} = 'invalid';
+        }
+
+        $ltsjobs{"$groupname-$subgroupname"} = {
+            group            => $groupname,
+            subgroup         => $subgroupname,
+            status           => $status,
+            configfile       => $ltsconfigfile,
+            css_class        => $css_class,
+            nobulk_css_class => $nobulk_css_class,
+            ltsconfig        => $ltsconfig,
             confighelper     => $confighelper,
         };
     }
@@ -428,6 +479,17 @@ sub _read_server_configfile {
     my $settings = LoadFile( $serverconfig{config_defaults_servers} );
     $configfile{server} = "$serverconfig{path_serverconfig}/${server}_defaults.yaml";
     my $settingshelper = _override_config( $settings, \%configfile, qw( server ) );
+
+    return ( $settings, $settingshelper );
+}
+
+sub _read_lts_configfile {
+    my ($group, $subgroup) = @_;
+
+    my %configfile;
+    my $settings = get_lts_config_defaults();
+    $configfile{lts} = "$serverconfig{path_ltsconfig}/$group\_$subgroup.yaml";
+    my $settingshelper = _override_config( $settings, \%configfile, qw( lts ) );
 
     return ( $settings, $settingshelper );
 }
