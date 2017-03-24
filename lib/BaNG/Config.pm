@@ -486,9 +486,9 @@ sub _find_configs {
 sub _split_configname {
     my ($configfile) = @_;
 
-    my ( $hostname, $groupname ) = $configfile =~ /^([\w\d\.-]+)_([\w\d-]+)\.yaml/;
+    my ( $a, $b ) = $configfile =~ /^([\w\d\.-]+)_([\w\d-]+)\.yaml/;
 
-    return ( $hostname, $groupname );
+    return ( $a, $b );
 }
 
 sub _split_group_configname {
