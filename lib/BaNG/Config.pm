@@ -230,16 +230,15 @@ sub get_host_config {
 }
 
 sub get_lts_config {
-    my ( $group, $subgroup ) = @_;
+    my ( $group ) = @_;
 
     $group    ||= '*';
-    $subgroup ||= '*';
     undef %ltsjobs;
-    my @ltsconfigs = _find_configs( "$group\_$subgroup\.yaml", "$serverconfig{path_ltsconfig}" );
+    my @ltsconfigs = _find_configs( "$group\.yaml", "$serverconfig{path_ltsconfig}" );
 
     foreach my $ltsconfigfile (@ltsconfigs) {
-        my ( $groupname, $subgroupname ) = _split_configname($ltsconfigfile);
-        my ( $ltsconfig, $confighelper ) = _read_lts_configfile( $groupname, $subgroupname );
+        my ( $groupname ) = _split_configname($ltsconfigfile);
+        my ( $ltsconfig, $confighelper ) = _read_lts_configfile( $groupname );
         my $isEnabled        = $ltsconfig->{LTS_ENABLED};
         my $isBulkbkp        = $ltsconfig->{LTS_BULK_ALLOW} || 0;
         my $status           = $isEnabled ? 'enabled' : 'disabled';
@@ -251,9 +250,8 @@ sub get_lts_config {
             $confighelper->{LTS_SOURCE_FOLDER} = 'invalid';
         }
 
-        $ltsjobs{"$groupname-$subgroupname"} = {
+        $ltsjobs{"$groupname"} = {
             group            => $groupname,
-            subgroup         => $subgroupname,
             status           => $status,
             configfile       => $ltsconfigfile,
             css_class        => $css_class,
@@ -484,11 +482,11 @@ sub _read_server_configfile {
 }
 
 sub _read_lts_configfile {
-    my ($group, $subgroup) = @_;
+    my ($group) = @_;
 
     my %configfile;
     my $settings = get_lts_config_defaults();
-    $configfile{lts} = "$serverconfig{path_ltsconfig}/$group\_$subgroup.yaml";
+    $configfile{lts} = "$serverconfig{path_ltsconfig}/$group.yaml";
     my $settingshelper = _override_config( $settings, \%configfile, qw( lts ) );
 
     return ( $settings, $settingshelper );

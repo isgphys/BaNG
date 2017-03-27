@@ -13,11 +13,11 @@ our @EXPORT = qw(
 );
 
 sub _eval_tar_options {
-    my ($host, $group, $taskid) = @_;
-    my $tar_options = $serverconfig{tar_options};
+    my ($group, $taskid) = @_;
+    my $tar_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_tar_options};
     my $tar_helper  = _create_tar_helper();
 
-    logit( $taskid, $host, $group, "tar helper script $tar_helper created" );
+    logit( $taskid, $group, '', "tar helper script $tar_helper created" );
 
     $tar_options .= " -F $tar_helper";
 
@@ -25,10 +25,10 @@ sub _eval_tar_options {
 }
 
 sub _eval_tar_source {
-    my ( $host, $group ) = @_;
-    my $tar_source = targetpath( $host, $group );
+    my ( $group ) = @_;
+    my $tar_source = targetpath( $group );
 
-    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
+    if ( $ltsjobs{"$group"}->{ltsconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) {
         $tar_source .= '/current';
     } else {
         $tar_source .= "/snap_LTS";
