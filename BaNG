@@ -43,10 +43,11 @@ $taskid = create_timeid( $host_arg, $group_arg );
 
 bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
 
-get_host_config( $host_arg, $group_arg );
+if ( $serverconfig{bkpmode} eq "rsync") {
 
-foreach my $config ( sort keys %hosts ) {
-    if ( $serverconfig{bkpmode} eq "rsync" ){
+    get_host_config( $host_arg, $group_arg );
+
+    foreach my $config ( sort keys %hosts ) {
         if ($wipe) {
             wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group}, $taskid, $force );
         } elsif ($xymononly) {
@@ -57,11 +58,15 @@ foreach my $config ( sort keys %hosts ) {
         } else {
             queue_rsync_backup( $host_arg, $group_arg, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $initial, $missingonly, $noreport, $taskid );
         }
-    } elsif ( $serverconfig{bkpmode} eq "tar" ) {
-        print "TAR mode work\n" if $serverconfig{verbose};
-        execute_tar($taskid, $hosts{$config}->{hostname}, $hosts{$config}->{group} );
     }
+} elsif ( $serverconfig{bkpmode} eq "tar" ) {
+
+    get_lts_config( $group_arg, $subgroup_arg );
+
+    print "TAR mode work\n" if $serverconfig{verbose};
+    queue_tar_backup( $group_arg, $subgroup_arg, $noreport, $taskid );
 }
+
 
 if ( !@queue ) {
     print "Exit because queue is empty.\n" if ( $serverconfig{verbose} && !$wipe );
