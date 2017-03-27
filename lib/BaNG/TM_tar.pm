@@ -10,7 +10,10 @@ use BaNG::BackupServer;
 use Exporter 'import';
 our @EXPORT = qw(
     execute_tar
+    queue_tar_backup
 );
+
+my ($startstamp, $endstamp);
 
 sub _eval_tar_options {
     my ($group, $taskid) = @_;
@@ -81,48 +84,154 @@ sub _delete_tar_helper {
 }
 
 sub _setup_tar_target {
-    my ( $host, $group, $hostconfig, $taskid ) = @_;
+    my ( $group, $ltsconfig, $taskid ) = @_;
 
-    my $nfs_share         = $serverconfig{lts_nfs_share};
-    my $nfs_mount_options = $serverconfig{lts_nfs_mount_options};
-    my $tar_target        = $serverconfig{lts_target_mnt};
+    my $nfs_share         = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_share};
+    my $nfs_mount_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_mount_options};
+    my $tar_target        = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_mount};
 
     if (`cat /proc/mounts | grep $tar_target`) {
-        print "$taskid, $host, $group, $tar_target is mounted \n" if $serverconfig{verbose};
+        print "$taskid, $group, $tar_target is mounted \n" if $serverconfig{verbose};
     } else {
-        print "$taskid, $host, $group, $tar_target is not mounted \n" if $serverconfig{verbose};
+        print "$taskid, $group, $tar_target is not mounted \n" if $serverconfig{verbose};
         my $mount_cmd = "mount -t nfs -o $nfs_mount_options $nfs_share $tar_target";
         $mount_cmd = "echo $mount_cmd" if $serverconfig{dryrun};
         my $mount_result = system($mount_cmd);
         if ($mount_result == 0) {
-            print "$taskid, $host, $group, $tar_target is now mounted \n" if $serverconfig{verbose};
+            print "$taskid, $group, $tar_target is now mounted \n" if $serverconfig{verbose};
         } else {
-            print "$taskid, $host, $group, Mount error for $tar_target: $mount_result\n";
+            print "$taskid, $group, Mount error for $tar_target: $mount_result\n";
             return;
         }
     }
 
-    $tar_target .= "/$hostconfig->{BKP_PREFIX}/$host";
+    $tar_target .= "/$ltsconfig->{BKP_PREFIX}/$group";
 
     return $tar_target;
 }
 
 sub execute_tar {
-    my ( $taskid, $host, $group, $srcfolder ) = @_;
-    my $hostconfig  = $hosts{"$host-$group"}->{hostconfig};
+    my ( $taskid, $group, $srcfolder ) = @_;
+    my $ltsconfig  = $ltsjobs{"$group"}->{ltsconfig};
 
     my $startstamp = time();
 
-    my ($tar_options, $tar_helper) = _eval_tar_options($host, $group, $taskid);
-    my $tar_source                 = _eval_tar_source($host, $group);
-    my $tar_target                 = _setup_tar_target($host, $group, $hostconfig, $taskid);
+    my ($tar_options, $tar_helper) = _eval_tar_options($group, $taskid);
+    my $tar_source                 = _eval_tar_source($group);
+    my $tar_target                 = _setup_tar_target($group, $ltsconfig, $taskid);
 
     my $tar_cmd  = $serverconfig{path_tar};
 
-    print "$taskid, $host, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target $tar_source\n" ;
-    print "$taskid, $host, $group, Executing tar for host $host group $group\n";
+    print "$taskid, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target $tar_source\n" ;
+    print "$taskid, $group, Executing tar for group $group\n";
 
     _delete_tar_helper($tar_helper);
+}
+
+#################################
+# Queuing
+#
+sub queue_tar_backup {
+    my ( $group, $noreport, $taskid ) = @_;
+    my $jobid;
+
+    logit( $taskid, $group, '', "Queueing backup for group $group" );
+
+    # make sure backup is enabled
+    return unless $ltsjobs{"$group"}->{ltsconfig}->{BKP_ENABLED};
+
+    # stop if trying to do bulk backup if it's not allowed
+    return unless ( ( $group ) || $ltsjobs{"$group"}->{ltsconfig}->{BKP_BULK_ALLOW} );
+
+    if ( !-e ($ltsjobs{"$group"}->{ltsconfig}->{path_tar} || "") ) {
+        $startstamp = time();
+        $endstamp   = $startstamp;
+        $jobid = create_timeid( $taskid, $group );
+        logit( $taskid, $group, '', "TAR command " . ($ltsjobs{"$group"}->{ltsconfig}->{path_tar} || "") . " not found!" );
+
+        return 1;
+    }
+
+    my $bkptimestamp = eval_bkptimestamp( $group );
+
+    # get list of source folders to back up
+    my (@src_folders) = split( / /, $ltsjobs{"$group"}->{ltsconfig}->{BKP_SOURCE_FOLDER} );
+    logit( $taskid, $group, '', 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
+    logit( $taskid, $group, '', 'Status source folder threading: ' . $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SRCFOLDERS} );
+
+    if (( $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SRCFOLDERS} ) || ( $#src_folders  == 0 )) {
+#        # optionally queue each subfolder of the source folders while only 1 srcfolder defined
+        if ( $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+
+            my $dosnapshot = 0;
+            my $numFolder  = @src_folders;
+
+            foreach my $folder (@src_folders) {
+                $jobid = create_timeid( $taskid, $group );
+
+                _queue_subfolders( $taskid, $jobid, $group, $bkptimestamp, $dosnapshot, $folder );
+            }
+
+        } else {
+
+            my $dosnapshot = 0;
+            my $numFolder  = @src_folders;
+
+            $jobid = create_timeid( $taskid, $group );
+
+            foreach my $folder (@src_folders) {
+
+                my $bkpjob = {
+                    jobid        => $jobid,
+                    group        => $group,
+                    path         => "$folder",
+                    srcfolder    => "@src_folders",
+                    bkptimestamp => $bkptimestamp,
+                    dosnapshot   => $dosnapshot,
+                };
+                push( @queue, $bkpjob );
+            }
+        }
+
+    } else {
+        # queue list of source folders as a whole
+        $jobid = create_timeid( $taskid, $group );
+        my $bkpjob = {
+            jobid        => $jobid,
+            group        => $group,
+            path         => "@src_folders",
+            srcfolder    => "@src_folders",
+            bkptimestamp => $bkptimestamp,
+            dosnapshot   => 1,
+            rsync_err    => 0,
+            has_failed   => 0,
+        };
+        push( @queue, $bkpjob );
+    }
+
+    logit( $taskid, $group, '', "End of queueing backup of group $group" );
+
+    return 1;
+}
+
+sub _queue_subfolders {
+    my ( $taskid, $jobid, $group, $bkptimestamp, $dosnapshot, $srcfolder ) = @_;
+
+    $srcfolder =~ s/://;
+    my $sourcepath      = targetpath( $group );
+    my $searchpath = $sourcepath . "/current" . $srcfolder;
+    print "sourcepath: $searchpath\n";
+
+    my @subfolders = `find $searchpath -mindepth 1 -maxdepth 1 -xdev -type d -not -empty | sort`;
+
+    if ( $#subfolders == -1 ) {
+        push( @subfolders, $srcfolder );
+        logit( $taskid, $group, '', "ERROR: eval subfolders failed, use now with:\n @subfolders" );
+    } else {
+        logit( $taskid, $group, '', "eval subfolders:\n @subfolders" );
+    }
+
+    return 1;
 }
 
 1;
