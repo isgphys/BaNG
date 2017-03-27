@@ -9,6 +9,7 @@ db_support:             0
 #
 path_groupconfig:       etc/groups
 path_hostconfig:        etc/hosts
+path_ltsconfig:         etc/lts
 path_excludes:          etc/excludes
 path_db_dumps:          var/db_dumps
 path_lockfiles:         var/lockfiles
