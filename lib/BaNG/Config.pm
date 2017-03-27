@@ -545,10 +545,15 @@ sub _find_configs {
 
 sub _split_configname {
     my ($configfile) = @_;
+    my ($a, $b);
 
-    my ( $a, $b ) = $configfile =~ /^([\w\d\.-]+)_([\w\d-]+)\.yaml/;
-
-    return ( $a, $b );
+    if ($configfile =~ /_/ ) {
+        ( $a, $b ) = $configfile =~ /^([\w\d\.-]+)_([\w\d-]+)\.yaml/;
+        return ( $a, $b );
+    } else {
+        ( $a ) = $configfile =~ /^([\w\d\.-]+)\.yaml/;
+        return ( $a );
+    }
 }
 
 sub _split_group_configname {
