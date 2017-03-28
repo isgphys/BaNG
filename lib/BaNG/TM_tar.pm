@@ -13,8 +13,6 @@ our @EXPORT = qw(
     queue_tar_backup
 );
 
-my ($startstamp, $endstamp);
-
 sub _eval_tar_options {
     my ($group, $taskid) = @_;
     my $tar_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_tar_options};
