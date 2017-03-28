@@ -25,7 +25,6 @@ my ($initial, $force, $noreport, $missingonly);
 my ($taskid, $taskmeta);
 my ($verbose_arg, $vv_arg, $vvv_arg);
 my $dryrun_arg;
-my %finishable_bkpjobs;
 
 #################################
 # Main
@@ -56,166 +55,37 @@ if ( $serverconfig{bkpmode} eq "rsync") {
             my %RecentBackups = bangstat_recentbackups($host);
             xymon_report( $taskid, $host, $group, %RecentBackups );
         } else {
-            queue_rsync_backup( $host_arg, $group_arg, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $initial, $missingonly, $noreport, $taskid );
+            queue_rsync_backup( $host_arg, $group_arg, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $initial, $missingonly, $noreport, $taskid, $dryrun_arg, $cron );
         }
     }
+
+    if ( !@queue ) {
+        print "Exit because queue is empty.\n" if ( $serverconfig{verbose} && !$wipe );
+        exit 0;
+    }
+
+    reorder_queue_by_priority( $taskid, $host_arg, $group_arg );
+
+    run_rsync_threads($host_arg, $group_arg, $nthreads_arg, $dryrun_arg, $cron);
+
+    logit( $taskid, $host_arg, $group_arg, "Task $taskid finished!" );
+
+    exit 0;
+
 } elsif ( $serverconfig{bkpmode} eq "tar" ) {
+    print "TAR mode work\n" if $serverconfig{verbose};
 
     get_lts_config( $group_arg );
-
-    print "TAR mode work\n" if $serverconfig{verbose};
     queue_tar_backup( $group_arg, $noreport, $taskid );
-}
 
+    if ( !@queue ) {
+        print "Exit because queue is empty.\n" if $serverconfig{verbose};
+        exit 0;
+    }
 
-if ( !@queue ) {
-    print "Exit because queue is empty.\n" if ( $serverconfig{verbose} && !$wipe );
+    execute_tar($taskid, $group_arg );
+
     exit 0;
-}
-
-reorder_queue_by_priority( $taskid, $host_arg, $group_arg );
-run_threads();
-foreach my $finishable_bkpjob (sort keys %finishable_bkpjobs) {
-    finish_backupjob($finishable_bkpjobs{$finishable_bkpjob});
-}
-logit( $taskid, $host_arg, $group_arg, "Task $taskid finished!" );
-
-exit 0;
-
-#################################
-# Threading
-#
-sub run_threads {
-
-    # define number of threads
-    my $nthreads;
-    if ($nthreads_arg) {
-
-        # If nthreads was defined by cli argument, use it
-        $nthreads = $nthreads_arg;
-        print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
-    } elsif ( $host_arg && $group_arg ) {
-
-        # If no nthreads was given, and we back up a single host and group, get nthreads from its config
-        $nthreads = $hosts{"$host_arg-$group_arg"}->{hostconfig}->{BKP_THREADS_DEFAULT};
-        print "Using nthreads = $nthreads from $host_arg-$group_arg config file\n" if $serverconfig{verbose};
-    } else {
-        $nthreads = 1;
-    }
-    my $Q = Thread::Queue->new;
-    my @threads = map { threads->create( \&thread_work, $Q ) } ( 1 .. $nthreads );
-    $Q->enqueue($_) for @queue;
-    $Q->enqueue( (undef) x $nthreads );
-
-    foreach my $thread (@threads) {
-        my (@finishable_bkpjobs_in_thread) = $thread->join;
-
-        # Merge bkpjobs returned by this thread with already known jobs
-        foreach my $bkpjob (@finishable_bkpjobs_in_thread) {
-            if ( exists $finishable_bkpjobs{$bkpjob->{jobid}} ) {
-                $finishable_bkpjobs{$bkpjob->{jobid}}->{has_failed} = 1 if $bkpjob->{has_failed};
-                $finishable_bkpjobs{$bkpjob->{jobid}}->{dosnapshot} = 1 if $bkpjob->{dosnapshot};
-            } else {
-                $finishable_bkpjobs{$bkpjob->{jobid}} = $bkpjob;
-            }
-            # Push unique rsync errors to array
-            unless( grep { $_ == $bkpjob->{rsync_err} } @{ $finishable_bkpjobs{$bkpjob->{jobid}}->{rsync_errs} } ) {
-                push( @{ $finishable_bkpjobs{$bkpjob->{jobid}}->{rsync_errs} }, $bkpjob->{rsync_err} );
-            }
-        }
-    }
-
-    return 1;
-}
-
-sub thread_work {
-    my ($Q) = @_;
-    my @finishable_bkpjobs_in_thread;
-
-    while ( my $bkpjob = $Q->dequeue ) {
-        my $tid            = threads->tid;
-        my $jobid          = $bkpjob->{jobid};
-        my $host           = $bkpjob->{host};
-        my $group          = $bkpjob->{group};
-        my $path           = $bkpjob->{path};
-        my $bkptimestamp   = $bkpjob->{bkptimestamp};
-        my $srcfolder      = $bkpjob->{srcfolder};
-        my $dosnapshot     = $bkpjob->{'dosnapshot'};
-        my $exclsubfolders = $bkpjob->{'exclsubfolders'} || 0;
-
-        my $random_integer = int( rand(10) ) + 1;
-        $random_integer = 0 if ( $dryrun_arg || not $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} );
-
-        return unless create_lockfile( $taskid, $host, $group, $path );
-        writeto_lockfile( $taskid, $host, $group, $path, "cron", $cron);
-        logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
-        sleep($random_integer);
-        logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
-        my $rsync_err = execute_rsync( $taskid, $jobid, $noreport, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
-        logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
-        my $bkpjob = {
-            jobid        => $jobid,
-            host         => $host,
-            group        => $group,
-            bkptimestamp => $bkptimestamp,
-            dosnapshot   => $dosnapshot,
-            rsync_err    => $rsync_err,
-            has_failed   => check_rsync_status( $rsync_err ),
-        };
-        push(@finishable_bkpjobs_in_thread, $bkpjob);
-        remove_lockfile( $taskid, $host, $group, $path );
-    }
-
-    return (@finishable_bkpjobs_in_thread);
-}
-
-#################################
-# Helper subroutines
-#
-sub finish_backupjob {
-    my ($bkpjob)     = @_;
-    my $jobid        = $bkpjob->{'jobid'};
-    my $host         = $bkpjob->{'host'};
-    my $group        = $bkpjob->{'group'};
-    my $bkptimestamp = $bkpjob->{'bkptimestamp'};
-    my $dosnapshot   = $bkpjob->{'dosnapshot'};
-    my $has_failed   = $bkpjob->{'has_failed'};
-    my $rsync_err    = join(', ', sort @{ $bkpjob->{'rsync_errs'} });
-    my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
-
-    if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) &&  ( $dosnapshot )) {
-        my $rsync_target = targetpath( $host, $group );
-        create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid, $rsync_target);
-        if ( $has_failed ) {
-            logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
-            rename_failed_backup( $taskid, $host, $group, $bkptimestamp );
-        } else {
-            logit( $taskid, $host, $group, "rsync in snapshot-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-        }
-    }
-    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'links' ) {
-        if ( $has_failed ) {
-            logit( $taskid, $host, $group, "rsync in links-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
-            rename_failed_backup( $taskid, $host, $group, $bkptimestamp );
-        } else {
-            logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-            create_link_current( $host, $group, $bkptimestamp );
-        }
-    }
-
-    # report finished job to DB, jobstatus => 2
-    bangstat_finish_backupjob( $taskid, $jobid, $host, $group, '2' ) unless $noreport;
-
-    my %RecentBackups = bangstat_recentbackups($host);
-    unless ($noreport) {
-        xymon_report( $taskid, $host, $group, %RecentBackups );
-        mail_report( $taskid, $host, $group, %RecentBackups ) if $serverconfig{report_to};
-    }
-    logit( $taskid, $host, $group, "Backup successful for host $host group $group!" );
-
-    remove_generic_exclude_file($taskid, $host, $group, $jobid) if $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS};
-
-    return 1;
 }
 
 #################################
