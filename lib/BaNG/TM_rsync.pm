@@ -11,7 +11,6 @@ use IPC::Open3;
 
 use Exporter 'import';
 our @EXPORT = qw(
-    execute_rsync
     queue_rsync_backup
     run_rsync_threads
 );
@@ -214,7 +213,7 @@ sub queue_rsync_backup {
     return 1;
 }
 
-sub execute_rsync {
+sub _execute_rsync {
     my ( $taskid, $jobid, $noreport, $host, $group, $bkptimestamp, $path, $srcfolder, $exclsubfolders ) = @_;
 
     $bkptimestamp = eval_bkptimestamp( $host, $group ) unless $bkptimestamp;
@@ -551,7 +550,7 @@ sub _rsync_thread_work {
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
-        my $rsync_err = execute_rsync( $taskid, $jobid, $noreport, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
+        my $rsync_err = _execute_rsync( $taskid, $jobid, $noreport, $host, $group, $bkptimestamp, $path, $srcfolder ,$exclsubfolders );
         logit( $taskid, $host, $group, "Thread $tid finished with $host-$group ($path) ErrCode: $rsync_err" );
         my $bkpjob = {
             taskid       => $taskid,
