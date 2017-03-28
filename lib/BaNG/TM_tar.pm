@@ -140,73 +140,31 @@ sub queue_tar_backup {
     # make sure backup is enabled
     return unless $ltsjobs{"$group"}->{ltsconfig}->{BKP_ENABLED};
 
-    # stop if trying to do bulk backup if it's not allowed
-    return unless ( ( $group ) || $ltsjobs{"$group"}->{ltsconfig}->{BKP_BULK_ALLOW} );
+    if ( !-e ($serverconfig{path_tar} || "") ) {
 
-    if ( !-e ($ltsjobs{"$group"}->{ltsconfig}->{path_tar} || "") ) {
-        $startstamp = time();
-        $endstamp   = $startstamp;
-        $jobid = create_timeid( $taskid, $group );
-        logit( $taskid, $group, '', "TAR command " . ($ltsjobs{"$group"}->{ltsconfig}->{path_tar} || "") . " not found!" );
+        logit( $taskid, $group, '', "TAR command " . ($serverconfig{path_tar} || "") . " not found!" );
 
         return 1;
     }
 
-    my $bkptimestamp = eval_bkptimestamp( $group );
+    my $src_folder = $ltsjobs{"$group"}->{ltsconfig}->{BKP_SOURCE_PATH};
 
-    # get list of source folders to back up
-    my (@src_folders) = split( / /, $ltsjobs{"$group"}->{ltsconfig}->{BKP_SOURCE_FOLDER} );
-    logit( $taskid, $group, '', 'Number of source folders: ' . ( $#src_folders + 1 ) . " ( @src_folders )" );
-    logit( $taskid, $group, '', 'Status source folder threading: ' . $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SRCFOLDERS} );
+    if ( $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SUBFOLDERS} ) {
 
-    if (( $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SRCFOLDERS} ) || ( $#src_folders  == 0 )) {
-#        # optionally queue each subfolder of the source folders while only 1 srcfolder defined
-        if ( $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SUBFOLDERS} ) {
-
-            my $dosnapshot = 0;
-            my $numFolder  = @src_folders;
-
-            foreach my $folder (@src_folders) {
-                $jobid = create_timeid( $taskid, $group );
-
-                _queue_subfolders( $taskid, $jobid, $group, $bkptimestamp, $dosnapshot, $folder );
-            }
-
-        } else {
-
-            my $dosnapshot = 0;
-            my $numFolder  = @src_folders;
-
-            $jobid = create_timeid( $taskid, $group );
-
-            foreach my $folder (@src_folders) {
-
-                my $bkpjob = {
-                    jobid        => $jobid,
-                    group        => $group,
-                    path         => "$folder",
-                    srcfolder    => "@src_folders",
-                    bkptimestamp => $bkptimestamp,
-                    dosnapshot   => $dosnapshot,
-                };
-                push( @queue, $bkpjob );
-            }
-        }
+        _queue_subfolders( $taskid, $group, $src_folder );
 
     } else {
-        # queue list of source folders as a whole
+
         $jobid = create_timeid( $taskid, $group );
-        my $bkpjob = {
+
+        my $ltsjob = {
             jobid        => $jobid,
             group        => $group,
-            path         => "@src_folders",
-            srcfolder    => "@src_folders",
-            bkptimestamp => $bkptimestamp,
-            dosnapshot   => 1,
-            rsync_err    => 0,
-            has_failed   => 0,
+            path         => "$src_folder",
+            srcfolder    => "$src_folder",
         };
-        push( @queue, $bkpjob );
+        print "Push-Queue JobID: $ltsjob->{jobid} Group: $ltsjob->{group} srcfolder: $ltsjob->{srcfolder} path: $ltsjob->{path}\n" if $serverconfig{verbose};
+        push( @queue, $ltsjob );
     }
 
     logit( $taskid, $group, '', "End of queueing backup of group $group" );
@@ -215,22 +173,30 @@ sub queue_tar_backup {
 }
 
 sub _queue_subfolders {
-    my ( $taskid, $jobid, $group, $bkptimestamp, $dosnapshot, $srcfolder ) = @_;
-
-    $srcfolder =~ s/://;
-    my $sourcepath      = targetpath( $group );
-    my $searchpath = $sourcepath . "/current" . $srcfolder;
-    print "sourcepath: $searchpath\n";
+    my ( $taskid, $group, $searchpath ) = @_;
+    print "searchpath: $searchpath\n" if $serverconfig{verbose};
 
     my @subfolders = `find $searchpath -mindepth 1 -maxdepth 1 -xdev -type d -not -empty | sort`;
 
     if ( $#subfolders == -1 ) {
-        push( @subfolders, $srcfolder );
+        push( @subfolders, $searchpath );
         logit( $taskid, $group, '', "ERROR: eval subfolders failed, use now with:\n @subfolders" );
     } else {
-        logit( $taskid, $group, '', "eval subfolders:\n @subfolders" );
+        logit( $taskid, $group, '', "found subfolders:\n @subfolders" );
     }
 
+    foreach my $subfolder (@subfolders) {
+        my $jobid = create_timeid( $taskid, $group );
+        chomp $subfolder;
+        my $ltsjob = {
+            jobid        => $jobid,
+            group        => $group,
+            path         => "$subfolder",
+            srcfolder    => "$searchpath",
+        };
+        print "Push-Queue JobID: $ltsjob->{jobid} Group: $ltsjob->{group} srcfolder: $ltsjob->{srcfolder} path: $ltsjob->{path}\n" if $serverconfig{verbose};
+        push( @queue, $ltsjob );
+    }
     return 1;
 }
 
