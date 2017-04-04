@@ -126,6 +126,95 @@ sub execute_tar {
     _delete_tar_helper($tar_helper);
 }
 
+sub run_tar_threads {
+    my ($group, $nthreads_arg, $dryrun_arg, $cron) = @_;
+    my %finishable_ltsjobs;
+    # define number of threads
+    my $nthreads;
+
+    if ($nthreads_arg) {
+        # If nthreads was defined by cli argument, use it
+        $nthreads = $nthreads_arg;
+        print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
+    } elsif ( $group ) {
+        # If no nthreads was given, get nthreads from its config
+        $nthreads = $ltsjobs{"$group"}->{ltsconfig}->{LTS_THREADS_DEFAULT};
+        print "Using nthreads = $nthreads from $group config file\n" if $serverconfig{verbose};
+    } else {
+        $nthreads = 1;
+    }
+
+    my $Q = Thread::Queue->new;
+    my @threads = map { threads->create( \&_tar_thread_work, $Q ) } ( 1 .. $nthreads );
+
+    # fill the threading queue
+    $Q->enqueue($_) for @queue;
+
+    # Signal that there is no more work to be sent
+    $Q->end();
+
+    print "/////////////////////////////////////////////////////\n";
+    print "Queuing of threads finished, wait for joining...\n";
+    print "/////////////////////////////////////////////////////\n";
+
+    my @final_data;
+    while ( my @threadsList = threads->list() ) {
+        foreach my $tj (threads->list(threads::joinable) ) {
+            print "\nThread ". $tj->tid() ." finished, joining...\n";
+
+            my (@finishable_ltsjobs_in_thread) = $tj->join;
+
+            foreach my $ltsjob (@finishable_ltsjobs_in_thread) {
+                print "$ltsjob->{jobid} $ltsjob->{hostname}\n";
+                push (@final_data, $ltsjob );
+            }
+            my (@remaining) = threads->list(threads::running);
+            print "\t",scalar(@remaining)," of $nthreads threads remain\n";
+        }
+
+        unless ( threads->list() ) {
+            print "\nAll threads are joined! ". $#final_data ." entries found\n";
+
+            foreach my $ltsjob (@final_data) {
+                print "$ltsjob->{jobid} $ltsjob->{hostname}\n";
+            }
+        }
+    }
+
+    return 0;
+}
+
+sub _tar_thread_work {
+    my ($Q) = @_;
+    my @finishable_ltsjobs_in_thread;
+
+    while ( my $ltsjob = $Q->dequeue ) {
+        my $tid            = threads->tid;
+        my $taskid         = $ltsjob->{taskid};
+        my $jobid          = $ltsjob->{jobid};
+        my $group          = $ltsjob->{group};
+        my $host           = $ltsjob->{host};
+        my $path           = $ltsjob->{path};
+        my $srcfolder      = $ltsjob->{srcfolder};
+        my $dryrun         = $ltsjob->{'dryrun'};
+        my $cron           = $ltsjob->{'cron'};
+        my $noreport       = $ltsjob->{'noreport'};
+        my $exclsubfolders = $ltsjob->{'exclsubfolders'} || 0;
+
+        my $random_integer = int( rand(7) ) + 1;
+        $random_integer    = 0 if ( $dryrun );
+
+        logit( $taskid, 'LTS',$group, "Thread $tid working on $group ($path)" );
+        my $tar_err = _execute_tar( $taskid, $group, $path, $host );
+        my $ltsjob = {
+            jobid        => $jobid,
+            hostname => $host,
+        };
+        push(@finishable_ltsjobs_in_thread, $ltsjob);
+    }
+
+   return (@finishable_ltsjobs_in_thread);
+}
 #################################
 # Queuing
 #
@@ -156,6 +245,7 @@ sub queue_tar_backup {
         $jobid = create_timeid( $taskid, $group );
 
         my $ltsjob = {
+            taskid       => $taskid,
             jobid        => $jobid,
             group        => $group,
             path         => "$src_folder",
@@ -185,10 +275,13 @@ sub _queue_subfolders {
 
     foreach my $subfolder (@subfolders) {
         my $jobid = create_timeid( $taskid, $group );
+        my ( $host ) = $subfolder =~ /([a-z0-9-]*)$/;
         chomp $subfolder;
         my $ltsjob = {
+            taskid       => $taskid,
             jobid        => $jobid,
             group        => $group,
+            host         => $host,
             path         => "$subfolder",
             srcfolder    => "$searchpath",
         };
