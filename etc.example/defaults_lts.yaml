@@ -7,14 +7,20 @@ lts_nfs_mount:         "/mnt/LTS/"
 #
 lts_tar_options:       ""
 
+LTS_ENABLED:            0
+LTS_THREADS_DEFAULT:    1
+LTS_PREFIX:             ""
+LTS_SOURCE_PATH:        ""
+LTS_STORE_MODUS:        "snapshots"
+LTS_THREAD_SUBFOLDERS:  0
+#
 #*************************
 # Description of variables
 #
 HELP:
-  path_tar:
   lts_nfs_share:
   lts_nfs_mount_options:
   lts_target_mnt:
   #
-  tar_options:
+  lts_tar_options:
 
