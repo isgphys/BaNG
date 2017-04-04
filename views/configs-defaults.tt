@@ -90,3 +90,33 @@
         </tbody>
     </table>
 </div>
+
+<div class="float-left">
+    <h3>LTS Defaults Configfile:<% serverconfig.config_defaults_lts %></h3>
+    <table class="config_default default-table tablesorter">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Help</th>
+            </tr>
+        </thead>
+        <tbody>
+          <% FOREACH config IN ltsdefaults.keys.sort %>
+            <tr>
+                <td>
+                    <% config %>
+                </td>
+                <td>
+                  <% IF config != "HELP" %>
+                    <% ltsdefaults.$config %>
+                  <% END %>
+                </td>
+                <td>
+                  <% ltsdefaults.HELP.$config FILTER html_line_break %>
+                </td>
+            </tr>
+          <% END %>
+        </tbody>
+    </table>
+</div>

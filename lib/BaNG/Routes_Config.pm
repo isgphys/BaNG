@@ -23,6 +23,7 @@ get '/defaults' => require_role config->{admin_role} => sub {
         serverconfig   => \%serverconfig,
         serverdefaults => get_server_config_defaults(),
         hostdefaults   => get_host_config_defaults(),
+        ltsdefaults    => get_lts_config_defaults(),
         servername     => $servername,
         prefix_path    => $prefix,
     };
