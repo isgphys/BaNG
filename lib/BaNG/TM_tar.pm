@@ -9,8 +9,8 @@ use BaNG::BackupServer;
 
 use Exporter 'import';
 our @EXPORT = qw(
-    execute_tar
     queue_tar_backup
+    run_tar_threads
 );
 
 sub _eval_tar_options {
