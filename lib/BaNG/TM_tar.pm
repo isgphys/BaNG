@@ -136,7 +136,7 @@ sub queue_tar_backup {
     logit( $taskid, $group, '', "Queueing backup for group $group" );
 
     # make sure backup is enabled
-    return unless $ltsjobs{"$group"}->{ltsconfig}->{BKP_ENABLED};
+    return unless $ltsjobs{"$group"}->{ltsconfig}->{LTS_ENABLED};
 
     if ( !-e ($serverconfig{path_tar} || "") ) {
 
@@ -145,9 +145,9 @@ sub queue_tar_backup {
         return 1;
     }
 
-    my $src_folder = $ltsjobs{"$group"}->{ltsconfig}->{BKP_SOURCE_PATH};
+    my $src_folder = $ltsjobs{"$group"}->{ltsconfig}->{LTS_SOURCE_PATH};
 
-    if ( $ltsjobs{"$group"}->{ltsconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+    if ( $ltsjobs{"$group"}->{ltsconfig}->{LTS_THREAD_SUBFOLDERS} ) {
 
         _queue_subfolders( $taskid, $group, $src_folder );
 
