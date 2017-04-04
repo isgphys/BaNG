@@ -18,7 +18,7 @@ sub _eval_tar_options {
     my $tar_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_tar_options};
     my $tar_helper  = _create_tar_helper();
 
-    logit( $taskid, $group, '', "tar helper script $tar_helper created" );
+    logit( $taskid, 'LTS', $group, "tar helper script $tar_helper created" );
 
     $tar_options .= " -F $tar_helper";
 
@@ -204,8 +204,11 @@ sub _tar_thread_work {
         my $random_integer = int( rand(7) ) + 1;
         $random_integer    = 0 if ( $dryrun );
 
-        logit( $taskid, 'LTS',$group, "Thread $tid working on $group ($path)" );
+        logit( $taskid, 'LTS', $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
+        sleep($random_integer);
+        logit( $taskid, 'LTS', $group, "Thread $tid working on $group ($path)" );
         my $tar_err = _execute_tar( $taskid, $group, $path, $host );
+
         my $ltsjob = {
             jobid        => $jobid,
             hostname => $host,
@@ -215,6 +218,7 @@ sub _tar_thread_work {
 
    return (@finishable_ltsjobs_in_thread);
 }
+
 #################################
 # Queuing
 #
@@ -222,14 +226,14 @@ sub queue_tar_backup {
     my ( $group, $noreport, $taskid ) = @_;
     my $jobid;
 
-    logit( $taskid, $group, '', "Queueing backup for group $group" );
+    logit( $taskid, 'LTS', $group, "Queueing backup for group $group" );
 
     # make sure backup is enabled
     return unless $ltsjobs{"$group"}->{ltsconfig}->{LTS_ENABLED};
 
     if ( !-e ($serverconfig{path_tar} || "") ) {
 
-        logit( $taskid, $group, '', "TAR command " . ($serverconfig{path_tar} || "") . " not found!" );
+        logit( $taskid, 'LTS', $group, "TAR command " . ($serverconfig{path_tar} || "") . " not found!" );
 
         return 1;
     }
@@ -255,7 +259,7 @@ sub queue_tar_backup {
         push( @queue, $ltsjob );
     }
 
-    logit( $taskid, $group, '', "End of queueing backup of group $group" );
+    logit( $taskid, 'LTS', $group, "End of queueing backup of group $group" );
 
     return 1;
 }
@@ -268,9 +272,9 @@ sub _queue_subfolders {
 
     if ( $#subfolders == -1 ) {
         push( @subfolders, $searchpath );
-        logit( $taskid, $group, '', "ERROR: eval subfolders failed, use now with:\n @subfolders" );
+        logit( $taskid, 'LTS', $group, "ERROR: eval subfolders failed, use now with:\n @subfolders" );
     } else {
-        logit( $taskid, $group, '', "found subfolders:\n @subfolders" );
+        logit( $taskid, 'LTS', $group, "found subfolders:\n @subfolders" );
     }
 
     foreach my $subfolder (@subfolders) {
