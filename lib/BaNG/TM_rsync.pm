@@ -39,7 +39,7 @@ sub queue_rsync_backup {
 
     # check for existing target_path folder
     logit( $taskid, $host, $group, "Check for existing target_path for host $host group $group" );
-    my $check_target_code = check_target_exists( $host, $group, $taskid );
+    my $check_target_code = check_target_exists( $host, $group );
 
     if ( $check_target_code == 0 ) {
         if ( $initial ) {

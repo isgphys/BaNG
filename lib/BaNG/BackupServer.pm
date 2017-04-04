@@ -202,8 +202,7 @@ sub get_backup_folders {
 }
 
 sub check_target_exists {
-    my ( $host, $group, $taskid ) = @_;
-    $taskid       ||= 0;
+    my ( $host, $group ) = @_;
     my $snapshot    = ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) ? 1 : 0 ;
     my $target      = targetpath( $host, $group );
     my $return_code = 0; # 0 = not available, 1 = available

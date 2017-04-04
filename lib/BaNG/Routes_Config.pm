@@ -117,7 +117,7 @@ post '/new/:configtype' => require_role config->{admin_role} => sub {
         info "Configfile $return_msg created by $createdby";
         if ( $configtype eq 'host' ) {
             get_host_config( $hostname, $bkpgroup );
-            unless ( check_target_exists( $hostname, $bkpgroup, 0 ) ){
+            unless ( check_target_exists( $hostname, $bkpgroup ) ){
                 create_target( $hostname, $bkpgroup, 0 );
             }
             redirect "/host/$hostname";
