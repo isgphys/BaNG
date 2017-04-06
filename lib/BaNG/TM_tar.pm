@@ -159,7 +159,7 @@ sub _tar_thread_work {
         logit( $taskid, 'LTS', $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, 'LTS', $group, "Thread $tid working on $group ($path)" );
-        my $tar_err = _execute_tar( $taskid, $group, $path, $host );
+        my $tar_err = _execute_tar( $ltsjob );
 
         my $ltsjob = {
             jobid        => $jobid,
@@ -299,7 +299,19 @@ sub _setup_tar_target {
 }
 
 sub _execute_tar {
-    my ( $taskid, $group, $path, $host ) = @_;
+    my ( $ltsjob ) = @_;
+    my $tid            = threads->tid;
+    my $taskid         = $ltsjob->{taskid};
+    my $jobid          = $ltsjob->{jobid};
+    my $group          = $ltsjob->{group};
+    my $host           = $ltsjob->{host};
+    my $path           = $ltsjob->{path};
+    my $source_path    = $ltsjob->{source_path};
+    my $ifsub          = $ltsjob->{ifsub};
+    my $dryrun         = $ltsjob->{'dryrun'};
+    my $cron           = $ltsjob->{'cron'};
+    my $noreport       = $ltsjob->{'noreport'};
+
     my $ltsconfig  = $ltsjobs{"$group"}->{ltsconfig};
 
     my ($tar_options, $tar_helper) = _eval_tar_options($group, $taskid);
