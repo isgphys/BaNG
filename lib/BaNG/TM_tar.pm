@@ -297,15 +297,6 @@ sub _setup_tar_target {
     return $tar_target;
 }
 
-sub _lts_targetpath {
-    my ( $group ) = @_;
-
-    my $ltsconfig  = $ltsjobs{"$group"}->{ltsconfig};
-    my $target_path = "$ltsconfig->{lts_nfs_mount}/$ltsconfig->{LTS_PREFIX}";
-
-    return $target_path;
-}
-
 sub _execute_tar {
     my ( $taskid, $group, $path, $host ) = @_;
     my $ltsconfig  = $ltsjobs{"$group"}->{ltsconfig};
