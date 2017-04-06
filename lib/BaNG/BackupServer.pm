@@ -9,7 +9,7 @@ use BaNG::RemoteCommand;
 use BaNG::Reporting;
 use BaNG::BTRFS;
 use Date::Parse;
-use POSIX qw( floor );
+use POSIX qw( floor strftime );
 use Time::HiRes qw( gettimeofday );
 use Net::Ping;
 use YAML::Tiny qw( LoadFile );
@@ -454,7 +454,8 @@ sub create_timeid {
     my ( $taskid, $host, $group ) = @_;
 
     my ( $s, $usec ) = gettimeofday;
-    my $timeid = `$serverconfig{path_date} +"%Y%m%d%H%M%S"` . $usec;
+    my $timeid = strftime '%Y%m%d%H%M%S', localtime $s;
+    $timeid .= sprintf '%06d', $usec;
     $timeid =~ s/\n//g;
     $host   ||= "SERVER";
     $group  ||= "GLOBAL";
