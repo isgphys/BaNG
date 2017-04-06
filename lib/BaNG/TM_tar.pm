@@ -147,11 +147,8 @@ sub _tar_thread_work {
         my $group          = $ltsjob->{group};
         my $host           = $ltsjob->{host};
         my $path           = $ltsjob->{path};
-        my $srcfolder      = $ltsjob->{srcfolder};
         my $dryrun         = $ltsjob->{'dryrun'};
         my $cron           = $ltsjob->{'cron'};
-        my $noreport       = $ltsjob->{'noreport'};
-        my $exclsubfolders = $ltsjob->{'exclsubfolders'} || 0;
 
         my $random_integer = int( rand(7) ) + 1;
         $random_integer    = 0 if ( $dryrun );
@@ -162,8 +159,9 @@ sub _tar_thread_work {
         my $tar_err = _execute_tar( $ltsjob );
 
         my $ltsjob = {
-            jobid        => $jobid,
+            jobid    => $jobid,
             hostname => $host,
+            path     => $path,
         };
         push(@finishable_ltsjobs_in_thread, $ltsjob);
     }
