@@ -6,6 +6,8 @@ use warnings;
 use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::BackupServer;
+use forks;
+use Thread::Queue;
 
 use Exporter 'import';
 our @EXPORT = qw(

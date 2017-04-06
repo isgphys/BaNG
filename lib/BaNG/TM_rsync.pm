@@ -7,7 +7,9 @@ use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::BackupServer;
 use BaNG::BTRFS;
+use forks;
 use IPC::Open3;
+use Thread::Queue;
 
 use Exporter 'import';
 our @EXPORT = qw(
