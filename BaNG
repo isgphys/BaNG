@@ -83,7 +83,7 @@ if ( $serverconfig{bkpmode} eq "rsync") {
         exit 0;
     }
 
-    run_tar_threads($group_arg, $nthreads_arg, $dryrun_arg, $cron);
+    run_tar_threads($group_arg, $nthreads_arg, $dryrun_arg);
 
     exit 0;
 }

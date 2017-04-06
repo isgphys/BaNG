@@ -56,7 +56,7 @@ sub queue_tar_backup {
 }
 
 sub run_tar_threads {
-    my ($group, $nthreads_arg, $dryrun_arg, $cron) = @_;
+    my ($group, $nthreads_arg, $dryrun_arg) = @_;
     my %finishable_ltsjobs;
     # define number of threads
     my $nthreads;
