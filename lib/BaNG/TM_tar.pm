@@ -172,13 +172,14 @@ sub _tar_thread_work {
 }
 
 sub _queue_subfolders {
-    my ( $taskid, $group, $searchpath ) = @_;
-    print "searchpath: $searchpath\n" if $serverconfig{verbose};
+    my ( $taskid, $host, $group, $search_path ) = @_;
+    print "search_path: $search_path\n" if $serverconfig{verbose};
 
-    my @subfolders = `find $searchpath -mindepth 1 -maxdepth 1 -xdev -type d -not -empty | sort`;
+    #TODO: add function to create LTS-snaphosts of latest working backup
+    my @subfolders = `find "$search_path/current" -mindepth 1 -maxdepth 1 -xdev -type d -not -empty -print | sort`;
 
     if ( $#subfolders == -1 ) {
-        push( @subfolders, $searchpath );
+        push( @subfolders, $search_path );
         logit( $taskid, 'LTS', $group, "ERROR: eval subfolders failed, use now with:\n @subfolders" );
     } else {
         logit( $taskid, 'LTS', $group, "found subfolders:\n @subfolders" );
