@@ -109,7 +109,8 @@ sub run_tar_threads {
     print "/////////////////////////////////////////////////////\n";
 
     my @final_data;
-    while ( my @threadsList = threads->list() ) {
+    # loop until all threads are done
+    while ( threads->list() ) {
         foreach my $tj (threads->list(threads::joinable) ) {
             print "\nThread ". $tj->tid() ." finished, joining...\n";
 
@@ -124,10 +125,10 @@ sub run_tar_threads {
         }
 
         unless ( threads->list() ) {
-            print "\nAll threads are joined! ". $#final_data ." entries found\n";
+            print "\nAll threads are joined! ". $#final_data ." entries found:\n";
 
-            foreach my $ltsjob (@final_data) {
-                print "$ltsjob->{jobid} $ltsjob->{hostname}\n";
+            foreach my $ltsjob (sort { $a->{jobid} cmp $b->{jobid} } @final_data) {
+                print "$ltsjob->{jobid} $ltsjob->{hostname} $ltsjob->{path}\n";
             }
         }
     }
