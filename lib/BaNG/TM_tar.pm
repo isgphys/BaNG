@@ -16,11 +16,20 @@ our @EXPORT = qw(
 sub queue_tar_backup {
     my ( $group, $noreport, $taskid ) = @_;
     my $jobid;
+    my $source_path;
 
     logit( $taskid, 'LTS', $group, "Queueing backup for group $group" );
 
     # make sure backup is enabled
     return unless $ltsjobs{"$group"}->{ltsconfig}->{LTS_ENABLED};
+
+    # make sure LTS_SOURCE_PATH is set
+    if ( $ltsjobs{"$group"}->{ltsconfig}->{LTS_SOURCE_PATH} ) {
+        $source_path = $ltsjobs{"$group"}->{ltsconfig}->{LTS_SOURCE_PATH};
+    } else {
+        logit( $taskid, 'LTS', $group, "LTS_SOURCE_PATH not defined for group $group" );
+        return;
+    }
 
     if ( !-e ($serverconfig{path_tar} || "") ) {
 
