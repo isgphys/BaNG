@@ -183,19 +183,18 @@ sub _queue_subfolders {
         logit( $taskid, 'LTS', $group, "found subfolders:\n @subfolders" );
     }
 
+    my $jobid = create_timeid( $taskid, $group );
     foreach my $subfolder (@subfolders) {
-        my $jobid = create_timeid( $taskid, $group );
-        my ( $host ) = $subfolder =~ /([a-z0-9-]*)$/;
         chomp $subfolder;
         my $ltsjob = {
-            taskid       => $taskid,
-            jobid        => $jobid,
-            group        => $group,
-            host         => $host,
-            path         => "$subfolder",
-            srcfolder    => "$searchpath",
+            taskid      => $taskid,
+            jobid       => $jobid,
+            group       => $group,
+            host        => $host,
+            path        => "$subfolder",
+            source_path => "$search_path",
+            ifsub       => 1,
         };
-        print "Push-Queue JobID: $ltsjob->{jobid} Group: $ltsjob->{group} srcfolder: $ltsjob->{srcfolder} path: $ltsjob->{path}\n" if $serverconfig{verbose};
         push( @queue, $ltsjob );
     }
     return 1;
