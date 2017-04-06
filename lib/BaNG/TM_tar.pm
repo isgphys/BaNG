@@ -38,27 +38,40 @@ sub queue_tar_backup {
         return 1;
     }
 
-    my $src_folder = $ltsjobs{"$group"}->{ltsconfig}->{LTS_SOURCE_PATH};
+    print "source_path: $source_path\n" if $serverconfig{verbose};
 
-    if ( $ltsjobs{"$group"}->{ltsconfig}->{LTS_THREAD_SUBFOLDERS} ) {
+    my @hostslist = `find $source_path -mindepth 1 -maxdepth 1 -xdev -type d -not -empty | sort`;
 
-        _queue_subfolders( $taskid, $group, $src_folder );
-
+    if ( $#hostslist == -1 ) {
+        logit( $taskid, 'LTS', $group, "ERROR: eval hostslist failed, no hosts found:\n" );
     } else {
-
-        $jobid = create_timeid( $taskid, $group );
-
-        my $ltsjob = {
-            taskid       => $taskid,
-            jobid        => $jobid,
-            group        => $group,
-            path         => "$src_folder",
-            srcfolder    => "$src_folder",
-        };
-        print "Push-Queue JobID: $ltsjob->{jobid} Group: $ltsjob->{group} srcfolder: $ltsjob->{srcfolder} path: $ltsjob->{path}\n" if $serverconfig{verbose};
-        push( @queue, $ltsjob );
+        logit( $taskid, 'LTS', $group, "found following hosts ( $#hostslist )\n @hostslist" );
     }
 
+    foreach my $path (@hostslist) {
+        chomp($path);
+        next unless ( my ( $host ) = $path =~ /\/([a-z0-9-]*)$/ );  # we want only active hosts, ignore '_' in hostnames
+
+        if ( $ltsjobs{"$group"}->{ltsconfig}->{LTS_THREAD_SUBFOLDERS} ) {
+
+            _queue_subfolders( $taskid, $host, $group, $path );
+
+        } else {
+            my $jobid = create_timeid( $taskid, $group );
+            chomp $path;
+            my $ltsjob = {
+                taskid       => $taskid,
+                jobid        => $jobid,
+                group        => $group,
+                host         => $host,
+                path         => "$path",
+                source_path  => "$source_path",
+                ifsub        => 0,
+            };
+            push( @queue, $ltsjob );
+        }
+    }
+    print "Final queued hosts: $#queue\n" if $serverconfig{verbose};
     logit( $taskid, 'LTS', $group, "End of queueing backup of group $group" );
 
     return 1;
