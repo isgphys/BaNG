@@ -38,9 +38,9 @@ print "Run as Cron: $cron\n" if $serverconfig{verbose};
 
 $taskid = create_timeid( $host_arg, $group_arg );
 
-bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
-
 if ( $serverconfig{bkpmode} eq "rsync") {
+
+    bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
 
     get_host_config( $host_arg, $group_arg );
 
