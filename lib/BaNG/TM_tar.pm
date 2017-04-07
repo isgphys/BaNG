@@ -314,6 +314,11 @@ sub _setup_tar_target {
 
     $tar_target .= "/$ltsconfig->{LTS_PREFIX}/";
 
+    if ( ! -e $tar_target ) {
+        print "Create missing tar_target: $tar_target\n";
+        system("mkdir -p $tar_target") unless $serverconfig{dryrun};
+    }
+
     return $tar_target;
 }
 
