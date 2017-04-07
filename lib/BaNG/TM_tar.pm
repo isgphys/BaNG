@@ -155,6 +155,7 @@ sub _tar_thread_work {
         my $random_integer = int( rand(7) ) + 1;
         $random_integer    = 0 if ( $dryrun );
 
+        return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, 'LTS', $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, 'LTS', $group, "Thread $tid working on $group ($path)" );
@@ -166,6 +167,7 @@ sub _tar_thread_work {
             path     => $path,
         };
         push(@finishable_ltsjobs_in_thread, $ltsjob);
+        remove_lockfile( $taskid, $host, $group, $path );
     }
 
    return (@finishable_ltsjobs_in_thread);
