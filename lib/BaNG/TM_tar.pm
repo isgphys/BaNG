@@ -280,16 +280,17 @@ sub _setup_tar_target {
     my $tar_target        = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_mount};
 
     if (`cat /proc/mounts | grep $tar_target`) {
-        print "$taskid, $group, $tar_target is mounted \n" if $serverconfig{verbose};
+        logit( $taskid, 'LTS', $group, "$tar_target is mounted" ) if $serverconfig{verbose};;
     } else {
-        print "$taskid, $group, $tar_target is not mounted \n" if $serverconfig{verbose};
+        logit( $taskid, 'LTS', $group, "$tar_target is not mounted" ) if $serverconfig{verbose};;
         my $mount_cmd = "mount -t nfs -o $nfs_mount_options $nfs_share $tar_target";
         $mount_cmd = "echo $mount_cmd" if $serverconfig{dryrun};
         my $mount_result = system($mount_cmd);
         if ($mount_result == 0) {
-            print "$taskid, $group, $tar_target is now mounted \n" if $serverconfig{verbose};
+            logit( $taskid, 'LTS', $group, "$tar_target is now mounted" ) if $serverconfig{verbose};;
         } else {
             print "$taskid, $group, Mount error for $tar_target: $mount_result\n";
+            logit( $taskid, 'LTS', $group, "Mount error for $tar_target: $mount_result" ) if $serverconfig{verbose};;
             return;
         }
     }
