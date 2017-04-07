@@ -230,14 +230,20 @@ sub _eval_tar_source {
 }
 
 sub _create_tar_helper {
+    my ($taskid) = @_;
 
     my $tar_helper_path = "$prefix/var/tmp";
     if ( ! -e $tar_helper_path ) {
         print "Create missing tmp folder: $tar_helper_path\n" if $serverconfig{verbose};
-        mkdir -p $tar_helper_path unless $serverconfig{dryrun};
+        mkdir $tar_helper_path unless $serverconfig{dryrun};
     }
 
-    my $tar_helper = "$tar_helper_path/tar_helper.sh";
+    my $tar_helper = "$tar_helper_path/tar_helper_$taskid.sh";
+
+    if (-e $tar_helper){
+        print "tar_helper file $tar_helper exists, skipping...\n" if $serverconfig{verbose};
+        return $tar_helper;
+    }
 
     my $script_content = <<"EOF";
 
