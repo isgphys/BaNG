@@ -74,13 +74,13 @@ sub queue_tar_backup {
         }
     }
     print "Final queued hosts: $#queue\n" if $serverconfig{verbose};
-    logit( $taskid, 'LTS', $group, "End of queueing backup of group $group" );
+    logit( $taskid, 'LTS', $group, "Queueing of LTS-backup for group $group done." );
 
     return 1;
 }
 
 sub run_tar_threads {
-    my ($group, $nthreads_arg, $dryrun_arg) = @_;
+    my ($taskid, $group, $nthreads_arg, $dryrun_arg) = @_;
     my %finishable_ltsjobs;
     # define number of threads
     my $nthreads;
@@ -97,8 +97,10 @@ sub run_tar_threads {
         $nthreads = 1;
     }
 
+    my ($tar_options, $tar_helper) = _eval_tar_options($group, $taskid);
+
     my $Q = Thread::Queue->new;
-    my @threads = map { threads->create( \&_tar_thread_work, $Q ) } ( 1 .. $nthreads );
+    my @threads = map { threads->create( \&_tar_thread_work, $tar_options, $tar_helper, $Q ) } ( 1 .. $nthreads );
 
     # fill the threading queue
     $Q->enqueue($_) for @queue;
@@ -132,6 +134,7 @@ sub run_tar_threads {
             foreach my $ltsjob (sort { $a->{jobid} cmp $b->{jobid} } @final_data) {
                 print "$ltsjob->{jobid} $ltsjob->{hostname} $ltsjob->{path}\n";
             }
+        _delete_tar_helper($tar_helper);
         }
     }
 
@@ -139,7 +142,7 @@ sub run_tar_threads {
 }
 
 sub _tar_thread_work {
-    my ($Q) = @_;
+    my ($tar_options, $tar_helper, $Q) = @_;
     my @finishable_ltsjobs_in_thread;
 
     while ( my $ltsjob = $Q->dequeue ) {
@@ -158,8 +161,8 @@ sub _tar_thread_work {
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, 'LTS', $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
-        logit( $taskid, 'LTS', $group, "Thread $tid working on $group ($path)" );
-        my $tar_err = _execute_tar( $ltsjob );
+        logit( $taskid, 'LTS', $group, "Thread $tid start working on $group ($path)" );
+        my $tar_err = _execute_tar( $ltsjob, $tar_options, $tar_helper );
 
         my $ltsjob = {
             jobid    => $jobid,
@@ -207,7 +210,7 @@ sub _queue_subfolders {
 sub _eval_tar_options {
     my ($group, $taskid) = @_;
     my $tar_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_tar_options};
-    my $tar_helper  = _create_tar_helper();
+    my $tar_helper  = _create_tar_helper($taskid);
 
     logit( $taskid, 'LTS', $group, "tar helper script $tar_helper created" );
 
@@ -307,7 +310,7 @@ sub _setup_tar_target {
 }
 
 sub _execute_tar {
-    my ( $ltsjob ) = @_;
+    my ( $ltsjob, $tar_options, $tar_helper ) = @_;
     my $tid            = threads->tid;
     my $taskid         = $ltsjob->{taskid};
     my $jobid          = $ltsjob->{jobid};
@@ -322,7 +325,6 @@ sub _execute_tar {
 
     my $ltsconfig  = $ltsjobs{"$group"}->{ltsconfig};
 
-    my ($tar_options, $tar_helper) = _eval_tar_options($group, $taskid);
     my $tar_source                 = _eval_tar_source($group, $path);
     my $tar_target                 = _setup_tar_target($group, $ltsconfig, $taskid);
 
@@ -332,8 +334,6 @@ sub _execute_tar {
 
     print "$taskid, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target $tar_source\n" ;
     print "$taskid, $group, Executing tar for group $group\n";
-
-    _delete_tar_helper($tar_helper);
 }
 
 1;
