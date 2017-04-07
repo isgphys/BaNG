@@ -279,12 +279,14 @@ EOF
 sub _delete_tar_helper {
     my ($tar_helper) = @_;
 
-    print "check if tar helper script $tar_helper exists\n" if $serverconfig{verbose};
 
     if ( -e "$tar_helper" ){
         unlink  "$tar_helper";
-        print "Deleted tar helper script $tar_helper\n" if $serverconfig{verbose};
+        print "Delete tar helper script $tar_helper\n" if $serverconfig{verbose};
+    } else {
+        print "tar helper script $tar_helper does not exist\n" if $serverconfig{verbose};
     }
+    return 0;
 }
 
 sub _setup_tar_target {
