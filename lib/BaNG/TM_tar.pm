@@ -345,7 +345,7 @@ sub _execute_tar {
 
     my $tar_cmd  = $serverconfig{path_tar};
 
-    print "$taskid, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target $tar_source\n" ;
+    print "$taskid, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target.tar -C $tar_source .\n" ;
     print "$taskid, $group, Executing tar for group $group\n";
 }
 
