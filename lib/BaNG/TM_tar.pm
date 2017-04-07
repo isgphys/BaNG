@@ -256,14 +256,20 @@ sub _create_tar_helper {
 
 echo \$TAR_VERSION \$TAR_ARCHIVE \$TAR_VOLUME \$TAR_BLOCKING_FACTOR \$TAR_FD \$TAR_SUBCOMMAND \$TAR_FORMAT
 
-echo "Rotate to \$TAR_VOLUME"
-mv "\$TAR_ARCHIVE" "\$TAR_ARCHIVE-\$TAR_VOLUME"
+TAR_VOLUME=\$((\$TAR_VOLUME-1))
+NEW_TAR_ARCHIVE=\$(echo \$TAR_ARCHIVE | sed "s/\\.tar/\\.\$TAR_VOLUME\\.tar/")
+
+echo "Rotate to \$NEW_TAR_ARCHIVE"
+
+mv "\$TAR_ARCHIVE" "\$NEW_TAR_ARCHIVE"
 # tar_helper end
 EOF
+
     unless ( $serverconfig{dryrun} ) {
         open HELPERFILE, '>', $tar_helper;
         print HELPERFILE $script_content;
         close HELPERFILE;
+        chmod( 0755, $tar_helper );
     }
     print "Create tar helper script: $tar_helper\n$script_content\n" if $serverconfig{verbose};
 
