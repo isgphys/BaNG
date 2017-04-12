@@ -10,7 +10,7 @@ use BaNG::Config;
 use BaNG::BackupServer;
 use BaNG::Reporting;
 use BaNG::TM_rsync;
-use BaNG::TM_tar;
+use BaNG::TM_lts;
 use BaNG::BTRFS;
 use BaNG::Wipe;
 
@@ -69,18 +69,18 @@ if ( $serverconfig{bkpmode} eq "rsync") {
 
     exit 0;
 
-} elsif ( $serverconfig{bkpmode} eq "tar" ) {
-    print "TAR mode work\n" if $serverconfig{verbose};
+} elsif ( $serverconfig{bkpmode} eq "lts" ) {
+    print "LTS mode work\n" if $serverconfig{verbose};
 
     get_lts_config( $group_arg );
-    queue_tar_backup( $group_arg, $noreport, $taskid );
+    queue_lts_backup( $group_arg, $noreport, $taskid );
 
     if ( !@queue ) {
         print "Exit because queue is empty.\n" if $serverconfig{verbose};
         exit 0;
     }
 
-    run_tar_threads($taskid, $group_arg, $nthreads_arg, $dryrun_arg);
+    run_lts_threads($taskid, $group_arg, $nthreads_arg, $dryrun_arg);
 
     exit 0;
 }
@@ -112,7 +112,7 @@ sub parse_command_options {
     ) or usage('Invalid commmand line options.');
     usage('You must provide some arguments') unless ( $host_arg || $group_arg );
     usage('Number of threads must be positive') if ( $nthreads_arg && $nthreads_arg <= 0 );
-    usage('Wrong Backup Mode, please use rsync or tar') unless ( !defined $bkpmode_arg  || ($bkpmode_arg eq "rsync" || $bkpmode_arg eq "tar" ));
+    usage('Wrong Backup Mode, please use rsync or lts') unless ( !defined $bkpmode_arg  || ($bkpmode_arg eq "rsync" || $bkpmode_arg eq "lts" ));
 
     $verbose_arg = 1 if ( $dryrun_arg || $vv_arg || $vvv_arg );
 
@@ -157,7 +157,7 @@ sub usage {
         -p <path>                   # override path to folder containing etc/
         -w | --wipe                 # wipe the backup
         -w --force                  # forcing wipe the backup (override auto_wipe_limit)
-        --bkpmode <rsync|tar>       # select backup mode (rsync / tar), default: rsync
+        --bkpmode <rsync|lts>       # select backup mode (rsync / lts), default: rsync
         --initial                   # create nonexisting backup targets
         --missingonly               # backup only hosts that were not backed up recently
         --label <string>            # set a label for this task

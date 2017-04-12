@@ -1,4 +1,4 @@
-package BaNG::TM_tar;
+package BaNG::TM_lts;
 
 use 5.010;
 use strict;
@@ -11,11 +11,11 @@ use Thread::Queue;
 
 use Exporter 'import';
 our @EXPORT = qw(
-    queue_tar_backup
-    run_tar_threads
+    queue_lts_backup
+    run_lts_threads
 );
 
-sub queue_tar_backup {
+sub queue_lts_backup {
     my ( $group, $noreport, $taskid ) = @_;
     my $jobid;
     my $source_path;
@@ -33,9 +33,9 @@ sub queue_tar_backup {
         return;
     }
 
-    if ( !-e ($serverconfig{path_tar} || "") ) {
+    if ( !-e ($serverconfig{path_dar} || "") ) {
 
-        logit( $taskid, 'LTS', $group, "TAR command " . ($serverconfig{path_tar} || "") . " not found!" );
+        logit( $taskid, 'LTS', $group, "dar command " . ($serverconfig{path_dar} || "") . " not found!" );
 
         return 1;
     }
@@ -79,7 +79,7 @@ sub queue_tar_backup {
     return 1;
 }
 
-sub run_tar_threads {
+sub run_lts_threads {
     my ($taskid, $group, $nthreads_arg, $dryrun_arg) = @_;
     my %finishable_ltsjobs;
     # define number of threads
@@ -97,10 +97,10 @@ sub run_tar_threads {
         $nthreads = 1;
     }
 
-    my ($tar_options, $tar_helper) = _eval_tar_options($group, $taskid);
+    my ($dar_options) = _eval_dar_options($group, $taskid);
 
     my $Q = Thread::Queue->new;
-    my @threads = map { threads->create( \&_tar_thread_work, $tar_options, $tar_helper, $Q ) } ( 1 .. $nthreads );
+    my @threads = map { threads->create( \&_dar_thread_work, $dar_options, $Q ) } ( 1 .. $nthreads );
 
     # fill the threading queue
     $Q->enqueue($_) for @queue;
@@ -134,15 +134,14 @@ sub run_tar_threads {
             foreach my $ltsjob (sort { $a->{jobid} cmp $b->{jobid} } @final_data) {
                 print "$ltsjob->{jobid} $ltsjob->{hostname} $ltsjob->{path}\n";
             }
-        _delete_tar_helper($tar_helper);
         }
     }
 
     return 0;
 }
 
-sub _tar_thread_work {
-    my ($tar_options, $tar_helper, $Q) = @_;
+sub _dar_thread_work {
+    my ($dar_options, $Q) = @_;
     my @finishable_ltsjobs_in_thread;
 
     while ( my $ltsjob = $Q->dequeue ) {
@@ -161,8 +160,8 @@ sub _tar_thread_work {
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, 'LTS', $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
-        logit( $taskid, 'LTS', $group, "Thread $tid start working on $group ($path)" );
-        my $tar_err = _execute_tar( $ltsjob, $tar_options, $tar_helper );
+        logit( $taskid, 'LTS', $group, "Thread $tid sdart working on $group ($path)" );
+        my $dar_err = _execute_dar( $ltsjob, $dar_options );
 
         my $ltsjob = {
             jobid    => $jobid,
@@ -207,123 +206,61 @@ sub _queue_subfolders {
     return 1;
 }
 
-sub _eval_tar_options {
+sub _eval_dar_options {
     my ($group, $taskid) = @_;
-    my $tar_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_tar_options};
-    my $tar_helper  = _create_tar_helper($taskid);
+    my $dar_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_dar_options};
 
-    logit( $taskid, 'LTS', $group, "tar helper script $tar_helper created" );
-
-    $tar_options .= " -F $tar_helper";
-
-    return ($tar_options, $tar_helper);
+    return ($dar_options);
 }
 
-sub _eval_tar_source {
+sub _eval_dar_source {
     my ( $group, $path ) = @_;
-    my $tar_source;
+    my $dar_source;
 
     if ( $ltsjobs{"$group"}->{ltsconfig}->{LTS_STORE_MODUS} eq 'snapshots' ) {
-        $tar_source = "$path/current";
+        $dar_source = "$path/current";
     } else {
-        $tar_source .= "/snap_LTS";
+        $dar_source .= "/snap_LTS";
     }
 
-    return $tar_source;
+    return $dar_source;
 }
 
-sub _create_tar_helper {
-    my ($taskid) = @_;
-
-    my $tar_helper_path = "$prefix/var/tmp";
-    if ( ! -e $tar_helper_path ) {
-        print "Create missing tmp folder: $tar_helper_path\n" if $serverconfig{verbose};
-        mkdir $tar_helper_path unless $serverconfig{dryrun};
-    }
-
-    my $tar_helper = "$tar_helper_path/tar_helper_$taskid.sh";
-
-    if (-e $tar_helper){
-        print "tar_helper file $tar_helper exists, skipping...\n" if $serverconfig{verbose};
-        return $tar_helper;
-    }
-
-    my $script_content = <<"EOF";
-
-#!/bin/bash
-# BaNG tar_helper script
-# Created by BaNG, do not manually edit this script!
-
-echo \$TAR_VERSION \$TAR_ARCHIVE \$TAR_VOLUME \$TAR_BLOCKING_FACTOR \$TAR_FD \$TAR_SUBCOMMAND \$TAR_FORMAT
-
-TAR_VOLUME=\$((\$TAR_VOLUME-1))
-NEW_TAR_ARCHIVE=\$(echo \$TAR_ARCHIVE | sed "s/\\.tar/\\.\$TAR_VOLUME\\.tar/")
-
-echo "Rotate to \$NEW_TAR_ARCHIVE"
-
-mv "\$TAR_ARCHIVE" "\$NEW_TAR_ARCHIVE"
-# tar_helper end
-EOF
-
-    unless ( $serverconfig{dryrun} ) {
-        open HELPERFILE, '>', $tar_helper;
-        print HELPERFILE $script_content;
-        close HELPERFILE;
-        chmod( 0755, $tar_helper );
-    }
-    print "Create tar helper script: $tar_helper\n$script_content\n" if $serverconfig{verbose};
-
-    return $tar_helper;
-}
-
-sub _delete_tar_helper {
-    my ($tar_helper) = @_;
-
-
-    if ( -e "$tar_helper" ){
-        unlink  "$tar_helper";
-        print "Delete tar helper script $tar_helper\n" if $serverconfig{verbose};
-    } else {
-        print "tar helper script $tar_helper does not exist\n" if $serverconfig{verbose};
-    }
-    return 0;
-}
-
-sub _setup_tar_target {
+sub _setup_dar_target {
     my ( $group, $ltsconfig, $taskid ) = @_;
 
     my $nfs_share         = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_share};
     my $nfs_mount_options = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_mount_options};
-    my $tar_target        = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_mount};
+    my $dar_target        = $ltsjobs{"$group"}->{ltsconfig}->{lts_nfs_mount};
 
-    if (`cat /proc/mounts | grep $tar_target`) {
-        logit( $taskid, 'LTS', $group, "$tar_target is mounted" ) if $serverconfig{verbose};;
+    if (`cat /proc/mounts | grep $dar_target`) {
+        logit( $taskid, 'LTS', $group, "$dar_target is mounted" ) if $serverconfig{verbose};;
     } else {
-        logit( $taskid, 'LTS', $group, "$tar_target is not mounted" ) if $serverconfig{verbose};;
-        my $mount_cmd = "mount -t nfs -o $nfs_mount_options $nfs_share $tar_target";
+        logit( $taskid, 'LTS', $group, "$dar_target is not mounted" ) if $serverconfig{verbose};;
+        my $mount_cmd = "mount -t nfs -o $nfs_mount_options $nfs_share $dar_target";
         $mount_cmd = "echo $mount_cmd" if $serverconfig{dryrun};
         my $mount_result = system($mount_cmd);
         if ($mount_result == 0) {
-            logit( $taskid, 'LTS', $group, "$tar_target is now mounted" ) if $serverconfig{verbose};;
+            logit( $taskid, 'LTS', $group, "$dar_target is now mounted" ) if $serverconfig{verbose};;
         } else {
-            print "$taskid, $group, Mount error for $tar_target: $mount_result\n";
-            logit( $taskid, 'LTS', $group, "Mount error for $tar_target: $mount_result" ) if $serverconfig{verbose};;
+            print "$taskid, $group, Mount error for $dar_target: $mount_result\n";
+            logit( $taskid, 'LTS', $group, "Mount error for $dar_target: $mount_result" ) if $serverconfig{verbose};;
             return;
         }
     }
 
-    $tar_target .= "/$ltsconfig->{LTS_PREFIX}/";
+    $dar_target .= "/$ltsconfig->{LTS_PREFIX}/";
 
-    if ( ! -e $tar_target ) {
-        print "Create missing tar_target: $tar_target\n";
-        system("mkdir -p $tar_target") unless $serverconfig{dryrun};
+    if ( ! -e $dar_target ) {
+        print "Create missing dar_target: $dar_target\n";
+        system("mkdir -p $dar_target") unless $serverconfig{dryrun};
     }
 
-    return $tar_target;
+    return $dar_target;
 }
 
-sub _execute_tar {
-    my ( $ltsjob, $tar_options, $tar_helper ) = @_;
+sub _execute_dar {
+    my ( $ltsjob, $dar_options ) = @_;
     my $tid            = threads->tid;
     my $taskid         = $ltsjob->{taskid};
     my $jobid          = $ltsjob->{jobid};

@@ -22,7 +22,7 @@ path_btrfs:             '/usr/bin/env btrfs'
 path_date:              /bin/date
 path_rsh:               /usr/bin/rsh
 path_rsync:             /usr/bin/rsync
-path_tar:
+path_dar:
 path_timeout:
 path_ypcat:
 path_nocache:
@@ -38,7 +38,7 @@ lts_nfs_share:          ""
 lts_nfs_mount_options:  ""
 lts_target_mnt:         ""
 #
-tar_options:            ''
+dar_options:            ""
 #
 verbose:                0
 verboselevel:           2
@@ -80,6 +80,13 @@ HELP:
   path_date:
   path_rsh:
   path_rsync:
+  path_dar:
+
+  report_to:                email-addresses for reporting (comma separated)
+  xymon_server:             hostname of xymon server
+
+  verbose:                  |
+                            0 = be quiet
 
   report_to:                email-addresses for reporting (comma separated)
   xymon_server:             hostname of xymon server

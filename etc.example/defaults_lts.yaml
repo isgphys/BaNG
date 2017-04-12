@@ -5,7 +5,7 @@ lts_nfs_share:         ""
 lts_nfs_mount_options: ""
 lts_nfs_mount:         "/mnt/LTS/"
 #
-lts_tar_options:       ""
+lts_dar_options:       ""
 
 LTS_ENABLED:            0
 LTS_THREADS_DEFAULT:    1
@@ -22,5 +22,4 @@ HELP:
   lts_nfs_mount_options:
   lts_target_mnt:
   #
-  lts_tar_options:
-
+  lts_dar_options:
