@@ -7,6 +7,7 @@ use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::BackupServer;
 use forks;
+use IPC::Open3;
 use Thread::Queue;
 
 use Exporter 'import';
@@ -275,15 +276,49 @@ sub _execute_dar {
 
     my $ltsconfig  = $ltsjobs{"$group"}->{ltsconfig};
 
-    my $tar_source                 = _eval_tar_source($group, $path);
-    my $tar_target                 = _setup_tar_target($group, $ltsconfig, $taskid);
+    my $dar_source                 = _eval_dar_source($group, $path);
+    my $dar_target                 = _setup_dar_target($group, $ltsconfig, $taskid);
 
-    $tar_target .= "$host" if $host;
+    $dar_target .= "$host" if $host;
 
-    my $tar_cmd  = $serverconfig{path_tar};
+    my $dar_cmd  = $serverconfig{path_dar};
+    $dar_cmd .= " $dar_options -c $dar_target -R $dar_source";
 
-    print "$taskid, $group, Tar Command: $tar_cmd $tar_options -cf $tar_target.tar -C $tar_source .\n" ;
-    print "$taskid, $group, Executing tar for group $group\n";
+    print "$taskid, $group, Executing dar for group $group\n" if $serverconfig{verbose};
+    print "$taskid, $group, dar Command: $dar_cmd\n" ;
+
+    local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
+    $dar_cmd = "echo $dar_cmd" if $serverconfig{dryrun};
+
+    my $darpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$dar_cmd" );
+
+    my @outlines = <HIS_OUT>;
+    my @errlines = <HIS_ERR>;
+    close HIS_IN;
+    close HIS_OUT;
+    close HIS_ERR;
+
+    waitpid( $darpid, 0 );
+
+    logit( $taskid, $host, $group, "dar[$darpid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "ERROR: dar[$darpid] STDERR: @errlines" ) if @errlines;
+    logit( $taskid, $host, $group, "ERROR: dar[$darpid] child exited with status of $?" ) if $?;
+
+    my $errcode  = 0;
+    my $endstamp = time();
+
+    if (@errlines) {
+        foreach my $errline (@errlines) {
+            if ( $errline =~ /.* \(code (\d+)/ ) {
+                $errcode = $1;
+                logit( $taskid, $host, $group, "dar errorcode: $errcode" );
+            }
+        }
+    } else {
+        logit( $taskid, $host, $group, "dar successful for host $host group $group path $path" );
+    }
+
+
 }
 
 1;
