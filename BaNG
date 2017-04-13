@@ -14,7 +14,7 @@ use BaNG::TM_lts;
 use BaNG::BTRFS;
 use BaNG::Wipe;
 
-my $version = '3.6';
+my $version = '3.7-testing';
 my $prefix_arg;
 my ($host_arg, $group_arg, $nthreads_arg, $bkpmode_arg);
 my ($cron, $wipe, $xymononly);
