@@ -87,12 +87,6 @@ HELP:
 
   verbose:                  |
                             0 = be quiet
-
-  report_to:                email-addresses for reporting (comma separated)
-  xymon_server:             hostname of xymon server
-
-  verbose:                  |
-                            0 = be quiet
                             1 = Write debug output to console
   verboselevel:             |
                             0 = be quiet
