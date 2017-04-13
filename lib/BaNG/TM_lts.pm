@@ -41,7 +41,7 @@ sub queue_lts_backup {
         return 1;
     }
 
-    print "source_path: $source_path\n" if $serverconfig{verbose};
+    print "Hostlist source_path: $source_path\n" if $serverconfig{verbose};
 
     my @hostslist = `find $source_path -mindepth 1 -maxdepth 1 -xdev -type d -not -empty | sort`;
 
@@ -109,15 +109,17 @@ sub run_lts_threads {
     # Signal that there is no more work to be sent
     $Q->end();
 
-    print "/////////////////////////////////////////////////////\n";
-    print "Queuing of threads finished, wait for joining...\n";
-    print "/////////////////////////////////////////////////////\n";
+    if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 ) {
+        print "/////////////////////////////////////////////////////\n";
+        print "Queuing of threads finished, wait for joining...\n";
+        print "/////////////////////////////////////////////////////\n";
+    }
 
     my @final_data;
     # loop until all threads are done
     while ( threads->list() ) {
         foreach my $tj (threads->list(threads::joinable) ) {
-            print "\nThread ". $tj->tid() ." finished, joining...\n";
+            print "\nThread ". $tj->tid() ." finished, joining...\n" if $serverconfig{verbose};
 
             my (@finishable_ltsjobs_in_thread) = $tj->join;
 
@@ -126,14 +128,16 @@ sub run_lts_threads {
                 push (@final_data, $ltsjob );
             }
             my (@remaining) = threads->list(threads::running);
-            print "\t",scalar(@remaining)," of $nthreads threads remain\n";
+            print "\t",scalar(@remaining)," of $nthreads threads remain\n" if $serverconfig{verbose};
         }
 
         unless ( threads->list() ) {
-            print "\nAll threads are joined! ". $#final_data ." entries found:\n";
+            if ( $serverconfig{verbose} && $serverconfig{verboselevel} >= 2 ) {
+                print "\nAll threads are joined! ". $#final_data ." entries found:\n";
 
-            foreach my $ltsjob (sort { $a->{jobid} cmp $b->{jobid} } @final_data) {
-                print "$ltsjob->{jobid} $ltsjob->{hostname} $ltsjob->{path}\n";
+                foreach my $ltsjob (sort { $a->{jobid} cmp $b->{jobid} } @final_data) {
+                    print "$ltsjob->{jobid} $ltsjob->{hostname} $ltsjob->{path}\n";
+                }
             }
         }
     }
@@ -178,7 +182,7 @@ sub _dar_thread_work {
 
 sub _queue_subfolders {
     my ( $taskid, $host, $group, $search_path ) = @_;
-    print "search_path: $search_path\n" if $serverconfig{verbose};
+    print "Subfolder search_path: $search_path\n" if $serverconfig{verbose};
 
     #TODO: add function to create LTS-snaphosts of latest working backup
     my @subfolders = `find "$search_path/current" -mindepth 1 -maxdepth 1 -xdev -type d -not -empty -print | sort`;
