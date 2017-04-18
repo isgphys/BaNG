@@ -325,8 +325,6 @@ sub _execute_dar {
     } else {
         logit( $taskid, $host, $group, "dar successful for host $host group $group path $path" );
     }
-
-
 }
 
 1;
