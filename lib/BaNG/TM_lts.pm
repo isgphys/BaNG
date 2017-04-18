@@ -165,7 +165,7 @@ sub _dar_thread_work {
         return unless create_lockfile( $taskid, $host, $group, $path );
         logit( $taskid, 'LTS', $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
-        logit( $taskid, 'LTS', $group, "Thread $tid sdart working on $group ($path)" );
+        logit( $taskid, 'LTS', $group, "Thread $tid start working on $group ($path)" );
         my $dar_err = _execute_dar( $ltsjob, $dar_options );
 
         my $ltsjob = {
