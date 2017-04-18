@@ -548,7 +548,7 @@ sub _rsync_thread_work {
         $random_integer    = 0 if ( $dryrun );
 
         return unless create_lockfile( $taskid, $host, $group, $path );
-        writeto_lockfile( $taskid, $host, $cron, $path, "cron", $cron);
+        writeto_lockfile( $taskid, $host, $group, $path, "cron", $cron);
         logit( $taskid, $host, $group, "Thread $tid sleep $random_integer sec. for $host-$group ($path)" );
         sleep($random_integer);
         logit( $taskid, $host, $group, "Thread $tid working on $host-$group ($path)" );
