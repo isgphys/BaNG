@@ -296,6 +296,10 @@ sub _execute_dar {
 
     my $darpid = open3( *HIS_IN, *HIS_OUT, *HIS_ERR, "$dar_cmd" );
 
+    writeto_lockfile( $taskid, $host, $group, $path, "shpid", $darpid);
+
+    logit( $taskid, $host, $group, "dar PID: $darpid for host $host group $group path $path" );
+
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;
