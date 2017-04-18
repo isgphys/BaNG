@@ -331,7 +331,7 @@ sub eval_bkptimestamp {
 sub lockfile {
     my ( $host, $group, $path ) = @_;
 
-    $group = "LTS-$group" if ($serverconfig{bkpmode} eq "tar");
+    $group = "LTS-$group" if ($serverconfig{bkpmode} eq "lts");
 
     $path =~ s/^://g;
     $path =~ s/\s:/\+/g;
