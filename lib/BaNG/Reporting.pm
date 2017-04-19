@@ -860,7 +860,8 @@ sub read_global_log {
         if ( $logline =~ qr{
                 (?<logdate> \w{3}\s\d{2} ) \s
                 (?<logtime> \d{2}:\d{2}:\d{2} ) \s
-                (?<hostgroup> [^:]* )\s:\s
+                (?<hostgroup> [\w-]* )\(
+                (?<taskid> \d* ) \) \s:\s
                 (?<message> .* )
             }x )
         {
@@ -868,12 +869,14 @@ sub read_global_log {
             my $logdate   = $+{logdate};
             my $logtime   = $+{logtime};
             my $hostgroup = $+{hostgroup};
+            my $taskid    = $+{taskid};
 
             if ( $msg =~ /ERR/ ) {
                 push( @{ $parsed_logdata{$logdate} }, {
                     date      => $logdate,
                     time      => $logtime,
                     hostgroup => $hostgroup,
+                    taskid    => $taskid,
                     message   => $msg,
                 });
             }

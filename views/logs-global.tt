@@ -12,6 +12,8 @@
                       <% IF logline.message.match('Rsync success')%>class="logSuccess"<% END %>
                       >
                         <td class="center"><% logline.time %></td>
+                        <td class="center"><% logline.taskid %></td>
+                        <td class="center"><% logline.hostgroup %></td>
                         <td><% logline.message %></td>
                     </tr>
                   <%- END %>
