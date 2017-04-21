@@ -12,7 +12,7 @@ Manual setup
 Install dependencies:
 
 ```sh
-apt-get install perl rsh-redone-server rsh-redone-client rsync starman \
+apt-get install perl rsh-redone-server rsh-redone-client rsync starman coreutils \
     libclone-perl libdancer-perl libdatetime-perl libdbd-mysql-perl \
     libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl \
     liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl \
