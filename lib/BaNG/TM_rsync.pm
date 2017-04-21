@@ -98,14 +98,14 @@ sub queue_rsync_backup {
     }
 
     # make sure rsh/ssh connection works
-    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL}, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, "ssh", $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     logit( $taskid, $host, $group, "check_client_rshell_connection: $rshell_status, $rshell_msg" );
 
     if ( !$rshell_status ) {
         $startstamp = time();
         $endstamp   = $startstamp;
         $jobid = create_timeid( $taskid, $host, $group );
-        logit( $taskid, $host, $group, "Error: ". $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL} ." on host $host not working" );
+        logit( $taskid, $host, $group, "Error: rsh/ssh on host $host not working" );
         bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER},
                                   $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), '0', '-2', '' ) unless $noreport;
         return 1;
