@@ -169,7 +169,7 @@ sub check_client_rshell_connection {
         $state = 1;
         $msg   = 'Could not test RemoteShell because Host is behind a Gateway-Host';
     } else {
-        $result = `timeout 3 $rshell $host uname -a 2>&1`;
+        $result = `timeout 10 $rshell $host uname -a 2>&1`;
 
         if ( $result =~ /^(Linux|Darwin)/) {
             $state = 1;
