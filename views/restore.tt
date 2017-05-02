@@ -1,14 +1,16 @@
 <h2>Backup restore paths</h2>
-<div id="restore_content">
-    <div class="loading_message">
-        <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Backup Restore Paths
-    </div>
-</div>
+
+<div id="restore_content"></div>
+
 <script>
     $(window).load(function() {
         $.ajax({
             url: '/restore/restore_content/<% showhost %>',
+            beforeSend:function (content){
+                $('#restore_content').html('<div class="loading_message">' +
+                    '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                    'Loading Backup Restore Paths</div>');
+            },
             success: function(content) {
                 $('#restore_content').html(content);
                 initializeAll();

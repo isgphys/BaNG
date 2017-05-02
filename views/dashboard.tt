@@ -21,30 +21,13 @@
 <% CATCH %>
 <% END %>
 
-<div id="fsinfo" class="float-left">
-    <div class="loading_message">
-        <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Filesystem Usage Report
-    </div>
-</div>
-<div id="lockinfo" class="float-left">
-    <div class="loading_message">
-        <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Running Jobs Report
-    </div>
-</div>
-<div id="wipeinfo" class="float-left">
-    <div class="loading_message">
-        <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Wipe Status Overview
-    </div>
-</div>
-<div id="error_report" class="float-clear">
-    <div class="loading_message">
-        <img src="/images/spinner.gif" width=25 alt="Loading animation">
-        Loading Backup Report Overview
-    </div>
-</div>
+<div id="fsinfo" class="float-left"></div>
+
+<div id="lockinfo" class="float-left"></div>
+
+<div id="wipeinfo" class="float-left"></div>
+
+<div id="error_report" class="float-clear"></div>
 
 <script>
     $(window).load(function() {
@@ -83,6 +66,11 @@
             };
             $.ajax({
                 url: '/wipe_status',
+                beforeSend:function (content){
+                    $('#wipeinfo').html('<div class="loading_message">' +
+                        '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                        'Loading Wipe Status Overview</div>');
+                },
                 timeout: 45000,
                 success: function(content) {
                     $('#wipeinfo').html(content);
@@ -119,6 +107,11 @@
     function load_lockfile_report() {
         $.ajax({
             url: '/lockfile_report',
+            beforeSend:function (content){
+                $('#lockinfo').html('<div class="loading_message">' +
+                    '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                    'Loading Running Jobs Report</div>');
+            },
             success: function(content) {
                 $('#lockinfo').html(content);
                 initializeAll();
@@ -132,6 +125,11 @@
     function load_fsinfo_report() {
         $.ajax({
             url: '/fsinfo_report',
+            beforeSend:function (content){
+                $('#fsinfo').html('<div class="loading_message">' +
+                    '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                    'Loading Filesystem Usage Report</div>');
+            },
             success: function(content) {
                 $('#fsinfo').html(content);
                 initializeAll();
@@ -145,6 +143,11 @@
     function load_error_report() {
         $.ajax({
             url: '/error_report',
+            beforeSend:function (content){
+                $('#error_report').html('<div class="loading_message">' +
+                    '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                    'Loading Backup Report Overview</div>');
+            },
             success: function(content) {
                 $('#error_report').html(content);
                 initializeAll();
