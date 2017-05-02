@@ -109,7 +109,7 @@ sub get_fsinfo {
             }x;
 
             my $mountpt  = $+{mountpt};
-            my $mountopt = $+{mountopt};
+            my $mountopt = $+{mountopt} || "";
 
             $fsinfo{$server}{$mountpt}{rwstatus} = 'check_red' if $mountopt =~ /ro/;
         }
