@@ -104,7 +104,7 @@ sub bangstat_recentbackups {
             Jobs         => $dbrow->{'Jobs'},
             Cron         => $dbrow->{'Cron'},
             BkpGroup     => $BkpGroup,
-            BkpHost      => $dbrow->{'BkpFromHost'},
+            BkpHost      => $host,
             FilesCreated => num2human($dbrow->{'NumOfFilesCreated'}),
             FilesDel     => num2human($dbrow->{'NumOfFilesDel'}),
             FilesTrans   => num2human($dbrow->{'NumOfFilesTrans'}),
