@@ -55,6 +55,7 @@ if ($croncreate) {
             or die('Could not open /etc/cron.d/BaNG');
         print CRON $cron;
         close CRON;
+	chmod 0644,'/etc/cron.d/BaNG';
     }
 
     exit 0;
