@@ -20,7 +20,6 @@ Total Backup Tasks last 24H: <% RecentTasks.Data.size %>
             <th class="sorter-metric" data-metric-name="$">SizeTrans</th>
             <th class="sorter-metric" data-metric-name="$">TotalFiles</th>
             <th class="sorter-metric" data-metric-name="$">TotalSize</th>
-            <th>Log</th>
         </tr>
     </thead>
     <tbody>
@@ -55,7 +54,6 @@ Total Backup Tasks last 24H: <% RecentTasks.Data.size %>
                 <td class="center"><% bkp.SizeTrans %></td>
                 <td class="center"><% bkp.NumOfFiles %></td>
                 <td class="center"><% bkp.TotFileSize %></td>
-                <td class="zoom pointer" data-href='/logs/<% bkp.BkpHost %>/<% bkp.BkpGroup %>'></td>
             </tr>
         <%- END %>
     </tbody>
