@@ -1,5 +1,5 @@
 db_support:        1
-path_btrfs:        /usr/bin/btrfs
+path_btrfs:        /usr/local/bin/btrfs
 path_dar:          /usr/bin/dar
 remote_app:        "/usr/local/bin/remotesshwrapper"
 remote_app_path:   "/opt/remotesshwrapper"
