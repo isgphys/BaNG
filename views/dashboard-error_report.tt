@@ -20,7 +20,7 @@ Total Backup Jobs last 24H: <% RecentBackups24h.Data.size %>
         </tr>
     </thead>
     <tbody>
-        <%- FOREACH bkp IN RecentBackups24h.Data %>
+        <%- FOREACH bkp IN RecentBackups24h.Data.nsort('TaskID').reverse %>
             <% NEXT IF ( bkp.JobStatus == 2 AND bkp.ErrStatus == 0 ) OR ( bkp.JobStatus == -1 AND bkp.BkpGroup == 'mac-workstation' ) OR ( bkp.JobStatus == 2 AND ( bkp.ErrStatus == 24 OR bkp.ErrStatus == "0,24" ) ) %>
             <tr height="20">
                 <td><a href="/reporting/job/<% bkp.JobID %>"><% bkp.JobID.substr(12) %></a></td>
