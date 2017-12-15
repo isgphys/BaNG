@@ -8,7 +8,7 @@ BaNG Documentation
   * [Commands](Commands.markdown)           : BaNG command line tools
   * [Database](Database.markdown)           : BaNG database configuration
   * [Wipe](Wipe.markdown)                   : BaNG wipe strategy and long-time backups
-  * [Mac OS X](MacOSX.markdown)             : BaNG on Mac OS X servers and clients
+  * [macOS](macOS.markdown)                 : BaNG on macOS servers and clients
   * [Advanced](Advanced.markdown)           : BaNG features for advanced users
   * [Internals](Internals.markdown)         : BaNG Internals
   * [Terminology](Terminology.markdown)     : Glossary of concepts
