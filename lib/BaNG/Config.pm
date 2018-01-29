@@ -84,7 +84,7 @@ sub get_serverconfig {
     }
 
     # preprend full path where needed
-    foreach my $key (qw( config_defaults_hosts config_defaults_lts config_bangstat path_groupconfig path_hostconfig path_ltsconfig path_excludes path_db_dumps path_logs path_lockfiles )) {
+    foreach my $key (qw( config_defaults_hosts config_defaults_lts config_bangstat path_groupconfig path_hostconfig path_ltsconfig path_excludes path_db_dumps path_logs path_lockfiles path_trigger )) {
         $serverconfig{$key} = "$prefix/$serverconfig{$key}";
     }
 

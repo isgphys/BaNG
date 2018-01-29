@@ -14,6 +14,7 @@ path_excludes:          etc/excludes
 path_db_dumps:          var/db_dumps
 path_lockfiles:         var/lockfiles
 path_logs:              var/log
+path_trigger:           var/trigger
 #
 global_log_date:        "%Y-%m-%d"
 show_logs_number:       5
