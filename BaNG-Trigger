@@ -1,0 +1,78 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Cwd qw( abs_path );
+use File::Basename;
+use File::Find::Rule;
+use POSIX qw( strftime );
+
+use lib dirname( abs_path($0) ) . '/lib';
+use BaNG::Config;
+
+my $dryrun = 0;
+my $prefix_arg;
+
+get_serverconfig($prefix_arg);
+
+my @triggerfiles = _find_triggers( "*\_*\.trigger", "$serverconfig{path_trigger}");
+foreach my $triggerfile (@triggerfiles) {
+    my ( $hostname, $groupname ) = _split_triggername($triggerfile);
+    _logit("found trigger file for Host: $hostname Group: $groupname");
+    _logit("delete triggerfile $serverconfig{path_trigger}/$triggerfile");
+    unlink("$serverconfig{path_trigger}/$triggerfile") unless $dryrun;
+    my $bang_cmd = "$prefix/BaNG -h $hostname -g $groupname --noreport -n";
+    _logit("start backup for Host: $hostname Group: $groupname, using following command: $bang_cmd");
+    $bang_cmd = "echo $bang_cmd" if $dryrun;
+    system("$bang_cmd");
+};
+
+exit 0;
+
+###########################################
+#
+# Functions
+#
+sub _find_triggers {
+    my ( $query, $searchpath ) = @_;
+
+    my @files;
+    my $ffr_obj = File::Find::Rule->file()
+    ->name($query)
+    ->relative
+    ->maxdepth(1)
+    ->start($searchpath);
+
+    while ( my $file = $ffr_obj->match() ) {
+        push( @files, $file );
+    }
+    return @files;
+}
+
+sub _split_triggername {
+    my ($triggername) = @_;
+    my ($a, $b);
+
+    if ($triggername =~ /_/ ) {
+        ( $a, $b ) = $triggername =~ /^([\w\d\.-]+)_([\w\d-]+)\.trigger/;
+        return ( $a, $b );
+    } else {
+        ( $a ) = $triggername =~ /^([\w\d\.-]+)\.trigger/;
+        return ( $a );
+    }
+}
+
+sub _logit {
+    my ( $msg ) = @_;
+    my $timestamp     = strftime '%b %d %H:%M:%S', localtime;
+    my $logmonth      = strftime '%Y-%m',          localtime;
+    my $logfile       = "$serverconfig{path_logs}/Trigger.log";
+    my $logmessage    = "$timestamp BaNG-Trigger : $msg";
+
+    $logmessage .= "\n" unless ( $logmessage =~ m/\n$/ );
+
+    open my $log, '>>', $logfile or print "ERROR opening logfile $logfile: $!\n";
+    print {$log} $logmessage;
+    close $log;
+
+    return 1;
+}

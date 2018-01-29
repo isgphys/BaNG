@@ -1,0 +1,8 @@
+[Unit]
+Description= Triggers the service BaNG-Trigger
+
+[Path]
+DirectoryNotEmpty=/opt/BaNG/var/trigger/
+
+[Install]
+WantedBy=multi-user.target

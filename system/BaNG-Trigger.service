@@ -1,0 +1,6 @@
+[Unit]
+Description=Start Backup-Trigger script
+
+[Service]
+Type=oneshot
+ExecStart=/opt/BaNG/BaNG-Trigger
