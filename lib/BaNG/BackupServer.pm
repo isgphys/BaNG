@@ -164,16 +164,21 @@ sub check_client_rshell_connection {
     my $result;
     my $state = 0;
     my $msg   = "$rshell not working correctly";
+    my $rshell_args = "";
 
     if ( $gwhost || $host eq "localhost" ) {
         $state = 1;
         $msg   = 'Could not test RemoteShell because Host is behind a Gateway-Host';
     } else {
-        $result = `timeout 10 $rshell $host uname -a 2>&1`;
+        if ( $rshell =~ /ssh/ ){
+            $rshell_args = "-o ControlMaster=no";
+        }
+        my $exec_cmd = "timeout 10 $rshell $rshell_args $host uname -a 2>&1";
+        $result = `$exec_cmd`;
 
         if ( $result =~ /^(Linux|Darwin)/) {
             $state = 1;
-            $msg   = "$rshell ok";
+            $msg   = "$exec_cmd ok";
         }else{
             $msg  .= " - $result";
         }
