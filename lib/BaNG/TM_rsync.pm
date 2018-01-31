@@ -604,7 +604,7 @@ sub _finish_rsync_backupjob {
             rename_failed_backup( $taskid, $host, $group, $bkptimestamp );
         } else {
             logit( $taskid, $host, $group, "rsync in links-mode successfully finished with (code $rsync_err) for host $host group $group" ) if $serverconfig{verbose};
-            create_link_current( $host, $group, $bkptimestamp );
+            create_link_current( $taskid, $host, $group, $bkptimestamp );
         }
     }
 
