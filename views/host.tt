@@ -67,7 +67,7 @@
                 <td class="zoom pointer" data-href='/logs/<% host %>/<% hosts.$hostname.group %>'></td>
                 <td align="center" title="Delete config file <% hosts.$hostname.configfile %>"><img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>"></td>
 
-                <%- IF backupstack.${hosts.$hostname.group}.size - 1 > 0 %>
+                <%- IF backupstack.${hosts.$hostname.group}.size - 1 > 0 && conn_status %>
                 <td align="center" title="Start Backup <% host %>_<% hosts.$hostname.group %>"><img class="pointer" src="/images/computer_start.png" data-startbackup="<% host %>_<% hosts.$hostname.group %>"></td>
                 <%- END %>
             </tr>
