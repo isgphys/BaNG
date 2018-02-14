@@ -20,7 +20,7 @@ foreach my $triggerfile (@triggerfiles) {
     _logit("found trigger file for Host: $hostname Group: $groupname");
     _logit("delete triggerfile $serverconfig{path_trigger}/$triggerfile");
     unlink("$serverconfig{path_trigger}/$triggerfile") unless $dryrun;
-    my $bang_cmd = "$prefix/BaNG -h $hostname -g $groupname --noreport -n";
+    my $bang_cmd = "$prefix/BaNG -h $hostname -g $groupname";
     _logit("start backup for Host: $hostname Group: $groupname, using following command: $bang_cmd");
     $bang_cmd = "echo $bang_cmd" if $dryrun;
     system("$bang_cmd");
