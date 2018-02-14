@@ -24,11 +24,13 @@ path_date:              /bin/date
 path_rsh:               /usr/bin/rsh
 path_rsync:             /usr/bin/rsync
 path_dar:
-path_timeout:
 path_ypcat:
 path_nocache:
 path_ionice:
 path_taskset:
+#
+path_timeout:
+timeout_duration:
 #
 report_to:              admin@example.com
 xymon_server:
