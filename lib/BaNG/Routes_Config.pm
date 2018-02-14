@@ -155,4 +155,13 @@ post '/delete/:configtype/:file' => require_role config->{admin_role} => sub {
     warning "$return_msg by $deletedby!";
 };
 
+post '/trigger/:trigger' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+    my $trigger     = param('trigger');
+    my $triggeredby = session('logged_in_user');
+
+    my ( $return_code, $return_msg ) = trigger_config( $trigger );
+    warning "$return_msg by $triggeredby!";
+};
+
 1;

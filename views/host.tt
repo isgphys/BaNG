@@ -64,7 +64,11 @@
                 <td class="center"><% RecentBackups.$hostname.0.TotFileSize %></td>
                 <td class="center"><% RecentBackups.$hostname.0.Runtime %></td>
                 <td class="zoom pointer" data-href='/logs/<% host %>/<% hosts.$hostname.group %>'></td>
-                <td align="center"><img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>"></td>
+                <td align="center" title="Delete config file"><img class="delete pointer" src="/images/delete.png" data-configtype="host" data-deleteconfigfile="<% hosts.$hostname.configfile %>"></td>
+
+                <%- IF backupstack.${hosts.$hostname.group}.daily.size > 0  %>
+                <td align="center" title="Start Backup!"><img class="pointer" src="/images/computer_start.png" data-startbackup="<% host %>_<% hosts.$hostname.group %>"></td>
+                <%- END %>
             </tr>
             <%- IF hosts.$hostname.hostconfig.COMMENT %>
             <tr>

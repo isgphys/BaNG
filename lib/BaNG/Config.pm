@@ -30,6 +30,7 @@ our @EXPORT = qw(
     write_config
     update_config
     delete_config
+    trigger_config
     get_taskmeta
     get_cronjob_config
     generate_cron
@@ -189,6 +190,16 @@ sub delete_config {
     } else {
         return ( 1, "$DelConfigFile does not exist." );
     }
+}
+
+sub trigger_config {
+    my ( $trigger ) = @_;
+
+    my $path_config = 'path_trigger';
+    my $TriggerFile = "$serverconfig{$path_config}/$trigger.trigger";
+
+    system("echo \"\" >> \"$TriggerFile\"");
+    return ( 0, "Created trigger $TriggerFile successfully" );
 }
 
 sub get_host_config {

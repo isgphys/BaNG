@@ -103,6 +103,15 @@
                     window.location = $(this).data('href');
                 });
 
+                $('[data-startbackup]').click(function() {
+                    var ConfigFile = $(this).data('startbackup');
+                    if ( confirm('Do you really want start backup of ' + ConfigFile) ) {
+                        $.post('/config/trigger/' + ConfigFile, {
+                        });
+                        window.location = "/";
+                    };
+                });
+
                 $('[data-deleteconfigfile]').click(function() {
                     var deleteFile = $(this).data('deleteconfigfile');
                     var configType = $(this).data('configtype');
