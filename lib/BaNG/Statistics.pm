@@ -256,7 +256,8 @@ sub statistics_work_duration {
 
     my $sth = $bangstat_dbh->prepare("
         SELECT  TaskID, BkpGroup,
-            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
+            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime,
+            SUM(NumOfFiles) as NumOfFiles
         FROM statistic
         WHERE Start > date_sub(NOW(), INTERVAL 1 DAY)
         GROUP BY TaskID, BkpGroup
@@ -265,13 +266,13 @@ sub statistics_work_duration {
     $sth->execute();
 
     my @top_time;
-    while ( my ( $taskid, $bkpgroup, $runtime ) = $sth->fetchrow_array() ) {
+    while ( my ( $taskid, $bkpgroup, $runtime, $numoffiles ) = $sth->fetchrow_array() ) {
         next unless $runtime;
         next if $runtime < 2;
         push( @top_time, {
             name  => $bkpgroup,
             value => $runtime,
-            label => time2human( $runtime / 60 ),
+            label => num2human( $numoffiles, 1024 ) . " / " . time2human( $runtime / 60 ),
             url   => "/statistics/barchart/worktime/$taskid",
         });
     }
@@ -290,7 +291,8 @@ sub statistics_work_duration_details {
 
     $sth = $bangstat_dbh->prepare("
         SELECT bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot,
-            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime
+            TIMESTAMPDIFF(Second, MIN(Start) , MAX(Stop)) as Runtime,
+            SUM(NumOfFiles) as NumOfFiles
         FROM statistic
         WHERE TaskID = '$taskid'
         GROUP BY bkpfromhost, bkpgroup, BkpFromPath, BkpFromPathRoot
@@ -298,7 +300,7 @@ sub statistics_work_duration_details {
     ");
     $sth->execute();
 
-    while ( my ( $bkphost, $bkpgroup, $bkppath, $bkppathroot, $runtime ) = $sth->fetchrow_array() ) {
+    while ( my ( $bkphost, $bkpgroup, $bkppath, $bkppathroot, $runtime, $numoffiles ) = $sth->fetchrow_array() ) {
         $sqlbkpgroup = $bkpgroup;
         $bkpurl      = ( $bkppath eq $bkppathroot ) ? $bkppath : $bkppathroot;
         my $c = $bkpurl =~ tr/://;
@@ -317,7 +319,7 @@ sub statistics_work_duration_details {
         push( @top_size, {
             name  => $labeltext,
             value => max( $runtime, 59 ),               # display all values smaller than 1 minute as 59 seconds
-            label => time2human( $runtime / 60 ),
+            label => num2human( $numoffiles, 1024 ) . " / " . time2human( $runtime / 60 ),
             url   => $bkpurl,
         });
     }
