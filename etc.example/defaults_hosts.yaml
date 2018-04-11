@@ -48,6 +48,7 @@ BKP_RSYNC_INPLACE:        0                         # (--inplace) update destina
 BKP_RSYNC_ACL:            0                         # (--acls) preserve ACLs
 BKP_RSYNC_XATTRS:         0                         # (--xattrs) preserve extended attributes
 BKP_RSYNC_NODEVICES:      0                         # (--no-D) don't copy devices or special files
+BKP_RSYNC_SOCKOPTS:       ""                        # (--sockopts OPTIONS) specify custom TCP options
 
 #*************************
 # Description of variables
