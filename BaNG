@@ -35,6 +35,10 @@ print "BaNG run in $serverconfig{bkpmode} mode!\n" if $serverconfig{verbose};
 $cron = $ENV{'BaNG_Cron'} || "0";
 print "Run as Cron: $cron\n" if $serverconfig{verbose};
 
+if (!-d "/run/BaNG") {
+    mkdir "/run/BaNG",0770 unless $serverconfig{dryrun};
+}
+
 $taskid = create_timeid( $host_arg, $group_arg );
 
 if ( $serverconfig{bkpmode} eq "rsync") {
