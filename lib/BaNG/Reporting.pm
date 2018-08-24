@@ -3,6 +3,7 @@ package BaNG::Reporting;
 use 5.010;
 use strict;
 use warnings;
+use Encode qw(encode);
 use BaNG::Config;
 use BaNG::Converter;
 use DBI;
@@ -782,7 +783,7 @@ sub logit {
                 print "Write to GLOBAL log: $logmessage";
             }
         } else {
-            print $logmessage;
+            print encode('utf-8', $logmessage);
         }
     }
 
@@ -792,13 +793,13 @@ sub logit {
             # write into daily logfile per host_group
             mkdir($logfolder) unless -d $logfolder;
             open my $log, '>>', $logfile or print "ERROR opening logfile $logfile: $!\n";
-            print {$log} $logmessage;
+            print {$log} encode('utf-8', $logmessage);
             close $log;
         }
 
         if ( $logmessage =~ /$selection/ || $group eq 'GLOBAL' || $host eq "SERVER" ) {
             open my $log, '>>', $globallogfile or print "ERROR opening logfile $globallogfile: $!\n";
-            print {$log} $logmessage;
+            print {$log} encode('utf-8', $logmessage);
             close $log;
         }
     }

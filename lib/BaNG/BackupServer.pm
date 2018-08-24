@@ -3,6 +3,7 @@ package BaNG::BackupServer;
 use 5.010;
 use strict;
 use warnings;
+use Encode qw(encode);
 use BaNG::Config;
 use BaNG::Converter;
 use BaNG::RemoteCommand;
@@ -562,14 +563,14 @@ sub reorder_queue_by_priority {
 
         my $prio = $hosts{"$host-$group"}->{hostconfig}->{BKP_PRIORITY}->{"$path"} || 0;
         $bkpjob->{priority} = $prio;
-        print "$path set priority to $prio\n" if $serverconfig{verbose};
+        print encode('utf-8', $path) . " set priority to $prio\n" if $serverconfig{verbose};
         push( @prio_queue, $bkpjob );
     }
 
     # reorder queue by priority
     print "Final queue order: \n" if $serverconfig{verbose};
     foreach my $bkpjob ( sort { $a->{priority} <=> $b->{priority} } @queue ) {
-        print "$bkpjob->{priority} $bkpjob->{path} $bkpjob->{dosnapshot}\n" if $serverconfig{verbose};
+        print "$bkpjob->{priority} ". encode('utf-8', $bkpjob->{path}) ." $bkpjob->{dosnapshot}\n" if $serverconfig{verbose};
         push( @prio_queue_sorted, $bkpjob );
     }
 

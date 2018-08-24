@@ -3,6 +3,7 @@ package BaNG::TM_rsync;
 use 5.010;
 use strict;
 use warnings;
+use Encode qw(decode);
 use BaNG::Config;
 use BaNG::Reporting;
 use BaNG::BackupServer;
@@ -471,9 +472,9 @@ sub _queue_remote_subfolders {
     # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
     if ( $#remotesubfolders == -1 ) {
         push( @remotesubfolders, $srcfolder );
-        logit( $taskid, $host, $group, "ERROR: eval subfolders failed, use now with:\n @remotesubfolders" );
+        logit( $taskid, $host, $group, "ERROR: eval subfolders failed, use now with:\n ". decode('utf-8', @remotesubfolders) );
     } else {
-        logit( $taskid, $host, $group, "eval subfolders:\n @remotesubfolders" );
+        logit( $taskid, $host, $group, "eval subfolders:\n ". decode('utf-8', @remotesubfolders) );
     }
 
     my $exclsubfolderfile = create_generic_exclude_file($taskid, $host, $group, $jobid);
@@ -492,7 +493,7 @@ sub _queue_remote_subfolders {
             jobid        => $jobid,
             host         => $host,
             group        => $group,
-            path         => ":'${remotesubfolder}'",
+            path         => ":'". decode('utf-8',${remotesubfolder}) ."'",
             bkptimestamp => $bkptimestamp,
             srcfolder    => ":$srcfolder",
             dosnapshot   => 0,
