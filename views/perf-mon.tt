@@ -21,8 +21,8 @@
             </tr>
             <tr>
                 <td>
-                    <embed src="<% perf_mon_url %>chart=system.ipv4&label=Total Traffic - in&dimensions=system.ipv4%7Creceived&refresh=2" type="image/svg+xml" height="20"></embed>
-                    <embed src="<% perf_mon_url %>chart=system.ipv4&label=Total Traffic - out&dimensions=system.ipv4%7Csent&value_color=red&refresh=2" type="image/svg+xml" height="20"></embed>
+                    <embed src="<% perf_mon_url %>chart=system.ip&label=Total Traffic - in&dimensions=system.ip%7Creceived&refresh=2" type="image/svg+xml" height="20"></embed>
+                    <embed src="<% perf_mon_url %>chart=system.ip&label=Total Traffic - out&dimensions=system.ip%7Csent&value_color=red&refresh=2" type="image/svg+xml" height="20"></embed>
                 </td>
             </tr>
             <tr>
