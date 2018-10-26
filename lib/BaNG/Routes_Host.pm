@@ -12,10 +12,10 @@ use BaNG::Reporting;
 
 prefix '/host';
 
-get '/:host' => require_role config->{admin_role} => sub {
+get '/:host/?:lastXdays?' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config( param('host') );
-    my %RecentBackups = bangstat_recentbackups( param('host') );
+    my %RecentBackups = bangstat_recentbackups( param('host'), param('lastXdays') );
     my ( $conn_status, $conn_msg ) = check_client_connection( param('host'), '' );
 
     template 'host', {
