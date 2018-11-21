@@ -27,14 +27,14 @@
             </tr>
             <tr>
                 <td>
-                    <embed src="<% perf_mon_url %>chart=net.team0&label=Data Traffic - read&dimensions=team0%7Creceived&divide=8192&units=MB%5Cs&refresh=2" type="image/svg+xml" height="20"></embed>
-                    <embed src="<% perf_mon_url %>chart=net.team0&label=Data Traffic - write&dimensions=team0%7Csent&divide=8192&units=MB%5Cs&value_color=red&refresh=2" type="image/svg+xml" height="20"></embed>
+                    <embed src="<% perf_mon_url %>chart=net.team1&label=Data Traffic - read&dimensions=team1%7Creceived&divide=8192&units=MB%5Cs&refresh=2" type="image/svg+xml" height="20"></embed>
+                    <embed src="<% perf_mon_url %>chart=net.team1&label=Data Traffic - write&dimensions=team1%7Csent&divide=8192&units=MB%5Cs&value_color=red&refresh=2" type="image/svg+xml" height="20"></embed>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <embed src="<% perf_mon_url %>chart=net.enp132s0f1&label=Gateway Traffic - in&dimensionsenp132s0f1p801p2%7Creceived&divide=8192&units=MB%5Cs&refresh=2" type="image/svg+xml" height="20"></embed>
-                    <embed src="<% perf_mon_url %>chart=net.enp132s0f1&label=Gateway Traffic - out&dimensions=enp132s0f1%7Csent&divide=8192&units=MB%5Cs&value_color=red&refresh=2" type="image/svg+xml" height="20"></>
+                    <embed src="<% perf_mon_url %>chart=net.eno1&label=Gateway Traffic - in&dimensions=eno1%7Creceived&divide=8192&units=MB%5Cs&refresh=2" type="image/svg+xml" height="20"></embed>
+                    <embed src="<% perf_mon_url %>chart=net.eno1&label=Gateway Traffic - out&dimensions=eno1%7Csent&divide=8192&units=MB%5Cs&value_color=red&refresh=2" type="image/svg+xml" height="20"></>
                 </td>
             </tr>
         </table>
