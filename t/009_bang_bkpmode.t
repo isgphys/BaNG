@@ -16,8 +16,8 @@ like(   $output,    qr|Option bkpmode requires an argument|         , 'Option bk
 $output = `$bangcmd -g $group --bkpmode test`;
 like(   $output,    qr|Wrong Backup Mode|                           , 'Wrong Backup Mode, please use rsync or lts'  );
 
-$output = `$bangcmd -g $group --bkpmode lts`;
-like(   $output,    qr|BaNG run in lts mode|                        , 'BaNG run in LTS mode'                        );
+$output = `$bangcmd -g $group --bkpmode rsync`;
+like(   $output,    qr|BaNG run in rsync mode|                      , 'BaNG run in rsync mode'                      );
 
 $output = `$bangcmd -g $group --bkpmode lts`;
 like(   $output,    qr|BaNG run in lts mode|                        , 'BaNG run in LTS mode'                        );
