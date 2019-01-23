@@ -1,5 +1,5 @@
 <h3>Last Data Transfer Report</h3>
-Total Entries: <% LastTransferDate.Data.size %>
+Last <% LastTransferDate.Data.size %> Entries
 <table class="reporting default-table border tablesorter">
     <thead>
         <tr>

@@ -352,7 +352,7 @@ sub bangstat_last_transfer {
             GROUP BY BkpFromPath
             ) AS LastOne
         INNER JOIN statistic ON statistic.ID = LastOne.ID
-        ORDER BY LastTransferDate;
+        ORDER BY LastTransferDate LIMIT 28;
     ");
     $sth->execute();
 
