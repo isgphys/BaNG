@@ -1,0 +1,30 @@
+<h3>Last Data Transfer Report</h3>
+Total Entries: <% LastTransferDate.Data.size %>
+<table class="reporting default-table border tablesorter">
+    <thead>
+        <tr>
+            <th>TaskID</th>
+            <th>BkpFromHost</th>
+            <th>Bkpgroup</th>
+            <th>BkpFromPath</th>
+            <th>Last Run</th>
+            <th class="sorter-metric" data-metric-name="$">FilesDel</th>
+            <th class="sorter-metric" data-metric-name="$">FilesTrans</th>
+            <th class="sorter-metric" data-metric-name="$">SizeTrans</th>
+        </tr>
+    </thead>
+    <tbody>
+        <%- FOREACH bkp IN LastTransferDate.Data %>
+            <tr>
+                <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
+                <td class="center"><% bkp.BkpFromHost %></td>
+                <td class="center"><% bkp.BkpGroup %></td>
+                <td class="center"><% bkp.BkpFromPath %></td>
+                <td style="white-space: nowrap;" class="center"><% bkp.LastTransferDate %></td>
+                <td class="center"><% bkp.FilesDel %></td>
+                <td class="center"><% bkp.FilesTrans %></td>
+                <td class="center"><% bkp.SizeTrans %></td>
+            </tr>
+        <%- END %>
+    </tbody>
+</table>

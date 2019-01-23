@@ -23,6 +23,7 @@
             <ul>
                 <li><a href="/reporting">by Tasks</a></li>
                 <li><a href="/reporting/jobs">by Jobs</a></li>
+                <li><a href="/reporting/lasttransfer">Last Transfer</a></li>
             </ul>
         </li>
         <% END %>

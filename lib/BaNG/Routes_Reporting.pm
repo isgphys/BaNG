@@ -69,4 +69,16 @@ get '/job/:jobid' => require_role config->{admin_role} => sub {
     };
 };
 
+get '/lasttransfer' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+
+    template 'reporting-lasttransfer' => {
+        section           => 'reporting',
+        servername        => $servername,
+        servers           => \%servers,
+        LastTransferDate  => bangstat_last_transfer(),
+        xymon_server      => $serverconfig{xymon_server},
+    };
+};
+
 1;

@@ -22,6 +22,7 @@ our @EXPORT = qw(
     bangstat_recentbackups_hours
     bangstat_recentbackups_job_details
     bangstat_recent_tasks
+    bangstat_last_transfer
     bangstat_task_jobs
     bangstat_task_delete
     bangstat_start_backupjob
@@ -335,6 +336,42 @@ sub bangstat_recent_tasks {
     $sth->finish();
 
     return \%RecentTasks;
+}
+
+sub bangstat_last_transfer {
+
+    my $conn = bangstat_db_connect( $serverconfig{config_bangstat} );
+    return '' unless $conn;
+
+    my $sth = $bangstat_dbh->prepare("
+        SELECT LastOne.*
+        FROM (
+            SELECT ID,TaskID,MAX(Start) as LastTransferDate,BkpFromHost,BkpGroup,BkpFromPath,NumOfFilesTrans,TotFileSizeTrans,NumOfFilesDel
+            FROM statistic
+            WHERE TotFileSizeTrans !='0'
+            GROUP BY BkpFromPath
+            ) AS LastOne
+        INNER JOIN statistic ON statistic.ID = LastOne.ID
+        ORDER BY LastTransferDate;
+    ");
+    $sth->execute();
+
+    my %LastTransfer;;
+    while ( my $dbrow = $sth->fetchrow_hashref() ) {
+        push( @{$LastTransfer{'Data'}}, {
+            TaskID              => $dbrow->{'TaskID'},
+            BkpFromHost         => $dbrow->{'BkpFromHost'},
+            BkpGroup            => $dbrow->{'BkpGroup'},
+            BkpFromPath         => $dbrow->{'BkpFromPath'},
+            LastTransferDate    => $dbrow->{'LastTransferDate'},
+            FilesDel            => num2human($dbrow->{'NumOfFilesDel'}),
+            FilesTrans          => num2human($dbrow->{'NumOfFilesTrans'}),
+            SizeTrans           => num2human($dbrow->{'TotFileSizeTrans'},1024)
+        });
+    }
+    $sth->finish();
+
+    return \%LastTransfer;
 }
 
 sub bangstat_task_delete {
