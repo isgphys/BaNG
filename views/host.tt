@@ -189,7 +189,33 @@
     </table>
 </div>
 
-<div style="clear:both;">
-    <br />
-    <%- INCLUDE 'host-bkpreport.tt' %>
-</div>
+<div id="bkpreport" ></div>
+
+<script>
+    $(window).load(function() {
+        load_bkpreport();
+    });
+
+    function load_bkpreport(lastXdays) {
+        var host_arg = $('#hostname').html();
+
+        if (lastXdays === undefined) {
+            lastXdays = 5;}
+
+        $.ajax({
+            url: '/host/' + host_arg  + '/bkpreport/' + lastXdays,
+            beforeSend:function (content){
+                $('#bkpreport').html('<div class="loading_message">' +
+                    '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                    'Loading Backup Report</div>');
+            },
+            success: function(content) {
+                $('#bkpreport').html(content);
+                document.getElementById("LastXdays").value = lastXdays;
+            },
+            error: function() {
+                $('#bkpreport').html('An error occured while loading the Backup Report.');
+            }
+        });
+    }
+</script>

@@ -1,66 +1,79 @@
-<div>
-    <h3>Backup Report</h3>
-    <table class="default-table border">
-        <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
-            <tr><td>
-                <table class="default-table border">
-                    <thead>
-                        <tr>
-                            <th colspan="13">Group: <% RecentBackups.$hostgroup.0.BkpGroup %>
-                        </br>
-                            Source: <% hosts.$hostgroup.hostconfig.BKP_SOURCE_FOLDER.replace(':','')%>
-                        </tr>
-                        <tr>
-                            <th width="50">TaskID</th>
-                            <th width="50">RunAs</th>
-                            <th width="50">JobStatus</th>
-                            <th width="50">ErrStatus</th>
-                            <th width="100">Starttime</th>
-                            <th width="50">Runtime</th>
-                            <th width="50">FilesCreated</th>
-                            <th width="50">FilesDel</th>
-                            <th width="50">FilesTrans</th>
-                            <th width="50">SizeTrans</th>
-                            <th width="50">TotalFiles</th>
-                            <th width="50">TotalSize</th>
-                            <th width="30">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <%- FOREACH bkp IN RecentBackups.$hostgroup %>
-                        <tr>
-                            <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
-                            <td class="center"><% IF bkp.Cron == 1 %>CRON<% ELSIF bkp.Cron == 0 %>CLI<% END %></td>
-                            <td <%- IF bkp.JobStatus == 2  AND bkp.isThread %>class="hook3" title="forked Job done">
-                                <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
-                                <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
-                                <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
-                                <% ELSIF bkp.JobStatus == -2 %>class="notallow" title="Remote Shell not working">
-                                <% ELSIF bkp.ErrStatus == 99 %>>
-                                <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
-                            <td title="Rsync Error Status: <% bkp.ErrStatus %>"
-                                <%- IF bkp.ErrStatus == 0 %> class="ok"
-                                <%- ELSIF bkp.ErrStatus == 99 %> class="notallow"
-                                <%- ELSIF bkp.ErrStatus.match('23') %> class="notok"
-                                <%- ELSIF bkp.ErrStatus.match('24') %> class="notok"
-                                <% ELSE %> class="bad"<% END %>>
-                            </td>
-                            <td class="center"><% bkp.Starttime %></td>
-                            <td class="center"><% bkp.Runtime %></td>
-                            <td class="center"><% bkp.FilesCreated %></td>
-                            <td class="center"><% bkp.FilesDel %></td>
-                            <td class="center"><% bkp.FilesTrans %></td>
-                            <td class="center"><% bkp.SizeTrans %></td>
-                            <td class="center"><% bkp.NumOfFiles %></td>
-                            <td class="center"><% bkp.TotFileSize %></td>
-                            <% IF bkp.TaskID %>
-                            <td align="center" title="Delete Task from DB"><img class="delete pointer" src="/images/delete.png" data-deletedbtask="<% bkp.TaskID %>"></td>
-                            <% END %>
-                        </tr>
-                        <%- END %>
-                    </tbody>
-                </table>
-            </td></tr>
-        <%- END %>
-    </table>
+<h3>Backup Report</h3>
+<div id="lastdays">
+    <select id="LastXdays">
+      <option value="5">5 days</option>
+      <option value="10">10 days</option>
+      <option value="30">30 days</option>
+      <option value="60">60 days</option>
+      <option value="90">90 days</option>
+    </select> <img id="lockinfo_img" src="/images/reload.png" width="15" title="Force reload">
 </div>
+<table class="default-table border">
+    <%- FOREACH hostgroup IN RecentBackups.keys.sort %>
+        <tr><td>
+            <table class="default-table border">
+                <thead>
+                    <tr>
+                        <th colspan="13">Group: <% RecentBackups.$hostgroup.0.BkpGroup %>
+                    </br>
+                        Source: <% hosts.$hostgroup.hostconfig.BKP_SOURCE_FOLDER.replace(':','')%>
+                    </tr>
+                    <tr>
+                        <th width="50">TaskID</th>
+                        <th width="50">RunAs</th>
+                        <th width="50">JobStatus</th>
+                        <th width="50">ErrStatus</th>
+                        <th width="100">Starttime</th>
+                        <th width="50">Runtime</th>
+                        <th width="50">FilesCreated</th>
+                        <th width="50">FilesDel</th>
+                        <th width="50">FilesTrans</th>
+                        <th width="50">SizeTrans</th>
+                        <th width="50">TotalFiles</th>
+                        <th width="50">TotalSize</th>
+                        <th width="30">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%- FOREACH bkp IN RecentBackups.$hostgroup %>
+                    <tr>
+                        <td class="center" title="<% bkp.TaskID %>"><a href="/reporting/task/<% bkp.TaskID %>"><% bkp.TaskID.substr(12) %></a></td>
+                        <td class="center"><% IF bkp.Cron == 1 %>CRON<% ELSIF bkp.Cron == 0 %>CLI<% END %></td>
+                        <td <%- IF bkp.JobStatus == 2  AND bkp.isThread %>class="hook3" title="forked Job done">
+                            <% ELSIF bkp.JobStatus == 2 %>class="hook" title="Job done">
+                            <% ELSIF bkp.JobStatus == 1 %>class="hook_box" title="Rsync done">
+                            <% ELSIF bkp.JobStatus == -1 %>class="offline pointer" data-href='https://<% xymon_server %>/hobbit-cgi/bb-hostsvc.sh?HOST=<% bkp.BkpHost %>&SERVICE=conn' title="Host offline">
+                            <% ELSIF bkp.JobStatus == -2 %>class="notallow" title="Remote Shell not working">
+                            <% ELSIF bkp.ErrStatus == 99 %>>
+                            <% ELSE %>class="jobrun" title="Still running"><%- END -%></td>
+                        <td title="Rsync Error Status: <% bkp.ErrStatus %>"
+                            <%- IF bkp.ErrStatus == 0 %> class="ok"
+                            <%- ELSIF bkp.ErrStatus == 99 %> class="notallow"
+                            <%- ELSIF bkp.ErrStatus.match('23') %> class="notok"
+                            <%- ELSIF bkp.ErrStatus.match('24') %> class="notok"
+                            <% ELSE %> class="bad"<% END %>>
+                        </td>
+                        <td class="center"><% bkp.Starttime %></td>
+                        <td class="center"><% bkp.Runtime %></td>
+                        <td class="center"><% bkp.FilesCreated %></td>
+                        <td class="center"><% bkp.FilesDel %></td>
+                        <td class="center"><% bkp.FilesTrans %></td>
+                        <td class="center"><% bkp.SizeTrans %></td>
+                        <td class="center"><% bkp.NumOfFiles %></td>
+                        <td class="center"><% bkp.TotFileSize %></td>
+                        <% IF bkp.TaskID %>
+                        <td align="center" title="Delete Task from DB"><img class="delete pointer" src="/images/delete.png" data-deletedbtask="<% bkp.TaskID %>"></td>
+                        <% END %>
+                    </tr>
+                    <%- END %>
+                </tbody>
+            </table>
+        </td></tr>
+    <%- END %>
+</table>
+<script>
+    $('#lockinfo_img').click(function(){
+        var e = document.getElementById("LastXdays");
+        load_bkpreport(e.options[e.selectedIndex].value);
+        });
+</script>
