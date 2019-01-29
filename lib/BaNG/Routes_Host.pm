@@ -35,11 +35,13 @@ get '/:host' => require_role config->{admin_role} => sub {
 
 get '/:host/bkpreport/?:lastXdays?' => require_role config->{admin_role} => sub {
     get_serverconfig();
+    get_host_config( param('host') );
     my %RecentBackups = bangstat_recentbackups( param('host'), param('lastXdays') );
 
     template 'host-bkpreport', {
         section       => 'host',
         RecentBackups => \%RecentBackups,
+        hosts         => \%hosts,
     },{ layout => 0 };
 };
 
