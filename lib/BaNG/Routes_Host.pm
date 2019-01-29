@@ -12,10 +12,9 @@ use BaNG::Reporting;
 
 prefix '/host';
 
-get '/:host/?:lastXdays?' => require_role config->{admin_role} => sub {
+get '/:host' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config( param('host') );
-    my %RecentBackups = bangstat_recentbackups( param('host'), param('lastXdays') );
     my ( $conn_status, $conn_msg ) = check_client_connection( param('host'), '' );
 
     template 'host', {
@@ -30,9 +29,18 @@ get '/:host/?:lastXdays?' => require_role config->{admin_role} => sub {
         hosts         => \%hosts,
         backupstack   => backup_folders_stack( param('host') ),
         cronjobs      => get_cronjob_config(),
-        RecentBackups => \%RecentBackups,
         xymon_server  => $serverconfig{xymon_server},
     };
+};
+
+get '/:host/bkpreport/?:lastXdays?' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+    my %RecentBackups = bangstat_recentbackups( param('host'), param('lastXdays') );
+
+    template 'host-bkpreport', {
+        section       => 'host',
+        RecentBackups => \%RecentBackups,
+    },{ layout => 0 };
 };
 
 1;
