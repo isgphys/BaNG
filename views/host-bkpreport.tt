@@ -76,4 +76,14 @@
         var e = document.getElementById("LastXdays");
         load_bkpreport(e.options[e.selectedIndex].value);
         });
+
+    $('[data-deletedbtask]').click(function() {
+        var TaskID = $(this).data('deletedbtask');
+        if ( confirm('Do you really want delete ' + TaskID  + ' from DB?') ) {
+            $.post('/reporting/task/' + TaskID, function(data) {
+                alert( data + " " + TaskID + ' has been deleted!');
+            });
+        };
+    });
+
 </script>
