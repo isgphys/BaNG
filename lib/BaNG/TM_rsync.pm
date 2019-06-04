@@ -403,8 +403,9 @@ sub _eval_rsync_options {
     $rsync_options .= '--force '         if $hostconfig->{BKP_RSYNC_DELETE_FORCE};
     $rsync_options .= '--numeric-ids '   if $hostconfig->{BKP_RSYNC_NUM_IDS};
     $rsync_options .= '--inplace '       if $hostconfig->{BKP_RSYNC_INPLACE};
-    $rsync_options .= '--acls '          if $hostconfig->{BKP_RSYNC_ACL};
-    $rsync_options .= '--xattrs '        if $hostconfig->{BKP_RSYNC_XATTRS};
+    $rsync_options .= '-S '              if $hostconfig->{BKP_RSYNC_SPARSE};
+    $rsync_options .= '-A '              if $hostconfig->{BKP_RSYNC_ACL};
+    $rsync_options .= '-X '              if $hostconfig->{BKP_RSYNC_XATTRS};
     $rsync_options .= '--no-D '          if $hostconfig->{BKP_RSYNC_NODEVICES};
     $rsync_options .= '-v '              if ( $serverconfig{verbose} && ( $serverconfig{verboselevel} == 3 ) );
     $rsync_options .= "-M '$hostconfig->{BKP_RSYNC_REMOTE_OPT}' "          if $hostconfig->{BKP_RSYNC_REMOTE_OPT};

@@ -46,8 +46,9 @@ BKP_RSYNC_IGNORE_ERRORS:  0                         # (--ignore-errors) delete e
 BKP_RSYNC_DELETE_FORCE:   0                         # (--force) force deletion of dirs even if not empty
 BKP_RSYNC_NUM_IDS:        0                         # (--numeric-ids) don't map uid/gid values by user/group name
 BKP_RSYNC_INPLACE:        0                         # (--inplace) update destination files in-place
-BKP_RSYNC_ACL:            0                         # (--acls) preserve ACLs
-BKP_RSYNC_XATTRS:         0                         # (--xattrs) preserve extended attributes
+BKP_RSYNC_SPARSE:         0                         # (-S) handle sparse files efficiently
+BKP_RSYNC_ACL:            0                         # (-A) preserve ACLs
+BKP_RSYNC_XATTRS:         0                         # (-X) preserve extended attributes
 BKP_RSYNC_NODEVICES:      0                         # (--no-D) don't copy devices or special files
 BKP_RSYNC_SOCKOPTS:       ""                        # (--sockopts OPTIONS) specify custom TCP options
 
@@ -118,6 +119,7 @@ HELP:
   BKP_RSYNC_DELETE_FORCE:   (--force) force deletion of dirs even if not empty
   BKP_RSYNC_NUM_IDS:        (--numeric-ids) don't map uid/gid values by user/group name
   BKP_RSYNC_INPLACE:        (--inplace) update destination files in-place
-  BKP_RSYNC_ACL:            (--acls) preserve ACLs
-  BKP_RSYNC_XATTRS:         (--xattrs) preserve extended attributes
+  BKP_RSYNC_SPARSE:         (-S) handle sparse files efficiently
+  BKP_RSYNC_ACL:            (-A) preserve ACLs
+  BKP_RSYNC_XATTRS:         (-X) preserve extended attributes
   BKP_RSYNC_NODEVICES:      (--no-D) don't copy devices or special files
