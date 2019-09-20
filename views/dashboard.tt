@@ -3,7 +3,9 @@
     <table>
         <tr>
             <td width=150><div><input id="showwipe" type="checkbox" value="1" style="vertical-align: middle;">Show Wipe Report</div></td>
+<% IF perf_mon_url %>
             <td width=180><div><input id="showperf" type="checkbox" value="1" style="vertical-align: middle;">Enable Performance Monitoring</div></td>
+<% END %>
             <td width=150>
                 <div id="cronstatus">
                     <div class="loading_message">
@@ -16,9 +18,8 @@
     </table>
 </form>
 
-<% TRY %>
-    <% INCLUDE 'perf-mon.tt' %>
-<% CATCH %>
+<% IF perf_mon_url %>
+<div id="performance" style="float: right;"></div>
 <% END %>
 
 <div id="fsinfo" class="float-left"></div>
@@ -36,6 +37,7 @@
         load_fsinfo_report();
         load_error_report();
 
+    <% IF perf_mon_url %>
         var showperf_state = localStorage.getItem('showperf') || "true";
         showperf_state = (showperf_state === "true"); // convert to boolean
         $('#showperf').prop('checked', showperf_state);
@@ -43,7 +45,31 @@
 
         $('#showperf').change(function (e) {
             localStorage.setItem('showperf', e.target.checked);
+            PerfMon();
         });
+
+        function PerfMon() {
+            if ( $('#showperf').is(':checked') ) {
+                netdata_update_every = 1;
+                $.ajax({
+                    url: '/perf_mon',
+                    beforeSend:function (content){
+                        $('#performance').html('<div class="loading_message">' +
+                            '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                            'Loading Perfomance Monitoring</div>');
+                    },
+                    success: function(content) {
+                        $('#performance').html(content);
+                    },
+                    error: function() {
+                        $('#performance').html('An error occured while loading the Performance Monitoring.');
+                    }
+                });
+        }else{
+            $('#performance').html('');
+            };
+    };
+    <% END %>
 
         var showwipe_state = localStorage.getItem('showwipe') || "true";
         showwipe_state = (showwipe_state === "true"); // convert to boolean

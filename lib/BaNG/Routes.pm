@@ -90,6 +90,16 @@ get '/wipe_status' => require_role config->{admin_role} => sub {
         },{ layout => 0 };
 };
 
+get '/perf_mon' => require_role config->{admin_role} => sub {
+    get_serverconfig();
+
+    template 'perf-mon' => {
+        servername   => $servername,
+        perf_mon_url => $serverconfig{perf_mon_url},
+    },{
+        layout => 0 };
+};
+
 get '/login' => sub {
     session 'return_url' => params->{return_url} || '/';
 
