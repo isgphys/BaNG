@@ -48,6 +48,9 @@ h3 {
 .alert_yellow {
     background-color: yellow;
 }
+.alert_green {
+    background-color: greenyellow;
+}
 .wipe {
     background-color: #FFEAEA;
 }

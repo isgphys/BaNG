@@ -2,10 +2,6 @@
 <form action="">
     <table>
         <tr>
-            <td width=150><div><input id="showwipe" type="checkbox" value="1" style="vertical-align: middle;">Show Wipe Report</div></td>
-<% IF perf_mon_url %>
-            <td width=180><div><input id="showperf" type="checkbox" value="1" style="vertical-align: middle;">Enable Performance Monitoring</div></td>
-<% END %>
             <td width=150>
                 <div id="cronstatus">
                     <div class="loading_message">
@@ -14,6 +10,10 @@
                     </div>
                 </div>
             </td>
+            <td width=150><div><input id="showwipe" type="checkbox" value="1" style="vertical-align: middle;">Show Wipe Report</div></td>
+<% IF perf_mon_url %>
+            <td width=220><div><input id="showperf" type="checkbox" value="1" style="vertical-align: middle;">Enable Performance Monitoring</div></td>
+<% END %>
         </tr>
     </table>
 </form>
@@ -118,7 +118,7 @@
             url: '/status_cron',
             success: function(content) {
             if (content == "" ) {
-            $('#cronstatus').html('<b>Cronjob Status:</b> up-to-date');
+            $('#cronstatus').html('<b>Cronjob Status:</b> <span class="alert_green">up-to-date</span>');
             } else {
             $('#cronstatus').html('<b>Cronjob Status:</b> <a class="alert_yellow" href="/status_cron">DIFF</a>');
                 }
