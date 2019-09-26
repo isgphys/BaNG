@@ -41,21 +41,9 @@ sub queue_rsync_backup {
     # stop if trying to do bulk backup if it's not allowed
     return unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} );
 
-    # check for existing target_path folder
+    # check for existing target_path folder (if missing create it when $initial is true)
     logit( $taskid, $host, $group, "Check for existing target_path for host $host group $group" );
-    my $check_target_code = check_target_exists( $host, $group );
-
-    if ( $check_target_code == 0 ) {
-        if ( $initial ) {
-            my ($return_code, $return_msg) = create_target($host, $group, $taskid );
-            logit( $taskid, $host, $group, "$return_msg for host $host group $group" );
-        } else {
-            logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
-            print "Skipping backup of $host because target_path (" . targetpath($host, $group ) .") does not exist!\n";
-            print "use --initial for the first backup run, otherwise check availability of mount!\n";
-            return 1;
-        }
-    }
+    return unless check_target_exists( $host, $group, $taskid, $initial );
 
     my @backup_folders = reverse(get_backup_folders( $host, $group ));
 

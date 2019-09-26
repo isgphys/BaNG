@@ -22,6 +22,7 @@ unlike( $output,    qr|Undefined|i                                              
 $group = 'snapshot-simple';
 $output = `$bangcmd -h localhost -g $group --initial`;
 like(   $output,    qr|Queueing backup for host localhost group $group|          , "Queueing backup for localhost $group"               );
+like(   $output,    qr|target_path for host localhost group $group is missing|   , "target_path is missing for for localhost $group"    );
 like(   $output,    qr|Created btrfs subvolume for host localhost group $group|  , "Created btrfs subvolume for localhost $group"       );
 like(   $output,    qr|check_client_connection|                                  , "Check online status of localhost $group"            );
 like(   $output,    qr|Number of source folders: 1|                              , "Correct source folders for localhost $group"        );

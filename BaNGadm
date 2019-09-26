@@ -77,10 +77,7 @@ if ( $initial_arg ) {
     print "Initialize target structure for $host_arg $group_arg\n";
     get_host_config( $host_arg, $group_arg );
 
-    unless ( check_target_exists( $host_arg, $group_arg ) ){
-        my ($create_return_code, $create_return_msg) = create_target( $host_arg, $group_arg, 0 );
-        print "$create_return_msg for host $host_arg group $group_arg\n";
-    }
+    return unless check_target_exists( $host_arg, $group_arg, 0, 1 );
 
     print "Target structure for $host_arg\_$group_arg is ready for use!\n";
 
@@ -171,10 +168,7 @@ if ($add_arg) {
         print "Configfile $return_msg created\n";
         get_host_config( $host_arg, $group_arg );
 
-        unless ( check_target_exists( $host_arg, $group_arg ) ){
-            my ($create_return_code, $create_return_msg) = create_target( $host_arg, $group_arg, 0 );
-            print "$create_return_msg for host $host_arg group $group_arg\n";
-        }
+        return unless check_target_exists( $host_arg, $group_arg, 0, 1) ;
 
         print "Target structure for $host_arg\_$group_arg is ready for use!\n";
     } else {

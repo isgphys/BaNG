@@ -26,7 +26,6 @@ our @EXPORT = qw(
     check_client_rshell_connection
     get_automount_paths
     check_target_exists
-    create_target
     create_lockfile
     remove_lockfile
     check_lockfile
@@ -210,25 +209,39 @@ sub get_backup_folders {
 }
 
 sub check_target_exists {
-    my ( $host, $group ) = @_;
+    my ( $host, $group, $taskid, $initial ) = @_;
     my $snapshot    = ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) ? 1 : 0 ;
     my $target      = targetpath( $host, $group );
     my $return_code = 0; # 0 = not available, 1 = available
 
     if ( -e $target ) {
         $return_code = 1;
-    }
-    if ( $snapshot ) {
-        $target .= '/current';
-
-        if ( -e $target ) {
-            $return_code = 1;
+        if ( $snapshot ) {
+            $target .= '/current';
+            if ( !-e $target ) {
+                $return_code = 0;
+            }
         }
     }
-    return $return_code;
+    if ( $return_code == 0 ) {
+        logit( $taskid, $host, $group, "target_path for host $host group $group is missing" );
+        if ( $initial ) {
+            my ($code, $msg) = _create_target($host, $group, $taskid );
+            logit( $taskid, $host, $group, "$msg for host $host group $group" );
+            $return_code = $code;
+        } else {
+            logit( $taskid, $host, $group, "Skipping because target_path (" . targetpath($host, $group ) .") does not exist for host $host group $group" );
+            print "Skipping backup of $host because target_path (" . targetpath($host, $group ) .") does not exist!\n";
+            print "use --initial for the first backup run, otherwise check availability of mount!\n";
+        }
+    } else {
+        logit( $taskid, $host, $group, "target_path $target for host $host group $group is available" );
+    }
+
+  return $return_code;
 }
 
-sub create_target {
+sub _create_target {
     my ( $host, $group, $taskid ) = @_;
     $taskid       ||= 0;
     my $snapshot    = ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) ? 1 : 0 ;
