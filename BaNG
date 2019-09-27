@@ -14,7 +14,7 @@ use BaNG::TM_lts;
 use BaNG::BTRFS;
 use BaNG::Wipe;
 
-my $version = '3.7-testing';
+my $version = '3.8-testing';
 my $prefix_arg;
 my ($host_arg, $group_arg, $nthreads_arg, $bkpmode_arg);
 my ($cron, $wipe, $xymononly);
@@ -44,19 +44,20 @@ $taskid = create_timeid( $host_arg, $group_arg );
 if ( $serverconfig{bkpmode} eq "rsync") {
 
     bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
-
     get_host_config( $host_arg, $group_arg );
 
     foreach my $config ( sort keys %hosts ) {
+        my $host  = $hosts{$config}->{hostname};
+        my $group = $hosts{$config}->{group};
+
         if ($wipe) {
-            wipe( $hosts{$config}->{hostname}, $hosts{$config}->{group}, $taskid, $force );
+            wipe( $host, $group, $taskid, $force );
         } elsif ($xymononly) {
-            my $host          = $hosts{$config}->{hostname};
-            my $group         = $hosts{$config}->{group};
             my %RecentBackups = bangstat_recentbackups($host);
             xymon_report( $taskid, $host, $group, %RecentBackups );
         } else {
-            queue_rsync_backup( $host_arg, $group_arg, $hosts{$config}->{hostname}, $hosts{$config}->{group}, $initial, $missingonly, $noreport, $taskid, $dryrun_arg, $cron );
+            next unless pre_queue_checks( $taskid, $host_arg, $group_arg, $host, $group, $initial, $missingonly, $noreport );
+            queue_rsync_backup( $host_arg, $group_arg, $host, $group, $initial, $missingonly, $noreport, $taskid, $dryrun_arg, $cron );
         }
     }
 

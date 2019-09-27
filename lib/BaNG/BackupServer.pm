@@ -18,6 +18,7 @@ use JSON;
 
 use Exporter 'import';
 our @EXPORT = qw(
+    pre_queue_checks
     bkp_to_current_server
     get_fsinfo
     get_lockfiles
@@ -208,11 +209,112 @@ sub get_backup_folders {
     return @backup_folders;
 }
 
+sub pre_queue_checks {
+    my ( $taskid, $host_arg, $group_arg, $host, $group, $initial, $missingonly, $noreport ) = @_;
+    my ( $startstamp, $endstamp, $jobid );
+
+    logit( $taskid, $host, $group, "pre-queue checks for host $host group $group" );
+
+    # make sure we are on the correct backup server
+    return 0 unless bkp_to_current_server( $host, $group, $taskid );
+
+    # make sure BKP_SOURCE_FOLDER is set
+    unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER} ) {
+        logit( $taskid, $host, $group, "BKP_SOURCE_FOLDER not defined for host $host group $group" );
+        return 0;
+    };
+
+    # make sure backup is enabled
+    unless ( $hosts{"$host-$group"}->{hostconfig}->{BKP_ENABLED} ){
+        logit( $taskid, $host, $group, "Backup is not enabled for host $host group $group" );
+        return 0;
+    };
+
+    # stop if trying to do bulk backup if it's not allowed
+    unless ( ( $group_arg && $host_arg ) || $hosts{"$host-$group"}->{hostconfig}->{BKP_BULK_ALLOW} ) {
+        logit( $taskid, $host, $group, "Bulk-Backup is not enabled for host $host group $group" );
+        return 0;
+    };
+
+    # check for existing target_path folder (if missing create it when $initial is true)
+    return 0 unless check_target_exists( $host, $group, $taskid, $initial );
+
+    my @backup_folders = reverse(get_backup_folders( $host, $group ));
+
+    #####################
+    # MIGRATION "lastdst"
+    if ( -f targetpath($host, $group ) . "/lastdst") {
+        logit( $taskid, $host, $group, "Found depricated lastdst file for host $host group $group" );
+        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq "links" ) {
+            if ( (!-d targetpath($host, $group ) . "/current") && ($#backup_folders >= 0)) {
+                my ($last_folder) = $backup_folders[0] =~ /([0-9._]*)$/;
+                create_link_current($taskid,$host, $group, $last_folder);
+            }
+        }
+        unlink(targetpath($host, $group ) . "/lastdst") unless $serverconfig{dryrun};
+        logit( $taskid, $host, $group, "Delete depricated lastdst file for host $host group $group" );
+    }
+    # MIGRATION "lastdst"
+    #####################
+
+    # if missingonly, don't queue host if we had a backup within the last 20 hours
+    if ( $missingonly && $backup_folders[0] =~ qr{ .*/(?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d)$ }x ) {
+        my $lastbkpepoch = str2time("$+{date} $+{HH}:$+{MM}:$+{SS}");
+        if ( ( time - $lastbkpepoch ) < 20 * 3600 ) {
+            logit( $taskid, $host, $group, "Skipping because recent backup found for host $host group $group" );
+            return 0;
+        }
+    }
+
+    # make sure host is online
+    my ( $conn_status, $conn_msg ) = check_client_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    logit( $taskid, $host, $group, "check_client_connection: $conn_status, $conn_msg" );
+
+    if ( !$conn_status ) {
+        $startstamp = time();
+        $endstamp   = $startstamp;
+        $jobid = create_timeid( $taskid, $host, $group );
+        logit( $taskid, $host, $group, "Error: host $host is offline" );
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER},
+                                  $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), '0', '-1', '' ) unless $noreport;
+        return 0;
+    }
+
+    # make sure rsh/ssh connection works
+    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL}, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    logit( $taskid, $host, $group, "check_client_rshell_connection: $rshell_status, $rshell_msg" );
+
+    if ( !$rshell_status ) {
+        $startstamp = time();
+        $endstamp   = $startstamp;
+        $jobid = create_timeid( $taskid, $host, $group );
+        logit( $taskid, $host, $group, "Error: ". $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL} ." on host $host not working" );
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER},
+                                  $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), '0', '-2', '' ) unless $noreport;
+        mail_report( $taskid, $host, $group, () ) if $serverconfig{report_to};
+        return 0;
+    }
+
+    if ( !-e ($serverconfig{path_rsync} || "") ) {
+        $startstamp = time();
+        $endstamp   = $startstamp;
+        $jobid = create_timeid( $taskid, $host, $group );
+        logit( $taskid, $host, $group, "RSYNC command " . ($serverconfig{path_rsync} || "") . " not found!" );
+        bangstat_start_backupjob( $taskid, $jobid, $host, $group, $startstamp, $endstamp, $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER},
+                                  $hosts{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER}, targetpath( $host, $group ), '0', '-5', '' ) unless $noreport;
+        return 0;
+    }
+
+    return 1;
+}
+
 sub check_target_exists {
     my ( $host, $group, $taskid, $initial ) = @_;
     my $snapshot    = ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) ? 1 : 0 ;
     my $target      = targetpath( $host, $group );
     my $return_code = 0; # 0 = not available, 1 = available
+
+    logit( $taskid, $host, $group, "Check existing target_path for host $host group $group" );
 
     if ( -e $target ) {
         $return_code = 1;
