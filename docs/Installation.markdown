@@ -4,7 +4,7 @@ Installation
 Automated setup
 ---------------
 
-Use the [Ansible](https://www.ansible.com) playbooks of [ansible-BaNG](https://github.com/patschbo/ansible-BaNG) to install BaNG.
+Use the [Ansible](https://www.ansible.com) playbooks of [ansible-BaNG](https://github.com/isgphys/ansible-BaNG) to install BaNG.
 
 Manual setup
 ------------
@@ -23,7 +23,7 @@ apt-get install perl rsh-redone-server rsh-redone-client rsync starman coreutils
 Note that `libforks-perl` must be version 0.35 or later. If your distribution ships an older version, you should install the module from cpan.
 
 ```sh
-git clone https://github.com/patschbo/BaNG.git /opt/BaNG
+git clone https://github.com/isgphys/BaNG.git /opt/BaNG
 cd /opt/BaNG
 chown www-data:www-data var/sessions
 cp config.yml.example config.yml
