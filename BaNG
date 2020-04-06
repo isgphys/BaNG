@@ -135,7 +135,7 @@ sub parse_command_options {
     ) or usage('Invalid commmand line options.');
     usage('You must provide some arguments') unless ( $host_arg || $group_arg );
     usage('Number of threads must be positive') if ( $nthreads_arg && $nthreads_arg <= 0 );
-    usage('Wrong Backup Mode, please use rsync or lts') unless ( !defined $bkpmode_arg  || ($bkpmode_arg eq "rsync" || $bkpmode_arg eq "lts" ));
+    usage('Wrong Backup Mode, please use rsync, lftp or lts') unless ( !defined $bkpmode_arg  || ($bkpmode_arg eq "rsync" || $bkpmode_arg eq "lts" || $bkpmode_arg eq "lftp"));
 
     $verbose_arg = 1 if ( $dryrun_arg || $vv_arg || $vvv_arg );
 
@@ -180,7 +180,7 @@ sub usage {
         -p <path>                   # override path to folder containing etc/
         -w | --wipe                 # wipe the backup
         -w --force                  # forcing wipe the backup (override auto_wipe_limit)
-        --bkpmode <rsync|lts>       # select backup mode (rsync / lts), default: rsync
+        --bkpmode <rsync|lts|lftp>       # select backup mode (rsync / lts / lftp), default: rsync
         --initial                   # create nonexisting backup targets
         --missingonly               # backup only hosts that were not backed up recently
         --label <string>            # set a label for this task
