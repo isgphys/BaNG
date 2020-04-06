@@ -92,20 +92,26 @@ if ( $serverconfig{bkpmode} eq "rsync") {
 
     exit 0;
 } elsif ( $serverconfig{bkpmode} eq "lftp" ) {
-    print "LFTP mode work\n" if $serverconfig{verbose};
-
-    my %hosts = return_host_config( $group_arg );
+    vsay("LFTP mode work.");
+    my %hosts;
+    $hosts = return_host_config( $host_arg, $group_arg );
 # no implicit confusing nonsense
-    my @queue = queue_lftp_backup( $group_arg, $noreport, $taskid );
+    my @queue;
+    my $queue = \@queue;
+    $queue = queue_lftp_backup($dryrun_arg,$hosts,$queue,$host_arg,$group_arg, $noreport, $taskid );
 
-    if ( !@queue ) {
-        print "Exit because queue is empty.\n" if $serverconfig{verbose};
+    if ( !@$queue ) {
+        vsay"Exit because queue is empty.";
         exit 0;
     }
 
-    run_lftp_threads($taskid, $group_arg, $nthreads_arg, $dryrun_arg);
-
+    run_lftp_threads($taskid, $host_arg, $group_arg, $nthreads_arg, $dryrun_arg);
+    vsay("Don't forget to follow up this job with an rsync run!";
     exit 0;
+}
+sub _vsay {
+    my $msg = shift;
+    print "$msg\n" if $serverconfig{verbose};
 }
 
 #################################

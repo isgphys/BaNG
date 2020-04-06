@@ -241,10 +241,10 @@ sub get_host_config {
 }
 
 sub return_host_config {
-    my ( $host, $group) = @_;
+    my ( $host, $group, $hostmap) = @_;
     $host  ||= '*';
     $group ||= '*';
-    my %hosts;
+  
     my @hostconfigs = _find_configs( "$host\_$group\.yaml", "$serverconfig{path_hostconfig}" );
 
     foreach my $hostconfigfile (@hostconfigs) {
