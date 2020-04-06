@@ -11,10 +11,11 @@ use BaNG::BackupServer;
 use BaNG::Reporting;
 use BaNG::TM_rsync;
 use BaNG::TM_lts;
+use BaNG::TM_lftp;
 use BaNG::BTRFS;
 use BaNG::Wipe;
 
-my $version = '3.8-testing';
+my $version = '7.7-neoBaNG1';
 my $prefix_arg;
 my ($host_arg, $group_arg, $nthreads_arg, $bkpmode_arg);
 my ($cron, $wipe, $xymononly);
@@ -26,6 +27,7 @@ my $dryrun_arg;
 #################################
 # Main
 #
+# Ich hasse es wirklich wie alles hier implizit gemacht wird
 parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
@@ -40,7 +42,8 @@ if (!-d "/run/BaNG") {
 }
 
 $taskid = create_timeid( $host_arg, $group_arg );
-
+# maybe todo: change that to some sort of dispatch instead of if-else
+# maybe even based on plug-in modules ? (pipe dream)
 if ( $serverconfig{bkpmode} eq "rsync") {
 
     bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
@@ -86,6 +89,21 @@ if ( $serverconfig{bkpmode} eq "rsync") {
     }
 
     run_lts_threads($taskid, $group_arg, $nthreads_arg, $dryrun_arg);
+
+    exit 0;
+} elsif ( $serverconfig{bkpmode} eq "lftp" ) {
+    print "LFTP mode work\n" if $serverconfig{verbose};
+
+    my %hosts = return_host_config( $group_arg );
+# no implicit confusing nonsense
+    my @queue = queue_lftp_backup( $group_arg, $noreport, $taskid );
+
+    if ( !@queue ) {
+        print "Exit because queue is empty.\n" if $serverconfig{verbose};
+        exit 0;
+    }
+
+    run_lftp_threads($taskid, $group_arg, $nthreads_arg, $dryrun_arg);
 
     exit 0;
 }
