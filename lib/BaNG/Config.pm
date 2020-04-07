@@ -272,9 +272,10 @@ sub return_host_config {
             nobulk_css_class => $nobulk_css_class,
             hostconfig       => $hostconfig,
             confighelper     => $confighelper,
+            pgetArgOverride  => $pgetArgOverride,
         };
     }
-    return %hosts;
+    return $hosts;
 }
 
 sub get_lts_config {
