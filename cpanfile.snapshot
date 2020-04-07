@@ -1,0 +1,316 @@
+# carton snapshot format: version 1.0
+DISTRIBUTIONS
+  Acme-Damn-0.08
+    pathname: I/IB/IBB/Acme-Damn-0.08.tar.gz
+    provides:
+      Acme::Damn 0.08
+    requirements:
+      ExtUtils::MakeMaker 0
+      perl 5.006
+  Algorithm-Diff-1.1903
+    pathname: T/TY/TYEMQ/Algorithm-Diff-1.1903.tar.gz
+    provides:
+      Algorithm::Diff 1.1903
+      Algorithm::Diff::_impl 1.1903
+    requirements:
+      ExtUtils::MakeMaker 0
+  AppConfig-1.71
+    pathname: N/NE/NEILB/AppConfig-1.71.tar.gz
+    provides:
+      AppConfig 1.71
+      AppConfig::Args 1.71
+      AppConfig::CGI 1.71
+      AppConfig::File 1.71
+      AppConfig::Getopt 1.71
+      AppConfig::State 1.71
+      AppConfig::Sys 1.71
+    requirements:
+      ExtUtils::MakeMaker 0
+      Test::More 0
+      perl 5.008008
+  DBI-1.643
+    pathname: T/TI/TIMB/DBI-1.643.tar.gz
+    provides:
+      Bundle::DBI 12.008696
+      DBD::DBM 0.08
+      DBD::DBM::Statement 0.08
+      DBD::DBM::Table 0.08
+      DBD::DBM::db 0.08
+      DBD::DBM::dr 0.08
+      DBD::DBM::st 0.08
+      DBD::ExampleP 12.014311
+      DBD::ExampleP::db 12.014311
+      DBD::ExampleP::dr 12.014311
+      DBD::ExampleP::st 12.014311
+      DBD::File 0.44
+      DBD::File::DataSource::File 0.44
+      DBD::File::DataSource::Stream 0.44
+      DBD::File::Statement 0.44
+      DBD::File::Table 0.44
+      DBD::File::TableSource::FileSystem 0.44
+      DBD::File::db 0.44
+      DBD::File::dr 0.44
+      DBD::File::st 0.44
+      DBD::Gofer 0.015327
+      DBD::Gofer::Policy::Base 0.010088
+      DBD::Gofer::Policy::classic 0.010088
+      DBD::Gofer::Policy::pedantic 0.010088
+      DBD::Gofer::Policy::rush 0.010088
+      DBD::Gofer::Transport::Base 0.014121
+      DBD::Gofer::Transport::corostream undef
+      DBD::Gofer::Transport::null 0.010088
+      DBD::Gofer::Transport::pipeone 0.010088
+      DBD::Gofer::Transport::stream 0.014599
+      DBD::Gofer::db 0.015327
+      DBD::Gofer::dr 0.015327
+      DBD::Gofer::st 0.015327
+      DBD::Mem 0.001
+      DBD::Mem::DataSource 0.001
+      DBD::Mem::Statement 0.001
+      DBD::Mem::Table 0.001
+      DBD::Mem::db 0.001
+      DBD::Mem::dr 0.001
+      DBD::Mem::st 0.001
+      DBD::NullP 12.014715
+      DBD::NullP::db 12.014715
+      DBD::NullP::dr 12.014715
+      DBD::NullP::st 12.014715
+      DBD::Proxy 0.2004
+      DBD::Proxy::RPC::PlClient 0.2004
+      DBD::Proxy::db 0.2004
+      DBD::Proxy::dr 0.2004
+      DBD::Proxy::st 0.2004
+      DBD::Sponge 12.010003
+      DBD::Sponge::db 12.010003
+      DBD::Sponge::dr 12.010003
+      DBD::Sponge::st 12.010003
+      DBDI 12.015129
+      DBI 1.643
+      DBI::Const::GetInfo::ANSI 2.008697
+      DBI::Const::GetInfo::ODBC 2.011374
+      DBI::Const::GetInfoReturn 2.008697
+      DBI::Const::GetInfoType 2.008697
+      DBI::DBD 12.015129
+      DBI::DBD::Metadata 2.014214
+      DBI::DBD::SqlEngine 0.06
+      DBI::DBD::SqlEngine::DataSource 0.06
+      DBI::DBD::SqlEngine::Statement 0.06
+      DBI::DBD::SqlEngine::Table 0.06
+      DBI::DBD::SqlEngine::TableSource 0.06
+      DBI::DBD::SqlEngine::TieMeta 0.06
+      DBI::DBD::SqlEngine::TieTables 0.06
+      DBI::DBD::SqlEngine::db 0.06
+      DBI::DBD::SqlEngine::dr 0.06
+      DBI::DBD::SqlEngine::st 0.06
+      DBI::Gofer::Execute 0.014283
+      DBI::Gofer::Request 0.012537
+      DBI::Gofer::Response 0.011566
+      DBI::Gofer::Serializer::Base 0.009950
+      DBI::Gofer::Serializer::DataDumper 0.009950
+      DBI::Gofer::Serializer::Storable 0.015586
+      DBI::Gofer::Transport::Base 0.012537
+      DBI::Gofer::Transport::pipeone 0.012537
+      DBI::Gofer::Transport::stream 0.012537
+      DBI::Profile 2.015065
+      DBI::ProfileData 2.010008
+      DBI::ProfileDumper 2.015325
+      DBI::ProfileDumper::Apache 2.014121
+      DBI::ProfileSubs 0.009396
+      DBI::ProxyServer 0.3005
+      DBI::ProxyServer::db 0.3005
+      DBI::ProxyServer::dr 0.3005
+      DBI::ProxyServer::st 0.3005
+      DBI::SQL::Nano 1.015544
+      DBI::SQL::Nano::Statement_ 1.015544
+      DBI::SQL::Nano::Table_ 1.015544
+      DBI::Util::CacheMemory 0.010315
+      DBI::Util::_accessor 0.009479
+      DBI::common 1.643
+    requirements:
+      ExtUtils::MakeMaker 6.48
+      Test::Simple 0.90
+      perl 5.008001
+  Devel-Symdump-2.18
+    pathname: A/AN/ANDK/Devel-Symdump-2.18.tar.gz
+    provides:
+      Devel::Symdump 2.18
+      Devel::Symdump::Export undef
+    requirements:
+      Compress::Zlib 0
+      ExtUtils::MakeMaker 0
+      Test::More 0
+      perl 5.004
+  Email-Date-Format-1.005
+    pathname: R/RJ/RJBS/Email-Date-Format-1.005.tar.gz
+    provides:
+      Email::Date::Format 1.005
+    requirements:
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
+      Time::Local 0
+      strict 0
+      warnings 0
+  Exporter-Tiny-1.002001
+    pathname: T/TO/TOBYINK/Exporter-Tiny-1.002001.tar.gz
+    provides:
+      Exporter::Shiny 1.002001
+      Exporter::Tiny 1.002001
+    requirements:
+      ExtUtils::MakeMaker 6.17
+      perl 5.006001
+  List-MoreUtils-0.428
+    pathname: R/RE/REHSACK/List-MoreUtils-0.428.tar.gz
+    provides:
+      List::MoreUtils 0.428
+      List::MoreUtils::PP 0.428
+    requirements:
+      Exporter::Tiny 0.038
+      ExtUtils::MakeMaker 0
+      List::MoreUtils::XS 0.426
+  List-MoreUtils-XS-0.428
+    pathname: R/RE/REHSACK/List-MoreUtils-XS-0.428.tar.gz
+    provides:
+      List::MoreUtils::XS 0.428
+    requirements:
+      Carp 0
+      ExtUtils::MakeMaker 0
+      File::Basename 0
+      File::Copy 0
+      File::Path 0
+      File::Spec 0
+      IPC::Cmd 0
+      XSLoader 0.22
+      base 0
+  MIME-Lite-3.031
+    pathname: R/RJ/RJBS/MIME-Lite-3.031.tar.gz
+    provides:
+      MIME::Lite 3.031
+      MIME::Lite::IO_Handle 3.031
+      MIME::Lite::IO_Scalar 3.031
+      MIME::Lite::IO_ScalarArray 3.031
+      MIME::Lite::SMTP 3.031
+      MailTool undef
+    requirements:
+      Email::Date::Format 1.000
+      ExtUtils::MakeMaker 0
+      File::Basename 0
+      File::Spec 0
+  Sys-SigAction-0.23
+    pathname: L/LB/LBAXTER/Sys-SigAction-0.23.tar.gz
+    provides:
+      Sys::SigAction 0.23
+      Sys::SigAction::Alarm undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      POSIX 0
+      Test::More 0
+      perl 5.006000
+  Template-Toolkit-3.008
+    pathname: A/AT/ATOOMIC/Template-Toolkit-3.008.tar.gz
+    provides:
+      Template 3.008
+      Template::Base 3.008
+      Template::Config 3.008
+      Template::Constants 3.008
+      Template::Context 3.008
+      Template::Directive 3.008
+      Template::Document 3.008
+      Template::Exception 3.008
+      Template::Filters 3.008
+      Template::Grammar 3.008
+      Template::Iterator 3.008
+      Template::Monad::Assert 3.008
+      Template::Monad::Scalar 3.008
+      Template::Namespace::Constants 3.008
+      Template::Parser 3.008
+      Template::Perl 3.008
+      Template::Plugin 3.008
+      Template::Plugin::Assert 3.008
+      Template::Plugin::CGI 3.008
+      Template::Plugin::Datafile 3.008
+      Template::Plugin::Date 3.008
+      Template::Plugin::Date::Calc 3.008
+      Template::Plugin::Date::Manip 3.008
+      Template::Plugin::Directory 3.008
+      Template::Plugin::Dumper 3.008
+      Template::Plugin::File 3.008
+      Template::Plugin::Filter 3.008
+      Template::Plugin::Format 3.008
+      Template::Plugin::HTML 3.008
+      Template::Plugin::Image 3.008
+      Template::Plugin::Iterator 3.008
+      Template::Plugin::Math 3.008
+      Template::Plugin::Pod 3.008
+      Template::Plugin::Procedural 3.008
+      Template::Plugin::Scalar 3.008
+      Template::Plugin::String 3.008
+      Template::Plugin::Table 3.008
+      Template::Plugin::URL 3.008
+      Template::Plugin::View 3.008
+      Template::Plugin::Wrap 3.008
+      Template::Plugins 3.008
+      Template::Provider 3.008
+      Template::Service 3.008
+      Template::Stash 3.008
+      Template::Stash::Context 3.008
+      Template::Stash::XS undef
+      Template::Test 3.008
+      Template::TieString 3.008
+      Template::Toolkit 3.008
+      Template::VMethods 3.008
+      Template::View 3.008
+    requirements:
+      AppConfig 1.56
+      ExtUtils::MakeMaker 0
+      File::Spec 0.8
+      File::Temp 0.12
+      Scalar::Util 0
+  Text-Diff-1.45
+    pathname: N/NE/NEILB/Text-Diff-1.45.tar.gz
+    provides:
+      Text::Diff 1.45
+      Text::Diff::Base 1.45
+      Text::Diff::Config 1.44
+      Text::Diff::Table 1.44
+    requirements:
+      Algorithm::Diff 1.19
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      perl 5.006
+  YAML-Tiny-1.73
+    pathname: E/ET/ETHER/YAML-Tiny-1.73.tar.gz
+    provides:
+      YAML::Tiny 1.73
+    requirements:
+      B 0
+      Carp 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Fcntl 0
+      Scalar::Util 0
+      perl 5.008001
+      strict 0
+      warnings 0
+  forks-0.36
+    pathname: R/RY/RYBSKEJ/forks-0.36.tar.gz
+    provides:
+      forks 0.36
+      forks::shared 0.36
+      threads::shared::array 0.36
+      threads::shared::handle 0.36
+      threads::shared::hash 0.36
+      threads::shared::scalar 0.36
+    requirements:
+      Acme::Damn 0
+      Attribute::Handlers 0
+      Devel::Symdump 0
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      IO::Socket 1.18
+      List::MoreUtils 0.15
+      Scalar::Util 1.11
+      Storable 0
+      Sys::SigAction 0.11
+      Test::More 0
+      Time::HiRes 0
+      if 0
