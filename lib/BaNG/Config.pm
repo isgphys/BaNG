@@ -241,7 +241,7 @@ sub get_host_config {
 }
 
 sub return_host_config {
-    my ( $host, $group, $hostmap) = @_;
+    my ( $host, $group, $hosts) = @_;
     $host  ||= '*';
     $group ||= '*';
   
@@ -253,6 +253,7 @@ sub return_host_config {
         my $isEnabled        = $hostconfig->{BKP_ENABLED};
         my $isBulkbkp        = $hostconfig->{BKP_BULK_ALLOW};
         my $isBulkwipe       = $hostconfig->{WIPE_BULK_ALLOW};
+        my $pgetArgOverride  = $hostconfig->{LFTP_PGET_OVERRIDE_NUM};
         my $status           = $isEnabled ? 'enabled' : 'disabled';
         my $css_class        = $isEnabled ? 'active ' : '';
         my $nobulk_css_class = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? 'nobulk ' : '';

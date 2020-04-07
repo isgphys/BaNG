@@ -94,7 +94,7 @@ if ( $serverconfig{bkpmode} eq "rsync") {
 } elsif ( $serverconfig{bkpmode} eq "lftp" ) {
     vsay("LFTP mode work.");
     my %hosts;
-    $hosts = return_host_config( $host_arg, $group_arg );
+    $hosts = return_host_config( $host_arg, $group_arg, \%hosts);
 # no implicit confusing nonsense
     my @queue;
     my $queue = \@queue;
