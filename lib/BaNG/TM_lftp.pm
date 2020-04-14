@@ -51,6 +51,44 @@ sub queue_lftp_backup {
 }
 
 sub run_lftp_threads {
-
+    
     return 0;
+}
+sub _do_lftp {
+    my ($taskid, $jobid, $host, $group, $bkptimestamp, $srcpath, @excludes, $cond_end) = @_;
+    my $lftp_bin = "/usr/bin/lftp";
+    my $verbose = " --verbose";
+    my $delete = " --delete";
+    my $lftp_excludes = ""; # TODO - extract from rsync exclude file
+    my $nthreads = 0; # TODO - is the setting for rsync per job or task ?
+    my $parallel = " --parallel=$nthreads";
+    my $lftp_mode = "mirror";
+    $srcpath =~ tr/://;
+    $srcpath =~ tr/'/"/;
+    $srcpath =~ tr/\/\//\//;
+    my $destpath = '""'; # TODO - figure this out
+    my $lftp_script = "-c '" . $lftp_mode . $verbose . $delete . $parallel . $srcpath . $destpath . "'";
+    my $lftp_cmd = $lftp_bin . $lftp_script;
+    logit( $taskid, $host, $group, "LFTP Command: $lftp_cmd" );
+    logit( $taskid, $host, $group, "Executing lft for host $host group $group path $srcpath" );    
+    local (*HIS_IN, *HIS_OUT, *HIS_ERR);
+    $lftp_cmd = "echo $lftp_cmd" if $serverconfig{dryrun};
+    my $lftppid = open3(*HIS_IN, *HIS_OUT, *HIS_ERR, "$lftp_cmd");
+    writeto_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid);
+    my @outlines = <HIS_OUT>;
+    my @errlines = <HIS_ERR>;
+    close HIS_IN;
+    close HIS_OUT;
+    close HIS_ERR;
+    waitpid ($lftppid,0);
+    { lock ($cond_end);
+      cond_signal($cond_end);
+      }
+    logit( $taskid, $host, $group, "Rsync[$lftppid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
+    logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] STDERR: @errlines" ) if @errlines;
+    my $errcode = $?;
+    logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] child exited with status of $?" ) if $errcode;
+    
+    return $errcode;
+
 }
