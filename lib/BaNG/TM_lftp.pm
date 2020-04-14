@@ -61,7 +61,7 @@ sub run_lftp_threads {
         my @threads = map { threads->create( \&_do_lftp, $Q ) } ( 1 .. $nthreads );
         $Q->enqueue($j);
 #        $Q->enqueue( (undef) x $nthreads ); # wtf is undef XOR nthreads supposed to do
-        for(my $i;$i <= $nthreads;$i++) {
+        for(%$j{src_folders}) {
             lock($cond_end);
             cond_wait($cond_end);
             lock($cond_end);
