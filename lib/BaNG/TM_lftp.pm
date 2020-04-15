@@ -56,7 +56,7 @@ sub run_lftp_threads {
     my $cond_end :shared;
     lock ($cond_end);
     foreach my $j (@queue) {
-        # src_folders separate
+
         my @src_folders = %$j{src_folders}; # this looks hairy
         my $nthreads = scalar @src_folders; # do process per directory
         my @threads = map { threads->create( \&_do_lftp, $Q ) } ( 1 .. $nthreads );
@@ -67,7 +67,7 @@ sub run_lftp_threads {
             cond_wait($cond_end);
             lock($cond_end);
             my %fj = %$cond_end;
-            logit($fj{taskid}, $fj{host}, $fj{group}, "Job $fj{jobid} finished."); # TODO do I really want to copy this info and pass it back this way
+            logit($fj{taskid}, $fj{host}, $fj{group}, "Job $fj{jobid} finished."); # TODO do I really want to copy this info and pass it back this way; also does this even work ?
         }    
 }
     
@@ -76,28 +76,30 @@ sub run_lftp_threads {
 }
 sub _do_lftp {
     my ($taskid, $host, $group, $bkptimestamp, $srcpath, @excludes,$jobthreads, $cond_end) = @_; # TODO uh this all has to come from $Q or I have to parse this earlier in run_lftp_threads
+    # TODO don't ignore dryrun..
     my $lftp_bin = "/usr/bin/lftp";
     my $verbose = " --verbose";
     my $delete = " --delete";
     my $lftp_excludes = ""; # TODO - extract from rsync exclude file
+    # TODO add a method to just do it with a path so that we don't have to think about excludes - rsync will clean up afterwards anyway
     my $nthreads = 0; # TODO - is the setting for rsync per job or task ?
     my $parallel = " --parallel=$jobthreads"; # TODO - figure out what job/task are supposed to mean in this program and stop using interchangeably
     my $lftp_mode = "mirror";
     $srcpath =~ tr/://;
     $srcpath =~ tr/'/"/;
-    $srcpath =~ tr/\/\//\//;
+    $srcpath =~ tr/\/\//\//; # TODO ask where the double slashes come from
     my $destpath = '""'; # TODO - figure this out
     my $lftp_script = "-c '" . $lftp_mode . $verbose . $delete . $parallel . $srcpath . $destpath . "'";
     my $lftp_srchost = $host;
-    my $lftp_srcproto = "sftp://"; # TODO ask
-    my $lftp_pget_n = 2; #TODO check
+    my $lftp_srcproto = "sftp://"; # good for now. maybe look into torrent because it sounds interesting and maybe useful
+    my $lftp_pget_n = 2; #TODO figure out experimentally
     my $lftp_cmd = $lftp_bin . " $lftp_srcproto$lftp_srchost " . $lftp_script;
     logit( $taskid, $host, $group, "LFTP Command: $lftp_cmd" );
-    logit( $taskid, $host, $group, "Executing lft for host $host group $group path $srcpath" );    
+    logit( $taskid, $host, $group, "Executing lftp for host $host group $group path $srcpath." );    
     local (*HIS_IN, *HIS_OUT, *HIS_ERR);
     $lftp_cmd = "echo $lftp_cmd" if $serverconfig{dryrun};
     my $lftppid = open3(*HIS_IN, *HIS_OUT, *HIS_ERR, "$lftp_cmd");
-    writeto_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid);
+    writeto_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid); # TODO clear this
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;

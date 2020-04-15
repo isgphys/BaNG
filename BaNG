@@ -105,7 +105,7 @@ if ( $serverconfig{bkpmode} eq "rsync") {
         exit 0;
     }
 
-    run_lftp_threads($taskid, $host_arg, $group_arg, $nthreads_arg, $dryrun_arg);
+    run_lftp_threads($queue, $nthreads_arg, $dryrun_arg);
     vsay("Don't forget to follow up this job with an rsync run!";
     exit 0;
 }
