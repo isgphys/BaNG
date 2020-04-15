@@ -87,7 +87,10 @@ sub _do_lftp {
     $srcpath =~ tr/\/\//\//;
     my $destpath = '""'; # TODO - figure this out
     my $lftp_script = "-c '" . $lftp_mode . $verbose . $delete . $parallel . $srcpath . $destpath . "'";
-    my $lftp_cmd = $lftp_bin . $lftp_script;
+    my $lftp_srchost = $host;
+    my $lftp_srcproto = "sftp://"; # TODO ask
+    my $lftp_pget_n = 2; #TODO check
+    my $lftp_cmd = $lftp_bin . " $lftp_srcproto$lftp_srchost " . $lftp_script;
     logit( $taskid, $host, $group, "LFTP Command: $lftp_cmd" );
     logit( $taskid, $host, $group, "Executing lft for host $host group $group path $srcpath" );    
     local (*HIS_IN, *HIS_OUT, *HIS_ERR);
@@ -102,8 +105,8 @@ sub _do_lftp {
 
     logit( $taskid, $host, $group, "lftp[$lftppid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
     logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] STDERR: @errlines" ) if @errlines;
-    my $errcode = $?;
-    logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] child exited with status of $?" ) if $errcode;
+    my $errcode = $?; # warum parset TM_rsync das stdout anstatt $? zu nehmen ?
+    logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] child exited with status of $errcode" ) if $errcode;
     my $jobid = $lftppid; # TODO - probably not a good idea
     waitpid ($lftppid,0);
     { lock ($cond_end);
