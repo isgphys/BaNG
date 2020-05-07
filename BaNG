@@ -101,12 +101,12 @@ if ( $serverconfig{bkpmode} eq "rsync") {
     $queue = queue_lftp_backup($dryrun_arg,$hosts,$queue,$host_arg,$group_arg, $noreport, $taskid );
 
     if ( !@$queue ) {
-        vsay("Exit because queue is empty.");
+        _vsay("Exit because queue is empty.");
         exit 0;
     }
 
     run_lftp_threads($queue, $nthreads_arg, $dryrun_arg);
-    vsay("Don't forget to follow up this job with an rsync run!";
+    _vsay("Don't forget to follow up this job with an rsync run!");
     exit 0;
 }
 sub _vsay {

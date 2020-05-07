@@ -62,6 +62,7 @@ sub run_lftp_threads {
         my @threads = map { threads->create( \&_do_lftp, $Q ) } ( 1 .. $nthreads );
         $Q->enqueue($j);
 #        $Q->enqueue( (undef) x $nthreads ); # wtf is undef XOR nthreads supposed to do
+# closes queue supposedly
         for(@src_folders) {
             lock($cond_end);
             cond_wait($cond_end);
@@ -83,11 +84,15 @@ sub _do_lftp {
     my $lftp_excludes = ""; # TODO - extract from rsync exclude file
     # TODO add a method to just do it with a path so that we don't have to think about excludes - rsync will clean up afterwards anyway
     my $nthreads = 0; # TODO - is the setting for rsync per job or task ?
+# rsync doesnt do parallel native
     my $parallel = " --parallel=$jobthreads"; # TODO - figure out what job/task are supposed to mean in this program and stop using interchangeably
     my $lftp_mode = "mirror";
     $srcpath =~ tr/://;
     $srcpath =~ tr/'/"/;
-    $srcpath =~ tr/\/\//\//; # TODO ask where the double slashes come from
+if (    $srcpath =~ tr/\/\//\//)
+{
+logit("mystery path $srcpath"); #wahrscheinlich nur für db
+} 
     my $destpath = '""'; # TODO - figure this out
     my $lftp_script = "-c '" . $lftp_mode . $verbose . $delete . $parallel . $srcpath . $destpath . "'";
     my $lftp_srchost = $host;
