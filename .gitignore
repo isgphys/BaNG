@@ -7,3 +7,4 @@ debug.pl
 tuning
 views/navbar-custom-items.tt
 local/
+t/filesystem/test.img

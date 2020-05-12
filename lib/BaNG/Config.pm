@@ -38,6 +38,7 @@ our @EXPORT = qw(
     targetpath
     list_groups
     list_groupmembers
+    return_host_config
 );
 
 our %hosts;

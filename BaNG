@@ -92,20 +92,22 @@ if ( $serverconfig{bkpmode} eq "rsync") {
 
     exit 0;
 } elsif ( $serverconfig{bkpmode} eq "lftp" ) {
-    vsay("LFTP mode work.");
-    my %hosts;
-    $hosts = return_host_config( $host_arg, $group_arg, \%hosts);
+    _vsay("LFTP mode work.");
+    get_host_config($host_arg,$group_arg);
+    bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
 # no implicit confusing nonsense
     my @queue;
-    my $queue = \@queue;
-    $queue = queue_lftp_backup($dryrun_arg,$hosts,$queue,$host_arg,$group_arg, $noreport, $taskid );
+    queue_lftp_backup($dryrun_arg,\%hosts,\@queue,$host_arg,$group_arg, $noreport, $taskid );
+    foreach my $j (@queue) {
+    print "$j\n";
+    }
 
-    if ( !@$queue ) {
+    if ( !@queue ) {
         _vsay("Exit because queue is empty.");
         exit 0;
     }
 
-    run_lftp_threads($queue, $nthreads_arg, $dryrun_arg);
+    run_lftp_threads(\@queue, $nthreads_arg, $dryrun_arg);
     _vsay("Don't forget to follow up this job with an rsync run!");
     exit 0;
 }
