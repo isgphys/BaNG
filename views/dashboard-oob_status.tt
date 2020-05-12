@@ -1,0 +1,26 @@
+<h3>OOB Snapshots</h3>
+<table class="border">
+    <thead>
+        <tr>
+            <th>Hostname</th>
+            <th class="center">Group</th>
+            <th class="center">OOB Snapshots</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% FOREACH hostname IN hosts.keys.sort %>
+
+           <% IF oobsd.$hostname.size > 0 %>
+              <tr>
+                        <td style="white-space: nowrap;"><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
+                        <td class="center" style="white-space: nowrap;"><a href="/config/allhosts/<% hosts.$hostname.group %>"><% hosts.$hostname.group %></a></td>
+                        <td class="center check_yellow">
+                        <% FOREACH oob_directory IN oobsd.$hostname %> 
+                            <%- oob_directory.trim -%>, 
+                        <% END %>                    
+                        </td>
+           </tr>
+           <% END %>
+        <% END %>
+    </tbody>
+</table>

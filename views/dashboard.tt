@@ -100,6 +100,7 @@
                 timeout: 45000,
                 success: function(content) {
                     $('#wipeinfo').html(content);
+                    add_oob_to_wipe_status(content);
                     initializeAll();
                 },
                 error: function() {
@@ -112,6 +113,24 @@
             $('#wipeinfo').html('');
         };
     };
+    function add_oob_to_wipe_status(wipestatus) {
+    $.ajax({
+                url: '/oob_status',
+                beforeSend:function (content){
+                    $('#wipeinfo').html(wipestatus + '<div class="loading_message">' +
+                        '<img src="/images/spinner.gif" width=25 alt="Loading animation">'+
+                        'Loading OOB Snapshot Overview</div>');
+                },
+                timeout: 45000,
+                success: function(content) {
+                    $('#wipeinfo').html(wipestatus + content);
+                    initializeAll();
+                },
+                error: function() {
+                    $('#wipeinfo').html(wipestatus + "<h3>Couldn't load oob snapshot overview.</h3>");
+                }
+            });
+    }
 
     function load_cron_status() {
         $.ajax({

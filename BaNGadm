@@ -31,6 +31,7 @@ my $group_arg;
 my $host_arg;
 my $prefix_arg;
 my $showgroups;
+my $get_oob_snapshots_arg;
 
 #################################
 # Main
@@ -110,7 +111,29 @@ if ($failed_arg) {
     }
     exit 0;
 }
+if ($get_oob_snapshots_arg) {
+    # 2 => get all including failed
+    # 1 => get only oob
+    my $host  = $host_arg || '*';
+    my $group = $group_arg || '*';
+    get_host_config( $host, $group );
+    my %oob_dirs = get_oob_snapshot_dirs(\%hosts, $get_oob_snapshots_arg);
 
+    foreach my $hostgroup (sort keys %hosts ) {
+        unless ( $hosts{$hostgroup}->{hostconfig}->{BKP_TARGET_HOST} ne $servername ) {
+            _vsay("Check $hostgroup for oob snapshots.");
+            if ( scalar @{$oob_dirs{$hostgroup}} > 0 ) {
+                print "\nFound following directories for $hosts{$hostgroup}->{hostname} - $hosts{$hostgroup}->{group}\n";
+                foreach my $oob_directory ( sort @{$oob_dirs{$hostgroup}} ) {
+                    print "\t$oob_directory";
+                }
+                print "\n";
+            }
+        }
+    }
+
+    exit 0;
+}
 if ($setprop) {
     get_host_config( $host_arg, $group_arg );
     my @backup_folders = get_backup_folders( $host_arg, $group_arg, 2);
@@ -278,6 +301,7 @@ sub parse_command_options {
         'p|prefix=s'  => \$prefix_arg,
         'showgroups'  => \$showgroups,
         'setprop=s'   => \$setprop,
+        'get_oob_snapshots:i' => \$get_oob_snapshots_arg,
     ) or usage('Invalid commmand line options.');
     usage('Do not use together!') if ( $croncreate && $showgroups );
     usage('Check the arguments!') unless (
@@ -285,9 +309,13 @@ sub parse_command_options {
             ( $initial_arg && ( $host_arg && $group_arg ) ) ||
             ( $initial_arg && ( $host_arg && $group_arg && ( $prefix_arg || $dryrun_arg  ))) ||
             ( $croncreate || $croncheck || $failed_arg || $showgroups || $tidy_arg || $dump_arg ) ||
-            ( $host_arg && $group_arg && $setprop )
+            ( $host_arg && $group_arg && $setprop ) || (defined $get_oob_snapshots_arg)
         );
+    usage('The option --get_oob_snapshots can only take the values 1 for oob-only or 2 to include failed backups.') if ($get_oob_snapshots_arg && ($get_oob_snapshots_arg >=3 || $get_oob_snapshots_arg <0));
 
+    if (defined $get_oob_snapshots_arg && $get_oob_snapshots_arg == 0) {
+        $get_oob_snapshots_arg = 1; # re-map the argument to 1 for oob-only-mode if no value given on command line
+    }
     $verbose_arg = 1 if ( $dryrun_arg || $vvv_arg );
 
     return 1;
@@ -351,4 +379,8 @@ sub usage {
 EOF
 
     exit 0;
+}
+sub _vsay {
+    my $msg = shift;
+    print "$msg\n" if $serverconfig{verbose};
 }
