@@ -10,11 +10,10 @@ use BaNG::BackupServer;
 use BaNG::BTRFS;
 use Date::Parse;
 use forks;
-use forks::shared;
 use IPC::Open3;
 use Thread::Queue;
-use Data::Dumper;
-use Thread::Semaphore;
+
+
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -97,9 +96,7 @@ sub run_lftp_threads {
 }
 sub _do_lftp {
     my $Q = shift;
-    print Dumper($Q);
     my $theargs = $Q->dequeue;
-    print Dumper($theargs);
     my ($dryrun, $taskid, $host, $group, $bkptimestamp, $srcpath, $excludes,$jobthreads) = ($$theargs{dryrun}, $$theargs{taskid}, $$theargs{host},$$theargs{group},$$theargs{bkptimestamp},$$theargs{path},$$theargs{excludes},$$theargs{parallel});
 
     my $rQ = $$theargs{rQ};
