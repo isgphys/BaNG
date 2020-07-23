@@ -30,10 +30,8 @@ sub queue_lftp_backup {
     my $bkptimestamp = eval_bkptimestamp ($host, $group);
     my @src_folders = split( / /, %$hostsref{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER});
     my $hostconfig = %$hostsref{"$host-$group"}->{hostconfig};
-    #    my $serverconfig = %$hostsref{"$host-$group"}->{serverconfig};
     my $excludes;
-    #print Dumper($hostconfig);
-    #print Dumper($serverconfig);
+
     if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
         my $excludefile = "$serverconfig->{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
         if ( -e $excludefile ) {
@@ -131,6 +129,13 @@ sub _lftp_parse_exclude_file {
     }
 
 }
+sub _get_target_dir {
+    my $theargs = shift;
+    my $target = targetpath( $$theargs{host}, $$theargs{group} );
+    $target .= '/current';
+    return $target;
+
+}
 sub _do_lftp {
     my $Q = shift;
     my $theargs = $Q->dequeue;
@@ -141,21 +146,15 @@ sub _do_lftp {
     my $verbose = " --verbose";
     my $delete = " --delete";
     my $excludes = _lftp_parse_exclude_file($theargs);
-
-
-    # TODO add a method to just do it with a path so that we don't have to think about excludes - rsync will clean up afterwards anyway
-    my $nthreads = 0; # TODO - is the setting for rsync per job or task ?
+    my $nthreads = 0;
 # rsync doesnt do parallel native
     my $parallel = " --parallel=$jobthreads"; # TODO: figure this out
     my $lftp_mode = "mirror";
-    $srcpath =~ tr/://;
+    $srcpath =~ s/^:(.*)$/$1/;
     $srcpath =~ tr/'/"/;
-if (    $srcpath =~ tr/\/\//\//)
-{
-logit("mystery path $srcpath"); #wahrscheinlich nur für db
-} 
-    my $destpath = '""'; # TODO - figure this out
-    my $lftp_script = "-c '" . $lftp_mode . $verbose . " " . $excludes . " " . $delete . $parallel . " " . $srcpath . " " . $destpath . "'";
+    $srcpath =~ tr/\/\//\//;
+    my $destpath = _get_target_dir($theargs);
+    my $lftp_script = "-c " . "'" . $lftp_mode . $verbose . " " . $excludes . $delete . $parallel . " " . '"' . $srcpath . '"' . " " . $destpath . "'";
     my $lftp_srchost = $host;
     my $lftp_srcproto = "sftp://"; # good for now. maybe look into torrent because it sounds interesting and maybe useful
     my $lftp_pget_n = 2; #TODO figure out experimentally
@@ -169,7 +168,6 @@ logit("mystery path $srcpath"); #wahrscheinlich nur für db
     else {
         $lftp_cmd = "$lftp_cmd";
     }
-#    $lftp_cmd = "echo Would run: $lftp_cmd";
     my $lftppid = open3(*HIS_IN, *HIS_OUT, *HIS_ERR, "$lftp_cmd");
     writeto_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid);
     my @outlines = <HIS_OUT>;
@@ -180,9 +178,9 @@ logit("mystery path $srcpath"); #wahrscheinlich nur für db
 
     logit( $taskid, $host, $group, "lftp[$lftppid] STDOUT: @outlines" ) if ( @outlines && $serverconfig{verboselevel} >= 2 );
     logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] STDERR: @errlines" ) if @errlines;
-    my $errcode = $?; # warum parset TM_rsync das stdout anstatt $? zu nehmen ?
+    my $errcode = $?;
     logit( $taskid, $host, $group, "ERROR: lftp[$lftppid] child exited with status of $errcode" ) if $errcode;
-    my $jobid = $lftppid; # TODO - probably not a good idea
+    my $jobid = $lftppid;
     waitpid ($lftppid,0);
     print "Thread finished lftp[$lftppid]\n $jobid $host $group with err $errcode.\n";
     $rQ->enqueue(threads->tid);
