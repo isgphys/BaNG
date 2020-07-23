@@ -12,7 +12,7 @@ use Date::Parse;
 use forks;
 use IPC::Open3;
 use Thread::Queue;
-
+use Data::Dumper;
 
 
 use Exporter 'import';
@@ -22,14 +22,27 @@ our @EXPORT = qw(
 );
 
 sub queue_lftp_backup {
-    my ($dryrun, $hostsref, $queueref, $host, $group, $noreport,$taskid ) = @_;
+    my ($dryrun, $hostsref, $queueref, $host, $group, $noreport,$taskid,$serverconfig ) = @_;
     my $jobid;
     my $source_path;
     my ( $startstamp, $endstamp );
     logit ($taskid, $host, $group, "Queueing lftp backup for host $host, group $group");
     my $bkptimestamp = eval_bkptimestamp ($host, $group);
     my @src_folders = split( / /, %$hostsref{"$host-$group"}->{hostconfig}->{BKP_SOURCE_FOLDER});
-
+    my $hostconfig = %$hostsref{"$host-$group"}->{hostconfig};
+    #    my $serverconfig = %$hostsref{"$host-$group"}->{serverconfig};
+    my $excludes;
+    #print Dumper($hostconfig);
+    #print Dumper($serverconfig);
+    if ( $hostconfig->{BKP_EXCLUDE_FILE} ) {
+        my $excludefile = "$serverconfig->{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $excludes = $excludefile;
+        } else {
+            logit( $taskid, $host, $group, "Warning: could not find excludefile $excludefile." );
+            $excludes = "";
+        }
+    }
     # queue list of source folders as a whole
     $jobid = create_timeid( $taskid, $host, $group );
     my %bkpjob = (
@@ -44,7 +57,7 @@ sub queue_lftp_backup {
             dryrun       => $dryrun,
             rsync_err    => 0,
             has_failed   => 0,
-            excludes =>  "",
+            excludes =>  $excludes,
         );
     push( @$queueref, \%bkpjob );
     
@@ -94,17 +107,38 @@ sub run_lftp_threads {
 
     return 0;
 }
+sub _lftp_parse_exclude_file {
+    my ($theargs, $mode) = @_;
+    my $excludes = %$theargs{excludes};
+    my $keyword = $mode eq "-" ? "exclude" : "include";
+    my @excludeslist;
+    my $lftp_excludes;
+    if (-e $excludes) {
+        print "My exclude file is: $excludes\n";
+        open(my $fh,"<",$excludes);
+        while(<$fh>) {
+            if (($_) =~ s/^$mode (.*)$/$1/) {
+                chomp;
+                push @excludeslist, "--exclude=$_";
+            }
+        }
+        my $x = join " ", @excludeslist;
+        return $x;
+    }
+
+}
 sub _do_lftp {
     my $Q = shift;
     my $theargs = $Q->dequeue;
-    my ($dryrun, $taskid, $host, $group, $bkptimestamp, $srcpath, $excludes,$jobthreads) = ($$theargs{dryrun}, $$theargs{taskid}, $$theargs{host},$$theargs{group},$$theargs{bkptimestamp},$$theargs{path},$$theargs{excludes},$$theargs{parallel});
+    my ($dryrun, $taskid, $host, $group, $bkptimestamp, $srcpath, $jobthreads) = ($$theargs{dryrun}, $$theargs{taskid}, $$theargs{host},$$theargs{group},$$theargs{bkptimestamp},$$theargs{path},$$theargs{parallel});
 
     my $rQ = $$theargs{rQ};
-    # TODO don't ignore dryrun..
     my $lftp_bin = "/usr/bin/lftp";
     my $verbose = " --verbose";
     my $delete = " --delete";
-    my $lftp_excludes = ""; # TODO - extract from rsync exclude file
+    my $excludes = _lftp_parse_exclude_file($theargs,"-");
+    my $includes = _lftp_parse_exclude_file($theargs,"+");
+
     # TODO add a method to just do it with a path so that we don't have to think about excludes - rsync will clean up afterwards anyway
     my $nthreads = 0; # TODO - is the setting for rsync per job or task ?
 # rsync doesnt do parallel native
@@ -117,7 +151,7 @@ if (    $srcpath =~ tr/\/\//\//)
 logit("mystery path $srcpath"); #wahrscheinlich nur für db
 } 
     my $destpath = '""'; # TODO - figure this out
-    my $lftp_script = "-c '" . $lftp_mode . $verbose . $delete . $parallel . " " . $srcpath . " " . $destpath . "'";
+    my $lftp_script = "-c '" . $lftp_mode . $verbose . " " . $excludes . " " . $delete . $parallel . " " . $srcpath . " " . $destpath . "'";
     my $lftp_srchost = $host;
     my $lftp_srcproto = "sftp://"; # good for now. maybe look into torrent because it sounds interesting and maybe useful
     my $lftp_pget_n = 2; #TODO figure out experimentally
@@ -131,9 +165,9 @@ logit("mystery path $srcpath"); #wahrscheinlich nur für db
     else {
         $lftp_cmd = "$lftp_cmd";
     }
-    $lftp_cmd = "echo Would run: $lftp_cmd";
+#    $lftp_cmd = "echo Would run: $lftp_cmd";
     my $lftppid = open3(*HIS_IN, *HIS_OUT, *HIS_ERR, "$lftp_cmd");
-    writeto_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid); # TODO clear this
+    writeto_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid);
     my @outlines = <HIS_OUT>;
     my @errlines = <HIS_ERR>;
     close HIS_IN;
