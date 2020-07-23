@@ -65,31 +65,48 @@ sub queue_lftp_backup {
 }
 
 sub run_lftp_threads {
-    my ($queue, $parallel, $dryrun) = @_;
+    my ($queue, $nthreads_arg, $dryrun, $hosts) = @_;
     my $Q = Thread::Queue->new;
     my $rQ = Thread::Queue->new;
+    my $nthreads;
     my @threads;
-    
+
     
     foreach my $j (@$queue) {
 
         foreach my $srcdir (@{$j->{srcdirs}}) {
-           my %threadargs = (dryrun => $dryrun,
-                taskid => $$j{taskid},
-                host => $$j{host},
-                group => $$j{group},
-                bkptimestamp => $$j{bkptimestamp},
-                path => $srcdir,
-                excludes => $$j{excludes},
-                parallel => $parallel, rQ => $rQ);
-
-
-            $Q->enqueue(\%threadargs);
-           my $t = threads->create( \&_do_lftp, $Q);
-           $t->detach();
-            push(@threads,$t->tid);
-
+            if ($nthreads_arg) {
+                # If nthreads was defined by cli argument, use it
+                $nthreads = $nthreads_arg;
+                print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
+            } else {
+                # If no nthreads was given, and we back up a single host and group, get nthreads from its config
+                my $ntfh = %$hosts{"$$j{host}-$$j{group}"}->{hostconfig}->{BKP_THREADS_DEFAULT};;
+                if ($ntfh) {
+                    print "Using nthreads = $nthreads from config file\n";
+                    $nthreads = $ntfh;
+                }
+                else {
+                    $nthreads = 1;
+                }
             }
+            my $parallel = $nthreads;
+            my %threadargs = (dryrun => $dryrun,
+                              taskid => $$j{taskid},
+                              host => $$j{host},
+                              group => $$j{group},
+                              bkptimestamp => $$j{bkptimestamp},
+                              path => $srcdir,
+                              excludes => $$j{excludes},
+                              parallel => $parallel, rQ => $rQ);
+            
+            
+            $Q->enqueue(\%threadargs);
+            my $t = threads->create( \&_do_lftp, $Q);
+            $t->detach();
+            push(@threads,$t->tid);
+            
+        }
         
     }
 
@@ -146,7 +163,8 @@ sub _do_lftp {
     my $verbose = " --verbose";
     my $delete = " --delete";
     my $excludes = _lftp_parse_exclude_file($theargs);
-    my $nthreads = 0;
+    my $nthreads = $jobthreads;
+
 # rsync doesnt do parallel native
     my $parallel = " --parallel=$jobthreads"; # TODO: figure this out
     my $lftp_mode = "mirror";
@@ -154,10 +172,11 @@ sub _do_lftp {
     $srcpath =~ tr/'/"/;
     $srcpath =~ tr/\/\//\//;
     my $destpath = _get_target_dir($theargs);
-    my $lftp_script = "-c " . "'" . $lftp_mode . $verbose . " " . $excludes . $delete . $parallel . " " . '"' . $srcpath . '"' . " " . $destpath . "'";
+    my $lftp_pget_n = " --use-pget-n=2";
+    my $lftp_script = "-c " . "'" . $lftp_mode . $verbose . " " . $excludes . $delete . $lftp_pget_n . $parallel . " " . '"' . $srcpath . '"' . " " . $destpath . "'";
     my $lftp_srchost = $host;
     my $lftp_srcproto = "sftp://"; # good for now. maybe look into torrent because it sounds interesting and maybe useful
-    my $lftp_pget_n = 2; #TODO figure out experimentally
+
     my $lftp_cmd = $lftp_bin . " $lftp_srcproto$lftp_srchost " . $lftp_script;
     logit( $taskid, $host, $group, "LFTP Command: $lftp_cmd" );
     logit( $taskid, $host, $group, "Executing lftp for host $host group $group path $srcpath." );    

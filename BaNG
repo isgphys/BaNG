@@ -97,7 +97,7 @@ if ( $serverconfig{bkpmode} eq "rsync") {
     bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
 # no implicit confusing nonsense
     my @queue;
-    queue_lftp_backup($dryrun_arg,\%hosts,\@queue,$host_arg,$group_arg, $noreport, $taskid );
+    queue_lftp_backup($dryrun_arg,\%hosts,\@queue,$host_arg,$group_arg, $noreport, $taskid, \%serverconfig );
     foreach my $j (@queue) {
     print "$j\n";
     }
