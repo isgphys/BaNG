@@ -108,18 +108,22 @@ sub run_lftp_threads {
     return 0;
 }
 sub _lftp_parse_exclude_file {
-    my ($theargs, $mode) = @_;
+    my ($theargs) = @_;
     my $excludes = %$theargs{excludes};
-    my $keyword = $mode eq "-" ? "exclude" : "include";
+    
     my @excludeslist;
     my $lftp_excludes;
     if (-e $excludes) {
         print "My exclude file is: $excludes\n";
         open(my $fh,"<",$excludes);
         while(<$fh>) {
-            if (($_) =~ s/^$mode (.*)$/$1/) {
+            if (($_) =~ s/^- (.*)$/$1/) {
                 chomp;
                 push @excludeslist, "--exclude=$_";
+            }
+            elsif (($_) =~ s/^\+ (.*)$/$1/) {
+                chomp;
+                push @excludeslist, "--include=$_";
             }
         }
         my $x = join " ", @excludeslist;
@@ -136,8 +140,8 @@ sub _do_lftp {
     my $lftp_bin = "/usr/bin/lftp";
     my $verbose = " --verbose";
     my $delete = " --delete";
-    my $excludes = _lftp_parse_exclude_file($theargs,"-");
-    my $includes = _lftp_parse_exclude_file($theargs,"+");
+    my $excludes = _lftp_parse_exclude_file($theargs);
+
 
     # TODO add a method to just do it with a path so that we don't have to think about excludes - rsync will clean up afterwards anyway
     my $nthreads = 0; # TODO - is the setting for rsync per job or task ?
