@@ -38,7 +38,6 @@ our @EXPORT = qw(
     targetpath
     list_groups
     list_groupmembers
-    return_host_config
 );
 
 our %hosts;
@@ -241,43 +240,6 @@ sub get_host_config {
     return 1;
 }
 
-sub return_host_config {
-    my ( $host, $group, $hosts) = @_;
-    $host  ||= '*';
-    $group ||= '*';
-  
-    my @hostconfigs = _find_configs( "$host\_$group\.yaml", "$serverconfig{path_hostconfig}" );
-
-    foreach my $hostconfigfile (@hostconfigs) {
-        my ( $hostname, $groupname ) = _split_configname($hostconfigfile);
-        my ( $hostconfig, $confighelper ) = _read_host_configfile( $hostname, $groupname );
-        my $isEnabled        = $hostconfig->{BKP_ENABLED};
-        my $isBulkbkp        = $hostconfig->{BKP_BULK_ALLOW};
-        my $isBulkwipe       = $hostconfig->{WIPE_BULK_ALLOW};
-        my $pgetArgOverride  = $hostconfig->{LFTP_PGET_OVERRIDE_NUM};
-        my $status           = $isEnabled ? 'enabled' : 'disabled';
-        my $css_class        = $isEnabled ? 'active ' : '';
-        my $nobulk_css_class = ( $isBulkbkp == 0 && $isBulkwipe == 0 ) ? 'nobulk ' : '';
-
-        unless ( $hostconfig->{BKP_SOURCE_FOLDER} ) {
-            $css_class                         = 'invalidConfig';
-            $confighelper->{BKP_SOURCE_FOLDER} = 'invalid';
-        }
-
-        $hosts{"$hostname-$groupname"} = {
-            hostname         => $hostname,
-            group            => $groupname,
-            status           => $status,
-            configfile       => $hostconfigfile,
-            css_class        => $css_class,
-            nobulk_css_class => $nobulk_css_class,
-            hostconfig       => $hostconfig,
-            confighelper     => $confighelper,
-            pgetArgOverride  => $pgetArgOverride,
-        };
-    }
-    return $hosts;
-}
 
 sub get_lts_config {
     my ( $group ) = @_;

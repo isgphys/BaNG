@@ -48,14 +48,10 @@ sub queue_lftp_backup {
             jobid        => $jobid,
             host         => $host,
             group        => $group,
-            path         => "@src_folders",
-            srcdirs    => \@src_folders,
+            srcdirs      => \@src_folders,
             bkptimestamp => $bkptimestamp,
-            dosnapshot   => 1,
             dryrun       => $dryrun,
-            rsync_err    => 0,
-            has_failed   => 0,
-            excludes =>  $excludes,
+            excludes     => $excludes,
         );
     push( @$queueref, \%bkpjob );
     
@@ -110,10 +106,8 @@ sub run_lftp_threads {
     }
 
     for(@threads) {
-            print "Waiting for finished jobs in joiner loop.\n";
-
             my $finished_thread = $rQ->dequeue();
-            print "finished waiting for thread $finished_thread.\n";
+            print "Finished waiting for thread $finished_thread.\n";
 
         } 
            
@@ -128,7 +122,6 @@ sub _lftp_parse_exclude_file {
     my @excludeslist;
     my $lftp_excludes;
     if (-e $excludes) {
-        print "My exclude file is: $excludes\n";
         open(my $fh,"<",$excludes);
         while(<$fh>) {
             if (($_) =~ s/^- (.*)$/$1/) {
@@ -163,9 +156,7 @@ sub _do_lftp {
     my $delete = " --delete";
     my $excludes = _lftp_parse_exclude_file($theargs);
     my $nthreads = $jobthreads;
-
-# rsync doesnt do parallel native
-    my $parallel = " --parallel=$jobthreads"; # TODO: figure this out
+    my $parallel = " --parallel=$jobthreads";
     my $lftp_mode = "mirror";
     $srcpath =~ s/^:(.*)$/$1/;
     $srcpath =~ tr/'/"/;
@@ -201,7 +192,7 @@ sub _do_lftp {
     my $jobid = $lftppid;
     waitpid ($lftppid,0);
     print "Thread finished lftp[$lftppid]\n $jobid $host $group with err $errcode.\n";
+    remove_lockfile($taskid,$host,$group,$srcpath,"shpid",$lftppid);
     $rQ->enqueue(threads->tid);
-    print "going out of scope with $jobid\n";
     return $errcode;
 }

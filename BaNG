@@ -15,7 +15,7 @@ use BaNG::TM_lftp;
 use BaNG::BTRFS;
 use BaNG::Wipe;
 
-my $version = '7.7-neoBaNG1';
+my $version = '3.9-testing';
 my $prefix_arg;
 my ($host_arg, $group_arg, $nthreads_arg, $bkpmode_arg);
 my ($cron, $wipe, $xymononly);
@@ -27,7 +27,6 @@ my $dryrun_arg;
 #################################
 # Main
 #
-# Ich hasse es wirklich wie alles hier implizit gemacht wird
 parse_command_options();
 get_serverconfig($prefix_arg);
 cli_args_override_global_config();
@@ -94,8 +93,6 @@ if ( $serverconfig{bkpmode} eq "rsync") {
 } elsif ( $serverconfig{bkpmode} eq "lftp" ) {
     _vsay("LFTP mode work.");
     get_host_config($host_arg,$group_arg);
-    bangstat_set_taskmeta( $taskid, $host_arg, $group_arg, $cron, $taskmeta) unless ( $wipe || $xymononly );
-# no implicit confusing nonsense
     my @queue;
     queue_lftp_backup($dryrun_arg,\%hosts,\@queue,$host_arg,$group_arg, $noreport, $taskid, \%serverconfig );
     foreach my $j (@queue) {
