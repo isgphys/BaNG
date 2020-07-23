@@ -70,31 +70,30 @@ sub run_lftp_threads {
     my $rQ = Thread::Queue->new;
     my $nthreads;
     my @threads;
-
+    
     
     foreach my $j (@$queue) {
 
         foreach my $srcdir (@{$j->{srcdirs}}) {
+            my $host = $$j{host};
+            my $group = $$j{group};
+
             if ($nthreads_arg) {
                 # If nthreads was defined by cli argument, use it
                 $nthreads = $nthreads_arg;
                 print "Using nthreads = $nthreads from command line argument\n" if $serverconfig{verbose};
             } else {
                 # If no nthreads was given, and we back up a single host and group, get nthreads from its config
-                my $ntfh = %$hosts{"$$j{host}-$$j{group}"}->{hostconfig}->{BKP_THREADS_DEFAULT};;
-                if ($ntfh) {
-                    print "Using nthreads = $nthreads from config file\n";
-                    $nthreads = $ntfh;
-                }
-                else {
-                    $nthreads = 1;
-                }
+                my $ntfh = defined %$hosts{"$host-$group"}->{hostconfig}->{BKP_THREADS_DEFAULT} ? %$hosts{"$host-$group"}->{hostconfig}->{BKP_THREADS_DEFAULT} : 1;
+
+                $nthreads = $ntfh;
+
             }
             my $parallel = $nthreads;
             my %threadargs = (dryrun => $dryrun,
                               taskid => $$j{taskid},
-                              host => $$j{host},
-                              group => $$j{group},
+                              host => $host,
+                              group => $group,
                               bkptimestamp => $$j{bkptimestamp},
                               path => $srcdir,
                               excludes => $$j{excludes},
