@@ -171,9 +171,9 @@ sub _do_lftp {
     $srcpath =~ s/^:(.*)$/$1/;
     $srcpath =~ tr/'/"/;
     $srcpath =~ tr/\/\//\//;
-    my $destpath = _get_target_dir($theargs);
+    my $destpath = _get_target_dir($theargs) . $srcpath;
     my $lftp_pget_n = " --use-pget-n=2";
-    my $lftp_script = "-c " . "'" . $lftp_mode . $verbose . " " . $excludes . $delete . $lftp_pget_n . $parallel . " " . '"' . $srcpath . '"' . " " . $destpath . "'";
+    my $lftp_script = "-e " . "'" . $lftp_mode . $verbose . " " . $excludes . $delete . $lftp_pget_n . $parallel . " " . '-c "' . $srcpath . '"' . " " . $destpath . ";bye'";
     my $lftp_srchost = $host;
     my $lftp_srcproto = "sftp://"; # good for now. maybe look into torrent because it sounds interesting and maybe useful
 
