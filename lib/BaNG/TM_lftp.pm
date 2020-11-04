@@ -126,7 +126,7 @@ sub _lftp_parse_exclude_file {
         while(<$fh>) {
             if (($_) =~ s/^- (.*)$/$1/) {
                 chomp;
-                push @excludeslist, "--exclude=$_";
+                push @excludeslist, "--exclude=\"$_\"";
             }
             elsif (($_) =~ s/^\+ (.*)$/$1/) {
                 chomp;
