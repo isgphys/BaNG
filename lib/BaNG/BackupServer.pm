@@ -148,14 +148,19 @@ sub check_client_connection {
     my $msg   = 'Host offline';
     my $p     = Net::Ping->new( 'tcp', 2 );
 
-    if ( $p->ping($host) ) {
-        $state = 1;
-        $msg   = 'Host online';
-    } elsif ($gwhost) {
-        $state = 1;
-        $msg   = 'Host not pingable because behind a Gateway-Host';
-    }
-    $p->close();
+    eval {
+        if ( $p->ping($host) ) {
+            $state = 1;
+            $msg   = 'Host online';
+        } elsif ($gwhost) {
+            $state = 1;
+            $msg   = 'Host not pingable because behind a Gateway-Host';
+        }
+        $p->close();
+        1; 
+    } or do {
+        $msg = "Hostname unresolved";
+    };
 
     return $state, $msg;
 }
