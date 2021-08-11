@@ -159,7 +159,8 @@ sub check_client_connection {
         $p->close();
         1; 
     } or do {
-        $msg = "Hostname unresolved";
+        my $theerror = $@;
+        $msg = "Exception caught in Net::Ping - $theerror";
     };
 
     return $state, $msg;
