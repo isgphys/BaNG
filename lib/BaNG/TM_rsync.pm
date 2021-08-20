@@ -36,16 +36,6 @@ sub queue_rsync_backup {
     if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} ) || ( $#src_folders  == 0 )) {
         # optionally queue each subfolder of the source folders while only 1 srcfolder defined
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
-            my $excludes;
-            if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_EXCLUDE_FILE} ) {
-                my $excludefile = "$serverconfig->{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
-                if ( -e $excludefile ) {
-                    $excludes = $excludefile;
-                } else {
-                logit( $taskid, $host, $group, "Warning: could not find excludefile $excludefile." );
-                $excludes = "";
-                }
-            }
 
             my $dosnapshot = 0;
             my $numFolder  = @src_folders;
@@ -376,13 +366,44 @@ sub _eval_rsync_generic_exclude_cmd {
 
     return $exclsubfolderopt;
 }
-
+    sub _glob2pat {
+        my $globstr = shift;
+        my %patmap = (
+            '*' => '.*',
+            '?' => '.',
+            '[' => '[',
+            ']' => ']',
+        );
+        $globstr =~ s{(.)} { $patmap{$1} || "\Q$1" }ge;
+        return '^' . $globstr . '$';
+    }
 sub _queue_remote_subfolders {
     my ( $taskid, $jobid, $host, $group, $bkptimestamp, $dosnapshot, $srcfolder, $dryrun, $cron, $noreport ) = @_;
 
     $srcfolder =~ s/://;
     my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 -not -empty | sort`;
+    my $excludes;
+    my @excludeslist;
+    if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_EXCLUDE_FILE} ) {
+        my $excludefile = "$serverconfig->{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        if ( -e $excludefile ) {
+            $excludes = $excludefile;
+        } else {
+            logit( $taskid, $host, $group, "Warning: could not find excludefile $excludefile." );
+            $excludes = "";
+        }
+    }
+    if (-e $excludes) {
+        open(my $fh,"<",$excludes);
+        while(<$fh>) {
+            if (($_) =~ s/^- (.*)$/$1/) {
+                chomp;
+                push @excludeslist, "\! -name \"$_\"";
+            }
+        }
+    }
+    my $findexcludes = join " ", @excludeslist;
+    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 -not -empty $findexcludes | grep - sort`;
 
     # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
     if ( $#remotesubfolders == -1 ) {
