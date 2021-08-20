@@ -379,13 +379,14 @@ sub _eval_rsync_generic_exclude_cmd {
     }
 sub _queue_remote_subfolders {
     my ( $taskid, $jobid, $host, $group, $bkptimestamp, $dosnapshot, $srcfolder, $dryrun, $cron, $noreport ) = @_;
+    my $hostconfig    = $hosts{"$host-$group"}->{hostconfig};
 
     $srcfolder =~ s/://;
     my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
     my $excludes;
     my @excludeslist;
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_EXCLUDE_FILE} ) {
-        my $excludefile = "$serverconfig->{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+        my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
         if ( -e $excludefile ) {
             $excludes = $excludefile;
         } else {
@@ -398,12 +399,12 @@ sub _queue_remote_subfolders {
         while(<$fh>) {
             if (($_) =~ s/^- (.*)$/$1/) {
                 chomp;
-                push @excludeslist, "\! -name \"$_\"";
+                push @excludeslist, "\\! -name \\\"$_\\\"";
             }
         }
     }
     my $findexcludes = join " ", @excludeslist;
-    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 -not -empty $findexcludes | grep - sort`;
+    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 -not -empty $findexcludes | sort`;
 
     # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
     if ( $#remotesubfolders == -1 ) {
