@@ -36,6 +36,16 @@ sub queue_rsync_backup {
     if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SRCFOLDERS} ) || ( $#src_folders  == 0 )) {
         # optionally queue each subfolder of the source folders while only 1 srcfolder defined
         if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_THREAD_SUBFOLDERS} ) {
+            my $excludes;
+            if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_EXCLUDE_FILE} ) {
+                my $excludefile = "$serverconfig->{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
+                if ( -e $excludefile ) {
+                    $excludes = $excludefile;
+                } else {
+                logit( $taskid, $host, $group, "Warning: could not find excludefile $excludefile." );
+                $excludes = "";
+                }
+            }
 
             my $dosnapshot = 0;
             my $numFolder  = @src_folders;
