@@ -485,7 +485,7 @@ sub statistics_schedule {
         FROM statistic
         LEFT JOIN statistic_task_meta USING (TaskID)
         WHERE Start > date_sub(concat(curdate(),' $BackupStartHour:00:00'), interval $lastXdays day)
-        AND BkpToHost LIKE '$servername'
+        AND BkpToHost = '$servername'
         GROUP BY TaskID, BkpToHost, BkpFromHost, BkpGroup, TaskName, Description, Cron
         ORDER BY Start;
     ");
