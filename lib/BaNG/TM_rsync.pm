@@ -383,7 +383,7 @@ sub _queue_remote_subfolders {
 
     $srcfolder =~ s/://;
     my $remoteshell      = $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL};
-    my $excludes;
+    my $excludes = "";
     my @excludeslist;
     if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_EXCLUDE_FILE} ) {
         my $excludefile = "$serverconfig{path_excludes}/$hostconfig->{BKP_EXCLUDE_FILE}";
