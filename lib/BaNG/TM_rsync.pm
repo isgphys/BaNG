@@ -12,6 +12,7 @@ use Date::Parse;
 use forks;
 use IPC::Open3;
 use Thread::Queue;
+#use Data::Dumper;
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -79,7 +80,6 @@ sub queue_rsync_backup {
                 };
                 push( @queue, $bkpjob );
             }
-
             my $bkpjob = {
                 taskid       => $taskid,
                 jobid        => $jobid,
@@ -438,6 +438,8 @@ sub _queue_remote_subfolders {
             cron         => $cron,
             noreport     => $noreport,
         };
+
+        logit( $taskid, $host, $group, "DOSNAPSHOT == $dosnapshot pushing job for $srcfolder for host $host group $group" );
         push( @queue, $bkpjob );
 
         $remotesubfolder =~ s|^/||g;
@@ -461,6 +463,8 @@ sub _queue_remote_subfolders {
         noreport       => $noreport,
         exclsubfolders => 1,
     };
+
+    logit( $taskid, $host, $group, "DOSNAPSHOT == $dosnapshot pushing job for $srcfolder FILESONLY for host $host group $group" );
     push( @queue, $bkpjob );
 
     return 1;
@@ -525,6 +529,7 @@ sub _finish_rsync_backupjob {
     my $rsync_err    = join(', ', sort @{ $bkpjob->{'rsync_errs'} });
     my @rsync_pass   = @{ $serverconfig{'rsync_err_ok'} };
 
+    logit( $taskid, $host, $group, "DOSNAPSHOT == $dosnapshot finished with code $rsync_err for host $host group $group" );
     if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) &&  ( $dosnapshot )) {
         my $rsync_target = targetpath( $host, $group );
         create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid, $rsync_target);
