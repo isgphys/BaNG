@@ -532,7 +532,7 @@ sub _finish_rsync_backupjob {
     logit( $taskid, $host, $group, "DOSNAPSHOT == $dosnapshot finished with code $rsync_err for host $host group $group" );
     if (( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq 'snapshots' ) &&  ( $dosnapshot )) {
         my $rsync_target = targetpath( $host, $group );
-        create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid, $rsync_target);
+        create_btrfs_snapshot( $host, $group, $bkptimestamp, $taskid, $rsync_target) unless (-e "$rsync_target/$bkptimestamp");
 
         if ( $has_failed ) {
             logit( $taskid, $host, $group, "rsync in snapshot-mode failed with code $rsync_err for host $host group $group" ) if $serverconfig{verbose};
