@@ -8,3 +8,4 @@ tuning
 views/navbar-custom-items.tt
 local/
 t/filesystem/test.img
+*.sql.gz
