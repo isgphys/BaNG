@@ -353,6 +353,7 @@ sub usage {
 
         $command --initialize -h <host> -g <group>    # create target folder structure for defined host
 
+        $command --get_oob_snapshots <mode>           # show all non-standard snapshots. Mode 2: include failed, 1: don't
         $command --failed                             # show all failed backups
         $command --failed -h <host> -g <group>        # show failed backups of defined hosts and/or group
         $command --failed --cleanup                   # purge failed backup folders
