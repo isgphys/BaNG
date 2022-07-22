@@ -25,7 +25,7 @@
                         <td align="center"><% bkp.Starttime %></td>
                         <td align="center"><% bkp.Stoptime  %></td>
                         <td align="center"><% bkp.Runtime  %></td>
-                        <td align="center"><% IF bkp.isThread %><IMG SRC=http://<% xymon_server %>/hobbit/gifs/daduke/green-tick.gif ALT="is Thread" HEIGHT=16 WIDTH=16><% END %></td>
+                        <td align="center"><% IF bkp.isThread %><IMG SRC=http://<% xymon_server %>/gifs/led/green-tick.gif ALT="is Thread" HEIGHT=16 WIDTH=16><% END %></td>
                     </tr>
                     <%- END %>
                 </tbody>
