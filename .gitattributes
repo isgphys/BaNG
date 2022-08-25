@@ -1,3 +1,5 @@
 # Treat minified JavaScript and CSS files as binary
 *.min.js    binary
 *.min.css   binary
+# Treat generated files as binary
+cpanfile.snapshot  binary
