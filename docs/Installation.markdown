@@ -15,7 +15,7 @@ Install dependencies:
 apt-get install perl rsh-redone-server rsh-redone-client rsync starman coreutils \
     libclone-perl libdancer-perl libdatetime-perl libdbd-mysql-perl \
     libdbi-perl libfile-find-rule-perl libforks-perl libjson-perl \
-    liblist-moreutils-perl liblocale-gettext-perl libmail-sendmail-perl \
+    liblist-moreutils-perl liblocale-gettext-perl \
     libmime-lite-perl libmodule-refresh-perl libnet-ldap-perl \
     libtemplate-perl libyaml-tiny-perl libtext-diff-perl libdancer-plugin-auth-extensible-perl
 ```
