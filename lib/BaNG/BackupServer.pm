@@ -291,7 +291,7 @@ sub pre_queue_checks {
     }
 
     # make sure rsh/ssh connection works
-    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL}, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_UNAME}, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     logit( $taskid, $host, $group, "check_client_rshell_connection: $rshell_status, $rshell_msg" );
 
     if ( !$rshell_status ) {
