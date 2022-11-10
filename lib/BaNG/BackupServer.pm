@@ -183,10 +183,11 @@ sub check_client_rshell_connection {
         if ( $rshell =~ /ssh/ ){
             $rshell_args = "-o ControlMaster=no";
         }
-        my $exec_cmd = "$timeout_cmd $rshell $rshell_args $host uname -a 2>&1";
+        # instead of checking uname, we now call rsync which works for both direct and rrsync calls
+        my $exec_cmd = "$timeout_cmd $rshell $rshell_args $host rsync --server --version 2>&1";
         $result = `$exec_cmd`;
 
-        if ( $result =~ /^(Linux|Darwin)/) {
+        if ( $result =~ /sending to read-only server is not allowed|rsync  version/ ) {
             $state = 1;
             $msg   = "$exec_cmd ok";
         }else{
@@ -291,7 +292,7 @@ sub pre_queue_checks {
     }
 
     # make sure rsh/ssh connection works
-    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_UNAME}, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
+    my ( $rshell_status, $rshell_msg ) = check_client_rshell_connection( $host, $hosts{"$host-$group"}->{hostconfig}->{BKP_RSYNC_RSHELL}, $hosts{"$host-$group"}->{hostconfig}->{BKP_GWHOST} );
     logit( $taskid, $host, $group, "check_client_rshell_connection: $rshell_status, $rshell_msg" );
 
     if ( !$rshell_status ) {

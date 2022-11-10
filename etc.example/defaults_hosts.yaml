@@ -40,7 +40,6 @@ BKP_RSYNC_WHOLEFILE:      0                         # (-W) copy files whole (w/o
 BKP_RSYNC_COMPRESS:       0                         # (-z) compress file data during the transfer
 BKP_RSYNC_RSHELL:         "rsh"                     # (-e) specify the remote shell to use
 BKP_RSYNC_RSHELL_PATH:    ""                        # (--rsync-path=PROGRAM) specify the rsync to run on remote machine
-BKP_RSYNC_UNAME:          "rsh"                     # specify the ssh config for restricted uname key
 BKP_RSYNC_REMOTE_OPT:     ""                        # (-M OPTIONS) specify rsync options on the remote machine
 BKP_RSYNC_DELETE:         1                         # (--delete) delete extraneous files from dest dir
 BKP_RSYNC_IGNORE_ERRORS:  0                         # (--ignore-errors) delete even if there are I/O errors
