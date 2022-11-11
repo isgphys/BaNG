@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Encode qw(decode);
 use BaNG::Config;
+use BaNG::RemoteCommand;
 use BaNG::Reporting;
 use BaNG::BackupServer;
 use BaNG::BTRFS;
@@ -12,7 +13,6 @@ use Date::Parse;
 use forks;
 use IPC::Open3;
 use Thread::Queue;
-#use Data::Dumper;
 
 use Exporter 'import';
 our @EXPORT = qw(
@@ -399,12 +399,16 @@ sub _queue_remote_subfolders {
         while(<$fh>) {
             if (($_) =~ s/^- (.*)$/$1/) {
                 chomp;
-                push @excludeslist, "\\! -name \\\"$_\\\"";
+                push @excludeslist, $_;
             }
         }
     }
     my $findexcludes = join " ", @excludeslist;
-    my @remotesubfolders = `$remoteshell $host find $srcfolder -xdev -type d -mindepth 1 -maxdepth 1 -not -empty $findexcludes | sort`;
+    my @allsubfolders = remote_command( $host, "$serverconfig{remote_app_folder}/subfolders", $srcfolder );
+    chomp @allsubfolders;
+
+    # remove excludes from found subfolders
+    my @remotesubfolders = grep { my $f = $_; !grep $_ eq $f, @excludeslist } @allsubfolders;
 
     # if @remotesubfolders empty (rsh troubles?) then use the $srcfolder
     if ( $#remotesubfolders == -1 ) {
