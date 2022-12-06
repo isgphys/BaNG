@@ -93,7 +93,7 @@ get '/wipe_status' => require_role config->{admin_role} => sub {
 get '/oob_status' => require_role config->{admin_role} => sub {
     get_serverconfig();
     get_host_config('*');
-    my $get_oob_snapshots_mode = params->{get_oob_snapshots_mode} || 1;
+    my $get_oob_snapshots_mode = params->{get_oob_snapshots_mode} || 2;
     my %oobsd = get_oob_snapshot_dirs(\%hosts,$get_oob_snapshots_mode);
 
     template 'dashboard-oob_status' => {
