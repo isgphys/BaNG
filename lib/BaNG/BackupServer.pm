@@ -208,7 +208,7 @@ sub get_backup_folders {
     my $REGEX = "[0-9\./_]*";                                           # default, show all good folders
     $REGEX    = ".*_failed" if $folder_type == 1;                       # show all *_failed folders
     $REGEX    = "\\([0-9\./_]*\\|.*_failed\$\\)" if $folder_type == 2;  # show all folders, except "current" folder
-    $REGEX    = "[0-9]+\.[0-9]+\.[0-9]+_[0-9]+_+.*" if ($folder_type == 3 || $folder_type == 4); # get all oob
+    $REGEX    = "[0-9]+\.[0-9]+\.[0-9]+_[0-9]+[-_.]+.*" if ($folder_type == 3 || $folder_type == 4); # get all oob
     
     if ( $server eq $servername ) {
         @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}/$REGEX' 2>/dev/null`;
