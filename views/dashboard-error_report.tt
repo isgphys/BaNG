@@ -40,7 +40,52 @@ Total Backup Jobs last 24H: <% RecentBackups24h.Data.size %>
                     <%- ELSIF bkp.ErrStatus.match('24') %> class="notok"
                     <% ELSE %> class="bad"<% END %>>
                 </td>
-                <td class="center"><% bkp.ErrStatus %></td>
+                <%- FOREACH status IN bkp.ErrStatus.split(',') %>
+                    <%- NEXT IF status == 0 %>
+                    <%- SWITCH status %>
+                        <%- CASE '1' %>
+                            <%- errTxt = 'Syntax error' %>
+                        <%- CASE '2' %>
+                            <%- errTxt = 'Protocol incompatibility' %>
+                        <%- CASE '3' %>
+                            <%- errTxt = 'Errors selecting input/output files' %>
+                        <%- CASE '4' %>
+                            <%- errTxt = 'Requested action not supported' %>
+                        <%- CASE '5' %>
+                            <%- errTxt = 'Error starting client-server protocol' %>
+                        <%- CASE '6' %>
+                            <%- errTxt = 'Daemon unable to append to log-file' %>
+                        <%- CASE '10' %>
+                            <%- errTxt = 'Error in socket I/O' %>
+                        <%- CASE '11' %>
+                            <%- errTxt = 'Error in file I/O' %>
+                        <%- CASE '12' %>
+                            <%- errTxt = 'Error in rsync protocol data stream' %>
+                        <%- CASE '13' %>
+                            <%- errTxt = 'Errors with program diagnostics' %>
+                        <%- CASE '14' %>
+                            <%- errTxt = 'Error in IPC code' %>
+                        <%- CASE '20' %>
+                            <%- errTxt = 'Received SIGUSR1 or SIGINT' %>
+                        <%- CASE '21' %>
+                            <%- errTxt = 'Some error returned by waitpid()' %>
+                        <%- CASE '22' %>
+                            <%- errTxt = 'Error allocating core memory buffers' %>
+                        <%- CASE '23' %>
+                            <%- errTxt = 'Partial transfer due to error' %>
+                        <%- CASE '24' %>
+                            <%- errTxt = 'Partial transfer due to vanished source files' %>
+                        <%- CASE '25' %>
+                            <%- errTxt = 'The --max-delete limit stopped deletions' %>
+                        <%- CASE '30' %>
+                            <%- errTxt = 'Timeout in data send/receive' %>
+                        <%- CASE '35' %>
+                            <%- errTxt = 'Timeout waiting for daemon connection' %>
+                        <%- CASE '255' %>
+                            <%- errTxt = 'SSH error' %>
+                    <%- END %>
+                <%- END %>
+                <td class="center"><% errTxt %></td>
                 <td class="center"><% bkp.Starttime %></td>
                 <td class="center"><% bkp.Runtime %></td>
                 <td class="center"><% bkp.FilesCreated %></td>
