@@ -250,25 +250,8 @@ sub pre_queue_checks {
     # check for existing target_path folder (if missing create it when $initial is true)
     return 0 unless check_target_exists( $host, $group, $taskid, $initial );
 
-    my @backup_folders = reverse(get_backup_folders( $host, $group ));
-
-    #####################
-    # MIGRATION "lastdst"
-    if ( -f targetpath($host, $group ) . "/lastdst") {
-        logit( $taskid, $host, $group, "Found depricated lastdst file for host $host group $group" );
-        if ( $hosts{"$host-$group"}->{hostconfig}->{BKP_STORE_MODUS} eq "links" ) {
-            if ( (!-d targetpath($host, $group ) . "/current") && ($#backup_folders >= 0)) {
-                my ($last_folder) = $backup_folders[0] =~ /([0-9._]*)$/;
-                create_link_current($taskid,$host, $group, $last_folder);
-            }
-        }
-        unlink(targetpath($host, $group ) . "/lastdst") unless $serverconfig{dryrun};
-        logit( $taskid, $host, $group, "Delete depricated lastdst file for host $host group $group" );
-    }
-    # MIGRATION "lastdst"
-    #####################
-
     # if missingonly, don't queue host if we had a backup within the last 20 hours
+    my @backup_folders = reverse(get_backup_folders( $host, $group ));
     if ( $missingonly && $backup_folders[0] =~ qr{ .*/(?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d)$ }x ) {
         my $lastbkpepoch = str2time("$+{date} $+{HH}:$+{MM}:$+{SS}");
         if ( ( time - $lastbkpepoch ) < 20 * 3600 ) {
