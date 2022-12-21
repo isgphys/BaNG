@@ -251,7 +251,7 @@ sub pre_queue_checks {
     return 0 unless check_target_exists( $host, $group, $taskid, $initial );
 
     # if missingonly, don't queue host if we had a backup within the last 20 hours
-    my @backup_folders = reverse(get_backup_folders( $host, $group ));
+    my @backup_folders = reverse(sort(get_backup_folders( $host, $group )));
     if ( $missingonly && $backup_folders[0] =~ qr{ .*/(?<date>[^_]*) _ (?<HH>\d\d) (?<MM>\d\d) (?<SS>\d\d)$ }x ) {
         my $lastbkpepoch = str2time("$+{date} $+{HH}:$+{MM}:$+{SS}");
         if ( ( time - $lastbkpepoch ) < 20 * 3600 ) {
