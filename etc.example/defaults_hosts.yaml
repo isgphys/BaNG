@@ -15,7 +15,6 @@ BKP_FOLDER:               "`date +%Y.%m.%d_%H%M%S`" # destination folder
 BKP_EXCLUDE_FILE:         ""                        # define an excludelist-file, only filename!
 BKP_GWHOST:               ""                        # Gateway-Host for backups of privat lan computers
 BKP_PRIORITY:                                       # add priority list (:path: Nr)
-
 TIMEOUT_DURATION:         0                         # number with an optional suffix 's' (default), 'm', 'h', 'd', 0=disabled
 TIMEOUT_KILL_AFTER:       "120"                     # send a KILL signal if COMMAND is still running after the initial signal was sent
 TIMEOUT_SIGNAL:           "12"                      # specify the signal to be sent on timeout
@@ -51,6 +50,7 @@ BKP_RSYNC_ACL:            0                         # (-A) preserve ACLs
 BKP_RSYNC_XATTRS:         0                         # (-X) preserve extended attributes
 BKP_RSYNC_NODEVICES:      0                         # (--no-D) don't copy devices or special files
 BKP_RSYNC_SOCKOPTS:       ""                        # (--sockopts OPTIONS) specify custom TCP options
+BKP_RSYNC_OLDARGS:        0                         # (--old-args) disable the modern arg-protection idiom
 
 #*************************
 # Description of variables
@@ -123,3 +123,5 @@ HELP:
   BKP_RSYNC_ACL:            (-A) preserve ACLs
   BKP_RSYNC_XATTRS:         (-X) preserve extended attributes
   BKP_RSYNC_NODEVICES:      (--no-D) don't copy devices or special files
+  BKP_RSYNC_SOCKOPTS:       (--sockopts OPTIONS) specify custom TCP options
+  BKP_RSYNC_OLDARGS:        (--old-args) disable the modern arg-protection idiom
