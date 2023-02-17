@@ -1,5 +1,4 @@
 *.swp
-config.yml
 /etc
 TODO
 debug.pl
