@@ -18,8 +18,8 @@
         </tr>
         <tr>
             <td>
-                <img src="<% perf_mon_url %>/host/<% servername %>/api/v1/badge.svg?chart=net.team1&label=iSCSI Traffic - read&dimensions=team1%7Creceived&divide=8192&units=MB%5Cs&precision=2" type="image/svg+xml" height="20"></img>
-                <img src="<% perf_mon_url %>/host/<% servername %>/api/v1/badge.svg?chart=net.team1&label=iSCSI Traffic - write&dimensions=team1%7Csent&divide=8192&units=MB%5Cs&value_color=red&precision=2" type="image/svg+xml" height="20"></img>
+                <img src="<% perf_mon_url %>/host/<% servername %>/api/v1/badge.svg?chart=net.team0&label=iSCSI Traffic - read&dimensions=team0%7Creceived&divide=8192&units=MB%5Cs&precision=2" type="image/svg+xml" height="20"></img>
+                <img src="<% perf_mon_url %>/host/<% servername %>/api/v1/badge.svg?chart=net.team0&label=iSCSI Traffic - write&dimensions=team0%7Csent&divide=8192&units=MB%5Cs&value_color=red&precision=2" type="image/svg+xml" height="20"></img>
             </td>
         </tr>
         <tr>
