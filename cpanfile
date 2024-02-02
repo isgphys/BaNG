@@ -1,4 +1,4 @@
-requires 'DBD::mysql';
+requires 'DBD::MariaDB';
 requires 'DBI';
 requires 'File::Find::Rule';
 requires 'JSON';
