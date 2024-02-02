@@ -46,13 +46,14 @@ sub bangstat_db_connect {
     my ($ConfigBangstat) = @_;
 
     my $yaml       = YAML::Tiny->read($ConfigBangstat);
+    my $DBdriver = $yaml->[0]{DBdriver};
     my $DBhostname = $yaml->[0]{DBhostname};
     my $DBusername = $yaml->[0]{DBusername};
     my $DBdatabase = $yaml->[0]{DBdatabase};
     my $DBpassword = $yaml->[0]{DBpassword};
 
     $bangstat_dbh = DBI->connect(
-        "DBI:mysql:database=$DBdatabase:host=$DBhostname:port=3306", $DBusername, $DBpassword,
+        "DBI:$DBdriver:database=$DBdatabase:host=$DBhostname:port=3306", $DBusername, $DBpassword,
         { PrintError => 0 }
     );
 
