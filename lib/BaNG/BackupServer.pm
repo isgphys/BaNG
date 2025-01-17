@@ -187,7 +187,7 @@ sub check_client_rshell_connection {
         my $exec_cmd = "$timeout_cmd $rshell $rshell_args $host rsync --server --version 2>&1";
         $result = `$exec_cmd`;
 
-        if ( $result =~ /sending to read-only server is not allowed|rsync\s+version/ ) {
+        if ( $result =~ /sending to read-only server( is)* not allowed|rsync\s+version/ ) {
             $state = 1;
             $msg   = "$exec_cmd ok";
         }else{
