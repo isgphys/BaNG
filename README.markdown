@@ -7,13 +7,13 @@ Backup tool developed and used by the [IT Services Group](http://isg.phys.ethz.c
 Motivation
 ----------
 
-A couple of years ago, our backups were made with bash scripts that would start a single *rsync* process per client to back up the data to a file system on a remote server. We used hard links to avoid that the backup space would have to increase linearly with the number of recent backups we wanted to keep. Still, because of the daily file changes, we always planned the backup space to be roughly twice as large as the productive file server.
+A couple of years ago, our backups were made with bash scripts that would start a single *rsync* process per client to back up the data to a file system on a remote server. We used hard links to avoid a linear increase in backup space with the number of recent backups we wanted to keep. Still, because of the daily file changes, we always planned the backup space to be roughly twice as large as the productive file server.
 
-At some point, due to the ever increasing storage volumes, the backups started to take longer and longer, and would eventually reach the critical 24 hours limit, thereby making daily backups impossible. Independently, the used *ext* and *xfs* file systems on the backup server struggled with the large number of files and hard links, especially when wiping older backups. For these reasons we decided to replan our backups from scratch.
+At some point, due to the ever increasing storage volumes, the backups started to take longer and longer, and would eventually reach the critical 24 hours limit, thereby making daily backups impossible. Independently, the *ext* and *xfs* file systems used on the backup server struggled with the large number of files and hard links, especially when wiping older backups. For these reasons we decided to replan our backups from scratch.
 
-Thus **BaNG**, our next generation backup tool, was born. It allows to start multiple *rsync* processes in parallel for higher transfer rates. If the backup server has *btrfs*, BaNG uses its snapshot feature to store several backups. Combined with the built-in compression the amount of backup space needed is greatly reduced. In addition to command line tools, BaNG has a web front-end to explore the status of the backups at a single glance, while also providing graphs to better analyze the performance and scheduling.
+Thus **BaNG**, our next generation backup tool, was born. It allows to start multiple *rsync* processes in parallel for higher transfer rates. If the backup server has *btrfs*, BaNG uses its snapshot feature to store several backups. Combined with the built-in compression the required amount of backup space is greatly reduced. In addition to command line tools, BaNG has a web front-end to explore the status of the backups at a single glance, while also providing graphs to better analyze the performance and scheduling.
 
-Since 2012 we use it productively for our daily backups of meanwhile over 1.06 PB of data across several SAN servers, Linux and Mac workstations. However, it may still contain bugs and is primarily meant for advanced users. Please refer to the [documentation](docs/) for more details.
+Since 2012 we have been using it in production for our daily backups of 5+ PiB of data across several SAN servers, Linux and Mac workstations. However, it may still contain bugs and is primarily meant for advanced users. Please refer to the [documentation](docs/) for more details.
 
 
 Main Features
