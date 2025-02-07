@@ -157,7 +157,7 @@ sub check_client_connection {
             $msg   = 'Host not pingable because behind a Gateway-Host';
         }
         $p->close();
-        1; 
+        1;
     } or do {
         my $theerror = $@;
         $msg = "Exception caught in Net::Ping - $theerror";
@@ -209,10 +209,10 @@ sub get_backup_folders {
     $REGEX    = ".*_failed" if $folder_type == 1;                       # show all *_failed folders
     $REGEX    = "\\([0-9\./_]*\\|.*_failed\$\\)" if $folder_type == 2;  # show all folders, except "current" folder
     $REGEX    = "[0-9]+\.[0-9]+\.[0-9]+_[0-9]+[-_.]+.*" if ($folder_type == 3 || $folder_type == 4); # get all oob
-    
+
     if ( $server eq $servername ) {
         @backup_folders = `find $bkpdir -mindepth 1 -maxdepth 1 -type d -regex '${bkpdir}/$REGEX' 2>/dev/null`;
-        @backup_folders = grep(!/.*_failed$/,@backup_folders) if ($folder_type == 3); # filter out failed if we don't want them        
+        @backup_folders = grep(!/.*_failed$/,@backup_folders) if ($folder_type == 3); # filter out failed if we don't want them
     } else {
         @backup_folders = remote_command( $server, "$servers{$server}{serverconfig}{remote_app_folder}/bang_getBackupFolders", $bkpdir );
     }
@@ -704,7 +704,7 @@ sub get_oob_snapshot_dirs {
     elsif ($get_oob_snapshots_mode == 2) {
         $find_mode = 4;
     }
-    
+
     foreach my $hostgroup (sort keys %$hosts ) {
         unless ( $hosts{$hostgroup}->{hostconfig}->{BKP_TARGET_HOST} ne $servername ) {
             $oob_dirs{$hostgroup}= [get_backup_folders($hosts{$hostgroup}->{hostname},$hosts{$hostgroup}->{group}, $find_mode)];
@@ -714,7 +714,7 @@ sub get_oob_snapshot_dirs {
         #}
     }
     return %oob_dirs;
-    
+
 }
 
 1;

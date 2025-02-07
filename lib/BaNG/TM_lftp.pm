@@ -54,8 +54,8 @@ sub queue_lftp_backup {
             excludes     => $excludes,
         );
     push( @$queueref, \%bkpjob );
-    
-    
+
+
     logit( $taskid, $host, $group, "End of queueing backup of host $host group $group" );
     return $queueref;
 }
@@ -66,8 +66,8 @@ sub run_lftp_threads {
     my $rQ = Thread::Queue->new;
     my $nthreads;
     my @threads;
-    
-    
+
+
     foreach my $j (@$queue) {
 
         foreach my $srcdir (@{$j->{srcdirs}}) {
@@ -94,31 +94,31 @@ sub run_lftp_threads {
                               path => $srcdir,
                               excludes => $$j{excludes},
                               parallel => $parallel, rQ => $rQ);
-            
-            
+
+
             $Q->enqueue(\%threadargs);
             my $t = threads->create( \&_do_lftp, $Q);
             $t->detach();
             push(@threads,$t->tid);
-            
+
         }
-        
+
     }
 
     for(@threads) {
             my $finished_thread = $rQ->dequeue();
             print "Finished waiting for thread $finished_thread.\n";
 
-        } 
-           
-    
+        }
+
+
 
     return 0;
 }
 sub _lftp_parse_exclude_file {
     my ($theargs) = @_;
     my $excludes = %$theargs{excludes};
-    
+
     my @excludeslist;
     my $lftp_excludes;
     if (-e $excludes) {
@@ -169,7 +169,7 @@ sub _do_lftp {
 
     my $lftp_cmd = $lftp_bin . " $lftp_srcproto$lftp_srchost " . $lftp_script;
     logit( $taskid, $host, $group, "LFTP Command: $lftp_cmd" );
-    logit( $taskid, $host, $group, "Executing lftp for host $host group $group path $srcpath." );    
+    logit( $taskid, $host, $group, "Executing lftp for host $host group $group path $srcpath." );
     local (*HIS_IN, *HIS_OUT, *HIS_ERR);
     if (defined $dryrun && $dryrun == 1) {
         $lftp_cmd = "echo Would run: $lftp_cmd";

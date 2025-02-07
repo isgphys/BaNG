@@ -15,9 +15,9 @@
                         <td style="white-space: nowrap;"><a href="/host/<%hosts.$hostname.hostname %>"><% hosts.$hostname.hostname %></a></td>
                         <td class="center" style="white-space: nowrap;"><a href="/config/allhosts/<% hosts.$hostname.group %>"><% hosts.$hostname.group %></a></td>
                         <td class="center check_yellow">
-                        <% FOREACH oob_directory IN oobsd.$hostname %> 
-                            <%- oob_directory.trim -%>, 
-                        <% END %>                    
+                        <% FOREACH oob_directory IN oobsd.$hostname %>
+                            <%- oob_directory.trim -%>,
+                        <% END %>
                         </td>
            </tr>
            <% END %>
