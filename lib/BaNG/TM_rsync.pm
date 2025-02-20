@@ -184,7 +184,7 @@ sub _execute_rsync {
         logit( $taskid, $host, $group, "Apply subfolder excludelist: $rsync_generic_exclude" );
     }
 
-    logit( $taskid, $host, $group, "Rsync Command: $rsync_cmd $rsync_options$path $rsync_target" );
+    logit( $taskid, $host, $group, "Rsync Command: $rsync_cmd $rsync_generic_exclude $rsync_options$path $rsync_target" );
     logit( $taskid, $host, $group, "Executing rsync for host $host group $group path $path" );
 
     local ( *HIS_IN, *HIS_OUT, *HIS_ERR );
