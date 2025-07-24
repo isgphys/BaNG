@@ -688,7 +688,7 @@ sub mail_report {
         );
 
         my $mail_msg = MIME::Lite->new(
-            From    => 'root@phys.ethz.ch',
+            From    => $serverconfig{report_from} || 'root',
             To      => $serverconfig{report_to},
             Type    => 'multipart/alternative',
             Subject => "Backup report of ($host-$group): $status",

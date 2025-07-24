@@ -40,7 +40,7 @@ mv etc/servers/bangserver_defaults.yaml etc/servers/`hostname -s`_defaults.yaml
 
 Fields you typically want to change in the config files:
 
-  * `defaults_servers.yaml`: `report_to`
+  * `defaults_servers.yaml`: `report_from` and `report_to`
   * `defaults_hosts.yaml`: `BKP_TARGET_HOST` and `BKP_TARGET_PATH`
 
 Make sure the `BKP_TARGET_PATH` folder where backups should be stored exists

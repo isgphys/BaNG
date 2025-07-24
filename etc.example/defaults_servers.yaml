@@ -32,6 +32,7 @@ path_taskset:
 path_timeout:
 timeout_duration:
 #
+report_from:            root@example.com
 report_to:              admin@example.com
 xymon_server:
 #
@@ -85,6 +86,7 @@ HELP:
   path_rsync:
   path_dar:
 
+  report_from:              email-addresses used as report sender
   report_to:                email-addresses for reporting (comma separated)
   xymon_server:             hostname of xymon server
 
